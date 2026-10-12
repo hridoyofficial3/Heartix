@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Success - Heartix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' }, cream: '#FBF8F3' }, fontFamily: { 'display': ['Playfair Display', 'serif'] }}}}
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #FBF8F3; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
+        .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
+        @keyframes pop { 0% { transform: scale(0); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .pop { animation: pop 0.5s ease-out; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md">
+        <div class="bg-white rounded-3xl shadow-xl p-8 text-center">
+            <div class="w-24 h-24 gold-gradient rounded-full mx-auto flex items-center justify-center mb-6 pop">
+                <i class="fas fa-check text-navy text-5xl"></i>
+            </div>
+            
+            <h1 class="font-display text-3xl text-navy mb-2">অর্ডার সফল!</h1>
+            <p class="text-gray-500 text-sm mb-6">আপনার অর্ডারটি আমরা পেয়েছি। শীঘ্রই আমরা কল করে কনফার্ম করব।</p>
+            
+            <div class="bg-cream rounded-2xl p-5 mb-6">
+                <p class="text-xs text-gray-500 mb-1">আপনার অর্ডার নাম্বার</p>
+                <p id="order-number" class="font-display text-2xl font-bold text-navy">HX00000000</p>
+            </div>
+
+            <div class="bg-blue-50 rounded-xl p-4 mb-6 text-left">
+                <p class="text-xs text-navy font-semibold mb-2"><i class="fas fa-info-circle text-blue-500 mr-1"></i> পরবর্তী ধাপ</p>
+                <ul class="text-xs text-gray-600 space-y-1">
+                    <li>✓ অর্ডার কনফার্ম করতে আমরা কল দেব</li>
+                    <li>✓ বিকাশ/নগদে অগ্রিম দিলে TrxID পাঠাবেন</li>
+                    <li>✓ কনফার্ম হলে ২-৩ দিনে ডেলিভারি</li>
+                </ul>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <a href="track-order.html?order=" id="track-btn" class="bg-white border-2 border-navy text-navy font-semibold py-3 rounded-xl text-sm text-center">
+                    <i class="fas fa-truck mr-1"></i> Track Order
+                </a>
+                <a href="index.html" class="navy-gradient text-white font-semibold py-3 rounded-xl text-sm text-center">
+                    <i class="fas fa-home mr-1"></i> Home
+                </a>
+            </div>
+
+            <p class="text-xs text-gray-400 mt-4">আমাদের WhatsApp: <span id="wa-number" class="font-semibold">-</span></p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
+            authDomain: "heartix.firebaseapp.com",
+            projectId: "heartix",
+            storageBucket: "heartix.firebasestorage.app",
+            messagingSenderId: "551204402338",
+            appId: "1:551204402338:web:169555975c0bbb97f113fb"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const params = new URLSearchParams(window.location.search);
+        const orderNum = params.get('order') || 'HX00000000';
+        document.getElementById('order-number').textContent = orderNum;
+        document.getElementById('track-btn').href = 'track-order.html?order=' + orderNum;
+
+        (async () => {
+            try {
+                const snap = await getDoc(doc(db, "settings", "main"));
+                if (snap.exists() && snap.data().whatsapp) {
+                    document.getElementById('wa-number').textContent = snap.data().whatsapp;
+                }
+            } catch(e) {}
+        })();
+    </script>
+</body>
+</html>
