@@ -5,56 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart - Heartix</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' }, cream: '#FBF8F3' }, fontFamily: { 'display': ['Playfair Display', 'serif'] }}}}
+    </script>
     <style>
-        .brand-navy { color: #0B1B3D; }
-        .brand-bg-navy { background-color: #0B1B3D; }
+        body { font-family: 'Inter', sans-serif; background: #FBF8F3; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .navy-bg { background: #0A1628; }
+        .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
+        .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
+        .premium-shadow { box-shadow: 0 4px 20px rgba(10,22,40,0.08); }
     </style>
 </head>
-<body class="bg-gray-50 pb-20 font-sans">
+<body class="pb-32">
 
-    <header class="bg-white sticky top-0 z-50 shadow-sm p-4 flex justify-between items-center">
-        <a href="index.html"><i class="fas fa-arrow-left text-xl text-gray-700"></i></a>
-        <h1 class="text-xl font-bold brand-navy">Shopping Cart</h1>
-        <div class="w-6"></div>
+    <header class="bg-white sticky top-0 z-30 px-4 py-3 flex justify-between items-center shadow-sm">
+        <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream">
+            <i class="fas fa-arrow-left text-navy text-lg"></i>
+        </a>
+        <h1 class="font-display text-xl navy-text text-navy">Shopping Cart</h1>
+        <div class="w-10"></div>
     </header>
 
-    <div class="p-4">
+    <div class="p-4 max-w-2xl mx-auto">
         <div id="cart-items" class="space-y-3"></div>
 
         <div id="empty-cart" class="hidden text-center py-16">
-            <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
-            <p class="text-gray-500 text-lg">আপনার কার্ট খালি!</p>
-            <a href="index.html" class="inline-block mt-4 brand-bg-navy text-white px-6 py-2 rounded-lg">শপিং শুরু করুন</a>
+            <i class="fas fa-shopping-bag text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg font-medium">আপনার কার্ট খালি!</p>
+            <a href="index.html" class="inline-block mt-5 navy-gradient text-white px-8 py-3 rounded-xl font-semibold text-sm">শপিং শুরু করুন</a>
         </div>
 
-        <div id="cart-summary" class="hidden bg-white rounded-lg shadow-sm p-4 mt-6">
-            <div class="flex justify-between mb-2">
-                <span class="text-gray-600">Subtotal:</span>
-                <span id="subtotal" class="font-semibold">৳ 0</span>
+        <div id="cart-summary" class="hidden bg-white rounded-2xl premium-shadow p-5 mt-6">
+            <h3 class="font-display text-lg text-navy mb-4 pb-3 border-b border-gray-100">Order Summary</h3>
+            <div class="flex justify-between mb-3 text-sm">
+                <span class="text-gray-600">Subtotal</span>
+                <span id="subtotal" class="font-semibold text-navy">৳ 0</span>
             </div>
-            <div class="flex justify-between mb-2">
-                <span class="text-gray-600">Delivery Charge:</span>
-                <span id="delivery-charge" class="font-semibold">৳ 100</span>
+            <div class="flex justify-between mb-3 text-sm">
+                <span class="text-gray-600">Delivery Charge</span>
+                <span id="delivery-charge" class="font-semibold text-navy">৳ 0</span>
             </div>
-            <div class="border-t pt-2 mt-2 flex justify-between">
-                <span class="font-bold text-lg">Total:</span>
-                <span id="total" class="font-bold text-lg brand-navy">৳ 0</span>
+            <div id="free-delivery-note" class="hidden bg-green-50 border border-green-200 text-green-700 text-xs p-3 rounded-lg mb-3">
+                🎉 আপনি ফ্রি ডেলিভারি পেয়েছেন!
             </div>
-            <a href="checkout.html" class="block w-full brand-bg-navy text-white text-center py-3 rounded-lg mt-4 hover:opacity-90">Proceed to Checkout</a>
+            <div class="border-t border-gray-100 pt-3 mt-3 flex justify-between items-baseline">
+                <span class="font-bold text-navy">Total</span>
+                <span id="total" class="font-display text-2xl font-bold text-navy">৳ 0</span>
+            </div>
+            <a href="checkout.html" class="block w-full navy-gradient text-white text-center py-3.5 rounded-xl mt-5 font-semibold text-sm">
+                Proceed to Checkout <i class="fas fa-arrow-right ml-1"></i>
+            </a>
         </div>
     </div>
 
-    <script>
-        const DELIVERY_CHARGE = 100;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        function getCart() {
-            const cart = localStorage.getItem('heartix_cart');
-            return cart ? JSON.parse(cart) : [];
-        }
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
+            authDomain: "heartix.firebaseapp.com",
+            projectId: "heartix",
+            storageBucket: "heartix.firebasestorage.app",
+            messagingSenderId: "551204402338",
+            appId: "1:551204402338:web:169555975c0bbb97f113fb"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let settings = { deliveryCharge: 100, freeDeliveryAbove: 0 };
+        let allProducts = {};
 
-        function saveCart(cart) {
-            localStorage.setItem('heartix_cart', JSON.stringify(cart));
+        function getCart() { return JSON.parse(localStorage.getItem('heartix_cart') || '[]'); }
+        function saveCart(cart) { localStorage.setItem('heartix_cart', JSON.stringify(cart)); }
+        function formatPrice(n) { return Number(n || 0).toLocaleString('en-IN'); }
+        function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+
+        async function loadData() {
+            try {
+                const [setSnap, prodSnap] = await Promise.all([
+                    getDoc(doc(db, "settings", "main")),
+                    getDocs(collection(db, "products"))
+                ]);
+                if (setSnap.exists()) {
+                    const s = setSnap.data();
+                    settings.deliveryCharge = s.deliveryCharge || 100;
+                    settings.freeDeliveryAbove = s.freeDeliveryAbove || 0;
+                }
+                prodSnap.forEach(d => { allProducts[d.id] = { id: d.id, ...d.data() }; });
+                renderCart();
+            } catch (e) { renderCart(); }
         }
 
         function renderCart() {
@@ -75,51 +117,60 @@
 
             let html = '';
             let subtotal = 0;
-
             cart.forEach((item, index) => {
                 subtotal += item.price * item.quantity;
+                const productData = allProducts[item.id];
+                const stock = productData ? (productData.stock || 0) : 999;
+                const stockWarning = stock < item.quantity ? `<p class="text-[10px] text-red-500 mt-1">⚠️ Only ${stock} in stock</p>` : '';
                 html += `
-                    <div class="bg-white rounded-lg shadow-sm p-3 flex items-center gap-3">
-                        <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded">
-                        <div class="flex-1">
-                            <h4 class="text-sm font-medium text-gray-800">${item.name}</h4>
-                            <p class="brand-navy font-bold text-sm mt-1">৳ ${item.price}</p>
-                            <div class="flex items-center gap-2 mt-2">
-                                <button onclick="changeQty(${index}, -1)" class="w-7 h-7 bg-gray-100 rounded flex items-center justify-center">−</button>
-                                <span class="font-semibold">${item.quantity}</span>
-                                <button onclick="changeQty(${index}, 1)" class="w-7 h-7 bg-gray-100 rounded flex items-center justify-center">+</button>
+                    <div class="bg-white rounded-2xl premium-shadow p-4 flex items-center gap-3">
+                        <img src="${item.image}" class="w-20 h-20 object-contain rounded-xl bg-gray-50">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-sm font-semibold text-navy line-clamp-2 mb-1">${escapeHtml(item.name)}</h4>
+                            <p class="font-display text-base font-bold text-navy mb-2">৳ ${formatPrice(item.price)}</p>
+                            ${stockWarning}
+                            <div class="flex items-center gap-2 mt-1">
+                                <button onclick="changeQty(${index}, -1)" class="w-7 h-7 bg-cream rounded-lg flex items-center justify-center text-navy font-bold">−</button>
+                                <span class="font-semibold text-sm w-6 text-center">${item.quantity}</span>
+                                <button onclick="changeQty(${index}, 1)" class="w-7 h-7 bg-cream rounded-lg flex items-center justify-center text-navy font-bold">+</button>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="font-bold brand-navy">৳ ${item.price * item.quantity}</p>
-                            <button onclick="removeItem(${index})" class="text-red-500 text-sm mt-2"><i class="fas fa-trash"></i></button>
+                            <p class="font-bold text-navy mb-2">৳ ${formatPrice(item.price * item.quantity)}</p>
+                            <button onclick="removeItem(${index})" class="text-red-500 text-sm">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
-
             cartItemsDiv.innerHTML = html;
-            document.getElementById('subtotal').innerText = '৳ ' + subtotal;
-            document.getElementById('delivery-charge').innerText = '৳ ' + DELIVERY_CHARGE;
-            document.getElementById('total').innerText = '৳ ' + (subtotal + DELIVERY_CHARGE);
+
+            const isFreeDelivery = settings.freeDeliveryAbove > 0 && subtotal >= settings.freeDeliveryAbove;
+            const deliveryCharge = isFreeDelivery ? 0 : settings.deliveryCharge;
+
+            document.getElementById('subtotal').innerText = '৳ ' + formatPrice(subtotal);
+            document.getElementById('delivery-charge').innerText = deliveryCharge === 0 ? 'ফ্রি' : '৳ ' + formatPrice(deliveryCharge);
+            document.getElementById('total').innerText = '৳ ' + formatPrice(subtotal + deliveryCharge);
+
+            if (isFreeDelivery) document.getElementById('free-delivery-note').classList.remove('hidden');
+            else document.getElementById('free-delivery-note').classList.add('hidden');
         }
 
-        function changeQty(index, change) {
+        window.changeQty = function(index, change) {
             let cart = getCart();
             cart[index].quantity += change;
             if (cart[index].quantity <= 0) cart.splice(index, 1);
             saveCart(cart);
             renderCart();
         }
-
-        function removeItem(index) {
+        window.removeItem = function(index) {
             let cart = getCart();
             cart.splice(index, 1);
             saveCart(cart);
             renderCart();
         }
 
-        renderCart();
+        loadData();
     </script>
 </body>
 </html>
