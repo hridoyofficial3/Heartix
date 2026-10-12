@@ -41,6 +41,10 @@
         @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         .toast-success { background: linear-gradient(135deg, #059669, #10b981); }
         .toast-error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        #search-bar-wrapper { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.35s ease, opacity 0.35s ease, padding 0.35s ease; }
+        #search-bar-wrapper.open { max-height: 100px; opacity: 1; }
+        #search-nav-btn.active i { color: #D4A84B; }
+        #search-nav-btn.active span { color: #D4A84B; }
     </style>
 </head>
 <body class="pb-16">
@@ -95,7 +99,7 @@
         </div>
     </div>
 
-    <!-- ULTRA SLIM HEADER (লোগোতে টাইট ফিট) -->
+    <!-- ULTRA SLIM HEADER -->
     <header class="glass sticky top-0 z-30 px-3 py-0 flex justify-between items-center border-b border-gray-100">
         <div class="flex items-center gap-1 flex-1 min-w-0">
             <button onclick="openSidebar()" class="w-7 h-7 flex items-center justify-center flex-shrink-0 -ml-1">
@@ -109,10 +113,14 @@
         </a>
     </header>
 
-    <div class="px-5 pt-4 pb-2">
-        <div class="relative">
-            <input type="text" id="search-input" oninput="searchProducts()" placeholder="Search products..." class="w-full bg-white rounded-2xl py-3.5 pl-12 pr-4 outline-none premium-shadow focus:ring-2 focus:ring-gold/40 text-navy placeholder-gray-400">
-            <i class="fas fa-search absolute left-4 top-4 text-gold"></i>
+    <!-- HIDDEN SEARCH BAR (Slide down when Search icon clicked) -->
+    <div id="search-bar-wrapper" class="px-5">
+        <div class="relative pt-3 pb-1">
+            <input type="text" id="search-input" oninput="searchProducts()" placeholder="Search products..." class="w-full bg-white rounded-2xl py-3.5 pl-12 pr-12 outline-none premium-shadow focus:ring-2 focus:ring-gold/40 text-navy placeholder-gray-400 text-sm">
+            <i class="fas fa-search absolute left-4 top-7 text-gold"></i>
+            <button onclick="closeSearch()" class="absolute right-4 top-7 text-gray-400 hover:text-navy w-6 h-6 flex items-center justify-center">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
     </div>
 
@@ -273,7 +281,7 @@
                 <span class="w-0.5 h-0.5 bg-transparent rounded-full mt-0.5"></span>
             </a>
             
-            <button onclick="focusSearch()" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]">
+            <button onclick="toggleSearch()" id="search-nav-btn" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]">
                 <i class="fas fa-search text-[15px] text-white/50"></i>
                 <span class="text-[8px] mt-0.5 text-white/50 font-medium tracking-wide">Search</span>
                 <span class="w-0.5 h-0.5 bg-transparent rounded-full mt-0.5"></span>
@@ -334,6 +342,30 @@
             document.getElementById('overlay').classList.add('hidden');
         }
 
+        // SEARCH TOGGLE
+        window.toggleSearch = function() {
+            const wrapper = document.getElementById('search-bar-wrapper');
+            const btn = document.getElementById('search-nav-btn');
+            const isOpen = wrapper.classList.contains('open');
+            if (isOpen) {
+                closeSearch();
+            } else {
+                wrapper.classList.add('open');
+                btn.classList.add('active');
+                setTimeout(() => document.getElementById('search-input').focus(), 350);
+            }
+        }
+        window.closeSearch = function() {
+            const wrapper = document.getElementById('search-bar-wrapper');
+            const btn = document.getElementById('search-nav-btn');
+            wrapper.classList.remove('open');
+            btn.classList.remove('active');
+            document.getElementById('search-input').value = '';
+            document.getElementById('search-input').blur();
+            currentSearch = '';
+            renderProducts();
+        }
+
         let slideIndex = 0;
         const slides = document.querySelectorAll('.slider-item');
         const dots = document.querySelectorAll('.slider-dot');
@@ -351,14 +383,12 @@
             currentSearch = document.getElementById('search-input').value.toLowerCase().trim();
             renderProducts();
         }
-        window.focusSearch = function() {
-            document.getElementById('search-input').focus();
-            window.scrollTo({ top: 100, behavior: 'smooth' });
-        }
         window.filterByCategory = function(category) {
             currentFilter = category;
             currentSearch = '';
             document.getElementById('search-input').value = '';
+            document.getElementById('search-bar-wrapper').classList.remove('open');
+            document.getElementById('search-nav-btn').classList.remove('active');
             const found = DEFAULT_CATEGORIES.find(c => c.key === category);
             document.getElementById('section-title').innerText = category === 'all' ? 'Best Sellers' : (found ? found.label : category);
             renderProducts();
