@@ -22,8 +22,6 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); }
-        .slider-item { display: none; opacity: 0; transition: opacity 0.8s ease; }
-        .slider-item.active { display: block; opacity: 1; }
         #sidebar { transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); }
         #sidebar.open { transform: translateX(0); }
         #sidebar.closed { transform: translateX(-100%); }
@@ -52,80 +50,44 @@
         .add-cart-btn { height: 38px; background: white; border: 1.5px solid #D4A84B; color: #0A1628; border-radius: 10px; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
         .add-cart-btn:active { background: #FBF8F3; }
 
-        /* SECTION TITLE STYLE (ঘরের বাজার স্টাইল) */
-        .section-title {
-            text-align: center;
-            font-size: 18px;
-            font-weight: 700;
-            color: #0A1628;
-            margin-bottom: 16px;
-            letter-spacing: -0.01em;
+        /* SECTION TITLE */
+        .section-title { text-align: center; font-size: 18px; font-weight: 700; color: #0A1628; margin-bottom: 16px; letter-spacing: -0.01em; }
+
+        /* CATEGORY CARD (ঘরের বাজার স্টাইল - হালকা ক্রিম) */
+        .category-card {
+            width: 88px;
+            height: 88px;
+            background: #FFFDF7;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 12px rgba(10,22,40,0.06);
+            border: 1px solid rgba(212,168,75,0.08);
+            transition: all 0.25s ease;
         }
+        .category-card:active { transform: scale(0.95); }
+        .category-icon { font-size: 42px; line-height: 1; }
+        .category-img { width: 60px; height: 60px; object-fit: contain; }
+
+        /* ===== SMOOTH SLIDER (ঘরের বাজার স্টাইল) ===== */
+        .slider-viewport { overflow: hidden; border-radius: 24px; box-shadow: 0 4px 20px rgba(10,22,40,0.08); }
+        .slider-track { display: flex; transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
+        .slider-slide { min-width: 100%; }
+        .slider-dot { transition: all 0.3s ease; }
 
         /* ===== PREMIUM FLOATING CART ===== */
         #floating-cart { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
         #floating-cart.show { opacity: 1; transform: translateY(0) scale(1); }
         #floating-cart.hide { opacity: 0; transform: translateY(20px) scale(0.9); pointer-events: none; }
-        
-        .floating-cart-card {
-            position: relative;
-            border-radius: 14px;
-            overflow: hidden;
-            background: linear-gradient(145deg, #0F1B33 0%, #0A1628 50%, #131F3A 100%);
-            box-shadow: 
-                0 12px 32px rgba(10,22,40,0.45),
-                0 0 0 1px rgba(212,168,75,0.25),
-                0 0 24px rgba(212,168,75,0.12);
-        }
-        .floating-cart-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1.5px;
-            background: linear-gradient(90deg, transparent, #E8C77B, transparent);
-            opacity: 0.7;
-        }
-        .floating-cart-card::after {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: radial-gradient(circle at 30% 30%, rgba(212,168,75,0.15), transparent 40%);
-            pointer-events: none;
-            animation: shimmerGlow 4s ease-in-out infinite;
-        }
-        @keyframes shimmerGlow {
-            0%, 100% { transform: translate(0, 0); opacity: 0.6; }
-            50% { transform: translate(10%, 10%); opacity: 1; }
-        }
-        .floating-cart-icon {
-            box-shadow: 0 3px 12px rgba(212,168,75,0.5), inset 0 1px 0 rgba(255,255,255,0.4);
-            position: relative;
-            z-index: 2;
-        }
+        .floating-cart-card { position: relative; border-radius: 14px; overflow: hidden; background: linear-gradient(145deg, #0F1B33 0%, #0A1628 50%, #131F3A 100%); box-shadow: 0 12px 32px rgba(10,22,40,0.45), 0 0 0 1px rgba(212,168,75,0.25), 0 0 24px rgba(212,168,75,0.12); }
+        .floating-cart-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1.5px; background: linear-gradient(90deg, transparent, #E8C77B, transparent); opacity: 0.7; }
+        .floating-cart-icon { box-shadow: 0 3px 12px rgba(212,168,75,0.5), inset 0 1px 0 rgba(255,255,255,0.4); position: relative; z-index: 2; }
         .floating-cart-content { position: relative; z-index: 2; }
-        .floating-cart-pulse {
-            position: absolute;
-            top: -2px;
-            right: -2px;
-            width: 9px;
-            height: 9px;
-            background: #22c55e;
-            border-radius: 50%;
-            border: 2px solid #0A1628;
-            animation: pulseDot 2s ease-in-out infinite;
-        }
-        @keyframes pulseDot {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.7); }
-            50% { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
-        }
-        .floating-cart-chevron {
-            animation: slideChevron 1.8s ease-in-out infinite;
-        }
-        @keyframes slideChevron {
-            0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(2px); }
-        }
+        .floating-cart-pulse { position: absolute; top: -2px; right: -2px; width: 9px; height: 9px; background: #22c55e; border-radius: 50%; border: 2px solid #0A1628; animation: pulseDot 2s ease-in-out infinite; }
+        @keyframes pulseDot { 0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.7); } 50% { box-shadow: 0 0 0 5px rgba(34,197,94,0); } }
+        .floating-cart-chevron { animation: slideChevron 1.8s ease-in-out infinite; }
+        @keyframes slideChevron { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(2px); } }
     </style>
 </head>
 <body class="pb-16">
@@ -203,44 +165,47 @@
         </div>
     </div>
 
+    <!-- SMOOTH SLIDER (ঘরের বাজার স্টাইল) -->
     <div class="px-5 pt-3">
-        <div class="relative rounded-3xl overflow-hidden premium-shadow">
-            <div class="slider-item active">
-                <div class="navy-gradient p-8 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-40 h-40 bg-gold/10 rounded-full -mr-20 -mt-20"></div>
-                    <div class="relative">
-                        <p class="text-gold text-xs tracking-widest uppercase mb-2">✨ Premium Collection</p>
-                        <h2 id="hero-title-1" class="font-display text-3xl text-white mb-2 leading-tight">Smart Living<br>Starts Here</h2>
-                        <p id="hero-sub-1" class="text-white/70 text-sm">Premium appliances for modern homes</p>
+        <div class="slider-viewport">
+            <div id="slider-track" class="slider-track">
+                <div class="slider-slide">
+                    <div class="navy-gradient p-8 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-40 h-40 bg-gold/10 rounded-full -mr-20 -mt-20"></div>
+                        <div class="relative">
+                            <p class="text-gold text-xs tracking-widest uppercase mb-2">✨ Premium Collection</p>
+                            <h2 id="hero-title-1" class="font-display text-3xl text-white mb-2 leading-tight">Smart Living<br>Starts Here</h2>
+                            <p id="hero-sub-1" class="text-white/70 text-sm">Premium appliances for modern homes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slider-slide">
+                    <div class="bg-gradient-to-br from-[#B8860B] via-[#D4A84B] to-[#E8C77B] p-8">
+                        <p class="text-navy text-xs tracking-widest uppercase mb-2">🔥 Limited Offer</p>
+                        <h2 class="font-display text-3xl text-navy mb-2 leading-tight">Up to 30% Off<br>Smart TVs</h2>
+                        <p class="text-navy/70 text-sm">Premium quality at special price</p>
+                    </div>
+                </div>
+                <div class="slider-slide">
+                    <div class="bg-gradient-to-br from-[#0F4C5C] via-[#1A6B7C] to-[#2C8B9E] p-8">
+                        <p class="text-gold text-xs tracking-widest uppercase mb-2">🚚 Free Delivery</p>
+                        <h2 id="hero-free-text" class="font-display text-3xl text-white mb-2 leading-tight">On Orders<br>Above ৳ 5,000</h2>
+                        <p class="text-white/70 text-sm">Fast delivery all over Bangladesh</p>
                     </div>
                 </div>
             </div>
-            <div class="slider-item">
-                <div class="bg-gradient-to-br from-[#B8860B] via-[#D4A84B] to-[#E8C77B] p-8">
-                    <p class="text-navy text-xs tracking-widest uppercase mb-2">🔥 Limited Offer</p>
-                    <h2 class="font-display text-3xl text-navy mb-2 leading-tight">Up to 30% Off<br>Smart TVs</h2>
-                    <p class="text-navy/70 text-sm">Premium quality at special price</p>
-                </div>
-            </div>
-            <div class="slider-item">
-                <div class="bg-gradient-to-br from-[#0F4C5C] via-[#1A6B7C] to-[#2C8B9E] p-8">
-                    <p class="text-gold text-xs tracking-widest uppercase mb-2">🚚 Free Delivery</p>
-                    <h2 id="hero-free-text" class="font-display text-3xl text-white mb-2 leading-tight">On Orders<br>Above ৳ 5,000</h2>
-                    <p class="text-white/70 text-sm">Fast delivery all over Bangladesh</p>
-                </div>
-            </div>
-            <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                <button onclick="goSlide(0)" class="slider-dot w-6 h-1.5 bg-white rounded-full"></button>
-                <button onclick="goSlide(1)" class="slider-dot w-1.5 h-1.5 bg-white/50 rounded-full"></button>
-                <button onclick="goSlide(2)" class="slider-dot w-1.5 h-1.5 bg-white/50 rounded-full"></button>
-            </div>
+        </div>
+        <div class="flex justify-center gap-1.5 mt-3">
+            <button onclick="goSlide(0)" class="slider-dot w-6 h-1.5 bg-navy rounded-full"></button>
+            <button onclick="goSlide(1)" class="slider-dot w-1.5 h-1.5 bg-navy/30 rounded-full"></button>
+            <button onclick="goSlide(2)" class="slider-dot w-1.5 h-1.5 bg-navy/30 rounded-full"></button>
         </div>
     </div>
 
     <!-- FEATURED CATEGORIES -->
     <div class="mt-7 px-5">
         <h3 class="section-title">Featured Categories</h3>
-        <div id="category-list" class="flex overflow-x-auto hide-scrollbar gap-4 pb-2">
+        <div id="category-list" class="flex overflow-x-auto hide-scrollbar gap-3 pb-2 justify-center flex-wrap">
             <div class="text-center text-gray-400 text-xs py-4 w-full">Loading...</div>
         </div>
     </div>
@@ -269,7 +234,7 @@
     <!-- OUR BRANDS -->
     <div id="brands-section" class="mt-10 px-5 hidden">
         <h3 class="section-title">Our Brands</h3>
-        <div id="brands-list" class="flex overflow-x-auto hide-scrollbar gap-3 pb-2"></div>
+        <div id="brands-list" class="flex overflow-x-auto hide-scrollbar gap-3 pb-2 justify-center flex-wrap"></div>
     </div>
 
     <div class="px-5 mt-10">
@@ -304,9 +269,7 @@
 
     <footer class="navy-gradient px-5 py-8 mt-6">
         <div class="flex items-center gap-3 mb-4">
-            <div class="bg-white rounded-xl p-2">
-                <img src="logo.png" alt="Heartix" class="h-12 object-contain">
-            </div>
+            <div class="bg-white rounded-xl p-2"><img src="logo.png" alt="Heartix" class="h-12 object-contain"></div>
             <div>
                 <p class="text-white font-display text-lg">Heartix</p>
                 <p class="text-gold text-[10px] tracking-widest uppercase">Smart Appliances</p>
@@ -405,8 +368,7 @@
         let allSettings = {};
         let currentFilter = 'all';
         let currentSearch = '';
-
-        const DEFAULT_CATEGORIES = [
+        let categories = [
             { key: 'TV', label: 'Televisions', icon: '📺' },
             { key: 'Fridge', label: 'Refrigerators', icon: '❄️' },
             { key: 'Fan', label: 'Fans', icon: '🌀' },
@@ -422,11 +384,7 @@
             if (type === 'warn') icon = 'exclamation-circle';
             t.innerHTML = `<i class="fas fa-${icon}"></i><span>${msg}</span>`;
             c.appendChild(t);
-            setTimeout(() => { 
-                t.style.transition = 'opacity 0.3s';
-                t.style.opacity = '0';
-                setTimeout(() => t.remove(), 300);
-            }, 2500);
+            setTimeout(() => { t.style.transition = 'opacity 0.3s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
         }
 
         window.openSidebar = function() {
@@ -462,18 +420,23 @@
             renderProducts();
         }
 
+        // ============ SMOOTH SLIDER ============
         let slideIndex = 0;
-        const slides = document.querySelectorAll('.slider-item');
-        const dots = document.querySelectorAll('.slider-dot');
-        window.goSlide = function(idx) { slideIndex = idx; updateSlide(); }
-        function updateSlide() {
-            slides.forEach(s => s.classList.remove('active'));
-            dots.forEach(d => { d.classList.remove('w-6','bg-white'); d.classList.add('w-1.5','bg-white/50'); });
-            slides[slideIndex].classList.add('active');
-            dots[slideIndex].classList.remove('w-1.5','bg-white/50');
-            dots[slideIndex].classList.add('w-6','bg-white');
+        const totalSlides = 3;
+        const dotEls = document.querySelectorAll('.slider-dot');
+        window.goSlide = function(idx) { 
+            slideIndex = idx; 
+            updateSlide(); 
         }
-        if (slides.length > 0) setInterval(() => { slideIndex = (slideIndex + 1) % slides.length; updateSlide(); }, 5000);
+        function updateSlide() {
+            document.getElementById('slider-track').style.transform = `translateX(-${slideIndex * 100}%)`;
+            dotEls.forEach((d, i) => {
+                if (i === slideIndex) { d.className = 'slider-dot w-6 h-1.5 bg-navy rounded-full'; }
+                else { d.className = 'slider-dot w-1.5 h-1.5 bg-navy/30 rounded-full'; }
+            });
+        }
+        setInterval(() => { slideIndex = (slideIndex + 1) % totalSlides; updateSlide(); }, 4000);
+        updateSlide();
 
         window.searchProducts = function() {
             currentSearch = document.getElementById('search-input').value.toLowerCase().trim();
@@ -485,7 +448,7 @@
             document.getElementById('search-input').value = '';
             document.getElementById('search-bar-wrapper').classList.remove('open');
             document.getElementById('search-nav-btn').classList.remove('active');
-            const found = DEFAULT_CATEGORIES.find(c => c.key === category);
+            const found = categories.find(c => c.key === category);
             document.getElementById('section-title').innerText = category === 'all' ? 'Top Selling Products' : (found ? found.label : category);
             renderProducts();
         }
@@ -497,14 +460,11 @@
             const cart = getCart();
             const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
             const totalAmount = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
-            
             document.getElementById('cart-count-header').innerText = totalItems;
             document.getElementById('cart-count-bottom').innerText = totalItems;
-            
             const floating = document.getElementById('floating-cart');
             const fCount = document.getElementById('floating-cart-count');
             const fTotal = document.getElementById('floating-cart-total');
-            
             if (totalItems > 0) {
                 floating.classList.remove('hide');
                 floating.classList.add('show');
@@ -557,12 +517,7 @@
         }
 
         function formatPrice(num) { return Number(num || 0).toLocaleString('en-IN'); }
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+        function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
         function getProductRating(productId) {
             const reviews = allReviews.filter(r => r.productId === productId);
             if (reviews.length === 0) return { avg: 0, count: 0 };
@@ -574,16 +529,23 @@
             const list = document.getElementById('category-list');
             const sidebarList = document.getElementById('sidebar-categories');
             let html = '', sideHtml = '';
-            DEFAULT_CATEGORIES.forEach(c => {
+            categories.forEach(c => {
+                // Icon can be emoji OR image URL
+                let iconHtml = '';
+                if (c.icon && (c.icon.startsWith('http') || c.icon.startsWith('data:'))) {
+                    iconHtml = `<img src="${c.icon}" alt="${c.label}" class="category-img">`;
+                } else {
+                    iconHtml = `<span class="category-icon">${c.icon || '📦'}</span>`;
+                }
                 html += `
-                    <div onclick="filterByCategory('${c.key}')" class="flex flex-col items-center min-w-[88px] cursor-pointer">
-                        <div class="w-20 h-20 bg-white rounded-2xl premium-shadow flex items-center justify-center text-3xl">${c.icon}</div>
-                        <span class="text-xs mt-2 text-navy font-medium">${c.label}</span>
+                    <div onclick="filterByCategory('${c.key}')" class="flex flex-col items-center cursor-pointer" style="min-width: 96px;">
+                        <div class="category-card">${iconHtml}</div>
+                        <span class="text-xs mt-2 text-navy font-medium text-center" style="max-width: 96px;">${escapeHtml(c.label)}</span>
                     </div>`;
                 sideHtml += `
                     <a href="#" onclick="filterByCategory('${c.key}'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
-                        <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center text-lg">${c.icon}</span>
-                        <span class="font-medium text-navy">${c.label}</span>
+                        <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center text-lg">${(!c.icon || c.icon.startsWith('http')) ? '📦' : c.icon}</span>
+                        <span class="font-medium text-navy">${escapeHtml(c.label)}</span>
                     </a>`;
             });
             list.innerHTML = html;
@@ -643,15 +605,9 @@
                 if (isOutOfStock) {
                     actionHtml = `<button disabled class="w-full mt-2 add-cart-btn opacity-50 cursor-not-allowed" style="border-color:#ccc; color:#999;">Out of Stock</button>`;
                 } else if (qty === 0) {
-                    actionHtml = `<button onclick="event.preventDefault(); addToCart('${p.id}')" class="w-full mt-2 add-cart-btn">
-                        <i class="fas fa-shopping-bag"></i> Add To Cart
-                    </button>`;
+                    actionHtml = `<button onclick="event.preventDefault(); addToCart('${p.id}')" class="w-full mt-2 add-cart-btn"><i class="fas fa-shopping-bag"></i> Add To Cart</button>`;
                 } else {
-                    actionHtml = `<div class="mt-2 qty-control w-full">
-                        <button onclick="event.preventDefault(); removeFromCart('${p.id}')">−</button>
-                        <span class="qty-num flex-1">${qty}</span>
-                        <button onclick="event.preventDefault(); addToCart('${p.id}')">+</button>
-                    </div>`;
+                    actionHtml = `<div class="mt-2 qty-control w-full"><button onclick="event.preventDefault(); removeFromCart('${p.id}')">−</button><span class="qty-num flex-1">${qty}</span><button onclick="event.preventDefault(); addToCart('${p.id}')">+</button></div>`;
                 }
 
                 html += `
@@ -707,6 +663,11 @@
             if (s.freeDeliveryAbove) document.getElementById('hero-free-text').innerHTML = `On Orders<br>Above ৳ ${formatPrice(s.freeDeliveryAbove)}`;
             if (s.contactPhone) document.getElementById('footer-phone').textContent = s.contactPhone;
             if (s.contactEmail) document.getElementById('footer-email').textContent = s.contactEmail;
+            // Custom categories from admin
+            if (s.categories && Array.isArray(s.categories) && s.categories.length > 0) {
+                categories = s.categories;
+                renderCategories();
+            }
         }
 
         updateCartUI();
