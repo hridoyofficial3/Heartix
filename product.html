@@ -29,7 +29,6 @@
 </head>
 <body class="pb-24">
 
-    <!-- HEADER -->
     <header class="glass sticky top-0 z-30 px-4 py-3 flex justify-between items-center shadow-sm">
         <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream">
             <i class="fas fa-arrow-left text-navy text-lg"></i>
@@ -41,22 +40,19 @@
         </a>
     </header>
 
-    <!-- BREADCRUMB -->
     <div class="px-4 py-3 text-xs text-gray-500">
         <a href="index.html" class="hover:text-navy">Home</a>
         <i class="fas fa-chevron-right text-[8px] mx-1"></i>
-        <span id="breadcrumb-category" class="hover:text-navy">Products</span>
+        <span id="breadcrumb-category">Products</span>
         <i class="fas fa-chevron-right text-[8px] mx-1"></i>
         <span id="breadcrumb-product" class="text-navy font-semibold">Loading...</span>
     </div>
 
-    <!-- PRODUCT DETAILS -->
     <div id="product-container">
         <p class="text-center text-gray-400 py-16">Loading product...</p>
     </div>
 
-    <!-- REVIEWS SECTION -->
-    <div id="reviews-section" class="px-4 mt-6">
+    <div class="px-4 mt-6">
         <div class="bg-white rounded-2xl p-5 shadow-sm">
             <h3 class="font-display text-xl navy-text mb-4">Customer Reviews</h3>
             
@@ -69,35 +65,34 @@
                 <div class="flex-1 space-y-1">
                     <div class="flex items-center gap-2 text-xs">
                         <span class="w-8">5 ★</span>
-                        <div class="flex-1 bg-gray-100 rounded-full h-1.5"><div class="bg-gold h-1.5 rounded-full" style="width:0%"></div></div>
-                        <span class="w-8 text-right text-gray-400">0%</span>
+                        <div class="flex-1 bg-gray-100 rounded-full h-1.5"><div id="bar5" class="bg-yellow-400 h-1.5 rounded-full" style="width:0%"></div></div>
+                        <span class="w-8 text-right text-gray-400" id="pct5">0%</span>
                     </div>
                     <div class="flex items-center gap-2 text-xs">
                         <span class="w-8">4 ★</span>
-                        <div class="flex-1 bg-gray-100 rounded-full h-1.5"><div class="bg-gold h-1.5 rounded-full" style="width:0%"></div></div>
-                        <span class="w-8 text-right text-gray-400">0%</span>
+                        <div class="flex-1 bg-gray-100 rounded-full h-1.5"><div id="bar4" class="bg-yellow-400 h-1.5 rounded-full" style="width:0%"></div></div>
+                        <span class="w-8 text-right text-gray-400" id="pct4">0%</span>
                     </div>
                     <div class="flex items-center gap-2 text-xs">
                         <span class="w-8">3 ★</span>
-                        <div class="flex-1 bg-gray-100 rounded-full h-1.5"><div class="bg-gold h-1.5 rounded-full" style="width:0%"></div></div>
-                        <span class="w-8 text-right text-gray-400">0%</span>
+                        <div class="flex-1 bg-gray-100 rounded-full h-1.5"><div id="bar3" class="bg-yellow-400 h-1.5 rounded-full" style="width:0%"></div></div>
+                        <span class="w-8 text-right text-gray-400" id="pct3">0%</span>
                     </div>
                     <div class="flex items-center gap-2 text-xs">
                         <span class="w-8">2 ★</span>
-                        <div class="flex-1 bg-gray-100 rounded-full h-1.5"><div class="bg-gold h-1.5 rounded-full" style="width:0%"></div></div>
-                        <span class="w-8 text-right text-gray-400">0%</span>
+                        <div class="flex-1 bg-gray-100 rounded-full h-1.5"><div id="bar2" class="bg-yellow-400 h-1.5 rounded-full" style="width:0%"></div></div>
+                        <span class="w-8 text-right text-gray-400" id="pct2">0%</span>
                     </div>
                     <div class="flex items-center gap-2 text-xs">
                         <span class="w-8">1 ★</span>
-                        <div class="flex-1 bg-gray-100 rounded-full h-1.5"><div class="bg-gold h-1.5 rounded-full" style="width:0%"></div></div>
-                        <span class="w-8 text-right text-gray-400">0%</span>
+                        <div class="flex-1 bg-gray-100 rounded-full h-1.5"><div id="bar1" class="bg-yellow-400 h-1.5 rounded-full" style="width:0%"></div></div>
+                        <span class="w-8 text-right text-gray-400" id="pct1">0%</span>
                     </div>
                 </div>
             </div>
 
             <div id="reviews-list" class="space-y-3 mb-4"></div>
 
-            <!-- SUBMIT REVIEW -->
             <div class="border-t border-gray-100 pt-4">
                 <h4 class="font-bold navy-text mb-3">Submit Your Review</h4>
                 <div class="space-y-3">
@@ -117,7 +112,6 @@
         </div>
     </div>
 
-    <!-- RELATED PRODUCTS -->
     <div class="px-4 mt-6">
         <h3 class="font-display text-xl navy-text mb-4">Related Products</h3>
         <div id="related-products" class="grid grid-cols-2 gap-3">
@@ -125,7 +119,6 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
     <footer class="navy-bg mt-8 px-5 py-8 pb-24">
         <div class="flex items-center gap-3 mb-4">
             <img src="logo.png" alt="Heartix" class="h-12 bg-white rounded-lg p-1">
@@ -188,7 +181,6 @@
         </div>
     </footer>
 
-    <!-- FLOATING ACTIONS -->
     <div class="fixed bottom-20 right-4 flex flex-col gap-3 z-30">
         <a id="float-whatsapp" href="#" target="_blank" class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg text-white">
             <i class="fab fa-whatsapp text-xl"></i>
@@ -198,7 +190,6 @@
         </a>
     </div>
 
-    <!-- BOTTOM NAV -->
     <div class="fixed bottom-0 left-0 w-full glass border-t border-gray-100 flex justify-around py-2 z-30 md:hidden">
         <a href="index.html" class="flex flex-col items-center py-1 px-4">
             <i class="fas fa-home text-lg text-gray-400"></i>
@@ -241,7 +232,6 @@
         const urlParams = new URLSearchParams(window.location.search);
         productId = urlParams.get('id');
 
-        // CART
         function getCart() { return JSON.parse(localStorage.getItem('heartix_cart') || '[]'); }
         function saveCart(cart) { localStorage.setItem('heartix_cart', JSON.stringify(cart)); }
         function updateCartCount() {
@@ -272,7 +262,6 @@
             window.location.href = 'checkout.html';
         }
 
-        // LOAD PRODUCT
         async function loadProduct() {
             const container = document.getElementById('product-container');
             if (!productId) {
@@ -306,7 +295,6 @@
 
             document.getElementById('product-container').innerHTML = `
                 <div class="px-4">
-                    <!-- IMAGE -->
                     <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
                         <div class="relative">
                             <img id="main-image" src="${p.image}" alt="${p.name}" class="w-full h-72 object-contain rounded-xl">
@@ -314,7 +302,6 @@
                         </div>
                     </div>
 
-                    <!-- INFO -->
                     <div class="bg-white rounded-2xl p-5 shadow-sm">
                         <h1 class="font-display text-2xl navy-text mb-2">${p.name}</h1>
                         <div class="flex items-center gap-2 mb-3">
@@ -328,7 +315,6 @@
                         ${p.brand ? `<p class="text-xs text-gray-500 mb-3">Brand: <span class="font-semibold navy-text">${p.brand}</span></p>` : ''}
                         ${p.stock !== undefined ? `<p class="text-xs mb-4 ${p.stock > 0 ? 'text-green-600' : 'text-red-500'} font-semibold">${p.stock > 0 ? '✓ In Stock' : '✗ Out of Stock'}</p>` : ''}
 
-                        <!-- QUANTITY -->
                         <div class="flex items-center gap-3 mb-4">
                             <span class="text-sm text-gray-600">Quantity:</span>
                             <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden">
@@ -338,7 +324,6 @@
                             </div>
                         </div>
 
-                        <!-- ACTION BUTTONS -->
                         <div class="grid grid-cols-2 gap-3 mb-3">
                             <button onclick="addToCart()" class="gold-gradient text-navy font-bold py-3 rounded-xl flex items-center justify-center gap-2 text-sm">
                                 <i class="fas fa-shopping-bag"></i> ADD TO CART
@@ -357,7 +342,6 @@
                         </div>
                     </div>
 
-                    <!-- DESCRIPTION -->
                     ${p.description ? `
                     <div class="bg-white rounded-2xl p-5 shadow-sm mt-4">
                         <h3 class="font-display text-xl navy-text mb-3 border-b-2 border-gold pb-2 inline-block">Product Details</h3>
@@ -366,8 +350,6 @@
                     ` : ''}
                 </div>
             `;
-
-            // WhatsApp & Call links
             updateContactLinks(p);
         }
 
@@ -379,12 +361,8 @@
                     document.getElementById('footer-address').innerText = s.contactAddress || 'Dhaka, Bangladesh';
                     document.getElementById('footer-phone').innerText = s.contactPhone || '+880 1XXX-XXXXXX';
                     document.getElementById('footer-email').innerText = s.contactEmail || 'info@heartix.com';
-                    if (s.whatsapp) {
-                        document.getElementById('float-whatsapp').href = `https://wa.me/${s.whatsapp}`;
-                    }
-                    if (s.contactPhone) {
-                        document.getElementById('float-call').href = `tel:${s.contactPhone}`;
-                    }
+                    if (s.whatsapp) document.getElementById('float-whatsapp').href = `https://wa.me/${s.whatsapp}`;
+                    if (s.contactPhone) document.getElementById('float-call').href = `tel:${s.contactPhone}`;
                 }
             } catch (e) { console.error(e); }
         }
@@ -404,18 +382,13 @@
             });
         }
 
-        // REVIEWS
         window.submitReview = async function() {
             const name = document.getElementById('review-name').value.trim();
             const rating = parseInt(document.getElementById('review-rating').value);
             const text = document.getElementById('review-text').value.trim();
-
             if (!name || !rating || !text) return alert("Please fill all review fields!");
-
             try {
-                await addDoc(collection(db, "reviews"), {
-                    productId, name, rating, text, createdAt: serverTimestamp()
-                });
+                await addDoc(collection(db, "reviews"), { productId, name, rating, text, createdAt: serverTimestamp() });
                 alert("✅ Review submitted!");
                 document.getElementById('review-name').value = '';
                 document.getElementById('review-rating').value = '';
@@ -430,19 +403,22 @@
                 const snap = await getDocs(q);
                 const reviews = [];
                 snap.forEach(d => reviews.push(d.data()));
-
                 const total = reviews.length;
                 const avg = total > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / total) : 0;
-
                 document.getElementById('avg-rating').innerText = avg.toFixed(1);
                 document.getElementById('review-count').innerText = `(${total} Reviews)`;
                 document.getElementById('product-review-count').innerText = total;
-
-                // Stars display
                 renderStars('avg-stars', avg);
                 renderStars('product-stars', avg);
 
-                // Reviews list
+                // Bar percentages
+                for (let i = 1; i <= 5; i++) {
+                    const count = reviews.filter(r => r.rating === i).length;
+                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                    document.getElementById('bar' + i).style.width = pct + '%';
+                    document.getElementById('pct' + i).innerText = pct + '%';
+                }
+
                 const list = document.getElementById('reviews-list');
                 if (reviews.length === 0) {
                     list.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">No reviews yet. Be the first!</p>';
@@ -454,7 +430,7 @@
                             <div class="border-b border-gray-100 pb-3 last:border-b-0">
                                 <div class="flex justify-between items-center mb-1">
                                     <p class="font-semibold navy-text text-sm">${r.name}</p>
-                                    <span class="text-gold text-sm">${stars}</span>
+                                    <span class="text-yellow-500 text-sm">${stars}</span>
                                 </div>
                                 <p class="text-xs text-gray-600">${r.text}</p>
                             </div>
@@ -477,16 +453,12 @@
             el.innerHTML = html;
         }
 
-        // RELATED PRODUCTS
         async function loadRelated() {
             try {
                 const snap = await getDocs(collection(db, "products"));
                 const related = [];
-                snap.forEach(d => {
-                    if (d.id !== productId) related.push({ id: d.id, ...d.data() });
-                });
+                snap.forEach(d => { if (d.id !== productId) related.push({ id: d.id, ...d.data() }); });
                 const shuffled = related.sort(() => 0.5 - Math.random()).slice(0, 4);
-                
                 const container = document.getElementById('related-products');
                 if (shuffled.length === 0) {
                     container.innerHTML = '<p class="col-span-full text-center text-gray-400 py-8 text-sm">No related products</p>';
