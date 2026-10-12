@@ -107,6 +107,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // গ্লোবাল প্রোডাক্ট ডাটা স্টোর
+        let allProducts = {};
+
         function getCart() {
             const cart = localStorage.getItem('heartix_cart');
             return cart ? JSON.parse(cart) : [];
@@ -124,17 +127,32 @@
             if (bottomCount) bottomCount.innerText = totalItems;
         }
 
-        window.addToCart = function(id, name, price, image) {
+        // শুধুমাত্র ID দিয়ে কার্টে অ্যাড করার ফাংশন (কোটেশন সমস্যা সমাধানের জন্য)
+        window.addToCart = function(id) {
+            const product = allProducts[id];
+            if (!product) {
+                alert("প্রোডাক্টটি খুঁজে পাওয়া যায়নি!");
+                return;
+            }
+
             let cart = getCart();
             const existingIndex = cart.findIndex(item => item.id === id);
+            
             if (existingIndex > -1) {
                 cart[existingIndex].quantity++;
             } else {
-                cart.push({ id, name, price, image, quantity: 1 });
+                cart.push({ 
+                    id: id, 
+                    name: product.name, 
+                    price: product.price, 
+                    image: product.image, 
+                    quantity: 1 
+                });
             }
+            
             saveCart(cart);
             updateCartCount();
-            alert("প্রোডাক্ট কার্টে অ্যাড করা হয়েছে!");
+            alert(product.name + " কার্টে অ্যাড করা হয়েছে!");
         }
 
         async function loadProducts() {
@@ -142,22 +160,29 @@
             try {
                 const querySnapshot = await getDocs(collection(db, "products"));
                 let htmlContent = '';
+                
                 if (querySnapshot.empty) {
                     productListDiv.innerHTML = '<p class="col-span-full text-center text-gray-500">কোনো প্রোডাক্ট পাওয়া যায়নি।</p>';
                     return;
                 }
+
                 querySnapshot.forEach((doc) => {
                     const product = doc.data();
                     const productId = doc.id;
+                    
+                    // প্রোডাক্টটি গ্লোবাল অবজেক্টে সেভ করা হচ্ছে
+                    allProducts[productId] = product;
+
                     htmlContent += `
                         <div class="bg-white rounded-lg shadow-sm p-3 flex flex-col relative">
                             <img src="${product.image}" alt="${product.name}" class="w-full h-32 object-cover rounded mb-2">
                             <h4 class="text-sm font-medium text-gray-800">${product.name}</h4>
                             <p class="brand-navy font-bold mt-1">৳ ${product.price}</p>
-                            <button onclick="addToCart('${productId}', '${product.name}', ${product.price}, '${product.image}')" class="mt-3 w-full brand-bg-navy text-white text-sm py-1.5 rounded hover:opacity-90 transition">Add To Cart</button>
+                            <button onclick="addToCart('${productId}')" class="mt-3 w-full brand-bg-navy text-white text-sm py-1.5 rounded hover:opacity-90 transition">Add To Cart</button>
                         </div>
                     `;
                 });
+                
                 productListDiv.innerHTML = htmlContent;
             } catch (error) {
                 productListDiv.innerHTML = `<p class="col-span-full text-center text-red-500">Error: ${error.message}</p>`;
