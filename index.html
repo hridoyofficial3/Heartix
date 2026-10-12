@@ -50,33 +50,42 @@
         .add-cart-btn { height: 38px; background: white; border: 1.5px solid #D4A84B; color: #0A1628; border-radius: 10px; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
         .add-cart-btn:active { background: #FBF8F3; }
 
-        /* SECTION TITLE */
         .section-title { text-align: center; font-size: 18px; font-weight: 700; color: #0A1628; margin-bottom: 16px; letter-spacing: -0.01em; }
 
-        /* CATEGORY CARD (ঘরের বাজার স্টাইল - হালকা ক্রিম) */
+        /* SMALLER CATEGORY CARD */
         .category-card {
-            width: 88px;
-            height: 88px;
+            width: 76px;
+            height: 76px;
             background: #FFFDF7;
-            border-radius: 16px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 12px rgba(10,22,40,0.06);
+            box-shadow: 0 2px 10px rgba(10,22,40,0.06);
             border: 1px solid rgba(212,168,75,0.08);
             transition: all 0.25s ease;
         }
         .category-card:active { transform: scale(0.95); }
-        .category-icon { font-size: 42px; line-height: 1; }
-        .category-img { width: 60px; height: 60px; object-fit: contain; }
+        .category-icon { font-size: 34px; line-height: 1; }
+        .category-img { width: 50px; height: 50px; object-fit: contain; }
 
-        /* ===== SMOOTH SLIDER (ঘরের বাজার স্টাইল) ===== */
+        /* AUTO SCROLL CATEGORIES */
+        #category-scroll-container {
+            scroll-behavior: smooth;
+            scroll-snap-type: x mandatory;
+        }
+        .cat-item {
+            scroll-snap-align: start;
+            flex-shrink: 0;
+        }
+
+        /* SMOOTH SLIDER */
         .slider-viewport { overflow: hidden; border-radius: 24px; box-shadow: 0 4px 20px rgba(10,22,40,0.08); }
         .slider-track { display: flex; transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
         .slider-slide { min-width: 100%; }
         .slider-dot { transition: all 0.3s ease; }
 
-        /* ===== PREMIUM FLOATING CART ===== */
+        /* FLOATING CART */
         #floating-cart { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
         #floating-cart.show { opacity: 1; transform: translateY(0) scale(1); }
         #floating-cart.hide { opacity: 0; transform: translateY(20px) scale(0.9); pointer-events: none; }
@@ -165,7 +174,6 @@
         </div>
     </div>
 
-    <!-- SMOOTH SLIDER (ঘরের বাজার স্টাইল) -->
     <div class="px-5 pt-3">
         <div class="slider-viewport">
             <div id="slider-track" class="slider-track">
@@ -202,15 +210,14 @@
         </div>
     </div>
 
-    <!-- FEATURED CATEGORIES -->
-    <div class="mt-7 px-5">
-        <h3 class="section-title">Featured Categories</h3>
-        <div id="category-list" class="flex overflow-x-auto hide-scrollbar gap-3 pb-2 justify-center flex-wrap">
+    <!-- FEATURED CATEGORIES (AUTO SCROLL, SMALLER) -->
+    <div class="mt-7">
+        <h3 class="section-title px-5">Featured Categories</h3>
+        <div id="category-scroll-container" class="flex overflow-x-auto hide-scrollbar gap-3 pb-2 px-5" style="scroll-behavior: smooth;">
             <div class="text-center text-gray-400 text-xs py-4 w-full">Loading...</div>
         </div>
     </div>
 
-    <!-- TOP SELLING PRODUCTS -->
     <div class="mt-8 px-5">
         <h3 id="section-title" class="section-title">Top Selling Products</h3>
         <div id="product-list" class="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -231,7 +238,6 @@
         </p>
     </div>
 
-    <!-- OUR BRANDS -->
     <div id="brands-section" class="mt-10 px-5 hidden">
         <h3 class="section-title">Our Brands</h3>
         <div id="brands-list" class="flex overflow-x-auto hide-scrollbar gap-3 pb-2 justify-center flex-wrap"></div>
@@ -420,14 +426,10 @@
             renderProducts();
         }
 
-        // ============ SMOOTH SLIDER ============
         let slideIndex = 0;
         const totalSlides = 3;
         const dotEls = document.querySelectorAll('.slider-dot');
-        window.goSlide = function(idx) { 
-            slideIndex = idx; 
-            updateSlide(); 
-        }
+        window.goSlide = function(idx) { slideIndex = idx; updateSlide(); }
         function updateSlide() {
             document.getElementById('slider-track').style.transform = `translateX(-${slideIndex * 100}%)`;
             dotEls.forEach((d, i) => {
@@ -525,12 +527,41 @@
             return { avg, count: reviews.length };
         }
 
+        // ============ AUTO SCROLL CATEGORIES ============
+        let catScrollInterval = null;
+        let currentCatIndex = 0;
+
+        function startCategoryAutoScroll() {
+            const container = document.getElementById('category-scroll-container');
+            if (!container) return;
+            const items = container.querySelectorAll('.cat-item');
+            if (items.length <= 1) return;
+            
+            if (catScrollInterval) clearInterval(catScrollInterval);
+            
+            catScrollInterval = setInterval(() => {
+                const container = document.getElementById('category-scroll-container');
+                const items = container.querySelectorAll('.cat-item');
+                if (items.length === 0) return;
+                
+                currentCatIndex++;
+                // If we've reached the end, scroll back to start
+                if (currentCatIndex >= items.length) {
+                    currentCatIndex = 0;
+                    container.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    const item = items[currentCatIndex];
+                    const scrollLeft = item.offsetLeft - 20; // 20px padding
+                    container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+                }
+            }, 1000); // Every 1 second
+        }
+
         function renderCategories() {
-            const list = document.getElementById('category-list');
+            const list = document.getElementById('category-scroll-container');
             const sidebarList = document.getElementById('sidebar-categories');
             let html = '', sideHtml = '';
             categories.forEach(c => {
-                // Icon can be emoji OR image URL
                 let iconHtml = '';
                 if (c.icon && (c.icon.startsWith('http') || c.icon.startsWith('data:'))) {
                     iconHtml = `<img src="${c.icon}" alt="${c.label}" class="category-img">`;
@@ -538,9 +569,9 @@
                     iconHtml = `<span class="category-icon">${c.icon || '📦'}</span>`;
                 }
                 html += `
-                    <div onclick="filterByCategory('${c.key}')" class="flex flex-col items-center cursor-pointer" style="min-width: 96px;">
+                    <div onclick="filterByCategory('${c.key}')" class="cat-item flex flex-col items-center cursor-pointer" style="min-width: 84px;">
                         <div class="category-card">${iconHtml}</div>
-                        <span class="text-xs mt-2 text-navy font-medium text-center" style="max-width: 96px;">${escapeHtml(c.label)}</span>
+                        <span class="text-[11px] mt-1.5 text-navy font-medium text-center" style="max-width: 84px; line-height: 1.2;">${escapeHtml(c.label)}</span>
                     </div>`;
                 sideHtml += `
                     <a href="#" onclick="filterByCategory('${c.key}'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
@@ -550,6 +581,10 @@
             });
             list.innerHTML = html;
             sidebarList.innerHTML = sideHtml;
+            
+            // Restart auto-scroll
+            currentCatIndex = 0;
+            setTimeout(startCategoryAutoScroll, 500);
         }
 
         function renderBrands() {
@@ -663,10 +698,8 @@
             if (s.freeDeliveryAbove) document.getElementById('hero-free-text').innerHTML = `On Orders<br>Above ৳ ${formatPrice(s.freeDeliveryAbove)}`;
             if (s.contactPhone) document.getElementById('footer-phone').textContent = s.contactPhone;
             if (s.contactEmail) document.getElementById('footer-email').textContent = s.contactEmail;
-            // Custom categories from admin
             if (s.categories && Array.isArray(s.categories) && s.categories.length > 0) {
                 categories = s.categories;
-                renderCategories();
             }
         }
 
