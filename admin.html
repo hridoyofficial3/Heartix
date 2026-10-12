@@ -3,73 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Heartix</title>
+    <title>Admin Control Panel - Heartix</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: {
+                navy: '#0A1628', gold: '#D4A84B', cream: '#FBF8F3'
+            }}}
+        }
+    </script>
     <style>
-        .brand-navy { color: #0B1B3D; }
-        .brand-bg-navy { background-color: #0B1B3D; }
+        body { font-family: 'Inter', sans-serif; background: #F5F5F7; }
+        .navy-bg { background: #0A1628; }
+        .gold-bg { background: #D4A84B; }
+        .navy-text { color: #0A1628; }
+        .gold-text { color: #D4A84B; }
+        .tab-active { background: #0A1628; color: white; }
+        .tab-inactive { background: white; color: #666; }
+        .modal-bg { background: rgba(10, 22, 40, 0.7); backdrop-filter: blur(4px); }
     </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body>
 
+    <!-- LOGIN -->
     <div id="login-section" class="min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-xl shadow-md w-full max-w-sm">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm">
             <div class="text-center mb-6">
-                <img src="logo.png" alt="Heartix" class="h-12 mx-auto mb-3">
-                <h2 class="text-xl font-bold brand-navy">Admin Login</h2>
+                <img src="logo.png" alt="Heartix" class="h-14 mx-auto mb-3">
+                <h2 class="text-2xl font-bold navy-text">Admin Control</h2>
+                <p class="text-xs text-gray-400 mt-1">Heartix Smart Appliances</p>
             </div>
-            <input type="password" id="admin-password" placeholder="Enter Admin Password" class="w-full border rounded-lg px-3 py-2 mb-4 outline-none focus:border-[#0B1B3D]">
-            <button onclick="login()" class="w-full brand-bg-navy text-white py-2 rounded-lg font-semibold">Login</button>
+            <input type="password" id="admin-password" placeholder="Enter Admin Password" class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 mb-4 outline-none focus:border-[#D4A84B] transition">
+            <button onclick="login()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">Login</button>
         </div>
     </div>
 
-    <div id="dashboard-section" class="hidden min-h-screen pb-20">
-        <header class="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-50">
-            <h1 class="text-lg font-bold brand-navy">Admin Panel</h1>
-            <button onclick="logout()" class="text-red-500 text-sm font-semibold"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    <!-- DASHBOARD -->
+    <div id="dashboard-section" class="hidden min-h-screen">
+        
+        <!-- HEADER -->
+        <header class="navy-bg sticky top-0 z-50 p-4 flex justify-between items-center shadow-lg">
+            <div class="flex items-center gap-3">
+                <img src="logo.png" alt="Heartix" class="h-9 bg-white rounded p-1">
+                <div>
+                    <h1 class="text-white font-bold text-sm">Admin Control</h1>
+                    <p class="text-gold text-[10px]">Full Access</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="text-white/80 hover:text-white text-sm flex items-center gap-2">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
         </header>
 
-        <div class="flex bg-white border-b">
-            <button onclick="showTab('add-product')" id="tab-add" class="flex-1 py-3 text-sm font-semibold brand-navy border-b-2 border-[#0B1B3D]">Add Product</button>
-            <button onclick="showTab('products')" id="tab-products" class="flex-1 py-3 text-sm font-semibold text-gray-500 border-b-2 border-transparent">Products</button>
-            <button onclick="showTab('orders')" id="tab-orders" class="flex-1 py-3 text-sm font-semibold text-gray-500 border-b-2 border-transparent">Orders</button>
-        </div>
-
-        <div id="content-add-product" class="p-4">
-            <div class="bg-white p-4 rounded-lg shadow-sm space-y-3">
-                <h3 class="font-bold text-gray-800 mb-2">নতুন প্রোডাক্ট অ্যাড করুন</h3>
-                <input type="text" id="p-name" placeholder="Product Name *" class="w-full border rounded-lg px-3 py-2 outline-none focus:border-[#0B1B3D]">
-                <input type="number" id="p-price" placeholder="Price (শুধু সংখ্যা) *" class="w-full border rounded-lg px-3 py-2 outline-none focus:border-[#0B1B3D]">
-                
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                    <label for="p-image-file" class="cursor-pointer">
-                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                        <p class="text-sm text-gray-600">ছবি সিলেক্ট করতে এখানে ক্লিক করুন</p>
-                    </label>
-                    <input type="file" id="p-image-file" accept="image/*" class="hidden">
-                    <p id="file-name" class="text-xs text-green-600 mt-2 font-semibold"></p>
-                </div>
-
-                <button onclick="addProduct()" id="add-btn" class="w-full brand-bg-navy text-white py-2 rounded-lg font-semibold mt-2">Add Product</button>
+        <!-- TABS -->
+        <div class="bg-white shadow-sm overflow-x-auto hide-scrollbar">
+            <div class="flex min-w-max">
+                <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-active px-5 py-3 text-sm font-semibold transition whitespace-nowrap">
+                    <i class="fas fa-chart-line mr-1"></i> Dashboard
+                </button>
+                <button onclick="showTab('products')" id="tab-products" class="tab-inactive px-5 py-3 text-sm font-semibold transition whitespace-nowrap">
+                    <i class="fas fa-box mr-1"></i> Products
+                </button>
+                <button onclick="showTab('orders')" id="tab-orders" class="tab-inactive px-5 py-3 text-sm font-semibold transition whitespace-nowrap">
+                    <i class="fas fa-receipt mr-1"></i> Orders
+                </button>
+                <button onclick="showTab('settings')" id="tab-settings" class="tab-inactive px-5 py-3 text-sm font-semibold transition whitespace-nowrap">
+                    <i class="fas fa-cog mr-1"></i> Settings
+                </button>
             </div>
         </div>
 
-        <div id="content-products" class="hidden p-4">
-            <div id="product-list-admin" class="space-y-3"><p class="text-center text-gray-500">Loading...</p></div>
-        </div>
+        <div class="p-4 max-w-4xl mx-auto">
 
-        <div id="content-orders" class="hidden p-4">
-            <div id="order-list-admin" class="space-y-3"><p class="text-center text-gray-500">Loading...</p></div>
+            <!-- ============= TAB 1: DASHBOARD ============= -->
+            <div id="content-dashboard" class="tab-content">
+                <h2 class="text-xl font-bold navy-text mb-4">Overview</h2>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-white rounded-2xl p-4 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fas fa-box text-2xl text-blue-500"></i>
+                            <span class="text-[10px] text-gray-400 font-semibold">TOTAL</span>
+                        </div>
+                        <p id="stat-products" class="text-2xl font-bold navy-text">0</p>
+                        <p class="text-xs text-gray-500">Products</p>
+                    </div>
+                    <div class="bg-white rounded-2xl p-4 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fas fa-receipt text-2xl text-purple-500"></i>
+                            <span class="text-[10px] text-gray-400 font-semibold">TOTAL</span>
+                        </div>
+                        <p id="stat-orders" class="text-2xl font-bold navy-text">0</p>
+                        <p class="text-xs text-gray-500">Orders</p>
+                    </div>
+                    <div class="bg-white rounded-2xl p-4 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fas fa-clock text-2xl text-yellow-500"></i>
+                            <span class="text-[10px] text-gray-400 font-semibold">PENDING</span>
+                        </div>
+                        <p id="stat-pending" class="text-2xl font-bold navy-text">0</p>
+                        <p class="text-xs text-gray-500">Pending Orders</p>
+                    </div>
+                    <div class="bg-white rounded-2xl p-4 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fas fa-money-bill-wave text-2xl text-green-500"></i>
+                            <span class="text-[10px] text-gray-400 font-semibold">REVENUE</span>
+                        </div>
+                        <p id="stat-revenue" class="text-2xl font-bold navy-text">৳0</p>
+                        <p class="text-xs text-gray-500">Total Revenue</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-4 shadow-sm">
+                    <h3 class="font-bold navy-text mb-3">Recent Orders</h3>
+                    <div id="recent-orders" class="space-y-2">
+                        <p class="text-gray-400 text-sm text-center py-4">No orders yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============= TAB 2: PRODUCTS ============= -->
+            <div id="content-products" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold navy-text">Products</h2>
+                    <button onclick="openAddModal()" class="gold-bg text-navy px-4 py-2 rounded-xl font-semibold text-sm">
+                        <i class="fas fa-plus mr-1"></i> Add New
+                    </button>
+                </div>
+                <input type="text" id="product-search" oninput="renderAdminProducts()" placeholder="Search products..." class="w-full bg-white rounded-xl px-4 py-3 mb-4 outline-none border border-gray-200">
+                <div id="product-list-admin" class="space-y-3">
+                    <p class="text-center text-gray-400 py-8">Loading...</p>
+                </div>
+            </div>
+
+            <!-- ============= TAB 3: ORDERS ============= -->
+            <div id="content-orders" class="tab-content hidden">
+                <h2 class="text-xl font-bold navy-text mb-4">Orders</h2>
+                <div class="flex gap-2 mb-4 overflow-x-auto hide-scrollbar">
+                    <button onclick="filterOrders('all')" class="order-filter-btn active bg-navy text-white px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap" data-filter="all">All</button>
+                    <button onclick="filterOrders('pending')" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap" data-filter="pending">Pending</button>
+                    <button onclick="filterOrders('confirmed')" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap" data-filter="confirmed">Confirmed</button>
+                    <button onclick="filterOrders('shipped')" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap" data-filter="shipped">Shipped</button>
+                    <button onclick="filterOrders('delivered')" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap" data-filter="delivered">Delivered</button>
+                </div>
+                <div id="order-list-admin" class="space-y-3">
+                    <p class="text-center text-gray-400 py-8">Loading...</p>
+                </div>
+            </div>
+
+            <!-- ============= TAB 4: SETTINGS ============= -->
+            <div id="content-settings" class="tab-content hidden">
+                <h2 class="text-xl font-bold navy-text mb-4">Website Settings</h2>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-image gold-text mr-2"></i>Hero Banner</h3>
+                    <label class="text-xs text-gray-500 font-semibold">Banner Title</label>
+                    <input type="text" id="setting-hero-title" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="Smart Living Starts Here">
+                    
+                    <label class="text-xs text-gray-500 font-semibold">Banner Subtitle</label>
+                    <input type="text" id="setting-hero-subtitle" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="Premium appliances for modern homes">
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-truck gold-text mr-2"></i>Delivery Settings</h3>
+                    <label class="text-xs text-gray-500 font-semibold">Delivery Charge (৳)</label>
+                    <input type="number" id="setting-delivery-charge" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="100">
+                    
+                    <label class="text-xs text-gray-500 font-semibold">Free Delivery Above (৳)</label>
+                    <input type="number" id="setting-free-delivery" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="5000">
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-phone gold-text mr-2"></i>Contact Info</h3>
+                    <label class="text-xs text-gray-500 font-semibold">Phone Number</label>
+                    <input type="text" id="setting-phone" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="01XXXXXXXXX">
+                    
+                    <label class="text-xs text-gray-500 font-semibold">Email</label>
+                    <input type="email" id="setting-email" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="info@heartix.com">
+                    
+                    <label class="text-xs text-gray-500 font-semibold">WhatsApp Number</label>
+                    <input type="text" id="setting-whatsapp" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="8801XXXXXXXXX">
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-credit-card gold-text mr-2"></i>Payment Info</h3>
+                    <label class="text-xs text-gray-500 font-semibold">bKash Number</label>
+                    <input type="text" id="setting-bkash" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="01XXXXXXXXX">
+                    
+                    <label class="text-xs text-gray-500 font-semibold">Nagad Number</label>
+                    <input type="text" id="setting-nagad" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="01XXXXXXXXX">
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-info-circle gold-text mr-2"></i>About</h3>
+                    <label class="text-xs text-gray-500 font-semibold">About Heartix</label>
+                    <textarea id="setting-about" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="About your business..."></textarea>
+                </div>
+
+                <button onclick="saveSettings()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold mb-4">
+                    <i class="fas fa-save mr-2"></i> Save All Settings
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ADD/EDIT PRODUCT MODAL -->
+    <div id="product-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="navy-bg p-4 rounded-t-2xl flex justify-between items-center sticky top-0">
+                <h3 id="modal-title" class="text-white font-bold">Add Product</h3>
+                <button onclick="closeModal()" class="text-white/80 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-5 space-y-3">
+                <input type="hidden" id="edit-product-id">
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Product Name *</label>
+                    <input type="text" id="p-name" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold" placeholder="e.g. Samsung 32 inch TV">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Price (৳) *</label>
+                    <input type="number" id="p-price" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold" placeholder="25000">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Category *</label>
+                    <select id="p-category" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold">
+                        <option value="TV">TV</option>
+                        <option value="Fridge">Fridge</option>
+                        <option value="Fan">Fan</option>
+                        <option value="Gadget">Gadget</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Description (Optional)</label>
+                    <textarea id="p-description" rows="2" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold" placeholder="Product details..."></textarea>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Product Image *</label>
+                    <div id="image-current" class="hidden mb-2">
+                        <img id="p-image-preview" class="w-20 h-20 object-cover rounded-lg">
+                    </div>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                        <label for="p-image-file" class="cursor-pointer block">
+                            <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-1"></i>
+                            <p class="text-xs text-gray-500">Click to upload image</p>
+                        </label>
+                        <input type="file" id="p-image-file" accept="image/*" class="hidden">
+                        <p id="file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
+                    </div>
+                </div>
+                <button onclick="saveProduct()" id="save-btn" class="w-full navy-bg text-white py-3 rounded-xl font-semibold mt-2">Save Product</button>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        const IMGBB_API_KEY = "df6ee25bc91b9b7200070d5328644463"; 
-
+        const IMGBB_API_KEY = "df6ee25bc91b9b7200070d5328644463";
         const firebaseConfig = {
             apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
             authDomain: "heartix.firebaseapp.com",
@@ -78,144 +271,361 @@
             messagingSenderId: "551204402338",
             appId: "1:551204402338:web:169555975c0bbb97f113fb"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const ADMIN_PASSWORD = "heartix2024";
-
-        document.getElementById('p-image-file').addEventListener('change', function(e) {
-            const fileName = e.target.files[0] ? e.target.files[0].name : '';
-            document.getElementById('file-name').innerText = fileName ? '✔ ' + fileName : '';
-        });
+        
+        let allProductsList = [];
+        let allOrdersList = [];
+        let currentOrderFilter = 'all';
 
         window.onload = function() {
             if (localStorage.getItem('isAdmin') === 'true') showDashboard();
         }
-
         function showDashboard() {
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('dashboard-section').classList.remove('hidden');
-            loadAdminProducts();
-            loadAdminOrders();
+            loadAllData();
         }
-
         window.login = function() {
             if (document.getElementById('admin-password').value === ADMIN_PASSWORD) {
                 localStorage.setItem('isAdmin', 'true');
                 showDashboard();
             } else alert("ভুল পাসওয়ার্ড!");
         }
-
         window.logout = function() {
             localStorage.removeItem('isAdmin');
             location.reload();
         }
 
         window.showTab = function(tab) {
-            document.getElementById('content-add-product').classList.add('hidden');
-            document.getElementById('content-products').classList.add('hidden');
-            document.getElementById('content-orders').classList.add('hidden');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('content-' + tab).classList.remove('hidden');
+            ['dashboard','products','orders','settings'].forEach(t => {
+                const btn = document.getElementById('tab-' + t);
+                btn.classList.remove('tab-active'); btn.classList.add('tab-inactive');
+            });
+            const activeBtn = document.getElementById('tab-' + tab);
+            activeBtn.classList.add('tab-active'); activeBtn.classList.remove('tab-inactive');
             
-            document.getElementById('tab-add').classList.remove('brand-navy', 'border-[#0B1B3D]');
-            document.getElementById('tab-products').classList.remove('brand-navy', 'border-[#0B1B3D]');
-            document.getElementById('tab-orders').classList.remove('brand-navy', 'border-[#0B1B3D]');
-            document.getElementById('tab-add').classList.add('text-gray-500', 'border-transparent');
-            document.getElementById('tab-products').classList.add('text-gray-500', 'border-transparent');
-            document.getElementById('tab-orders').classList.add('text-gray-500', 'border-transparent');
-
-            if (tab === 'add-product') {
-                document.getElementById('content-add-product').classList.remove('hidden');
-                document.getElementById('tab-add').classList.add('brand-navy', 'border-[#0B1B3D]');
-                document.getElementById('tab-add').classList.remove('text-gray-500', 'border-transparent');
-            } else if (tab === 'products') {
-                document.getElementById('content-products').classList.remove('hidden');
-                document.getElementById('tab-products').classList.add('brand-navy', 'border-[#0B1B3D]');
-                document.getElementById('tab-products').classList.remove('text-gray-500', 'border-transparent');
-            } else if (tab === 'orders') {
-                document.getElementById('content-orders').classList.remove('hidden');
-                document.getElementById('tab-orders').classList.add('brand-navy', 'border-[#0B1B3D]');
-                document.getElementById('tab-orders').classList.remove('text-gray-500', 'border-transparent');
-            }
+            if (tab === 'settings') loadSettings();
+            if (tab === 'dashboard') updateStats();
         }
 
-        window.addProduct = async function() {
+        // ============ LOAD DATA ============
+        async function loadAllData() {
+            await loadProducts();
+            await loadOrders();
+            updateStats();
+        }
+
+        async function loadProducts() {
+            try {
+                const q = query(collection(db, "products"));
+                const snap = await getDocs(q);
+                allProductsList = [];
+                snap.forEach(d => allProductsList.push({ id: d.id, ...d.data() }));
+                renderAdminProducts();
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadOrders() {
+            try {
+                const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+                const snap = await getDocs(q);
+                allOrdersList = [];
+                snap.forEach(d => allOrdersList.push({ id: d.id, ...d.data() }));
+                renderAdminOrders();
+                renderRecentOrders();
+            } catch (e) { console.error(e); }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-products').innerText = allProductsList.length;
+            document.getElementById('stat-orders').innerText = allOrdersList.length;
+            const pending = allOrdersList.filter(o => o.status === 'pending').length;
+            document.getElementById('stat-pending').innerText = pending;
+            const revenue = allOrdersList.reduce((sum, o) => sum + (o.total || 0), 0);
+            document.getElementById('stat-revenue').innerText = '৳' + revenue.toLocaleString();
+        }
+
+        // ============ PRODUCTS ============
+        window.renderAdminProducts = function() {
+            const list = document.getElementById('product-list-admin');
+            const search = (document.getElementById('product-search')?.value || '').toLowerCase();
+            let filtered = allProductsList;
+            if (search) filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(search));
+            
+            if (filtered.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-400 py-8">No products found</p>';
+                return;
+            }
+            let html = '';
+            filtered.forEach(p => {
+                html += `
+                    <div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
+                        <img src="${p.image}" class="w-16 h-16 object-cover rounded-lg">
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-sm navy-text truncate">${p.name}</p>
+                            <p class="text-xs text-gray-500">${p.category || 'N/A'}</p>
+                            <p class="text-sm font-bold gold-text">৳ ${p.price}</p>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <button onclick="editProduct('${p.id}')" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-edit text-sm"></i>
+                            </button>
+                            <button onclick="deleteProduct('${p.id}')" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        window.openAddModal = function() {
+            document.getElementById('modal-title').innerText = 'Add Product';
+            document.getElementById('edit-product-id').value = '';
+            document.getElementById('p-name').value = '';
+            document.getElementById('p-price').value = '';
+            document.getElementById('p-category').value = 'TV';
+            document.getElementById('p-description').value = '';
+            document.getElementById('p-image-file').value = '';
+            document.getElementById('file-name').innerText = '';
+            document.getElementById('image-current').classList.add('hidden');
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        window.closeModal = function() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        window.editProduct = function(id) {
+            const p = allProductsList.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('modal-title').innerText = 'Edit Product';
+            document.getElementById('edit-product-id').value = id;
+            document.getElementById('p-name').value = p.name;
+            document.getElementById('p-price').value = p.price;
+            document.getElementById('p-category').value = p.category || 'TV';
+            document.getElementById('p-description').value = p.description || '';
+            document.getElementById('p-image-file').value = '';
+            document.getElementById('file-name').innerText = '';
+            document.getElementById('p-image-preview').src = p.image;
+            document.getElementById('image-current').classList.remove('hidden');
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        document.getElementById('p-image-file').addEventListener('change', function(e) {
+            const f = e.target.files[0];
+            document.getElementById('file-name').innerText = f ? '✔ ' + f.name : '';
+        });
+
+        window.saveProduct = async function() {
+            const id = document.getElementById('edit-product-id').value;
             const name = document.getElementById('p-name').value.trim();
             const price = parseFloat(document.getElementById('p-price').value);
+            const category = document.getElementById('p-category').value;
+            const description = document.getElementById('p-description').value.trim();
             const file = document.getElementById('p-image-file').files[0];
 
-            if (!name || !price || !file) return alert("সব তথ্য এবং একটি ছবি সিলেক্ট করুন!");
+            if (!name || !price) return alert("Name and Price required!");
+            if (!id && !file) return alert("Please select an image!");
 
-            const btn = document.getElementById('add-btn');
-            btn.innerText = "Uploading...";
+            const btn = document.getElementById('save-btn');
+            btn.innerText = "Saving...";
             btn.disabled = true;
 
             try {
-                const formData = new FormData();
-                formData.append('image', file);
-                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
-                const result = await res.json();
-                if (!result.success) throw new Error("ImgBB আপলোড ব্যর্থ");
+                let imageUrl = null;
+                if (file) {
+                    const fd = new FormData();
+                    fd.append('image', file);
+                    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: fd });
+                    const result = await res.json();
+                    if (!result.success) throw new Error("Image upload failed");
+                    imageUrl = result.data.display_url;
+                }
 
-                await addDoc(collection(db, "products"), { name, price, image: result.data.display_url });
-                alert("✅ প্রোডাক্ট অ্যাড হয়েছে!");
-                document.getElementById('p-name').value = '';
-                document.getElementById('p-price').value = '';
-                document.getElementById('p-image-file').value = '';
-                document.getElementById('file-name').innerText = '';
-                loadAdminProducts();
-            } catch (error) { alert("সমস্যা: " + error.message); }
-            finally { btn.innerText = "Add Product"; btn.disabled = false; }
-        }
-
-        async function loadAdminProducts() {
-            const listDiv = document.getElementById('product-list-admin');
-            const querySnapshot = await getDocs(collection(db, "products"));
-            let html = querySnapshot.empty ? '<p class="text-center text-gray-500">কোনো প্রোডাক্ট নেই।</p>' : '';
-            querySnapshot.forEach((doc) => {
-                const p = doc.data();
-                html += `
-                    <div class="bg-white p-3 rounded-lg shadow-sm flex items-center gap-3">
-                        <img src="${p.image}" class="w-14 h-14 object-cover rounded">
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold">${p.name}</p>
-                            <p class="text-sm brand-navy font-bold">৳ ${p.price}</p>
-                        </div>
-                        <button onclick="deleteProduct('${doc.id}')" class="text-red-500 p-2"><i class="fas fa-trash"></i></button>
-                    </div>`;
-            });
-            listDiv.innerHTML = html;
+                if (id) {
+                    const updateData = { name, price, category, description };
+                    if (imageUrl) updateData.image = imageUrl;
+                    await updateDoc(doc(db, "products", id), updateData);
+                    alert("✅ Product updated!");
+                } else {
+                    await addDoc(collection(db, "products"), { name, price, category, description, image: imageUrl });
+                    alert("✅ Product added!");
+                }
+                closeModal();
+                await loadProducts();
+                updateStats();
+            } catch (e) { alert("Error: " + e.message); }
+            finally { btn.innerText = "Save Product"; btn.disabled = false; }
         }
 
         window.deleteProduct = async function(id) {
-            if (confirm("প্রোডাক্টটি ডিলিট করতে চান?")) {
-                await deleteDoc(doc(db, "products", id));
-                loadAdminProducts();
-            }
+            if (!confirm("Delete this product?")) return;
+            await deleteDoc(doc(db, "products", id));
+            await loadProducts();
+            updateStats();
         }
 
-        async function loadAdminOrders() {
-            const listDiv = document.getElementById('order-list-admin');
-            const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
-            const querySnapshot = await getDocs(q);
-            let html = querySnapshot.empty ? '<p class="text-center text-gray-500">কোনো অর্ডার নেই।</p>' : '';
-            querySnapshot.forEach((doc) => {
-                const o = doc.data();
-                let itemsHtml = o.items.map(i => `<li>${i.name} × ${i.quantity} = ৳ ${i.price * i.quantity}</li>`).join('');
+        // ============ ORDERS ============
+        window.filterOrders = function(filter) {
+            currentOrderFilter = filter;
+            document.querySelectorAll('.order-filter-btn').forEach(b => {
+                b.classList.remove('bg-navy', 'text-white');
+                b.classList.add('bg-white', 'text-gray-600');
+            });
+            event.target.classList.add('bg-navy', 'text-white');
+            event.target.classList.remove('bg-white', 'text-gray-600');
+            renderAdminOrders();
+        }
+
+        function renderAdminOrders() {
+            const list = document.getElementById('order-list-admin');
+            let filtered = allOrdersList;
+            if (currentOrderFilter !== 'all') filtered = filtered.filter(o => o.status === currentOrderFilter);
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-400 py-8">No orders found</p>';
+                return;
+            }
+
+            const statusColors = {
+                'pending': 'bg-yellow-100 text-yellow-700',
+                'confirmed': 'bg-blue-100 text-blue-700',
+                'shipped': 'bg-purple-100 text-purple-700',
+                'delivered': 'bg-green-100 text-green-700',
+                'cancelled': 'bg-red-100 text-red-700'
+            };
+
+            let html = '';
+            filtered.forEach(o => {
+                const itemsHtml = o.items.map(i => `<li class="flex justify-between"><span>${i.name} × ${i.quantity}</span><span class="font-semibold">৳ ${i.price * i.quantity}</span></li>`).join('');
                 html += `
-                    <div class="bg-white p-4 rounded-lg shadow-sm mb-3 border-l-4 border-[#0B1B3D]">
-                        <div class="flex justify-between items-start mb-2">
-                            <div><p class="font-bold text-sm">${o.customer.name}</p><p class="text-xs text-gray-500">${o.customer.phone}</p></div>
-                            <span class="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-700">${o.status}</span>
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-gold">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <p class="font-bold navy-text text-sm">${o.customer.name}</p>
+                                <p class="text-xs text-gray-500"><i class="fas fa-phone"></i> ${o.customer.phone}</p>
+                            </div>
+                            <span class="text-[10px] px-2 py-1 rounded-full font-bold uppercase ${statusColors[o.status] || 'bg-gray-100'}">${o.status}</span>
                         </div>
-                        <p class="text-xs text-gray-600 mb-2">${o.customer.address}, ${o.customer.thana}, ${o.customer.district}</p>
-                        <div class="bg-gray-50 p-2 rounded text-xs mb-2"><ul class="list-disc pl-4">${itemsHtml}</ul></div>
-                        <div class="flex justify-between text-sm font-semibold border-t pt-2">
-                            <span>Total: ৳ ${o.total}</span><span>Due: ৳ ${o.dueAmount}</span>
+                        <p class="text-xs text-gray-600 mb-3"><i class="fas fa-map-marker-alt gold-text"></i> ${o.customer.address}, ${o.customer.thana}, ${o.customer.district}</p>
+                        
+                        <div class="bg-gray-50 rounded-lg p-3 mb-3">
+                            <p class="text-[10px] text-gray-500 font-bold uppercase mb-2">Items</p>
+                            <ul class="text-xs text-gray-700 space-y-1">${itemsHtml}</ul>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Payment: ${o.paymentMethod} | Advance: ৳ ${o.advancePaid}</p>
+
+                        <div class="grid grid-cols-3 gap-2 text-center mb-3">
+                            <div class="bg-gray-50 rounded-lg p-2">
+                                <p class="text-[9px] text-gray-500">TOTAL</p>
+                                <p class="text-sm font-bold navy-text">৳${o.total}</p>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-2">
+                                <p class="text-[9px] text-gray-500">PAID</p>
+                                <p class="text-sm font-bold text-green-700">৳${o.advancePaid}</p>
+                            </div>
+                            <div class="bg-red-50 rounded-lg p-2">
+                                <p class="text-[9px] text-gray-500">DUE</p>
+                                <p class="text-sm font-bold text-red-700">৳${o.dueAmount}</p>
+                            </div>
+                        </div>
+
+                        <p class="text-[10px] text-gray-500 mb-3">Payment: <span class="font-semibold">${o.paymentMethod}</span></p>
+
+                        <div class="flex gap-2">
+                            <select onchange="updateOrderStatus('${o.id}', this.value)" class="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-2 outline-none">
+                                <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                                <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
+                            <button onclick="callCustomer('${o.customer.phone}')" class="px-3 py-2 bg-green-50 text-green-700 rounded-lg text-xs font-semibold">
+                                <i class="fas fa-phone"></i> Call
+                            </button>
+                        </div>
                     </div>`;
             });
-            listDiv.innerHTML = html;
+            list.innerHTML = html;
+        }
+
+        window.updateOrderStatus = async function(id, status) {
+            try {
+                await updateDoc(doc(db, "orders", id), { status });
+                const order = allOrdersList.find(o => o.id === id);
+                if (order) order.status = status;
+                renderRecentOrders();
+                updateStats();
+                alert("✅ Status updated to: " + status);
+            } catch (e) { alert("Error: " + e.message); }
+        }
+
+        window.callCustomer = function(phone) {
+            window.location.href = 'tel:' + phone;
+        }
+
+        function renderRecentOrders() {
+            const list = document.getElementById('recent-orders');
+            const recent = allOrdersList.slice(0, 3);
+            if (recent.length === 0) {
+                list.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">No orders yet</p>';
+                return;
+            }
+            let html = '';
+            recent.forEach(o => {
+                html += `
+                    <div class="flex justify-between items-center py-2 border-b last:border-b-0">
+                        <div>
+                            <p class="text-sm font-semibold navy-text">${o.customer.name}</p>
+                            <p class="text-xs text-gray-500">${o.items.length} item(s) • ৳${o.total}</p>
+                        </div>
+                        <span class="text-[10px] px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-bold uppercase">${o.status}</span>
+                    </div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        // ============ SETTINGS ============
+        async function loadSettings() {
+            try {
+                const snap = await getDoc(doc(db, "settings", "main"));
+                if (snap.exists()) {
+                    const s = snap.data();
+                    document.getElementById('setting-hero-title').value = s.heroTitle || '';
+                    document.getElementById('setting-hero-subtitle').value = s.heroSubtitle || '';
+                    document.getElementById('setting-delivery-charge').value = s.deliveryCharge || 100;
+                    document.getElementById('setting-free-delivery').value = s.freeDeliveryAbove || '';
+                    document.getElementById('setting-phone').value = s.contactPhone || '';
+                    document.getElementById('setting-email').value = s.contactEmail || '';
+                    document.getElementById('setting-whatsapp').value = s.whatsapp || '';
+                    document.getElementById('setting-bkash').value = s.bkashNumber || '';
+                    document.getElementById('setting-nagad').value = s.nagadNumber || '';
+                    document.getElementById('setting-about').value = s.aboutText || '';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        window.saveSettings = async function() {
+            try {
+                const settings = {
+                    heroTitle: document.getElementById('setting-hero-title').value,
+                    heroSubtitle: document.getElementById('setting-hero-subtitle').value,
+                    deliveryCharge: parseFloat(document.getElementById('setting-delivery-charge').value) || 100,
+                    freeDeliveryAbove: parseFloat(document.getElementById('setting-free-delivery').value) || 0,
+                    contactPhone: document.getElementById('setting-phone').value,
+                    contactEmail: document.getElementById('setting-email').value,
+                    whatsapp: document.getElementById('setting-whatsapp').value,
+                    bkashNumber: document.getElementById('setting-bkash').value,
+                    nagadNumber: document.getElementById('setting-nagad').value,
+                    aboutText: document.getElementById('setting-about').value
+                };
+                await setDoc(doc(db, "settings", "main"), settings, { merge: true });
+                alert("✅ Settings saved successfully!");
+            } catch (e) { alert("Error: " + e.message); }
         }
     </script>
 </body>
