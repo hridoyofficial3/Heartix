@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Heartix — Premium Smart Appliances in Bangladesh. Shop TVs, Refrigerators, Fans and Smart Gadgets.">
     <title>Heartix — Premium Smart Appliances</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: { extend: {
@@ -20,26 +21,31 @@
         .font-display { font-family: 'Playfair Display', serif; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); }
         .slider-item { display: none; opacity: 0; transition: opacity 0.8s ease; }
         .slider-item.active { display: block; opacity: 1; }
-        #sidebar { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        #sidebar { transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); }
         #sidebar.open { transform: translateX(0); }
         #sidebar.closed { transform: translateX(-100%); }
-        .product-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-card { transition: all 0.3s ease; }
         .product-card:active { transform: scale(0.98); }
-        .category-tile { transition: all 0.3s ease; }
         .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
         .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
-        .premium-shadow { box-shadow: 0 4px 20px rgba(10, 22, 40, 0.08); }
-        .gold-shadow { box-shadow: 0 8px 30px rgba(212, 168, 75, 0.3); }
+        .premium-shadow { box-shadow: 0 4px 20px rgba(10,22,40,0.08); }
         @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
-        .shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 1000px 100%; animation: shimmer 2s infinite; }
+        .shimmer { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size: 1000px 100%; animation: shimmer 2s infinite; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in-up { animation: fadeInUp 0.6s ease-out; }
+        #toast-container { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 400px; }
+        .toast { padding: 14px 20px; border-radius: 14px; color: white; margin-bottom: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideDown 0.4s ease; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .toast-success { background: linear-gradient(135deg, #059669, #10b981); }
+        .toast-error { background: linear-gradient(135deg, #dc2626, #ef4444); }
     </style>
 </head>
 <body class="pb-36">
+
+    <div id="toast-container"></div>
 
     <div id="overlay" onclick="closeSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden"></div>
 
@@ -49,7 +55,7 @@
             <div class="relative">
                 <div class="flex justify-between items-center mb-4">
                     <div class="bg-white rounded-xl p-2"><img src="logo.png" alt="Heartix" class="h-8"></div>
-                    <button onclick="closeSidebar()" class="text-white/80 hover:text-white text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
+                    <button onclick="closeSidebar()" class="text-white/80 text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -64,35 +70,20 @@
                 <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center text-lg">🛍️</span>
                 <span class="font-medium text-navy">All Products</span>
             </a>
-            <a href="#" onclick="filterByCategory('TV'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
-                <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center text-lg">📺</span>
-                <span class="font-medium text-navy">Televisions</span>
-            </a>
-            <a href="#" onclick="filterByCategory('Fridge'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
-                <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center text-lg">❄️</span>
-                <span class="font-medium text-navy">Refrigerators</span>
-            </a>
-            <a href="#" onclick="filterByCategory('Fan'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
-                <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center text-lg">🌀</span>
-                <span class="font-medium text-navy">Fans</span>
-            </a>
-            <a href="#" onclick="filterByCategory('Gadget'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
-                <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center text-lg">🔌</span>
-                <span class="font-medium text-navy">Smart Gadgets</span>
-            </a>
+            <div id="sidebar-categories"></div>
             <p class="text-[10px] text-gray-400 font-bold tracking-widest uppercase mt-6 mb-3">Quick Actions</p>
             <a href="cart.html" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
                 <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-shopping-bag text-navy"></i></span>
                 <span class="font-medium text-navy">My Cart</span>
             </a>
+            <a href="track-order.html" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
+                <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-truck text-navy"></i></span>
+                <span class="font-medium text-navy">Track Order</span>
+            </a>
             <p class="text-[10px] text-gray-400 font-bold tracking-widest uppercase mt-6 mb-3">Support</p>
             <a href="#" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
                 <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-headset text-navy"></i></span>
                 <span class="font-medium text-navy">Contact Us</span>
-            </a>
-            <a href="#" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
-                <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-info-circle text-navy"></i></span>
-                <span class="font-medium text-navy">About Heartix</span>
             </a>
         </nav>
         <div class="p-5 mt-4">
@@ -104,20 +95,20 @@
         </div>
     </div>
 
-    <header class="glass sticky top-0 z-30 px-5 py-3 flex justify-between items-center">
+    <header class="glass sticky top-0 z-30 px-5 py-3 flex justify-between items-center border-b border-gray-100">
         <button onclick="openSidebar()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream">
             <i class="fas fa-bars text-navy text-lg"></i>
         </button>
         <img src="logo.png" alt="Heartix" class="h-10 object-contain">
         <a href="cart.html" class="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream">
             <i class="fas fa-shopping-bag text-navy text-lg"></i>
-            <span id="cart-count-header" class="absolute -top-1 -right-1 gold-gradient text-navy text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center gold-shadow">0</span>
+            <span id="cart-count-header" class="absolute -top-1 -right-1 gold-gradient text-navy text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
         </a>
     </header>
 
     <div class="px-5 pt-5 pb-2">
         <div class="relative">
-            <input type="text" id="search-input" oninput="searchProducts()" placeholder="Search premium products..." class="w-full bg-white rounded-2xl py-3.5 pl-12 pr-4 outline-none premium-shadow focus:ring-2 focus:ring-gold/40 text-navy placeholder-gray-400">
+            <input type="text" id="search-input" oninput="searchProducts()" placeholder="Search products..." class="w-full bg-white rounded-2xl py-3.5 pl-12 pr-4 outline-none premium-shadow focus:ring-2 focus:ring-gold/40 text-navy placeholder-gray-400">
             <i class="fas fa-search absolute left-4 top-4 text-gold"></i>
         </div>
     </div>
@@ -128,34 +119,30 @@
                 <div class="navy-gradient p-8 relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-40 h-40 bg-gold/10 rounded-full -mr-20 -mt-20"></div>
                     <div class="relative">
-                        <p class="text-gold text-xs tracking-widest uppercase mb-2">✨ New Collection</p>
-                        <h2 class="font-display text-3xl text-white mb-2 leading-tight">Smart Living<br>Starts Here</h2>
-                        <p class="text-white/70 text-sm mb-4">Premium appliances for modern homes</p>
+                        <p class="text-gold text-xs tracking-widest uppercase mb-2">✨ Premium Collection</p>
+                        <h2 id="hero-title-1" class="font-display text-3xl text-white mb-2 leading-tight">Smart Living<br>Starts Here</h2>
+                        <p id="hero-sub-1" class="text-white/70 text-sm">Premium appliances for modern homes</p>
                     </div>
                 </div>
             </div>
             <div class="slider-item">
-                <div class="bg-gradient-to-br from-[#B8860B] via-[#D4A84B] to-[#E8C77B] p-8 relative overflow-hidden">
-                    <div class="relative">
-                        <p class="text-navy text-xs tracking-widest uppercase mb-2">🔥 Limited Offer</p>
-                        <h2 class="font-display text-3xl text-navy mb-2 leading-tight">Up to 30% Off<br>Smart TVs</h2>
-                        <p class="text-navy/70 text-sm mb-4">Premium quality at special price</p>
-                    </div>
+                <div class="bg-gradient-to-br from-[#B8860B] via-[#D4A84B] to-[#E8C77B] p-8">
+                    <p class="text-navy text-xs tracking-widest uppercase mb-2">🔥 Limited Offer</p>
+                    <h2 class="font-display text-3xl text-navy mb-2 leading-tight">Up to 30% Off<br>Smart TVs</h2>
+                    <p class="text-navy/70 text-sm">Premium quality at special price</p>
                 </div>
             </div>
             <div class="slider-item">
-                <div class="bg-gradient-to-br from-[#0F4C5C] via-[#1A6B7C] to-[#2C8B9E] p-8 relative overflow-hidden">
-                    <div class="relative">
-                        <p class="text-gold text-xs tracking-widest uppercase mb-2">🚚 Free Delivery</p>
-                        <h2 class="font-display text-3xl text-white mb-2 leading-tight">On Orders<br>Above ৳ 5,000</h2>
-                        <p class="text-white/70 text-sm mb-4">Fast delivery all over Bangladesh</p>
-                    </div>
+                <div class="bg-gradient-to-br from-[#0F4C5C] via-[#1A6B7C] to-[#2C8B9E] p-8">
+                    <p id="hero-free-title" class="text-gold text-xs tracking-widest uppercase mb-2">🚚 Free Delivery</p>
+                    <h2 id="hero-free-text" class="font-display text-3xl text-white mb-2 leading-tight">On Orders<br>Above ৳ 5,000</h2>
+                    <p class="text-white/70 text-sm">Fast delivery all over Bangladesh</p>
                 </div>
             </div>
             <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                <div class="slider-dot w-6 h-1.5 bg-white rounded-full"></div>
-                <div class="slider-dot w-1.5 h-1.5 bg-white/50 rounded-full"></div>
-                <div class="slider-dot w-1.5 h-1.5 bg-white/50 rounded-full"></div>
+                <button onclick="goSlide(0)" class="slider-dot w-6 h-1.5 bg-white rounded-full"></button>
+                <button onclick="goSlide(1)" class="slider-dot w-1.5 h-1.5 bg-white/50 rounded-full"></button>
+                <button onclick="goSlide(2)" class="slider-dot w-1.5 h-1.5 bg-white/50 rounded-full"></button>
             </div>
         </div>
     </div>
@@ -163,25 +150,10 @@
     <div class="mt-7 px-5">
         <div class="flex justify-between items-baseline mb-4">
             <h3 class="font-display text-2xl text-navy">Categories</h3>
-            <button onclick="filterByCategory('all')" class="text-xs text-gold font-semibold hover:underline">View All →</button>
+            <button onclick="filterByCategory('all')" class="text-xs text-gold font-semibold">View All →</button>
         </div>
-        <div class="flex overflow-x-auto hide-scrollbar gap-4 pb-2">
-            <div onclick="filterByCategory('TV')" class="category-tile flex flex-col items-center min-w-[88px] cursor-pointer">
-                <div class="w-20 h-20 bg-white rounded-2xl premium-shadow flex items-center justify-center text-3xl">📺</div>
-                <span class="text-xs mt-2 text-navy font-medium">Televisions</span>
-            </div>
-            <div onclick="filterByCategory('Fridge')" class="category-tile flex flex-col items-center min-w-[88px] cursor-pointer">
-                <div class="w-20 h-20 bg-white rounded-2xl premium-shadow flex items-center justify-center text-3xl">❄️</div>
-                <span class="text-xs mt-2 text-navy font-medium">Fridges</span>
-            </div>
-            <div onclick="filterByCategory('Fan')" class="category-tile flex flex-col items-center min-w-[88px] cursor-pointer">
-                <div class="w-20 h-20 bg-white rounded-2xl premium-shadow flex items-center justify-center text-3xl">🌀</div>
-                <span class="text-xs mt-2 text-navy font-medium">Fans</span>
-            </div>
-            <div onclick="filterByCategory('Gadget')" class="category-tile flex flex-col items-center min-w-[88px] cursor-pointer">
-                <div class="w-20 h-20 bg-white rounded-2xl premium-shadow flex items-center justify-center text-3xl">🔌</div>
-                <span class="text-xs mt-2 text-navy font-medium">Gadgets</span>
-            </div>
+        <div id="category-list" class="flex overflow-x-auto hide-scrollbar gap-4 pb-2">
+            <div class="text-center text-gray-400 text-xs py-4 w-full">Loading...</div>
         </div>
     </div>
 
@@ -238,10 +210,43 @@
         </div>
     </div>
 
-    <!-- FLOATING BOTTOM NAV (HT Bazar Style) -->
+    <footer class="navy-gradient px-5 py-8 pb-32 mt-6">
+        <div class="flex items-center gap-3 mb-4">
+            <img src="logo.png" alt="Heartix" class="h-12 bg-white rounded-lg p-1">
+            <div>
+                <p class="text-white font-display text-lg">Heartix</p>
+                <p class="text-gold text-[10px] tracking-widest uppercase">Smart Appliances</p>
+            </div>
+        </div>
+        <p class="text-white/60 text-xs leading-relaxed mb-4">Heartix is your trusted destination for premium smart appliances in Bangladesh.</p>
+        <div class="space-y-2 mb-5">
+            <p class="text-white/80 text-xs"><i class="fas fa-phone gold-text mr-2 w-4"></i><span id="footer-phone">+880 1XXX-XXXXXX</span></p>
+            <p class="text-white/80 text-xs"><i class="fas fa-envelope gold-text mr-2 w-4"></i><span id="footer-email">info@heartix.com</span></p>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-5">
+            <div>
+                <p class="text-gold text-xs font-bold uppercase mb-3">Information</p>
+                <a href="#" class="block text-white/70 text-xs py-1">About Us</a>
+                <a href="#" class="block text-white/70 text-xs py-1">Contact Us</a>
+                <a href="#" class="block text-white/70 text-xs py-1">Terms & Conditions</a>
+                <a href="#" class="block text-white/70 text-xs py-1">Privacy Policy</a>
+            </div>
+            <div>
+                <p class="text-gold text-xs font-bold uppercase mb-3">Support</p>
+                <a href="track-order.html" class="block text-white/70 text-xs py-1">Track Order</a>
+                <a href="#" class="block text-white/70 text-xs py-1">Return Policy</a>
+                <a href="#" class="block text-white/70 text-xs py-1">FAQ</a>
+                <a href="#" class="block text-white/70 text-xs py-1">Shipping Info</a>
+            </div>
+        </div>
+        <div class="border-t border-white/10 pt-4 text-center">
+            <p class="text-white/50 text-[10px]">© 2025 Heartix. All rights reserved.</p>
+        </div>
+    </footer>
+
     <div class="fixed bottom-3 left-3 right-3 z-40 md:hidden">
-        <div class="navy-gradient rounded-full px-2 py-2 flex justify-around items-center relative" style="box-shadow: 0 12px 40px rgba(10,22,40,0.45);">
-            <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex flex-col items-center py-1 px-3">
+        <div class="navy-gradient rounded-full px-2 py-2 flex justify-around items-center" style="box-shadow: 0 12px 40px rgba(10,22,40,0.45);">
+            <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="flex flex-col items-center py-1 px-3">
                 <i class="fas fa-home text-lg text-gold"></i>
                 <span class="text-[9px] mt-0.5 text-white/80 font-medium">Home</span>
             </button>
@@ -259,7 +264,7 @@
                 <i class="fas fa-search text-lg text-white/60"></i>
                 <span class="text-[9px] mt-0.5 text-white/60">Search</span>
             </button>
-            <button onclick="alert('কাস্টমার লগইন শীঘ্রই আসছে!')" class="flex flex-col items-center py-1 px-3">
+            <button onclick="showToast('কাস্টমার লগইন শীঘ্রই আসছে','error')" class="flex flex-col items-center py-1 px-3">
                 <i class="fas fa-user text-lg text-white/60"></i>
                 <span class="text-[9px] mt-0.5 text-white/60">Account</span>
             </button>
@@ -268,7 +273,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
@@ -278,12 +283,29 @@
             messagingSenderId: "551204402338",
             appId: "1:551204402338:web:169555975c0bbb97f113fb"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         let allProducts = [];
+        let allReviews = [];
+        let allSettings = {};
         let currentFilter = 'all';
         let currentSearch = '';
+
+        const DEFAULT_CATEGORIES = [
+            { key: 'TV', label: 'Televisions', icon: '📺' },
+            { key: 'Fridge', label: 'Refrigerators', icon: '❄️' },
+            { key: 'Fan', label: 'Fans', icon: '🌀' },
+            { key: 'Gadget', label: 'Smart Gadgets', icon: '🔌' }
+        ];
+
+        window.showToast = function(msg, type = 'success') {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'toast toast-' + type;
+            t.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i><span>${msg}</span>`;
+            c.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+        }
 
         window.openSidebar = function() {
             document.getElementById('sidebar').classList.remove('closed');
@@ -299,16 +321,15 @@
         let slideIndex = 0;
         const slides = document.querySelectorAll('.slider-item');
         const dots = document.querySelectorAll('.slider-dot');
-        function showSlide(idx) {
+        window.goSlide = function(idx) { slideIndex = idx; updateSlide(); }
+        function updateSlide() {
             slides.forEach(s => s.classList.remove('active'));
-            dots.forEach(d => { d.classList.remove('w-6', 'bg-white'); d.classList.add('w-1.5', 'bg-white/50'); });
-            slides[idx].classList.add('active');
-            dots[idx].classList.remove('w-1.5', 'bg-white/50');
-            dots[idx].classList.add('w-6', 'bg-white');
+            dots.forEach(d => { d.classList.remove('w-6','bg-white'); d.classList.add('w-1.5','bg-white/50'); });
+            slides[slideIndex].classList.add('active');
+            dots[slideIndex].classList.remove('w-1.5','bg-white/50');
+            dots[slideIndex].classList.add('w-6','bg-white');
         }
-        if (slides.length > 0) {
-            setInterval(() => { slideIndex = (slideIndex + 1) % slides.length; showSlide(slideIndex); }, 4000);
-        }
+        if (slides.length > 0) setInterval(() => { slideIndex = (slideIndex + 1) % slides.length; updateSlide(); }, 5000);
 
         window.searchProducts = function() {
             currentSearch = document.getElementById('search-input').value.toLowerCase().trim();
@@ -318,13 +339,12 @@
             document.getElementById('search-input').focus();
             window.scrollTo({ top: 100, behavior: 'smooth' });
         }
-
         window.filterByCategory = function(category) {
             currentFilter = category;
             currentSearch = '';
             document.getElementById('search-input').value = '';
-            const titles = { 'all': 'Best Sellers', 'TV': 'Televisions', 'Fridge': 'Refrigerators', 'Fan': 'Fans', 'Gadget': 'Smart Gadgets' };
-            document.getElementById('section-title').innerText = titles[category] || 'Products';
+            const found = DEFAULT_CATEGORIES.find(c => c.key === category);
+            document.getElementById('section-title').innerText = category === 'all' ? 'Best Sellers' : (found ? found.label : category);
             renderProducts();
         }
 
@@ -345,12 +365,51 @@
             return 'Gadget';
         }
 
+        function formatPrice(num) {
+            return Number(num || 0).toLocaleString('en-IN');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getProductRating(productId) {
+            const reviews = allReviews.filter(r => r.productId === productId);
+            if (reviews.length === 0) return { avg: 0, count: 0 };
+            const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
+            return { avg, count: reviews.length };
+        }
+
+        function renderCategories() {
+            const list = document.getElementById('category-list');
+            const sidebarList = document.getElementById('sidebar-categories');
+            let html = '';
+            let sideHtml = '';
+            DEFAULT_CATEGORIES.forEach(c => {
+                html += `
+                    <div onclick="filterByCategory('${c.key}')" class="flex flex-col items-center min-w-[88px] cursor-pointer">
+                        <div class="w-20 h-20 bg-white rounded-2xl premium-shadow flex items-center justify-center text-3xl">${c.icon}</div>
+                        <span class="text-xs mt-2 text-navy font-medium">${c.label}</span>
+                    </div>`;
+                sideHtml += `
+                    <a href="#" onclick="filterByCategory('${c.key}'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
+                        <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center text-lg">${c.icon}</span>
+                        <span class="font-medium text-navy">${c.label}</span>
+                    </a>`;
+            });
+            list.innerHTML = html;
+            sidebarList.innerHTML = sideHtml;
+        }
+
         window.renderProducts = function() {
             const listDiv = document.getElementById('product-list');
             const noResult = document.getElementById('no-result');
             let filtered = allProducts;
             if (currentFilter !== 'all') filtered = filtered.filter(p => getCategory(p) === currentFilter);
-            if (currentSearch) filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(currentSearch));
+            if (currentSearch) filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(currentSearch) || (p.brand || '').toLowerCase().includes(currentSearch));
 
             if (filtered.length === 0) {
                 listDiv.innerHTML = '';
@@ -363,47 +422,74 @@
             filtered.forEach((p, idx) => {
                 const hasDiscount = p.oldPrice && p.oldPrice > p.price;
                 const discountPct = hasDiscount ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 0;
+                const rating = getProductRating(p.id);
+                let starsHtml = '';
+                if (rating.count > 0) {
+                    for (let i = 1; i <= 5; i++) {
+                        if (i <= Math.floor(rating.avg)) starsHtml += '<i class="fas fa-star text-gold text-[10px]"></i>';
+                        else if (i - rating.avg < 1 && i - rating.avg > 0) starsHtml += '<i class="fas fa-star-half-alt text-gold text-[10px]"></i>';
+                        else starsHtml += '<i class="far fa-star text-gray-300 text-[10px]"></i>';
+                    }
+                    starsHtml += `<span class="text-[10px] text-gray-400 ml-1">(${rating.count})</span>`;
+                } else {
+                    starsHtml = '<span class="text-[10px] text-gray-400">No reviews yet</span>';
+                }
+                const stockBadge = p.stock !== undefined && p.stock <= 0 ? '<span class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-bold px-2 py-1 rounded-full">Out of Stock</span>' : '';
+
                 html += `
-                    <a href="product.html?id=${p.id}" class="product-card bg-white rounded-2xl p-3 premium-shadow fade-in-up block" style="animation-delay: ${idx * 0.05}s">
+                    <a href="product.html?id=${p.id}" class="product-card bg-white rounded-2xl p-3 premium-shadow fade-in-up block relative" style="animation-delay: ${idx*0.05}s">
                         <div class="relative mb-3">
-                            <img src="${p.image}" alt="${p.name}" class="w-full h-36 object-cover rounded-xl">
-                            ${hasDiscount ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-2 py-1 rounded-full">Save ${discountPct}%</span>` : ''}
+                            <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" class="w-full h-36 object-contain rounded-xl bg-gray-50">
+                            ${hasDiscount ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-2 py-1 rounded-full">-${discountPct}%</span>` : ''}
+                            ${stockBadge}
                         </div>
-                        <h4 class="text-sm font-semibold text-navy leading-tight mb-1 line-clamp-2">${p.name}</h4>
-                        <div class="flex items-center gap-1 mb-2">
-                            <i class="fas fa-star text-gold text-[10px]"></i>
-                            <i class="fas fa-star text-gold text-[10px]"></i>
-                            <i class="fas fa-star text-gold text-[10px]"></i>
-                            <i class="fas fa-star text-gold text-[10px]"></i>
-                            <i class="fas fa-star-half-alt text-gold text-[10px]"></i>
-                            <span class="text-[10px] text-gray-400 ml-1">(4.5)</span>
-                        </div>
+                        <h4 class="text-sm font-semibold text-navy leading-tight mb-1 line-clamp-2">${escapeHtml(p.name)}</h4>
+                        <div class="flex items-center gap-1 mb-2">${starsHtml}</div>
                         <div class="flex items-center gap-2 mb-3">
-                            <p class="font-display text-lg font-bold text-navy">৳ ${p.price}</p>
-                            ${hasDiscount ? `<p class="text-[10px] text-gray-400 line-through">৳ ${p.oldPrice}</p>` : ''}
+                            <p class="font-display text-lg font-bold text-navy">৳ ${formatPrice(p.price)}</p>
+                            ${hasDiscount ? `<p class="text-[10px] text-gray-400 line-through">৳ ${formatPrice(p.oldPrice)}</p>` : ''}
                         </div>
                         <div class="w-full navy-gradient text-white text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2">
-                            <i class="fas fa-eye text-[10px]"></i>
-                            View Details
+                            <i class="fas fa-eye text-[10px]"></i> View Details
                         </div>
                     </a>`;
             });
             listDiv.innerHTML = html;
         }
 
-        async function loadProducts() {
+        async function loadAll() {
             try {
-                const snap = await getDocs(collection(db, "products"));
+                const [prodSnap, revSnap, setSnap] = await Promise.all([
+                    getDocs(collection(db, "products")),
+                    getDocs(collection(db, "reviews")),
+                    getDoc(doc(db, "settings", "main"))
+                ]);
                 allProducts = [];
-                snap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
+                prodSnap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
+                allReviews = [];
+                revSnap.forEach(d => allReviews.push({ id: d.id, ...d.data() }));
+                if (setSnap.exists()) {
+                    allSettings = setSnap.data();
+                    applySettings();
+                }
+                renderCategories();
                 renderProducts();
-            } catch (error) {
-                document.getElementById('product-list').innerHTML = `<p class="col-span-full text-red-500 text-center">Error: ${error.message}</p>`;
+            } catch (e) {
+                document.getElementById('product-list').innerHTML = `<p class="col-span-full text-red-500 text-center">Error: ${e.message}</p>`;
             }
         }
 
+        function applySettings() {
+            const s = allSettings;
+            if (s.heroTitle) document.getElementById('hero-title-1').innerHTML = s.heroTitle;
+            if (s.heroSubtitle) document.getElementById('hero-sub-1').textContent = s.heroSubtitle;
+            if (s.freeDeliveryAbove) document.getElementById('hero-free-text').innerHTML = `On Orders<br>Above ৳ ${formatPrice(s.freeDeliveryAbove)}`;
+            if (s.contactPhone) document.getElementById('footer-phone').textContent = s.contactPhone;
+            if (s.contactEmail) document.getElementById('footer-email').textContent = s.contactEmail;
+        }
+
         updateCartCount();
-        loadProducts();
+        loadAll();
     </script>
 </body>
 </html>
