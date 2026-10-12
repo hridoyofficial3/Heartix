@@ -21,10 +21,9 @@
 </head>
 <body class="bg-gray-50 pb-20 font-sans">
 
-    <!-- OVERLAY -->
     <div id="overlay" onclick="closeSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
 
-    <!-- SIDEBAR MENU -->
+    <!-- SIDEBAR (Admin লিংক সরানো হয়েছে) -->
     <div id="sidebar" class="closed fixed top-0 left-0 h-full w-72 bg-white z-50 shadow-2xl overflow-y-auto">
         <div class="brand-bg-navy p-5 text-white">
             <div class="flex justify-between items-center mb-3">
@@ -45,7 +44,6 @@
             <p class="text-xs text-gray-500 font-semibold mt-4 mb-2">QUICK LINKS</p>
             <a href="cart.html" class="block py-2 px-3 hover:bg-gray-100 rounded">🛒 My Cart</a>
             <a href="checkout.html" class="block py-2 px-3 hover:bg-gray-100 rounded">💳 Checkout</a>
-            <a href="admin.html" class="block py-2 px-3 hover:bg-gray-100 rounded">🔐 Admin</a>
             
             <p class="text-xs text-gray-500 font-semibold mt-4 mb-2">ABOUT</p>
             <a href="#" class="block py-2 px-3 hover:bg-gray-100 rounded">📞 Contact Us</a>
@@ -65,7 +63,7 @@
         </a>
     </header>
 
-    <!-- SEARCH BAR -->
+    <!-- SEARCH -->
     <div class="p-4 bg-white">
         <div class="relative">
             <input type="text" id="search-input" oninput="searchProducts()" placeholder="Search for products..." class="w-full bg-gray-100 rounded-lg py-2 px-4 outline-none focus:ring-2 focus:ring-[#0B1B3D]">
@@ -97,7 +95,7 @@
         </div>
     </div>
 
-    <!-- FEATURED CATEGORIES -->
+    <!-- CATEGORIES -->
     <div class="mt-6 px-4">
         <h3 class="text-lg font-semibold text-gray-800 mb-3">Featured Categories</h3>
         <div class="flex overflow-x-auto hide-scrollbar gap-4 pb-2">
@@ -133,9 +131,9 @@
         <p id="no-result" class="hidden text-center text-gray-500 py-8">😔 কোনো প্রোডাক্ট পাওয়া যায়নি</p>
     </div>
 
-    <!-- BOTTOM NAV -->
+    <!-- BOTTOM NAV (Admin লিংক সরানো, ACCOUNT এখন লগইনের জন্য) -->
     <div class="fixed bottom-0 left-0 w-full bg-white border-t flex justify-around py-2 z-30 md:hidden">
-        <button onclick="showPage('home')" class="flex flex-col items-center brand-navy">
+        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex flex-col items-center brand-navy">
             <i class="fas fa-home text-lg"></i>
             <span class="text-[10px] mt-1">HOME</span>
         </button>
@@ -152,10 +150,10 @@
             <i class="fas fa-search text-lg"></i>
             <span class="text-[10px] mt-1">SEARCH</span>
         </button>
-        <a href="admin.html" class="flex flex-col items-center text-gray-500">
+        <button onclick="alert('কাস্টমার লগইন শীঘ্রই আসছে!')" class="flex flex-col items-center text-gray-500">
             <i class="fas fa-user text-lg"></i>
             <span class="text-[10px] mt-1">ACCOUNT</span>
-        </a>
+        </button>
     </div>
 
     <script type="module">
@@ -177,7 +175,6 @@
         let currentFilter = 'all';
         let currentSearch = '';
 
-        // ========== SIDEBAR ==========
         window.openSidebar = function() {
             document.getElementById('sidebar').classList.remove('closed');
             document.getElementById('sidebar').classList.add('open');
@@ -189,7 +186,6 @@
             document.getElementById('overlay').classList.add('hidden');
         }
 
-        // ========== BANNER SLIDER ==========
         let slideIndex = 0;
         const slides = document.querySelectorAll('.slider-item');
         if (slides.length > 0) {
@@ -200,7 +196,6 @@
             }, 3000);
         }
 
-        // ========== SEARCH ==========
         window.searchProducts = function() {
             currentSearch = document.getElementById('search-input').value.toLowerCase().trim();
             renderProducts();
@@ -210,7 +205,6 @@
             window.scrollTo({ top: 100, behavior: 'smooth' });
         }
 
-        // ========== CATEGORY FILTER ==========
         window.filterByCategory = function(category) {
             currentFilter = category;
             currentSearch = '';
@@ -219,7 +213,6 @@
             renderProducts();
         }
 
-        // ========== CART ==========
         function getCart() {
             const cart = localStorage.getItem('heartix_cart');
             return cart ? JSON.parse(cart) : [];
@@ -242,7 +235,6 @@
             alert(product.name + " কার্টে অ্যাড হয়েছে!");
         }
 
-        // ========== PRODUCTS ==========
         function getCategory(product) {
             const name = (product.name || '').toLowerCase();
             if (name.includes('tv') || name.includes('television')) return 'TV';
