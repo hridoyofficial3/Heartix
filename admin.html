@@ -68,8 +68,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // 🔑 আপনার ImgBB API Key এখানে বসান
-        const IMGBB_API_KEY = "YOUR_API_KEY_HERE"; 
+        const IMGBB_API_KEY = "df6ee25bc91b9b7200070d5328644463"; 
 
         const firebaseConfig = {
             apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
@@ -145,7 +144,6 @@
             const file = document.getElementById('p-image-file').files[0];
 
             if (!name || !price || !file) return alert("সব তথ্য এবং একটি ছবি সিলেক্ট করুন!");
-            if (IMGBB_API_KEY === "YOUR_API_KEY_HERE") return alert("⚠️ কোডে ImgBB API Key বসান!");
 
             const btn = document.getElementById('add-btn');
             btn.innerText = "Uploading...";
