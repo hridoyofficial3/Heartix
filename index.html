@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Heartix — Premium Smart Appliances in Bangladesh. Shop TVs, Refrigerators, Fans and Smart Gadgets.">
+    <meta name="description" content="Heartix — Premium Smart Appliances in Bangladesh.">
     <title>Heartix — Premium Smart Appliances</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -36,28 +36,87 @@
         .shimmer { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size: 1000px 100%; animation: shimmer 2s infinite; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in-up { animation: fadeInUp 0.6s ease-out; }
-        /* TOAST */
         #toast-container { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; pointer-events: none; }
         .toast-bar { padding: 14px 20px; color: white; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s ease; justify-content: center; }
         .toast-bar.success { background: linear-gradient(135deg, #16a34a, #22c55e); }
         .toast-bar.error { background: linear-gradient(135deg, #dc2626, #ef4444); }
         .toast-bar.warn { background: linear-gradient(135deg, #ea580c, #f97316); }
         @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-        /* SEARCH */
         #search-bar-wrapper { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.35s ease, opacity 0.35s ease, padding 0.35s ease; }
         #search-bar-wrapper.open { max-height: 100px; opacity: 1; }
         #search-nav-btn.active i, #search-nav-btn.active span { color: #D4A84B; }
-        /* QTY CONTROL */
         .qty-control { display: flex; align-items: center; background: #0A1628; border-radius: 10px; overflow: hidden; height: 38px; }
         .qty-control button { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: 300; }
         .qty-control button:active { background: rgba(255,255,255,0.15); }
         .qty-control .qty-num { color: white; font-weight: 700; min-width: 40px; text-align: center; font-size: 14px; }
         .add-cart-btn { height: 38px; background: white; border: 1.5px solid #D4A84B; color: #0A1628; border-radius: 10px; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
         .add-cart-btn:active { background: #FBF8F3; }
-        /* FLOATING CART */
-        #floating-cart { transition: all 0.3s ease; }
-        #floating-cart.show { opacity: 1; transform: translateY(0); }
-        #floating-cart.hide { opacity: 0; transform: translateY(20px); pointer-events: none; }
+
+        /* ===== PREMIUM FLOATING CART ===== */
+        #floating-cart { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        #floating-cart.show { opacity: 1; transform: translateY(0) scale(1); }
+        #floating-cart.hide { opacity: 0; transform: translateY(-15px) scale(0.9); pointer-events: none; }
+        
+        .floating-cart-card {
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
+            background: linear-gradient(145deg, #0F1B33 0%, #0A1628 50%, #131F3A 100%);
+            box-shadow: 
+                0 15px 40px rgba(10,22,40,0.45),
+                0 0 0 1px rgba(212,168,75,0.25),
+                0 0 30px rgba(212,168,75,0.12);
+            backdrop-filter: blur(10px);
+        }
+        .floating-cart-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1.5px;
+            background: linear-gradient(90deg, transparent, #E8C77B, transparent);
+            opacity: 0.7;
+        }
+        .floating-cart-card::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(212,168,75,0.15), transparent 40%);
+            pointer-events: none;
+            animation: shimmerGlow 4s ease-in-out infinite;
+        }
+        @keyframes shimmerGlow {
+            0%, 100% { transform: translate(0, 0); opacity: 0.6; }
+            50% { transform: translate(10%, 10%); opacity: 1; }
+        }
+        .floating-cart-icon {
+            box-shadow: 0 4px 16px rgba(212,168,75,0.5), inset 0 1px 0 rgba(255,255,255,0.4);
+            position: relative;
+            z-index: 2;
+        }
+        .floating-cart-content { position: relative; z-index: 2; }
+        .floating-cart-pulse {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            width: 11px;
+            height: 11px;
+            background: #22c55e;
+            border-radius: 50%;
+            border: 2px solid #0A1628;
+            animation: pulseDot 2s ease-in-out infinite;
+        }
+        @keyframes pulseDot {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.7); }
+            50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+        }
+        .floating-cart-chevron {
+            animation: slideChevron 1.8s ease-in-out infinite;
+        }
+        @keyframes slideChevron {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(3px); }
+        }
     </style>
 </head>
 <body class="pb-16">
@@ -112,7 +171,6 @@
         </div>
     </div>
 
-    <!-- HEADER -->
     <header class="glass sticky top-0 z-30 px-3 py-0 flex justify-between items-center border-b border-gray-100">
         <div class="flex items-center gap-1 flex-1 min-w-0">
             <button onclick="openSidebar()" class="w-7 h-7 flex items-center justify-center flex-shrink-0 -ml-1">
@@ -126,7 +184,6 @@
         </a>
     </header>
 
-    <!-- HIDDEN SEARCH BAR -->
     <div id="search-bar-wrapper" class="px-5">
         <div class="relative pt-3 pb-1">
             <input type="text" id="search-input" oninput="searchProducts()" placeholder="Search products..." class="w-full bg-white rounded-2xl py-3.5 pl-12 pr-12 outline-none premium-shadow focus:ring-2 focus:ring-gold/40 text-navy placeholder-gray-400 text-sm">
@@ -137,7 +194,6 @@
         </div>
     </div>
 
-    <!-- HERO SLIDER -->
     <div class="px-5 pt-3">
         <div class="relative rounded-3xl overflow-hidden premium-shadow">
             <div class="slider-item active">
@@ -172,7 +228,6 @@
         </div>
     </div>
 
-    <!-- CATEGORIES -->
     <div class="mt-7 px-5">
         <div class="flex justify-between items-baseline mb-4">
             <h3 class="font-display text-2xl text-navy">Featured Categories</h3>
@@ -183,7 +238,6 @@
         </div>
     </div>
 
-    <!-- PRODUCTS -->
     <div class="mt-8 px-5">
         <div class="mb-4">
             <p class="text-[10px] text-gold font-bold tracking-widest uppercase mb-1">Curated For You</p>
@@ -207,7 +261,6 @@
         </p>
     </div>
 
-    <!-- OUR BRANDS -->
     <div id="brands-section" class="mt-10 px-5 hidden">
         <div class="flex justify-between items-baseline mb-4">
             <h3 class="font-display text-2xl text-navy">Our Brands</h3>
@@ -216,7 +269,6 @@
         <div id="brands-list" class="flex overflow-x-auto hide-scrollbar gap-3 pb-2"></div>
     </div>
 
-    <!-- TRUST BANNER -->
     <div class="px-5 mt-10">
         <div class="navy-gradient rounded-3xl p-6 relative overflow-hidden">
             <div class="absolute top-0 right-0 w-40 h-40 bg-gold/10 rounded-full -mr-16 -mt-16"></div>
@@ -232,7 +284,6 @@
         </div>
     </div>
 
-    <!-- FEATURES -->
     <div class="px-5 mt-6 grid grid-cols-3 gap-3 pb-4">
         <div class="bg-white rounded-2xl p-3 premium-shadow text-center">
             <i class="fas fa-truck text-gold text-xl mb-1"></i>
@@ -248,7 +299,6 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
     <footer class="navy-gradient px-5 py-8 mt-6">
         <div class="flex items-center gap-3 mb-4">
             <div class="bg-white rounded-xl p-2">
@@ -285,14 +335,25 @@
         </div>
     </footer>
 
-    <!-- FLOATING CART BUTTON (Top-Right Style) -->
-    <a href="cart.html" id="floating-cart" class="hide fixed right-4 top-24 z-40 navy-gradient rounded-2xl px-3 py-3 shadow-2xl flex flex-col items-center gap-1 min-w-[70px]">
-        <i class="fas fa-shopping-bag text-white text-lg"></i>
-        <span id="floating-cart-count" class="text-white text-xs font-bold">0 Items</span>
-        <span id="floating-cart-total" class="gold-text text-xs font-bold">৳0</span>
+    <!-- ===== PREMIUM FLOATING CART ===== -->
+    <a href="cart.html" id="floating-cart" class="hide fixed right-3 top-20 z-40">
+        <div class="floating-cart-card pl-2 pr-3.5 py-2 flex items-center gap-2.5">
+            <!-- Icon -->
+            <div class="floating-cart-icon gold-gradient w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 relative">
+                <i class="fas fa-shopping-bag text-navy text-[15px]"></i>
+                <span class="floating-cart-pulse"></span>
+            </div>
+            <!-- Text -->
+            <div class="floating-cart-content flex flex-col min-w-[52px]">
+                <span class="text-white/55 text-[8.5px] font-bold uppercase tracking-[0.12em] leading-none mb-1">In Cart</span>
+                <span id="floating-cart-total" class="gold-text text-[15px] font-extrabold leading-none">৳0</span>
+                <span id="floating-cart-count" class="text-white/70 text-[9px] font-medium leading-none mt-0.5">0 items</span>
+            </div>
+            <!-- Chevron -->
+            <i class="fas fa-chevron-right text-gold/60 text-[9px] floating-cart-chevron"></i>
+        </div>
     </a>
 
-    <!-- BOTTOM NAV -->
     <nav class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#0F1729]/95 backdrop-blur-xl border-t border-white/5" style="padding-bottom: env(safe-area-inset-bottom);">
         <div class="flex justify-around items-center pt-1.5 pb-1.5">
             <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]">
@@ -353,7 +414,6 @@
             { key: 'Gadget', label: 'Smart Gadgets', icon: '🔌' }
         ];
 
-        // ============ TOAST ============
         window.showToast = function(msg, type = 'success') {
             const c = document.getElementById('toast-container');
             const t = document.createElement('div');
@@ -381,7 +441,6 @@
             document.getElementById('overlay').classList.add('hidden');
         }
 
-        // ============ SEARCH TOGGLE ============
         window.toggleSearch = function() {
             const wrapper = document.getElementById('search-bar-wrapper');
             const btn = document.getElementById('search-nav-btn');
@@ -404,7 +463,6 @@
             renderProducts();
         }
 
-        // ============ SLIDER ============
         let slideIndex = 0;
         const slides = document.querySelectorAll('.slider-item');
         const dots = document.querySelectorAll('.slider-dot');
@@ -418,7 +476,6 @@
         }
         if (slides.length > 0) setInterval(() => { slideIndex = (slideIndex + 1) % slides.length; updateSlide(); }, 5000);
 
-        // ============ SEARCH / FILTER ============
         window.searchProducts = function() {
             currentSearch = document.getElementById('search-input').value.toLowerCase().trim();
             renderProducts();
@@ -434,7 +491,6 @@
             renderProducts();
         }
 
-        // ============ CART ============
         function getCart() { return JSON.parse(localStorage.getItem('heartix_cart') || '[]'); }
         function saveCart(cart) { localStorage.setItem('heartix_cart', JSON.stringify(cart)); }
 
@@ -453,7 +509,7 @@
             if (totalItems > 0) {
                 floating.classList.remove('hide');
                 floating.classList.add('show');
-                fCount.innerText = totalItems + ' Item' + (totalItems > 1 ? 's' : '');
+                fCount.innerText = totalItems + ' item' + (totalItems > 1 ? 's' : '');
                 fTotal.innerText = '৳' + totalAmount.toLocaleString('en-IN');
             } else {
                 floating.classList.add('hide');
@@ -471,7 +527,7 @@
             saveCart(cart);
             updateCartUI();
             showToast(product.name.substring(0, 30) + ' added to Cart', 'success');
-            renderProducts(); // Re-render to show qty control
+            renderProducts();
         }
 
         window.removeFromCart = function(id) {
@@ -487,16 +543,11 @@
             }
         }
 
-        window.increaseQty = function(id) {
-            addToCart(id);
-        }
-
         window.getQtyInCart = function(id) {
             const item = getCart().find(i => i.id === id);
             return item ? item.quantity : 0;
         }
 
-        // ============ HELPERS ============
         function getCategory(product) {
             if (product.category) return product.category;
             const name = (product.name || '').toLowerCase();
@@ -507,14 +558,12 @@
         }
 
         function formatPrice(num) { return Number(num || 0).toLocaleString('en-IN'); }
-
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-
         function getProductRating(productId) {
             const reviews = allReviews.filter(r => r.productId === productId);
             if (reviews.length === 0) return { avg: 0, count: 0 };
@@ -522,12 +571,10 @@
             return { avg, count: reviews.length };
         }
 
-        // ============ RENDER CATEGORIES ============
         function renderCategories() {
             const list = document.getElementById('category-list');
             const sidebarList = document.getElementById('sidebar-categories');
-            let html = '';
-            let sideHtml = '';
+            let html = '', sideHtml = '';
             DEFAULT_CATEGORIES.forEach(c => {
                 html += `
                     <div onclick="filterByCategory('${c.key}')" class="flex flex-col items-center min-w-[88px] cursor-pointer">
@@ -544,7 +591,6 @@
             sidebarList.innerHTML = sideHtml;
         }
 
-        // ============ RENDER BRANDS ============
         function renderBrands() {
             const brands = [...new Set(allProducts.map(p => p.brand).filter(b => b && b.trim()))];
             if (brands.length === 0) return;
@@ -560,7 +606,6 @@
             list.innerHTML = html;
         }
 
-        // ============ RENDER PRODUCTS ============
         window.renderProducts = function() {
             const listDiv = document.getElementById('product-list');
             const noResult = document.getElementById('no-result');
@@ -595,7 +640,6 @@
                 const stockBadge = isOutOfStock ? '<span class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-bold px-2 py-1 rounded-full">Out of Stock</span>' : '';
                 const qty = getQtyInCart(p.id);
 
-                // ACTION BUTTON: Add to Cart OR Qty Control
                 let actionHtml = '';
                 if (isOutOfStock) {
                     actionHtml = `<button disabled class="w-full mt-2 add-cart-btn opacity-50 cursor-not-allowed" style="border-color:#ccc; color:#999;">Out of Stock</button>`;
@@ -633,7 +677,6 @@
             listDiv.innerHTML = html;
         }
 
-        // ============ LOAD DATA ============
         async function loadAll() {
             try {
                 const [prodSnap, revSnap, setSnap] = await Promise.all([
