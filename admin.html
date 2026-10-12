@@ -25,6 +25,9 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .img-thumb { position: relative; }
         .img-thumb .remove-btn { position: absolute; top: -6px; right: -6px; background: #dc2626; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+        .cat-preview { width: 60px; height: 60px; background: #FFFDF7; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(10,22,40,0.06); border: 1px solid rgba(212,168,75,0.08); overflow: hidden; }
+        .cat-preview img { width: 48px; height: 48px; object-fit: contain; }
+        .cat-preview .emoji { font-size: 32px; line-height: 1; }
     </style>
 </head>
 <body>
@@ -43,7 +46,7 @@
 
     <div id="dashboard-section" class="hidden min-h-screen">
         
-        <header class="navy-bg sticky top-0 z-50 p-4 flex justify-between items-center shadow-lg">
+        <header class="navy-bg sticky top-0 z-40 p-4 flex justify-between items-center shadow-lg">
             <div class="flex items-center gap-3">
                 <img src="logo.png" alt="Heartix" class="h-9 bg-white rounded p-1">
                 <div>
@@ -56,28 +59,32 @@
             </button>
         </header>
 
-        <div class="bg-white shadow-sm overflow-x-auto hide-scrollbar">
+        <div class="bg-white shadow-sm overflow-x-auto hide-scrollbar sticky top-[68px] z-30">
             <div class="flex min-w-max">
-                <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-active px-5 py-3 text-sm font-semibold whitespace-nowrap">
+                <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-active px-4 py-3 text-xs font-semibold whitespace-nowrap">
                     <i class="fas fa-chart-line mr-1"></i> Dashboard
                 </button>
-                <button onclick="showTab('products')" id="tab-products" class="tab-inactive px-5 py-3 text-sm font-semibold whitespace-nowrap">
+                <button onclick="showTab('products')" id="tab-products" class="tab-inactive px-4 py-3 text-xs font-semibold whitespace-nowrap">
                     <i class="fas fa-box mr-1"></i> Products
                 </button>
-                <button onclick="showTab('orders')" id="tab-orders" class="tab-inactive px-5 py-3 text-sm font-semibold whitespace-nowrap">
+                <button onclick="showTab('categories')" id="tab-categories" class="tab-inactive px-4 py-3 text-xs font-semibold whitespace-nowrap">
+                    <i class="fas fa-th-large mr-1"></i> Categories
+                </button>
+                <button onclick="showTab('orders')" id="tab-orders" class="tab-inactive px-4 py-3 text-xs font-semibold whitespace-nowrap">
                     <i class="fas fa-receipt mr-1"></i> Orders
                 </button>
-                <button onclick="showTab('reviews')" id="tab-reviews" class="tab-inactive px-5 py-3 text-sm font-semibold whitespace-nowrap">
+                <button onclick="showTab('reviews')" id="tab-reviews" class="tab-inactive px-4 py-3 text-xs font-semibold whitespace-nowrap">
                     <i class="fas fa-star mr-1"></i> Reviews
                 </button>
-                <button onclick="showTab('settings')" id="tab-settings" class="tab-inactive px-5 py-3 text-sm font-semibold whitespace-nowrap">
+                <button onclick="showTab('settings')" id="tab-settings" class="tab-inactive px-4 py-3 text-xs font-semibold whitespace-nowrap">
                     <i class="fas fa-cog mr-1"></i> Settings
                 </button>
             </div>
         </div>
 
-        <div class="p-4 max-w-4xl mx-auto">
+        <div class="p-4 max-w-4xl mx-auto pb-24">
 
+            <!-- ========== DASHBOARD ========== -->
             <div id="content-dashboard" class="tab-content">
                 <h2 class="text-xl font-bold navy-text mb-4">Overview</h2>
                 <div class="grid grid-cols-2 gap-3 mb-4">
@@ -110,6 +117,7 @@
                 </div>
             </div>
 
+            <!-- ========== PRODUCTS ========== -->
             <div id="content-products" class="tab-content hidden">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold navy-text">Products</h2>
@@ -123,6 +131,23 @@
                 </div>
             </div>
 
+            <!-- ========== CATEGORIES ========== -->
+            <div id="content-categories" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold navy-text">Categories</h2>
+                        <p class="text-xs text-gray-500 mt-1">নাম, আইকন বা ছবি পরিবর্তন করুন</p>
+                    </div>
+                    <button onclick="openCategoryModal()" class="gold-bg text-navy px-4 py-2 rounded-xl font-semibold text-sm">
+                        <i class="fas fa-plus mr-1"></i> New
+                    </button>
+                </div>
+                <div id="category-list-admin" class="space-y-3">
+                    <p class="text-center text-gray-400 py-8">Loading...</p>
+                </div>
+            </div>
+
+            <!-- ========== ORDERS ========== -->
             <div id="content-orders" class="tab-content hidden">
                 <h2 class="text-xl font-bold navy-text mb-4">Orders</h2>
                 <div class="flex gap-2 mb-4 overflow-x-auto hide-scrollbar">
@@ -137,6 +162,7 @@
                 </div>
             </div>
 
+            <!-- ========== REVIEWS ========== -->
             <div id="content-reviews" class="tab-content hidden">
                 <h2 class="text-xl font-bold navy-text mb-4">All Reviews</h2>
                 <div id="reviews-list-admin" class="space-y-3">
@@ -144,6 +170,7 @@
                 </div>
             </div>
 
+            <!-- ========== SETTINGS ========== -->
             <div id="content-settings" class="tab-content hidden">
                 <h2 class="text-xl font-bold navy-text mb-4">Settings</h2>
 
@@ -195,6 +222,7 @@
         </div>
     </div>
 
+    <!-- ========== PRODUCT MODAL ========== -->
     <div id="product-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div class="navy-bg p-4 rounded-t-2xl flex justify-between items-center sticky top-0 z-10">
@@ -220,12 +248,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-xs text-gray-500 font-semibold">Category *</label>
-                        <select id="p-category" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold">
-                            <option value="TV">TV</option>
-                            <option value="Fridge">Fridge</option>
-                            <option value="Fan">Fan</option>
-                            <option value="Gadget">Gadget</option>
-                        </select>
+                        <select id="p-category" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold"></select>
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 font-semibold">Stock Qty</label>
@@ -241,7 +264,6 @@
                     <textarea id="p-description" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold"></textarea>
                 </div>
 
-                <!-- MULTIPLE IMAGES -->
                 <div>
                     <label class="text-xs text-gray-500 font-semibold">Product Images * (Max 5)</label>
                     <div id="image-preview-grid" class="grid grid-cols-4 gap-2 mb-2"></div>
@@ -256,6 +278,57 @@
                 </div>
 
                 <button onclick="saveProduct()" id="save-btn" class="w-full navy-bg text-white py-3 rounded-xl font-semibold mt-2">Save Product</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== CATEGORY MODAL ========== -->
+    <div id="category-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="navy-bg p-4 rounded-t-2xl flex justify-between items-center sticky top-0 z-10">
+                <h3 id="cat-modal-title" class="text-white font-bold">Add Category</h3>
+                <button onclick="closeCategoryModal()" class="text-white/80"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-5 space-y-3">
+                <input type="hidden" id="edit-category-key">
+                
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Category Key * (English, no spaces)</label>
+                    <input type="text" id="cat-key" placeholder="e.g. AC, WashingMachine" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold">
+                    <p class="text-[10px] text-gray-400 mt-1">অ্যাডমিন ও সিস্টেমের জন্য ব্যবহার হবে — শুধু ইংরেজি অক্ষর</p>
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Display Name *</label>
+                    <input type="text" id="cat-label" placeholder="e.g. Air Conditioners, ওয়াশিং মেশিন" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold">
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Icon (Emoji)</label>
+                    <input type="text" id="cat-icon-emoji" placeholder="যেমন: ❄️ 📺 🌀" maxlength="4" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold">
+                    <p class="text-[10px] text-gray-400 mt-1">Emoji থাকলে নিচে ছবি আপলোড দরকার নেই</p>
+                </div>
+
+                <div class="text-center text-xs text-gray-400 font-semibold">— অথবা —</div>
+
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Category Image (Optional)</label>
+                    <div id="cat-image-preview" class="hidden mb-2">
+                        <img id="cat-image-preview-img" class="w-20 h-20 object-contain bg-gray-50 rounded-lg border">
+                    </div>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
+                        <label for="cat-image-file" class="cursor-pointer block">
+                            <i class="fas fa-image text-xl text-gray-400 mb-1"></i>
+                            <p class="text-xs text-gray-500">ছবি সিলেক্ট করুন</p>
+                        </label>
+                        <input type="file" id="cat-image-file" accept="image/*" class="hidden">
+                        <p id="cat-file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
+                    </div>
+                </div>
+
+                <button onclick="saveCategory()" id="cat-save-btn" class="w-full navy-bg text-white py-3 rounded-xl font-semibold mt-2">
+                    <i class="fas fa-save mr-2"></i> Save Category
+                </button>
             </div>
         </div>
     </div>
@@ -277,13 +350,23 @@
         const db = getFirestore(app);
         const DEFAULT_PASSWORD = "heartix2024";
         
+        const DEFAULT_CATEGORIES = [
+            { key: 'TV', label: 'Televisions', icon: '📺' },
+            { key: 'Fridge', label: 'Refrigerators', icon: '❄️' },
+            { key: 'Fan', label: 'Fans', icon: '🌀' },
+            { key: 'Gadget', label: 'Smart Gadgets', icon: '🔌' }
+        ];
+
         let allProductsList = [];
         let allOrdersList = [];
         let allReviewsList = [];
+        let allCategories = [...DEFAULT_CATEGORIES];
         let currentOrderFilter = 'all';
         let currentAdminPassword = DEFAULT_PASSWORD;
-        let pendingImages = []; // Array of data URLs
-        let existingImages = []; // existing urls when editing
+        let pendingImages = [];
+        let existingImages = [];
+        let pendingCategoryImage = null;
+        let existingCategoryImage = null;
 
         async function loadAdminPassword() {
             try {
@@ -333,23 +416,216 @@
         window.showTab = function(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById('content-' + tab).classList.remove('hidden');
-            ['dashboard','products','orders','reviews','settings'].forEach(t => {
+            ['dashboard','products','categories','orders','reviews','settings'].forEach(t => {
                 const btn = document.getElementById('tab-' + t);
+                if (!btn) return;
                 btn.classList.remove('tab-active'); btn.classList.add('tab-inactive');
             });
             const activeBtn = document.getElementById('tab-' + tab);
-            activeBtn.classList.add('tab-active'); activeBtn.classList.remove('tab-inactive');
+            if (activeBtn) { activeBtn.classList.add('tab-active'); activeBtn.classList.remove('tab-inactive'); }
             if (tab === 'settings') loadSettings();
             if (tab === 'dashboard') updateStats();
+            window.scrollTo({top:0, behavior:'smooth'});
         }
 
         async function loadAllData() {
+            await loadCategories();
             await loadProducts();
             await loadOrders();
             await loadReviews();
             updateStats();
         }
 
+        async function loadCategories() {
+            try {
+                const snap = await getDoc(doc(db, "settings", "main"));
+                if (snap.exists() && snap.data().categories && Array.isArray(snap.data().categories) && snap.data().categories.length > 0) {
+                    allCategories = snap.data().categories;
+                } else {
+                    allCategories = [...DEFAULT_CATEGORIES];
+                }
+                renderAdminCategories();
+                populateCategoryDropdown();
+            } catch (e) {
+                allCategories = [...DEFAULT_CATEGORIES];
+                renderAdminCategories();
+                populateCategoryDropdown();
+            }
+        }
+
+        function populateCategoryDropdown() {
+            const sel = document.getElementById('p-category');
+            if (!sel) return;
+            sel.innerHTML = '';
+            allCategories.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.key;
+                opt.textContent = c.label;
+                sel.appendChild(opt);
+            });
+        }
+
+        window.renderAdminCategories = function() {
+            const list = document.getElementById('category-list-admin');
+            if (allCategories.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-400 py-8">No categories</p>';
+                return;
+            }
+            let html = '';
+            allCategories.forEach((c, i) => {
+                const iconHtml = (c.icon && (c.icon.startsWith('http') || c.icon.startsWith('data:')))
+                    ? `<img src="${c.icon}" class="w-10 h-10 object-contain">`
+                    : `<span class="text-3xl">${c.icon || '📦'}</span>`;
+                html += `
+                    <div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
+                        <div class="cat-preview">${iconHtml}</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-sm navy-text truncate">${c.label}</p>
+                            <p class="text-xs text-gray-500">Key: ${c.key}</p>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <button onclick="editCategory(${i})" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-edit text-sm"></i>
+                            </button>
+                            <button onclick="deleteCategory(${i})" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        window.openCategoryModal = function() {
+            document.getElementById('cat-modal-title').innerText = 'Add Category';
+            document.getElementById('edit-category-key').value = '';
+            document.getElementById('cat-key').value = '';
+            document.getElementById('cat-label').value = '';
+            document.getElementById('cat-icon-emoji').value = '';
+            document.getElementById('cat-image-file').value = '';
+            document.getElementById('cat-file-name').innerText = '';
+            document.getElementById('cat-image-preview').classList.add('hidden');
+            pendingCategoryImage = null;
+            existingCategoryImage = null;
+            document.getElementById('category-modal').classList.remove('hidden');
+        }
+
+        window.closeCategoryModal = function() {
+            document.getElementById('category-modal').classList.add('hidden');
+        }
+
+        window.editCategory = function(index) {
+            const c = allCategories[index];
+            document.getElementById('cat-modal-title').innerText = 'Edit Category';
+            document.getElementById('edit-category-key').value = c.key;
+            document.getElementById('cat-key').value = c.key;
+            document.getElementById('cat-label').value = c.label;
+            const isImage = c.icon && (c.icon.startsWith('http') || c.icon.startsWith('data:'));
+            document.getElementById('cat-icon-emoji').value = isImage ? '' : (c.icon || '');
+            document.getElementById('cat-image-file').value = '';
+            document.getElementById('cat-file-name').innerText = '';
+            pendingCategoryImage = null;
+            existingCategoryImage = isImage ? c.icon : null;
+            
+            if (isImage) {
+                document.getElementById('cat-image-preview-img').src = c.icon;
+                document.getElementById('cat-image-preview').classList.remove('hidden');
+            } else {
+                document.getElementById('cat-image-preview').classList.add('hidden');
+            }
+            document.getElementById('category-modal').classList.remove('hidden');
+        }
+
+        document.getElementById('cat-image-file').addEventListener('change', function(e) {
+            const f = e.target.files[0];
+            if (!f) return;
+            document.getElementById('cat-file-name').innerText = '✔ ' + f.name;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                pendingCategoryImage = { file: f, dataUrl: evt.target.result };
+                document.getElementById('cat-image-preview-img').src = evt.target.result;
+                document.getElementById('cat-image-preview').classList.remove('hidden');
+            };
+            reader.readAsDataURL(f);
+        });
+
+        async function uploadToImgBB(file) {
+            const fd = new FormData();
+            fd.append('image', file);
+            const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: fd });
+            const result = await res.json();
+            if (!result.success) throw new Error("Image upload failed");
+            return result.data.display_url;
+        }
+
+        window.saveCategory = async function() {
+            const oldKey = document.getElementById('edit-category-key').value;
+            const key = document.getElementById('cat-key').value.trim().replace(/\s+/g, '');
+            const label = document.getElementById('cat-label').value.trim();
+            const emoji = document.getElementById('cat-icon-emoji').value.trim();
+
+            if (!key || !label) return alert("Key and Display Name are required!");
+            if (/\s/.test(key)) return alert("Key তে স্পেস থাকা যাবে না!");
+
+            // Check key uniqueness (only if new or key changed)
+            if (key !== oldKey && allCategories.some(c => c.key === key)) {
+                return alert("এই Key আগে থেকেই আছে!");
+            }
+
+            const btn = document.getElementById('cat-save-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+
+            try {
+                let finalIcon = emoji || '📦';
+                // If image uploaded, use it instead of emoji
+                if (pendingCategoryImage) {
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading image...';
+                    finalIcon = await uploadToImgBB(pendingCategoryImage.file);
+                } else if (existingCategoryImage && !emoji) {
+                    finalIcon = existingCategoryImage;
+                }
+
+                const newCategory = { key, label, icon: finalIcon };
+
+                if (oldKey) {
+                    // Edit existing
+                    const idx = allCategories.findIndex(c => c.key === oldKey);
+                    if (idx > -1) allCategories[idx] = newCategory;
+                } else {
+                    // Add new
+                    allCategories.push(newCategory);
+                }
+
+                // Save to Firestore
+                await setDoc(doc(db, "settings", "main"), { categories: allCategories }, { merge: true });
+
+                alert("✅ Category saved!");
+                closeCategoryModal();
+                renderAdminCategories();
+                populateCategoryDropdown();
+            } catch (e) {
+                alert("Error: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save mr-2"></i> Save Category';
+            }
+        }
+
+        window.deleteCategory = async function(index) {
+            if (!confirm("এই ক্যাটেগরি ডিলিট করবেন? এই ক্যাটেগরির প্রোডাক্টগুলো অন্য ক্যাটেগরিতে শিফট হতে হবে।")) return;
+            allCategories.splice(index, 1);
+            try {
+                await setDoc(doc(db, "settings", "main"), { categories: allCategories }, { merge: true });
+                renderAdminCategories();
+                populateCategoryDropdown();
+                alert("✅ Category deleted!");
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+        }
+
+        // ============ PRODUCTS ============
         async function loadProducts() {
             try {
                 const snap = await getDocs(collection(db, "products"));
@@ -406,7 +682,7 @@
                         <img src="${p.image}" class="w-16 h-16 object-contain bg-gray-50 rounded-lg">
                         <div class="flex-1 min-w-0">
                             <p class="font-semibold text-sm navy-text truncate">${p.name}</p>
-                            <p class="text-xs text-gray-500">${p.category || 'N/A'}${p.brand ? ' • ' + p.brand : ''} • ${imgCount} image${imgCount > 1 ? 's' : ''}</p>
+                            <p class="text-xs text-gray-500">${p.category || 'N/A'}${p.brand ? ' • ' + p.brand : ''} • ${imgCount} img</p>
                             <p class="text-sm font-bold gold-text">৳ ${p.price}</p>
                         </div>
                         <div class="flex flex-col gap-1">
@@ -428,7 +704,7 @@
             document.getElementById('p-name').value = '';
             document.getElementById('p-price').value = '';
             document.getElementById('p-oldprice').value = '';
-            document.getElementById('p-category').value = 'TV';
+            if (allCategories.length > 0) document.getElementById('p-category').value = allCategories[0].key;
             document.getElementById('p-stock').value = '10';
             document.getElementById('p-brand').value = '';
             document.getElementById('p-description').value = '';
@@ -451,7 +727,7 @@
             document.getElementById('p-name').value = p.name;
             document.getElementById('p-price').value = p.price;
             document.getElementById('p-oldprice').value = p.oldPrice || '';
-            document.getElementById('p-category').value = p.category || 'TV';
+            document.getElementById('p-category').value = p.category || (allCategories[0]?.key || 'TV');
             document.getElementById('p-stock').value = p.stock || 10;
             document.getElementById('p-brand').value = p.brand || '';
             document.getElementById('p-description').value = p.description || '';
@@ -465,7 +741,6 @@
         function renderImagePreview() {
             const grid = document.getElementById('image-preview-grid');
             let html = '';
-            // existing images
             existingImages.forEach((url, i) => {
                 html += `
                     <div class="img-thumb relative">
@@ -474,12 +749,11 @@
                         ${i === 0 && pendingImages.length === 0 ? '<span class="absolute bottom-0.5 left-0.5 bg-gold text-navy text-[8px] px-1 rounded">Main</span>' : ''}
                     </div>`;
             });
-            // pending (newly added)
-            pendingImages.forEach((dataUrl, i) => {
+            pendingImages.forEach((item, i) => {
                 const isMain = existingImages.length === 0 && i === 0;
                 html += `
                     <div class="img-thumb relative">
-                        <img src="${dataUrl}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border ${isMain ? 'border-2 border-gold' : 'border-gray-200'}">
+                        <img src="${item.dataUrl}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border ${isMain ? 'border-2 border-gold' : 'border-gray-200'}">
                         <button onclick="removePendingImage(${i})" class="remove-btn">×</button>
                         ${isMain ? '<span class="absolute bottom-0.5 left-0.5 bg-gold text-navy text-[8px] px-1 rounded">Main</span>' : ''}
                     </div>`;
@@ -487,22 +761,13 @@
             grid.innerHTML = html;
         }
 
-        window.removeExistingImage = function(i) {
-            existingImages.splice(i, 1);
-            renderImagePreview();
-        }
-        window.removePendingImage = function(i) {
-            pendingImages.splice(i, 1);
-            renderImagePreview();
-        }
+        window.removeExistingImage = function(i) { existingImages.splice(i, 1); renderImagePreview(); }
+        window.removePendingImage = function(i) { pendingImages.splice(i, 1); renderImagePreview(); }
 
         document.getElementById('p-image-file').addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
             const totalImages = existingImages.length + pendingImages.length + files.length;
-            if (totalImages > 5) {
-                alert("সর্বোচ্চ ৫টি ছবি দিতে পারবেন!");
-                return;
-            }
+            if (totalImages > 5) { alert("সর্বোচ্চ ৫টি ছবি!"); return; }
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(evt) {
@@ -513,15 +778,6 @@
             });
             e.target.value = '';
         });
-
-        async function uploadToImgBB(file) {
-            const fd = new FormData();
-            fd.append('image', file);
-            const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: fd });
-            const result = await res.json();
-            if (!result.success) throw new Error("Image upload failed");
-            return result.data.display_url;
-        }
 
         window.saveProduct = async function() {
             const id = document.getElementById('edit-product-id').value;
@@ -541,22 +797,15 @@
             btn.disabled = true;
 
             try {
-                // Upload new images
                 const newUrls = [];
                 for (let i = 0; i < pendingImages.length; i++) {
                     btn.innerText = `Uploading ${i + 1}/${pendingImages.length}...`;
                     const url = await uploadToImgBB(pendingImages[i].file);
                     newUrls.push(url);
                 }
-
                 const allImages = [...existingImages, ...newUrls];
                 const mainImage = allImages[0];
-
-                const data = {
-                    name, price, oldPrice, category, stock, brand, description,
-                    image: mainImage,
-                    images: allImages
-                };
+                const data = { name, price, oldPrice, category, stock, brand, description, image: mainImage, images: allImages };
 
                 if (id) {
                     await updateDoc(doc(db, "products", id), data);
@@ -579,6 +828,7 @@
             updateStats();
         }
 
+        // ============ ORDERS ============
         window.filterOrders = function(filter, btn) {
             currentOrderFilter = filter;
             document.querySelectorAll('.order-filter-btn').forEach(b => {
@@ -634,9 +884,7 @@
                                 <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
                                 <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                             </select>
-                            <a href="tel:${o.customer.phone}" class="px-3 py-2 bg-green-50 text-green-700 rounded-lg text-xs font-semibold flex items-center">
-                                <i class="fas fa-phone"></i>
-                            </a>
+                            <a href="tel:${o.customer.phone}" class="px-3 py-2 bg-green-50 text-green-700 rounded-lg text-xs font-semibold flex items-center"><i class="fas fa-phone"></i></a>
                         </div>
                     </div>`;
             });
@@ -702,6 +950,7 @@
             await loadReviews();
         }
 
+        // ============ SETTINGS ============
         async function loadSettings() {
             try {
                 const snap = await getDoc(doc(db, "settings", "main"));
