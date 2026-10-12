@@ -36,15 +36,28 @@
         .shimmer { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size: 1000px 100%; animation: shimmer 2s infinite; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in-up { animation: fadeInUp 0.6s ease-out; }
-        #toast-container { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 400px; }
-        .toast { padding: 14px 20px; border-radius: 14px; color: white; margin-bottom: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideDown 0.4s ease; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        .toast-success { background: linear-gradient(135deg, #059669, #10b981); }
-        .toast-error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        /* TOAST */
+        #toast-container { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; pointer-events: none; }
+        .toast-bar { padding: 14px 20px; color: white; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s ease; justify-content: center; }
+        .toast-bar.success { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .toast-bar.error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        .toast-bar.warn { background: linear-gradient(135deg, #ea580c, #f97316); }
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+        /* SEARCH */
         #search-bar-wrapper { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.35s ease, opacity 0.35s ease, padding 0.35s ease; }
         #search-bar-wrapper.open { max-height: 100px; opacity: 1; }
-        #search-nav-btn.active i { color: #D4A84B; }
-        #search-nav-btn.active span { color: #D4A84B; }
+        #search-nav-btn.active i, #search-nav-btn.active span { color: #D4A84B; }
+        /* QTY CONTROL */
+        .qty-control { display: flex; align-items: center; background: #0A1628; border-radius: 10px; overflow: hidden; height: 38px; }
+        .qty-control button { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: 300; }
+        .qty-control button:active { background: rgba(255,255,255,0.15); }
+        .qty-control .qty-num { color: white; font-weight: 700; min-width: 40px; text-align: center; font-size: 14px; }
+        .add-cart-btn { height: 38px; background: white; border: 1.5px solid #D4A84B; color: #0A1628; border-radius: 10px; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+        .add-cart-btn:active { background: #FBF8F3; }
+        /* FLOATING CART */
+        #floating-cart { transition: all 0.3s ease; }
+        #floating-cart.show { opacity: 1; transform: translateY(0); }
+        #floating-cart.hide { opacity: 0; transform: translateY(20px); pointer-events: none; }
     </style>
 </head>
 <body class="pb-16">
@@ -99,7 +112,7 @@
         </div>
     </div>
 
-    <!-- ULTRA SLIM HEADER -->
+    <!-- HEADER -->
     <header class="glass sticky top-0 z-30 px-3 py-0 flex justify-between items-center border-b border-gray-100">
         <div class="flex items-center gap-1 flex-1 min-w-0">
             <button onclick="openSidebar()" class="w-7 h-7 flex items-center justify-center flex-shrink-0 -ml-1">
@@ -113,7 +126,7 @@
         </a>
     </header>
 
-    <!-- HIDDEN SEARCH BAR (Slide down when Search icon clicked) -->
+    <!-- HIDDEN SEARCH BAR -->
     <div id="search-bar-wrapper" class="px-5">
         <div class="relative pt-3 pb-1">
             <input type="text" id="search-input" oninput="searchProducts()" placeholder="Search products..." class="w-full bg-white rounded-2xl py-3.5 pl-12 pr-12 outline-none premium-shadow focus:ring-2 focus:ring-gold/40 text-navy placeholder-gray-400 text-sm">
@@ -124,6 +137,7 @@
         </div>
     </div>
 
+    <!-- HERO SLIDER -->
     <div class="px-5 pt-3">
         <div class="relative rounded-3xl overflow-hidden premium-shadow">
             <div class="slider-item active">
@@ -158,9 +172,10 @@
         </div>
     </div>
 
+    <!-- CATEGORIES -->
     <div class="mt-7 px-5">
         <div class="flex justify-between items-baseline mb-4">
-            <h3 class="font-display text-2xl text-navy">Categories</h3>
+            <h3 class="font-display text-2xl text-navy">Featured Categories</h3>
             <button onclick="filterByCategory('all')" class="text-xs text-gold font-semibold">View All →</button>
         </div>
         <div id="category-list" class="flex overflow-x-auto hide-scrollbar gap-4 pb-2">
@@ -168,12 +183,13 @@
         </div>
     </div>
 
+    <!-- PRODUCTS -->
     <div class="mt-8 px-5">
         <div class="mb-4">
             <p class="text-[10px] text-gold font-bold tracking-widest uppercase mb-1">Curated For You</p>
-            <h3 id="section-title" class="font-display text-2xl text-navy">Best Sellers</h3>
+            <h3 id="section-title" class="font-display text-2xl text-navy">Top Selling Products</h3>
         </div>
-        <div id="product-list" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div id="product-list" class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div class="bg-white rounded-2xl p-3 premium-shadow">
                 <div class="w-full h-32 shimmer rounded-xl mb-2"></div>
                 <div class="h-4 w-3/4 shimmer rounded mb-2"></div>
@@ -191,6 +207,16 @@
         </p>
     </div>
 
+    <!-- OUR BRANDS -->
+    <div id="brands-section" class="mt-10 px-5 hidden">
+        <div class="flex justify-between items-baseline mb-4">
+            <h3 class="font-display text-2xl text-navy">Our Brands</h3>
+            <button class="text-xs text-gold font-semibold">See All →</button>
+        </div>
+        <div id="brands-list" class="flex overflow-x-auto hide-scrollbar gap-3 pb-2"></div>
+    </div>
+
+    <!-- TRUST BANNER -->
     <div class="px-5 mt-10">
         <div class="navy-gradient rounded-3xl p-6 relative overflow-hidden">
             <div class="absolute top-0 right-0 w-40 h-40 bg-gold/10 rounded-full -mr-16 -mt-16"></div>
@@ -206,6 +232,7 @@
         </div>
     </div>
 
+    <!-- FEATURES -->
     <div class="px-5 mt-6 grid grid-cols-3 gap-3 pb-4">
         <div class="bg-white rounded-2xl p-3 premium-shadow text-center">
             <i class="fas fa-truck text-gold text-xl mb-1"></i>
@@ -221,6 +248,7 @@
         </div>
     </div>
 
+    <!-- FOOTER -->
     <footer class="navy-gradient px-5 py-8 mt-6">
         <div class="flex items-center gap-3 mb-4">
             <div class="bg-white rounded-xl p-2">
@@ -257,7 +285,14 @@
         </div>
     </footer>
 
-    <!-- PREMIUM SLIM BOTTOM NAV -->
+    <!-- FLOATING CART BUTTON (Top-Right Style) -->
+    <a href="cart.html" id="floating-cart" class="hide fixed right-4 top-24 z-40 navy-gradient rounded-2xl px-3 py-3 shadow-2xl flex flex-col items-center gap-1 min-w-[70px]">
+        <i class="fas fa-shopping-bag text-white text-lg"></i>
+        <span id="floating-cart-count" class="text-white text-xs font-bold">0 Items</span>
+        <span id="floating-cart-total" class="gold-text text-xs font-bold">৳0</span>
+    </a>
+
+    <!-- BOTTOM NAV -->
     <nav class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#0F1729]/95 backdrop-blur-xl border-t border-white/5" style="padding-bottom: env(safe-area-inset-bottom);">
         <div class="flex justify-around items-center pt-1.5 pb-1.5">
             <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]">
@@ -265,13 +300,11 @@
                 <span class="text-[8px] mt-0.5 text-gold font-semibold tracking-wide">Home</span>
                 <span class="w-0.5 h-0.5 bg-gold rounded-full mt-0.5"></span>
             </button>
-            
             <button onclick="openSidebar()" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]">
                 <i class="fas fa-th-large text-[15px] text-white/50"></i>
                 <span class="text-[8px] mt-0.5 text-white/50 font-medium tracking-wide">Menu</span>
                 <span class="w-0.5 h-0.5 bg-transparent rounded-full mt-0.5"></span>
             </button>
-            
             <a href="cart.html" class="relative flex flex-col items-center py-0.5 px-3 min-w-[56px]">
                 <div class="relative">
                     <i class="fas fa-shopping-bag text-[15px] text-white/50"></i>
@@ -280,13 +313,11 @@
                 <span class="text-[8px] mt-0.5 text-white/50 font-medium tracking-wide">Cart</span>
                 <span class="w-0.5 h-0.5 bg-transparent rounded-full mt-0.5"></span>
             </a>
-            
             <button onclick="toggleSearch()" id="search-nav-btn" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]">
                 <i class="fas fa-search text-[15px] text-white/50"></i>
                 <span class="text-[8px] mt-0.5 text-white/50 font-medium tracking-wide">Search</span>
                 <span class="w-0.5 h-0.5 bg-transparent rounded-full mt-0.5"></span>
             </button>
-            
             <button onclick="showToast('কাস্টমার লগইন শীঘ্রই আসছে','error')" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]">
                 <i class="fas fa-user text-[15px] text-white/50"></i>
                 <span class="text-[8px] mt-0.5 text-white/50 font-medium tracking-wide">Account</span>
@@ -322,13 +353,21 @@
             { key: 'Gadget', label: 'Smart Gadgets', icon: '🔌' }
         ];
 
+        // ============ TOAST ============
         window.showToast = function(msg, type = 'success') {
             const c = document.getElementById('toast-container');
             const t = document.createElement('div');
-            t.className = 'toast toast-' + type;
-            t.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i><span>${msg}</span>`;
+            t.className = 'toast-bar ' + type;
+            let icon = 'check-circle';
+            if (type === 'error') icon = 'times-circle';
+            if (type === 'warn') icon = 'exclamation-circle';
+            t.innerHTML = `<i class="fas fa-${icon}"></i><span>${msg}</span>`;
             c.appendChild(t);
-            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+            setTimeout(() => { 
+                t.style.transition = 'opacity 0.3s';
+                t.style.opacity = '0';
+                setTimeout(() => t.remove(), 300);
+            }, 2500);
         }
 
         window.openSidebar = function() {
@@ -342,14 +381,13 @@
             document.getElementById('overlay').classList.add('hidden');
         }
 
-        // SEARCH TOGGLE
+        // ============ SEARCH TOGGLE ============
         window.toggleSearch = function() {
             const wrapper = document.getElementById('search-bar-wrapper');
             const btn = document.getElementById('search-nav-btn');
             const isOpen = wrapper.classList.contains('open');
-            if (isOpen) {
-                closeSearch();
-            } else {
+            if (isOpen) closeSearch();
+            else {
                 wrapper.classList.add('open');
                 btn.classList.add('active');
                 setTimeout(() => document.getElementById('search-input').focus(), 350);
@@ -366,6 +404,7 @@
             renderProducts();
         }
 
+        // ============ SLIDER ============
         let slideIndex = 0;
         const slides = document.querySelectorAll('.slider-item');
         const dots = document.querySelectorAll('.slider-dot');
@@ -379,6 +418,7 @@
         }
         if (slides.length > 0) setInterval(() => { slideIndex = (slideIndex + 1) % slides.length; updateSlide(); }, 5000);
 
+        // ============ SEARCH / FILTER ============
         window.searchProducts = function() {
             currentSearch = document.getElementById('search-input').value.toLowerCase().trim();
             renderProducts();
@@ -390,18 +430,73 @@
             document.getElementById('search-bar-wrapper').classList.remove('open');
             document.getElementById('search-nav-btn').classList.remove('active');
             const found = DEFAULT_CATEGORIES.find(c => c.key === category);
-            document.getElementById('section-title').innerText = category === 'all' ? 'Best Sellers' : (found ? found.label : category);
+            document.getElementById('section-title').innerText = category === 'all' ? 'Top Selling Products' : (found ? found.label : category);
             renderProducts();
         }
 
+        // ============ CART ============
         function getCart() { return JSON.parse(localStorage.getItem('heartix_cart') || '[]'); }
-        function updateCartCount() {
+        function saveCart(cart) { localStorage.setItem('heartix_cart', JSON.stringify(cart)); }
+
+        function updateCartUI() {
             const cart = getCart();
-            const total = cart.reduce((s, i) => s + i.quantity, 0);
-            document.getElementById('cart-count-header').innerText = total;
-            document.getElementById('cart-count-bottom').innerText = total;
+            const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
+            const totalAmount = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+            
+            document.getElementById('cart-count-header').innerText = totalItems;
+            document.getElementById('cart-count-bottom').innerText = totalItems;
+            
+            const floating = document.getElementById('floating-cart');
+            const fCount = document.getElementById('floating-cart-count');
+            const fTotal = document.getElementById('floating-cart-total');
+            
+            if (totalItems > 0) {
+                floating.classList.remove('hide');
+                floating.classList.add('show');
+                fCount.innerText = totalItems + ' Item' + (totalItems > 1 ? 's' : '');
+                fTotal.innerText = '৳' + totalAmount.toLocaleString('en-IN');
+            } else {
+                floating.classList.add('hide');
+                floating.classList.remove('show');
+            }
         }
 
+        window.addToCart = function(id) {
+            const product = allProducts.find(p => p.id === id);
+            if (!product) return;
+            let cart = getCart();
+            const idx = cart.findIndex(i => i.id === id);
+            if (idx > -1) cart[idx].quantity++;
+            else cart.push({ id, name: product.name, price: product.price, image: product.image, quantity: 1 });
+            saveCart(cart);
+            updateCartUI();
+            showToast(product.name.substring(0, 30) + ' added to Cart', 'success');
+            renderProducts(); // Re-render to show qty control
+        }
+
+        window.removeFromCart = function(id) {
+            let cart = getCart();
+            const idx = cart.findIndex(i => i.id === id);
+            if (idx > -1) {
+                if (cart[idx].quantity > 1) cart[idx].quantity--;
+                else cart.splice(idx, 1);
+                saveCart(cart);
+                updateCartUI();
+                renderProducts();
+                showToast('Updated cart', 'warn');
+            }
+        }
+
+        window.increaseQty = function(id) {
+            addToCart(id);
+        }
+
+        window.getQtyInCart = function(id) {
+            const item = getCart().find(i => i.id === id);
+            return item ? item.quantity : 0;
+        }
+
+        // ============ HELPERS ============
         function getCategory(product) {
             if (product.category) return product.category;
             const name = (product.name || '').toLowerCase();
@@ -411,9 +506,7 @@
             return 'Gadget';
         }
 
-        function formatPrice(num) {
-            return Number(num || 0).toLocaleString('en-IN');
-        }
+        function formatPrice(num) { return Number(num || 0).toLocaleString('en-IN'); }
 
         function escapeHtml(text) {
             if (!text) return '';
@@ -429,6 +522,7 @@
             return { avg, count: reviews.length };
         }
 
+        // ============ RENDER CATEGORIES ============
         function renderCategories() {
             const list = document.getElementById('category-list');
             const sidebarList = document.getElementById('sidebar-categories');
@@ -450,6 +544,23 @@
             sidebarList.innerHTML = sideHtml;
         }
 
+        // ============ RENDER BRANDS ============
+        function renderBrands() {
+            const brands = [...new Set(allProducts.map(p => p.brand).filter(b => b && b.trim()))];
+            if (brands.length === 0) return;
+            document.getElementById('brands-section').classList.remove('hidden');
+            const list = document.getElementById('brands-list');
+            let html = '';
+            brands.slice(0, 8).forEach(b => {
+                html += `
+                    <div class="flex-shrink-0 bg-white rounded-2xl premium-shadow px-6 py-4 min-w-[130px] flex items-center justify-center">
+                        <span class="font-display text-lg text-navy font-bold">${escapeHtml(b)}</span>
+                    </div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        // ============ RENDER PRODUCTS ============
         window.renderProducts = function() {
             const listDiv = document.getElementById('product-list');
             const noResult = document.getElementById('no-result');
@@ -480,29 +591,49 @@
                 } else {
                     starsHtml = '<span class="text-[10px] text-gray-400">No reviews yet</span>';
                 }
-                const stockBadge = p.stock !== undefined && p.stock <= 0 ? '<span class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-bold px-2 py-1 rounded-full">Out of Stock</span>' : '';
+                const isOutOfStock = p.stock !== undefined && p.stock <= 0;
+                const stockBadge = isOutOfStock ? '<span class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-bold px-2 py-1 rounded-full">Out of Stock</span>' : '';
+                const qty = getQtyInCart(p.id);
+
+                // ACTION BUTTON: Add to Cart OR Qty Control
+                let actionHtml = '';
+                if (isOutOfStock) {
+                    actionHtml = `<button disabled class="w-full mt-2 add-cart-btn opacity-50 cursor-not-allowed" style="border-color:#ccc; color:#999;">Out of Stock</button>`;
+                } else if (qty === 0) {
+                    actionHtml = `<button onclick="event.preventDefault(); addToCart('${p.id}')" class="w-full mt-2 add-cart-btn">
+                        <i class="fas fa-shopping-bag"></i> Add To Cart
+                    </button>`;
+                } else {
+                    actionHtml = `<div class="mt-2 qty-control w-full">
+                        <button onclick="event.preventDefault(); removeFromCart('${p.id}')">−</button>
+                        <span class="qty-num flex-1">${qty}</span>
+                        <button onclick="event.preventDefault(); addToCart('${p.id}')">+</button>
+                    </div>`;
+                }
 
                 html += `
-                    <a href="product.html?id=${p.id}" class="product-card bg-white rounded-2xl p-3 premium-shadow fade-in-up block relative" style="animation-delay: ${idx*0.05}s">
-                        <div class="relative mb-3">
-                            <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" class="w-full h-36 object-contain rounded-xl bg-gray-50">
-                            ${hasDiscount ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-2 py-1 rounded-full">-${discountPct}%</span>` : ''}
-                            ${stockBadge}
-                        </div>
-                        <h4 class="text-sm font-semibold text-navy leading-tight mb-1 line-clamp-2">${escapeHtml(p.name)}</h4>
-                        <div class="flex items-center gap-1 mb-2">${starsHtml}</div>
-                        <div class="flex items-center gap-2 mb-3">
-                            <p class="font-display text-lg font-bold text-navy">৳ ${formatPrice(p.price)}</p>
-                            ${hasDiscount ? `<p class="text-[10px] text-gray-400 line-through">৳ ${formatPrice(p.oldPrice)}</p>` : ''}
-                        </div>
-                        <div class="w-full navy-gradient text-white text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2">
-                            <i class="fas fa-eye text-[10px]"></i> View Details
-                        </div>
-                    </a>`;
+                    <div class="product-card bg-white rounded-2xl p-3 premium-shadow fade-in-up relative flex flex-col" style="animation-delay: ${idx*0.05}s">
+                        <a href="product.html?id=${p.id}" class="block flex-1">
+                            <div class="relative mb-2">
+                                <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" class="w-full h-36 object-contain rounded-xl bg-gray-50">
+                                ${hasDiscount ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-2 py-1 rounded-full">-${discountPct}%</span>` : ''}
+                                ${stockBadge}
+                            </div>
+                            <h4 class="text-sm font-semibold text-navy leading-tight mb-1 line-clamp-2" style="min-height: 36px;">${escapeHtml(p.name)}</h4>
+                            <div class="flex items-center gap-1 mb-2">${starsHtml}</div>
+                            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                <p class="font-display text-lg font-bold text-navy">৳${formatPrice(p.price)}</p>
+                                ${hasDiscount ? `<p class="text-[10px] text-gray-400 line-through">৳${formatPrice(p.oldPrice)}</p>` : ''}
+                            </div>
+                            ${hasDiscount ? `<span class="inline-block bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full mb-1">Save ৳${formatPrice(p.oldPrice - p.price)}</span>` : ''}
+                        </a>
+                        ${actionHtml}
+                    </div>`;
             });
             listDiv.innerHTML = html;
         }
 
+        // ============ LOAD DATA ============
         async function loadAll() {
             try {
                 const [prodSnap, revSnap, setSnap] = await Promise.all([
@@ -519,7 +650,9 @@
                     applySettings();
                 }
                 renderCategories();
+                renderBrands();
                 renderProducts();
+                updateCartUI();
             } catch (e) {
                 document.getElementById('product-list').innerHTML = `<p class="col-span-full text-red-500 text-center">Error: ${e.message}</p>`;
             }
@@ -534,7 +667,7 @@
             if (s.contactEmail) document.getElementById('footer-email').textContent = s.contactEmail;
         }
 
-        updateCartCount();
+        updateCartUI();
         loadAll();
     </script>
 </body>
