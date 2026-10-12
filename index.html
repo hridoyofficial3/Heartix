@@ -3,156 +3,321 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heartix - Smart Appliances</title>
+    <title>Heartix — Premium Smart Appliances</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { DEFAULT: '#0A1628', light: '#152238', dark: '#060D1A' },
+                        gold: { DEFAULT: '#D4A84B', light: '#E8C77B', dark: '#A67F2F' },
+                        cream: '#FBF8F3',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                        'display': ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
+        body { font-family: 'Inter', sans-serif; background: #FBF8F3; }
+        .font-display { font-family: 'Playfair Display', serif; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .brand-navy { color: #0B1B3D; }
-        .brand-bg-navy { background-color: #0B1B3D; }
-        .slider-item { display: none; }
-        .slider-item.active { display: block; }
-        #sidebar { transition: transform 0.3s ease; }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .slider-item { display: none; opacity: 0; transition: opacity 0.8s ease; }
+        .slider-item.active { display: block; opacity: 1; }
+        
+        #sidebar { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         #sidebar.open { transform: translateX(0); }
         #sidebar.closed { transform: translateX(-100%); }
-        #overlay { transition: opacity 0.3s ease; }
+        
+        .product-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(10, 22, 40, 0.12); }
+        
+        .category-tile { transition: all 0.3s ease; }
+        .category-tile:hover { transform: translateY(-4px); }
+        
+        .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
+        .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
+        
+        .premium-shadow { box-shadow: 0 4px 20px rgba(10, 22, 40, 0.08); }
+        .gold-shadow { box-shadow: 0 8px 30px rgba(212, 168, 75, 0.3); }
+        
+        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+        .shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 1000px 100%; animation: shimmer 2s infinite; }
+        
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in-up { animation: fadeInUp 0.6s ease-out; }
     </style>
 </head>
-<body class="bg-gray-50 pb-20 font-sans">
+<body class="pb-24">
 
-    <div id="overlay" onclick="closeSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+    <!-- OVERLAY -->
+    <div id="overlay" onclick="closeSidebar()" class="fixed inset-0 bg-navy/60 backdrop-blur-sm z-40 hidden transition-opacity"></div>
 
-    <!-- SIDEBAR (Admin লিংক সরানো হয়েছে) -->
-    <div id="sidebar" class="closed fixed top-0 left-0 h-full w-72 bg-white z-50 shadow-2xl overflow-y-auto">
-        <div class="brand-bg-navy p-5 text-white">
-            <div class="flex justify-between items-center mb-3">
-                <img src="logo.png" alt="Heartix" class="h-10 bg-white rounded p-1">
-                <button onclick="closeSidebar()" class="text-white text-2xl"><i class="fas fa-times"></i></button>
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="closed fixed top-0 left-0 h-full w-80 bg-white z-50 shadow-2xl overflow-y-auto">
+        <div class="navy-gradient p-6 text-white relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full -mr-16 -mt-16"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 bg-gold/5 rounded-full -ml-12 -mb-12"></div>
+            <div class="relative">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="bg-white rounded-xl p-2">
+                        <img src="logo.png" alt="Heartix" class="h-8">
+                    </div>
+                    <button onclick="closeSidebar()" class="text-white/80 hover:text-white text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <p class="text-xs text-gold tracking-widest uppercase mb-1">Welcome</p>
+                <p class="font-display text-2xl font-bold">Heartix</p>
+                <p class="text-xs text-white/60 mt-1">Premium Smart Appliances</p>
             </div>
-            <p class="text-sm opacity-90">Hello there!</p>
-            <p class="font-bold">Welcome to Heartix</p>
         </div>
-        <nav class="p-4">
-            <p class="text-xs text-gray-500 font-semibold mb-2">CATEGORIES</p>
-            <a href="#" onclick="filterByCategory('all'); closeSidebar();" class="block py-2 px-3 hover:bg-gray-100 rounded">🏠 All Products</a>
-            <a href="#" onclick="filterByCategory('TV'); closeSidebar();" class="block py-2 px-3 hover:bg-gray-100 rounded">📺 TV</a>
-            <a href="#" onclick="filterByCategory('Fridge'); closeSidebar();" class="block py-2 px-3 hover:bg-gray-100 rounded">❄️ Fridge</a>
-            <a href="#" onclick="filterByCategory('Fan'); closeSidebar();" class="block py-2 px-3 hover:bg-gray-100 rounded">🌀 Fan</a>
-            <a href="#" onclick="filterByCategory('Gadget'); closeSidebar();" class="block py-2 px-3 hover:bg-gray-100 rounded">🔌 Gadgets</a>
-            
-            <p class="text-xs text-gray-500 font-semibold mt-4 mb-2">QUICK LINKS</p>
-            <a href="cart.html" class="block py-2 px-3 hover:bg-gray-100 rounded">🛒 My Cart</a>
-            <a href="checkout.html" class="block py-2 px-3 hover:bg-gray-100 rounded">💳 Checkout</a>
-            
-            <p class="text-xs text-gray-500 font-semibold mt-4 mb-2">ABOUT</p>
-            <a href="#" class="block py-2 px-3 hover:bg-gray-100 rounded">📞 Contact Us</a>
-            <a href="#" class="block py-2 px-3 hover:bg-gray-100 rounded">ℹ️ About Heartix</a>
-            <a href="#" class="block py-2 px-3 hover:bg-gray-100 rounded">📋 Terms & Conditions</a>
-            <a href="#" class="block py-2 px-3 hover:bg-gray-100 rounded">↩️ Return Policy</a>
+
+        <nav class="p-5">
+            <p class="text-[10px] text-gray-400 font-bold tracking-widest uppercase mb-3">Browse</p>
+            <a href="#" onclick="filterByCategory('all'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition group">
+                <span class="w-9 h-9 bg-cream group-hover:bg-gold/10 rounded-lg flex items-center justify-center text-lg transition">🛍️</span>
+                <span class="font-medium text-navy">All Products</span>
+            </a>
+            <a href="#" onclick="filterByCategory('TV'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition group">
+                <span class="w-9 h-9 bg-cream group-hover:bg-gold/10 rounded-lg flex items-center justify-center text-lg transition">📺</span>
+                <span class="font-medium text-navy">Televisions</span>
+            </a>
+            <a href="#" onclick="filterByCategory('Fridge'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition group">
+                <span class="w-9 h-9 bg-cream group-hover:bg-gold/10 rounded-lg flex items-center justify-center text-lg transition">❄️</span>
+                <span class="font-medium text-navy">Refrigerators</span>
+            </a>
+            <a href="#" onclick="filterByCategory('Fan'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition group">
+                <span class="w-9 h-9 bg-cream group-hover:bg-gold/10 rounded-lg flex items-center justify-center text-lg transition">🌀</span>
+                <span class="font-medium text-navy">Fans</span>
+            </a>
+            <a href="#" onclick="filterByCategory('Gadget'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition group">
+                <span class="w-9 h-9 bg-cream group-hover:bg-gold/10 rounded-lg flex items-center justify-center text-lg transition">🔌</span>
+                <span class="font-medium text-navy">Smart Gadgets</span>
+            </a>
+
+            <p class="text-[10px] text-gray-400 font-bold tracking-widest uppercase mt-6 mb-3">Quick Actions</p>
+            <a href="cart.html" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition group">
+                <span class="w-9 h-9 bg-cream group-hover:bg-gold/10 rounded-lg flex items-center justify-center"><i class="fas fa-shopping-bag text-navy"></i></span>
+                <span class="font-medium text-navy">My Cart</span>
+            </a>
+            <a href="checkout.html" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition group">
+                <span class="w-9 h-9 bg-cream group-hover:bg-gold/10 rounded-lg flex items-center justify-center"><i class="fas fa-credit-card text-navy"></i></span>
+                <span class="font-medium text-navy">Checkout</span>
+            </a>
+
+            <p class="text-[10px] text-gray-400 font-bold tracking-widest uppercase mt-6 mb-3">Support</p>
+            <a href="#" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition group">
+                <span class="w-9 h-9 bg-cream group-hover:bg-gold/10 rounded-lg flex items-center justify-center"><i class="fas fa-headset text-navy"></i></span>
+                <span class="font-medium text-navy">Contact Us</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition group">
+                <span class="w-9 h-9 bg-cream group-hover:bg-gold/10 rounded-lg flex items-center justify-center"><i class="fas fa-info-circle text-navy"></i></span>
+                <span class="font-medium text-navy">About Heartix</span>
+            </a>
         </nav>
+
+        <div class="p-5 mt-4">
+            <div class="navy-gradient rounded-2xl p-4 text-white text-center">
+                <i class="fas fa-crown text-gold text-2xl mb-2"></i>
+                <p class="font-display text-lg mb-1">Premium Service</p>
+                <p class="text-xs text-white/70">100% Authentic Products</p>
+            </div>
+        </div>
     </div>
 
     <!-- HEADER -->
-    <header class="bg-white sticky top-0 z-30 shadow-sm p-4 flex justify-between items-center">
-        <button onclick="openSidebar()"><i class="fas fa-bars text-xl text-gray-700"></i></button>
-        <img src="logo.png" alt="Heartix" class="h-10 object-contain">
-        <a href="cart.html" class="relative">
-            <i class="fas fa-shopping-cart text-xl text-gray-700"></i>
-            <span id="cart-count-header" class="absolute -top-2 -right-2 brand-bg-navy text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+    <header class="glass sticky top-0 z-30 px-5 py-3 flex justify-between items-center">
+        <button onclick="openSidebar()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream transition">
+            <i class="fas fa-bars text-navy text-lg"></i>
+        </button>
+        <div class="flex items-center gap-2">
+            <img src="logo.png" alt="Heartix" class="h-10 object-contain">
+        </div>
+        <a href="cart.html" class="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream transition">
+            <i class="fas fa-shopping-bag text-navy text-lg"></i>
+            <span id="cart-count-header" class="absolute -top-1 -right-1 gold-gradient text-navy text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center gold-shadow">0</span>
         </a>
     </header>
 
-    <!-- SEARCH -->
-    <div class="p-4 bg-white">
+    <!-- HERO SEARCH -->
+    <div class="px-5 pt-5 pb-2">
         <div class="relative">
-            <input type="text" id="search-input" oninput="searchProducts()" placeholder="Search for products..." class="w-full bg-gray-100 rounded-lg py-2 px-4 outline-none focus:ring-2 focus:ring-[#0B1B3D]">
-            <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+            <input type="text" id="search-input" oninput="searchProducts()" placeholder="Search premium products..." class="w-full bg-white rounded-2xl py-3.5 pl-12 pr-4 outline-none premium-shadow focus:ring-2 focus:ring-gold/40 transition text-navy placeholder-gray-400">
+            <i class="fas fa-search absolute left-4 top-4 text-gold"></i>
         </div>
     </div>
 
     <!-- BANNER SLIDER -->
-    <div class="px-4 mt-2">
-        <div class="relative rounded-xl overflow-hidden shadow-md">
+    <div class="px-5 pt-3">
+        <div class="relative rounded-3xl overflow-hidden premium-shadow">
             <div class="slider-item active">
-                <div class="brand-bg-navy p-8 text-center text-white">
-                    <h2 class="text-2xl font-bold mb-2">Welcome to Heartix</h2>
-                    <p class="text-sm opacity-90">Smart Appliances for Smart Living</p>
+                <div class="navy-gradient p-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-40 h-40 bg-gold/10 rounded-full -mr-20 -mt-20"></div>
+                    <div class="absolute bottom-0 left-0 w-32 h-32 bg-gold/5 rounded-full -ml-16 -mb-16"></div>
+                    <div class="relative">
+                        <p class="text-gold text-xs tracking-widest uppercase mb-2">✨ New Collection</p>
+                        <h2 class="font-display text-3xl text-white mb-2 leading-tight">Smart Living<br>Starts Here</h2>
+                        <p class="text-white/70 text-sm mb-4">Premium appliances for modern homes</p>
+                        <button class="gold-gradient text-navy text-sm font-semibold px-5 py-2.5 rounded-full gold-shadow">Explore Now →</button>
+                    </div>
                 </div>
             </div>
             <div class="slider-item">
-                <div class="bg-gradient-to-r from-orange-400 to-pink-500 p-8 text-center text-white">
-                    <h2 class="text-2xl font-bold mb-2">🔥 Big Discount!</h2>
-                    <p class="text-sm opacity-90">Up to 30% OFF on Smart TVs</p>
+                <div class="bg-gradient-to-br from-[#B8860B] via-[#D4A84B] to-[#E8C77B] p-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
+                    <div class="relative">
+                        <p class="text-navy text-xs tracking-widest uppercase mb-2">🔥 Limited Offer</p>
+                        <h2 class="font-display text-3xl text-navy mb-2 leading-tight">Up to 30% Off<br>Smart TVs</h2>
+                        <p class="text-navy/70 text-sm mb-4">Premium quality at special price</p>
+                        <button class="navy-gradient text-white text-sm font-semibold px-5 py-2.5 rounded-full">Shop Deals →</button>
+                    </div>
                 </div>
             </div>
             <div class="slider-item">
-                <div class="bg-gradient-to-r from-green-500 to-teal-500 p-8 text-center text-white">
-                    <h2 class="text-2xl font-bold mb-2">Free Delivery!</h2>
-                    <p class="text-sm opacity-90">On orders above ৳ 5000</p>
+                <div class="bg-gradient-to-br from-[#0F4C5C] via-[#1A6B7C] to-[#2C8B9E] p-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
+                    <div class="relative">
+                        <p class="text-gold text-xs tracking-widest uppercase mb-2">🚚 Free Delivery</p>
+                        <h2 class="font-display text-3xl text-white mb-2 leading-tight">On Orders<br>Above ৳ 5,000</h2>
+                        <p class="text-white/70 text-sm mb-4">Fast delivery all over Bangladesh</p>
+                        <button class="gold-gradient text-navy text-sm font-semibold px-5 py-2.5 rounded-full gold-shadow">Order Now →</button>
+                    </div>
                 </div>
+            </div>
+
+            <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                <div class="slider-dot w-6 h-1.5 bg-white rounded-full transition"></div>
+                <div class="slider-dot w-1.5 h-1.5 bg-white/50 rounded-full transition"></div>
+                <div class="slider-dot w-1.5 h-1.5 bg-white/50 rounded-full transition"></div>
             </div>
         </div>
     </div>
 
     <!-- CATEGORIES -->
-    <div class="mt-6 px-4">
-        <h3 class="text-lg font-semibold text-gray-800 mb-3">Featured Categories</h3>
+    <div class="mt-7 px-5">
+        <div class="flex justify-between items-baseline mb-4">
+            <h3 class="font-display text-2xl text-navy">Categories</h3>
+            <button onclick="filterByCategory('all')" class="text-xs text-gold font-semibold hover:underline">View All →</button>
+        </div>
         <div class="flex overflow-x-auto hide-scrollbar gap-4 pb-2">
-            <div onclick="filterByCategory('all')" class="flex flex-col items-center min-w-[80px] cursor-pointer">
-                <div class="w-16 h-16 bg-white rounded-full shadow flex items-center justify-center text-2xl hover:scale-110 transition">🛍️</div>
-                <span class="text-xs mt-2 text-gray-600">All</span>
+            <div onclick="filterByCategory('TV')" class="category-tile flex flex-col items-center min-w-[88px] cursor-pointer">
+                <div class="w-20 h-20 bg-white rounded-2xl premium-shadow flex items-center justify-center text-3xl">📺</div>
+                <span class="text-xs mt-2 text-navy font-medium">Televisions</span>
             </div>
-            <div onclick="filterByCategory('TV')" class="flex flex-col items-center min-w-[80px] cursor-pointer">
-                <div class="w-16 h-16 bg-white rounded-full shadow flex items-center justify-center text-2xl hover:scale-110 transition">📺</div>
-                <span class="text-xs mt-2 text-gray-600">TV</span>
+            <div onclick="filterByCategory('Fridge')" class="category-tile flex flex-col items-center min-w-[88px] cursor-pointer">
+                <div class="w-20 h-20 bg-white rounded-2xl premium-shadow flex items-center justify-center text-3xl">❄️</div>
+                <span class="text-xs mt-2 text-navy font-medium">Fridges</span>
             </div>
-            <div onclick="filterByCategory('Fridge')" class="flex flex-col items-center min-w-[80px] cursor-pointer">
-                <div class="w-16 h-16 bg-white rounded-full shadow flex items-center justify-center text-2xl hover:scale-110 transition">❄️</div>
-                <span class="text-xs mt-2 text-gray-600">Fridge</span>
+            <div onclick="filterByCategory('Fan')" class="category-tile flex flex-col items-center min-w-[88px] cursor-pointer">
+                <div class="w-20 h-20 bg-white rounded-2xl premium-shadow flex items-center justify-center text-3xl">🌀</div>
+                <span class="text-xs mt-2 text-navy font-medium">Fans</span>
             </div>
-            <div onclick="filterByCategory('Fan')" class="flex flex-col items-center min-w-[80px] cursor-pointer">
-                <div class="w-16 h-16 bg-white rounded-full shadow flex items-center justify-center text-2xl hover:scale-110 transition">🌀</div>
-                <span class="text-xs mt-2 text-gray-600">Fan</span>
-            </div>
-            <div onclick="filterByCategory('Gadget')" class="flex flex-col items-center min-w-[80px] cursor-pointer">
-                <div class="w-16 h-16 bg-white rounded-full shadow flex items-center justify-center text-2xl hover:scale-110 transition">🔌</div>
-                <span class="text-xs mt-2 text-gray-600">Gadgets</span>
+            <div onclick="filterByCategory('Gadget')" class="category-tile flex flex-col items-center min-w-[88px] cursor-pointer">
+                <div class="w-20 h-20 bg-white rounded-2xl premium-shadow flex items-center justify-center text-3xl">🔌</div>
+                <span class="text-xs mt-2 text-navy font-medium">Gadgets</span>
             </div>
         </div>
     </div>
 
     <!-- PRODUCTS -->
-    <div class="mt-6 px-4">
-        <h3 id="section-title" class="text-lg font-semibold text-gray-800 mb-3 text-center">Top Selling Products</h3>
-        <div id="product-list" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <p class="col-span-full text-center text-gray-500">Loading products...</p>
+    <div class="mt-8 px-5">
+        <div class="flex justify-between items-baseline mb-4">
+            <div>
+                <p class="text-[10px] text-gold font-bold tracking-widest uppercase mb-1">Curated For You</p>
+                <h3 id="section-title" class="font-display text-2xl text-navy">Best Sellers</h3>
+            </div>
         </div>
-        <p id="no-result" class="hidden text-center text-gray-500 py-8">😔 কোনো প্রোডাক্ট পাওয়া যায়নি</p>
+        <div id="product-list" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white rounded-2xl p-3 premium-shadow">
+                <div class="w-full h-32 shimmer rounded-xl mb-2"></div>
+                <div class="h-4 w-3/4 shimmer rounded mb-2"></div>
+                <div class="h-4 w-1/2 shimmer rounded"></div>
+            </div>
+            <div class="bg-white rounded-2xl p-3 premium-shadow">
+                <div class="w-full h-32 shimmer rounded-xl mb-2"></div>
+                <div class="h-4 w-3/4 shimmer rounded mb-2"></div>
+                <div class="h-4 w-1/2 shimmer rounded"></div>
+            </div>
+        </div>
+        <p id="no-result" class="hidden text-center text-gray-400 py-12">
+            <i class="fas fa-search text-4xl mb-3 block"></i>
+            কোনো প্রোডাক্ট পাওয়া যায়নি
+        </p>
     </div>
 
-    <!-- BOTTOM NAV (Admin লিংক সরানো, ACCOUNT এখন লগইনের জন্য) -->
-    <div class="fixed bottom-0 left-0 w-full bg-white border-t flex justify-around py-2 z-30 md:hidden">
-        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex flex-col items-center brand-navy">
-            <i class="fas fa-home text-lg"></i>
-            <span class="text-[10px] mt-1">HOME</span>
+    <!-- PREMIUM BANNER -->
+    <div class="px-5 mt-10">
+        <div class="navy-gradient rounded-3xl p-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-40 h-40 bg-gold/10 rounded-full -mr-16 -mt-16"></div>
+            <div class="absolute bottom-0 left-0 w-32 h-32 bg-gold/5 rounded-full -ml-16 -mb-16"></div>
+            <div class="relative flex items-center gap-4">
+                <div class="w-16 h-16 gold-gradient rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-shield-alt text-navy text-2xl"></i>
+                </div>
+                <div>
+                    <h4 class="text-white font-display text-xl mb-1">100% Authentic</h4>
+                    <p class="text-white/60 text-xs">All products are officially sourced and verified</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FEATURES STRIP -->
+    <div class="px-5 mt-6 grid grid-cols-3 gap-3 pb-4">
+        <div class="bg-white rounded-2xl p-3 premium-shadow text-center">
+            <i class="fas fa-truck text-gold text-xl mb-1"></i>
+            <p class="text-[10px] text-navy font-semibold">Fast Delivery</p>
+        </div>
+        <div class="bg-white rounded-2xl p-3 premium-shadow text-center">
+            <i class="fas fa-undo text-gold text-xl mb-1"></i>
+            <p class="text-[10px] text-navy font-semibold">Easy Return</p>
+        </div>
+        <div class="bg-white rounded-2xl p-3 premium-shadow text-center">
+            <i class="fas fa-headset text-gold text-xl mb-1"></i>
+            <p class="text-[10px] text-navy font-semibold">24/7 Support</p>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <div class="fixed bottom-0 left-0 w-full glass border-t border-gray-100 flex justify-around py-2 z-30 md:hidden">
+        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex flex-col items-center py-1 px-4">
+            <i class="fas fa-home text-lg text-navy"></i>
+            <span class="text-[10px] mt-1 text-navy font-semibold">Home</span>
         </button>
-        <button onclick="openSidebar()" class="flex flex-col items-center text-gray-500">
-            <i class="fas fa-th-large text-lg"></i>
-            <span class="text-[10px] mt-1">MENU</span>
+        <button onclick="openSidebar()" class="flex flex-col items-center py-1 px-4">
+            <i class="fas fa-th-large text-lg text-gray-400"></i>
+            <span class="text-[10px] mt-1 text-gray-400">Menu</span>
         </button>
-        <a href="cart.html" class="flex flex-col items-center text-gray-500 relative">
-            <i class="fas fa-shopping-bag text-lg"></i>
-            <span id="cart-count-bottom" class="absolute -top-1 -right-1 brand-bg-navy text-white text-[8px] rounded-full h-4 w-4 flex items-center justify-center">0</span>
-            <span class="text-[10px] mt-1">CART</span>
+        <a href="cart.html" class="flex flex-col items-center py-1 px-4 relative">
+            <i class="fas fa-shopping-bag text-lg text-gray-400"></i>
+            <span id="cart-count-bottom" class="absolute top-0 right-2 gold-gradient text-navy text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
+            <span class="text-[10px] mt-1 text-gray-400">Cart</span>
         </a>
-        <button onclick="focusSearch()" class="flex flex-col items-center text-gray-500">
-            <i class="fas fa-search text-lg"></i>
-            <span class="text-[10px] mt-1">SEARCH</span>
+        <button onclick="focusSearch()" class="flex flex-col items-center py-1 px-4">
+            <i class="fas fa-search text-lg text-gray-400"></i>
+            <span class="text-[10px] mt-1 text-gray-400">Search</span>
         </button>
-        <button onclick="alert('কাস্টমার লগইন শীঘ্রই আসছে!')" class="flex flex-col items-center text-gray-500">
-            <i class="fas fa-user text-lg"></i>
-            <span class="text-[10px] mt-1">ACCOUNT</span>
+        <button onclick="alert('কাস্টমার লগইন শীঘ্রই আসছে!')" class="flex flex-col items-center py-1 px-4">
+            <i class="fas fa-user text-lg text-gray-400"></i>
+            <span class="text-[10px] mt-1 text-gray-400">Account</span>
         </button>
     </div>
 
@@ -186,14 +351,22 @@
             document.getElementById('overlay').classList.add('hidden');
         }
 
+        // Slider with dots
         let slideIndex = 0;
         const slides = document.querySelectorAll('.slider-item');
+        const dots = document.querySelectorAll('.slider-dot');
+        function showSlide(idx) {
+            slides.forEach(s => s.classList.remove('active'));
+            dots.forEach(d => { d.classList.remove('w-6', 'bg-white'); d.classList.add('w-1.5', 'bg-white/50'); });
+            slides[idx].classList.add('active');
+            dots[idx].classList.remove('w-1.5', 'bg-white/50');
+            dots[idx].classList.add('w-6', 'bg-white');
+        }
         if (slides.length > 0) {
             setInterval(() => {
-                slides[slideIndex].classList.remove('active');
                 slideIndex = (slideIndex + 1) % slides.length;
-                slides[slideIndex].classList.add('active');
-            }, 3000);
+                showSlide(slideIndex);
+            }, 4000);
         }
 
         window.searchProducts = function() {
@@ -209,7 +382,8 @@
             currentFilter = category;
             currentSearch = '';
             document.getElementById('search-input').value = '';
-            document.getElementById('section-title').innerText = category === 'all' ? 'All Products' : category + ' Products';
+            const titles = { 'all': 'Best Sellers', 'TV': 'Televisions', 'Fridge': 'Refrigerators', 'Fan': 'Fans', 'Gadget': 'Smart Gadgets' };
+            document.getElementById('section-title').innerText = titles[category] || 'Products';
             renderProducts();
         }
 
@@ -263,13 +437,29 @@
             noResult.classList.add('hidden');
 
             let html = '';
-            filtered.forEach(p => {
+            filtered.forEach((p, idx) => {
                 html += `
-                    <div class="bg-white rounded-lg shadow-sm p-3 flex flex-col relative">
-                        <img src="${p.image}" alt="${p.name}" class="w-full h-32 object-cover rounded mb-2">
-                        <h4 class="text-sm font-medium text-gray-800">${p.name}</h4>
-                        <p class="brand-navy font-bold mt-1">৳ ${p.price}</p>
-                        <button onclick="addToCart('${p.id}')" class="mt-3 w-full brand-bg-navy text-white text-sm py-1.5 rounded hover:opacity-90">Add To Cart</button>
+                    <div class="product-card bg-white rounded-2xl p-3 premium-shadow fade-in-up" style="animation-delay: ${idx * 0.05}s">
+                        <div class="relative mb-3">
+                            <img src="${p.image}" alt="${p.name}" class="w-full h-36 object-cover rounded-xl">
+                            <span class="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-navy text-[9px] font-bold tracking-wider uppercase px-2 py-1 rounded-full">New</span>
+                        </div>
+                        <h4 class="text-sm font-semibold text-navy leading-tight mb-1 line-clamp-2">${p.name}</h4>
+                        <div class="flex items-center gap-1 mb-2">
+                            <i class="fas fa-star text-gold text-[10px]"></i>
+                            <i class="fas fa-star text-gold text-[10px]"></i>
+                            <i class="fas fa-star text-gold text-[10px]"></i>
+                            <i class="fas fa-star text-gold text-[10px]"></i>
+                            <i class="fas fa-star-half-alt text-gold text-[10px]"></i>
+                            <span class="text-[10px] text-gray-400 ml-1">(4.5)</span>
+                        </div>
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="font-display text-lg font-bold text-navy">৳ ${p.price}</p>
+                        </div>
+                        <button onclick="addToCart('${p.id}')" class="w-full navy-gradient text-white text-xs font-semibold py-2.5 rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-shopping-bag text-[10px]"></i>
+                            Add to Cart
+                        </button>
                     </div>`;
             });
             listDiv.innerHTML = html;
