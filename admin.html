@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Heartix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .brand-navy { color: #0B1B3D; }
+        .brand-bg-navy { background-color: #0B1B3D; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <!-- লগইন সেকশন -->
+    <div id="login-section" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-xl shadow-md w-full max-w-sm">
+            <div class="text-center mb-6">
+                <img src="logo.png" alt="Heartix" class="h-12 mx-auto mb-3">
+                <h2 class="text-xl font-bold brand-navy">Admin Login</h2>
+            </div>
+            <input type="password" id="admin-password" placeholder="Enter Admin Password" class="w-full border rounded-lg px-3 py-2 mb-4 outline-none focus:border-[#0B1B3D]">
+            <button onclick="login()" class="w-full brand-bg-navy text-white py-2 rounded-lg font-semibold">Login</button>
+            <p class="text-xs text-gray-500 text-center mt-4">শুধুমাত্র অ্যাডমিনের জন্য</p>
+        </div>
+    </div>
+
+    <!-- ড্যাশবোর্ড সেকশন (লগইন করার পর দেখা যাবে) -->
+    <div id="dashboard-section" class="hidden min-h-screen pb-20">
+        <!-- হেডার -->
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-50">
+            <h1 class="text-lg font-bold brand-navy">Admin Panel</h1>
+            <button onclick="logout()" class="text-red-500 text-sm font-semibold"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </header>
+
+        <!-- ট্যাব বাটন -->
+        <div class="flex bg-white border-b">
+            <button onclick="showTab('add-product')" id="tab-add" class="flex-1 py-3 text-sm font-semibold brand-navy border-b-2 border-[#0B1B3D]">Add Product</button>
+            <button onclick="showTab('products')" id="tab-products" class="flex-1 py-3 text-sm font-semibold text-gray-500 border-b-2 border-transparent">Products</button>
+            <button onclick="showTab('orders')" id="tab-orders" class="flex-1 py-3 text-sm font-semibold text-gray-500 border-b-2 border-transparent">Orders</button>
+        </div>
+
+        <!-- ট্যাব ১: নতুন প্রোডাক্ট অ্যাড -->
+        <div id="content-add-product" class="p-4">
+            <div class="bg-white p-4 rounded-lg shadow-sm space-y-3">
+                <h3 class="font-bold text-gray-800 mb-2">নতুন প্রোডাক্ট অ্যাড করুন</h3>
+                <input type="text" id="p-name" placeholder="Product Name *" class="w-full border rounded-lg px-3 py-2 outline-none focus:border-[#0B1B3D]">
+                <input type="number" id="p-price" placeholder="Price (শুধু সংখ্যা) *" class="w-full border rounded-lg px-3 py-2 outline-none focus:border-[#0B1B3D]">
+                <input type="text" id="p-image" placeholder="Image URL * (যেমন: https://i.ibb.co/...)" class="w-full border rounded-lg px-3 py-2 outline-none focus:border-[#0B1B3D]">
+                <p class="text-xs text-gray-500">💡 ছবি আপলোড করতে <a href="https://postimages.org/" target="_blank" class="text-blue-500 underline">Postimages</a> এ ছবি আপলোড করে "Direct Link" কপি করুন।</p>
+                <button onclick="addProduct()" id="add-btn" class="w-full brand-bg-navy text-white py-2 rounded-lg font-semibold">Add Product</button>
+            </div>
+        </div>
+
+        <!-- ট্যাব ২: প্রোডাক্ট লিস্ট -->
+        <div id="content-products" class="hidden p-4">
+            <div id="product-list-admin" class="space-y-3">
+                <p class="text-center text-gray-500">Loading...</p>
+            </div>
+        </div>
+
+        <!-- ট্যাব ৩: অর্ডার লিস্ট -->
+        <div id="content-orders" class="hidden p-4">
+            <div id="order-list-admin" class="space-y-3">
+                <p class="text-center text-gray-500">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ফায়ারবেস এবং অ্যাডমিন লজিক -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
+            authDomain: "heartix.firebaseapp.com",
+            projectId: "heartix",
+            storageBucket: "heartix.firebasestorage.app",
+            messagingSenderId: "551204402338",
+            appId: "1:551204402338:web:169555975c0bbb97f113fb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ✅ অ্যাডমিন পাসওয়ার্ড (আপনি চাইলে পরিবর্তন করতে পারেন)
+        const ADMIN_PASSWORD = "heartix2024";
+
+        // লগইন চেক
+        window.onload = function() {
+            if (localStorage.getItem('isAdmin') === 'true') {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('hidden');
+                loadAdminProducts();
+                loadAdminOrders();
+            }
+        }
+
+        window.login = function() {
+            const pass = document.getElementById('admin-password').value;
+            if (pass === ADMIN_PASSWORD) {
+                localStorage.setItem('isAdmin', 'true');
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('hidden');
+                loadAdminProducts();
+                loadAdminOrders();
+            } else {
+                alert("ভুল পাসওয়ার্ড!");
+            }
+        }
+
+        window.logout = function() {
+            localStorage.removeItem('isAdmin');
+            location.reload();
+        }
+
+        window.showTab = function(tab) {
+            document.getElementById('content-add-product').classList.add('hidden');
+            document.getElementById('content-products').classList.add('hidden');
+            document.getElementById('content-orders').classList.add('hidden');
+            
+            document.getElementById('tab-add').classList.remove('brand-navy', 'border-[#0B1B3D]');
+            document.getElementById('tab-products').classList.remove('brand-navy', 'border-[#0B1B3D]');
+            document.getElementById('tab-orders').classList.remove('brand-navy', 'border-[#0B1B3D]');
+            document.getElementById('tab-add').classList.add('text-gray-500', 'border-transparent');
+            document.getElementById('tab-products').classList.add('text-gray-500', 'border-transparent');
+            document.getElementById('tab-orders').classList.add('text-gray-500', 'border-transparent');
+
+            if (tab === 'add-product') {
+                document.getElementById('content-add-product').classList.remove('hidden');
+                document.getElementById('tab-add').classList.add('brand-navy', 'border-[#0B1B3D]');
+                document.getElementById('tab-add').classList.remove('text-gray-500', 'border-transparent');
+            } else if (tab === 'products') {
+                document.getElementById('content-products').classList.remove('hidden');
+                document.getElementById('tab-products').classList.add('brand-navy', 'border-[#0B1B3D]');
+                document.getElementById('tab-products').classList.remove('text-gray-500', 'border-transparent');
+            } else if (tab === 'orders') {
+                document.getElementById('content-orders').classList.remove('hidden');
+                document.getElementById('tab-orders').classList.add('brand-navy', 'border-[#0B1B3D]');
+                document.getElementById('tab-orders').classList.remove('text-gray-500', 'border-transparent');
+            }
+        }
+
+        // প্রোডাক্ট অ্যাড করার ফাংশন
+        window.addProduct = async function() {
+            const name = document.getElementById('p-name').value.trim();
+            const price = parseFloat(document.getElementById('p-price').value);
+            const image = document.getElementById('p-image').value.trim();
+
+            if (!name || !price || !image) {
+                alert("সব তথ্য পূরণ করুন!");
+                return;
+            }
+
+            const btn = document.getElementById('add-btn');
+            btn.innerText = "Adding...";
+            btn.disabled = true;
+
+            try {
+                await addDoc(collection(db, "products"), {
+                    name: name,
+                    price: price,
+                    image: image
+                });
+                alert("✅ প্রোডাক্ট সফলভাবে অ্যাড হয়েছে!");
+                document.getElementById('p-name').value = '';
+                document.getElementById('p-price').value = '';
+                document.getElementById('p-image').value = '';
+                loadAdminProducts();
+            } catch (error) {
+                alert("সমস্যা হয়েছে: " + error.message);
+            } finally {
+                btn.innerText = "Add Product";
+                btn.disabled = false;
+            }
+        }
+
+        // প্রোডাক্ট লিস্ট লোড করা
+        async function loadAdminProducts() {
+            const listDiv = document.getElementById('product-list-admin');
+            try {
+                const querySnapshot = await getDocs(collection(db, "products"));
+                let html = '';
+                if (querySnapshot.empty) {
+                    listDiv.innerHTML = '<p class="text-center text-gray-500">কোনো প্রোডাক্ট নেই।</p>';
+                    return;
+                }
+                querySnapshot.forEach((doc) => {
+                    const p = doc.data();
+                    html += `
+                        <div class="bg-white p-3 rounded-lg shadow-sm flex items-center gap-3">
+                            <img src="${p.image}" class="w-14 h-14 object-cover rounded">
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold">${p.name}</p>
+                                <p class="text-sm brand-navy font-bold">৳ ${p.price}</p>
+                            </div>
+                            <button onclick="deleteProduct('${doc.id}')" class="text-red-500 p-2"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                });
+                listDiv.innerHTML = html;
+            } catch (error) {
+                listDiv.innerHTML = `<p class="text-red-500 text-center">Error: ${error.message}</p>`;
+            }
+        }
+
+        // প্রোডাক্ট ডিলিট করা
+        window.deleteProduct = async function(id) {
+            if (confirm("আপনি কি নিশ্চিতভাবে এই প্রোডাক্টটি ডিলিট করতে চান?")) {
+                try {
+                    await deleteDoc(doc(db, "products", id));
+                    alert("প্রোডাক্ট ডিলিট হয়েছে!");
+                    loadAdminProducts();
+                } catch (error) {
+                    alert("ডিলিট করতে সমস্যা: " + error.message);
+                }
+            }
+        }
+
+        // অর্ডার লিস্ট লোড করা
+        async function loadAdminOrders() {
+            const listDiv = document.getElementById('order-list-admin');
+            try {
+                const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                let html = '';
+                if (querySnapshot.empty) {
+                    listDiv.innerHTML = '<p class="text-center text-gray-500">কোনো অর্ডার নেই।</p>';
+                    return;
+                }
+                querySnapshot.forEach((doc) => {
+                    const o = doc.data();
+                    let itemsHtml = o.items.map(i => `<li>${i.name} × ${i.quantity} = ৳ ${i.price * i.quantity}</li>`).join('');
+                    
+                    html += `
+                        <div class="bg-white p-4 rounded-lg shadow-sm mb-3">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <p class="font-bold text-sm">${o.customer.name}</p>
+                                    <p class="text-xs text-gray-500">${o.customer.phone}</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded ${o.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}">${o.status}</span>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-2">${o.customer.address}, ${o.customer.thana}, ${o.customer.district}</p>
+                            <div class="bg-gray-50 p-2 rounded text-xs mb-2">
+                                <ul class="list-disc pl-4">${itemsHtml}</ul>
+                            </div>
+                            <div class="flex justify-between text-sm font-semibold border-t pt-2">
+                                <span>Total: ৳ ${o.total}</span>
+                                <span>Due: ৳ ${o.dueAmount}</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Payment: ${o.paymentMethod} | Advance: ৳ ${o.advancePaid}</p>
+                        </div>
+                    `;
+                });
+                listDiv.innerHTML = html;
+            } catch (error) {
+                console.error(error);
+                listDiv.innerHTML = `<p class="text-red-500 text-center">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
