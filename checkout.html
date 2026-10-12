@@ -137,10 +137,7 @@
 
         window.placeOrder = async function() {
             const cart = getCart();
-            if (cart.length === 0) {
-                alert("আপনার কার্ট খালি!");
-                return;
-            }
+            if (cart.length === 0) return alert("আপনার কার্ট খালি!");
 
             const name = document.getElementById('customer-name').value.trim();
             const phone = document.getElementById('customer-phone').value.trim();
@@ -150,52 +147,33 @@
             const thana = document.getElementById('customer-thana').value.trim();
             const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
 
-            if (!name || !phone || !address || !district || !thana) {
-                alert("অনুগ্রহ করে সব প্রয়োজনীয় তথ্য পূরণ করুন।");
-                return;
-            }
-
-            if (!/^01[0-9]{9}$/.test(phone)) {
-                alert("সঠিক ফোন নাম্বার দিন (01XXXXXXXXX)।");
-                return;
-            }
+            if (!name || !phone || !address || !district || !thana) return alert("সব প্রয়োজনীয় তথ্য পূরণ করুন।");
+            if (!/^01[0-9]{9}$/.test(phone)) return alert("সঠিক ফোন নাম্বার দিন (01XXXXXXXXX)।");
 
             let subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
             const total = subtotal + DELIVERY_CHARGE;
-
             let advancePaid = 0;
             if (paymentMethod === 'full-online') advancePaid = total;
             else if (paymentMethod === 'delivery-advance') advancePaid = DELIVERY_CHARGE;
 
-            const orderData = {
-                customer: { name, phone, email, address, district, thana },
-                items: cart,
-                subtotal: subtotal,
-                deliveryCharge: DELIVERY_CHARGE,
-                total: total,
-                paymentMethod: paymentMethod,
-                advancePaid: advancePaid,
-                dueAmount: total - advancePaid,
-                status: 'pending',
-                createdAt: serverTimestamp()
-            };
-
             const btn = document.getElementById('place-order-btn');
-            btn.disabled = true;
             btn.innerText = 'Placing Order...';
+            btn.disabled = true;
 
             try {
-                await addDoc(collection(db, "orders"), orderData);
+                await addDoc(collection(db, "orders"), {
+                    customer: { name, phone, email, address, district, thana },
+                    items: cart, subtotal, deliveryCharge: DELIVERY_CHARGE, total,
+                    paymentMethod, advancePaid, dueAmount: total - advancePaid,
+                    status: 'pending', createdAt: serverTimestamp()
+                });
                 localStorage.removeItem('heartix_cart');
-                
-                alert(`🎉 আপনার অর্ডার সফলভাবে প্লেস হয়েছে!\n\nমোট বিল: ৳ ${total}\nঅগ্রিম পেমেন্ট: ৳ ${advancePaid}\nবাকি (COD): ৳ ${total - advancePaid}\n\nআমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।`);
-                
+                alert(`🎉 অর্ডার সফল!\nমোট বিল: ৳ ${total}\nঅগ্রিম: ৳ ${advancePaid}\nবাকি: ৳ ${total - advancePaid}`);
                 window.location.href = 'index.html';
             } catch (error) {
-                console.error("Error placing order: ", error);
-                alert("অর্ডার প্লেস করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
-                btn.disabled = false;
+                alert("সমস্যা হয়েছে: " + error.message);
                 btn.innerText = 'PLACE ORDER';
+                btn.disabled = false;
             }
         }
 
