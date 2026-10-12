@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
-            theme: { extend: { colors: { navy: '#0A1628', gold: '#D4A84B', cream: '#FBF8F3' }}}
+            theme: { extend: { colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' }, cream: '#FBF8F3' }}}
         }
     </script>
     <style>
@@ -23,6 +23,8 @@
         .modal-bg { background: rgba(10, 22, 40, 0.7); backdrop-filter: blur(4px); }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .img-thumb { position: relative; }
+        .img-thumb .remove-btn { position: absolute; top: -6px; right: -6px; background: #dc2626; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
     </style>
 </head>
 <body>
@@ -35,7 +37,7 @@
                 <p class="text-xs text-gray-400 mt-1">Heartix Smart Appliances</p>
             </div>
             <input type="password" id="admin-password" placeholder="Enter Admin Password" class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 mb-4 outline-none focus:border-[#D4A84B] transition">
-            <button onclick="login()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">Login</button>
+            <button onclick="login()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Login</button>
         </div>
     </div>
 
@@ -56,19 +58,19 @@
 
         <div class="bg-white shadow-sm overflow-x-auto hide-scrollbar">
             <div class="flex min-w-max">
-                <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-active px-5 py-3 text-sm font-semibold transition whitespace-nowrap">
+                <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-active px-5 py-3 text-sm font-semibold whitespace-nowrap">
                     <i class="fas fa-chart-line mr-1"></i> Dashboard
                 </button>
-                <button onclick="showTab('products')" id="tab-products" class="tab-inactive px-5 py-3 text-sm font-semibold transition whitespace-nowrap">
+                <button onclick="showTab('products')" id="tab-products" class="tab-inactive px-5 py-3 text-sm font-semibold whitespace-nowrap">
                     <i class="fas fa-box mr-1"></i> Products
                 </button>
-                <button onclick="showTab('orders')" id="tab-orders" class="tab-inactive px-5 py-3 text-sm font-semibold transition whitespace-nowrap">
+                <button onclick="showTab('orders')" id="tab-orders" class="tab-inactive px-5 py-3 text-sm font-semibold whitespace-nowrap">
                     <i class="fas fa-receipt mr-1"></i> Orders
                 </button>
-                <button onclick="showTab('reviews')" id="tab-reviews" class="tab-inactive px-5 py-3 text-sm font-semibold transition whitespace-nowrap">
+                <button onclick="showTab('reviews')" id="tab-reviews" class="tab-inactive px-5 py-3 text-sm font-semibold whitespace-nowrap">
                     <i class="fas fa-star mr-1"></i> Reviews
                 </button>
-                <button onclick="showTab('settings')" id="tab-settings" class="tab-inactive px-5 py-3 text-sm font-semibold transition whitespace-nowrap">
+                <button onclick="showTab('settings')" id="tab-settings" class="tab-inactive px-5 py-3 text-sm font-semibold whitespace-nowrap">
                     <i class="fas fa-cog mr-1"></i> Settings
                 </button>
             </div>
@@ -80,39 +82,26 @@
                 <h2 class="text-xl font-bold navy-text mb-4">Overview</h2>
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <div class="bg-white rounded-2xl p-4 shadow-sm">
-                        <div class="flex items-center justify-between mb-2">
-                            <i class="fas fa-box text-2xl text-blue-500"></i>
-                            <span class="text-[10px] text-gray-400 font-semibold">TOTAL</span>
-                        </div>
-                        <p id="stat-products" class="text-2xl font-bold navy-text">0</p>
+                        <i class="fas fa-box text-2xl text-blue-500"></i>
+                        <p id="stat-products" class="text-2xl font-bold navy-text mt-2">0</p>
                         <p class="text-xs text-gray-500">Products</p>
                     </div>
                     <div class="bg-white rounded-2xl p-4 shadow-sm">
-                        <div class="flex items-center justify-between mb-2">
-                            <i class="fas fa-receipt text-2xl text-purple-500"></i>
-                            <span class="text-[10px] text-gray-400 font-semibold">TOTAL</span>
-                        </div>
-                        <p id="stat-orders" class="text-2xl font-bold navy-text">0</p>
+                        <i class="fas fa-receipt text-2xl text-purple-500"></i>
+                        <p id="stat-orders" class="text-2xl font-bold navy-text mt-2">0</p>
                         <p class="text-xs text-gray-500">Orders</p>
                     </div>
                     <div class="bg-white rounded-2xl p-4 shadow-sm">
-                        <div class="flex items-center justify-between mb-2">
-                            <i class="fas fa-clock text-2xl text-yellow-500"></i>
-                            <span class="text-[10px] text-gray-400 font-semibold">PENDING</span>
-                        </div>
-                        <p id="stat-pending" class="text-2xl font-bold navy-text">0</p>
-                        <p class="text-xs text-gray-500">Pending Orders</p>
+                        <i class="fas fa-clock text-2xl text-yellow-500"></i>
+                        <p id="stat-pending" class="text-2xl font-bold navy-text mt-2">0</p>
+                        <p class="text-xs text-gray-500">Pending</p>
                     </div>
                     <div class="bg-white rounded-2xl p-4 shadow-sm">
-                        <div class="flex items-center justify-between mb-2">
-                            <i class="fas fa-money-bill-wave text-2xl text-green-500"></i>
-                            <span class="text-[10px] text-gray-400 font-semibold">REVENUE</span>
-                        </div>
-                        <p id="stat-revenue" class="text-2xl font-bold navy-text">৳0</p>
-                        <p class="text-xs text-gray-500">Total Revenue</p>
+                        <i class="fas fa-money-bill-wave text-2xl text-green-500"></i>
+                        <p id="stat-revenue" class="text-2xl font-bold navy-text mt-2">৳0</p>
+                        <p class="text-xs text-gray-500">Revenue</p>
                     </div>
                 </div>
-
                 <div class="bg-white rounded-2xl p-4 shadow-sm">
                     <h3 class="font-bold navy-text mb-3">Recent Orders</h3>
                     <div id="recent-orders" class="space-y-2">
@@ -137,7 +126,7 @@
             <div id="content-orders" class="tab-content hidden">
                 <h2 class="text-xl font-bold navy-text mb-4">Orders</h2>
                 <div class="flex gap-2 mb-4 overflow-x-auto hide-scrollbar">
-                    <button onclick="filterOrders('all', this)" class="order-filter-btn active bg-navy text-white px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap">All</button>
+                    <button onclick="filterOrders('all', this)" class="order-filter-btn bg-navy text-white px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap">All</button>
                     <button onclick="filterOrders('pending', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap">Pending</button>
                     <button onclick="filterOrders('confirmed', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap">Confirmed</button>
                     <button onclick="filterOrders('shipped', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap">Shipped</button>
@@ -156,17 +145,13 @@
             </div>
 
             <div id="content-settings" class="tab-content hidden">
-                <h2 class="text-xl font-bold navy-text mb-4">Website Settings</h2>
+                <h2 class="text-xl font-bold navy-text mb-4">Settings</h2>
 
-                <!-- 🔐 PASSWORD CHANGE -->
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4 border-2 border-red-100">
-                    <h3 class="font-bold text-red-600 mb-3"><i class="fas fa-key mr-2"></i>Admin Password Change</h3>
-                    <label class="text-xs text-gray-500 font-semibold">Current Password</label>
-                    <input type="password" id="current-password" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-red-400" placeholder="বর্তমান পাসওয়ার্ড">
-                    <label class="text-xs text-gray-500 font-semibold">New Password</label>
-                    <input type="password" id="new-password" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-red-400" placeholder="নতুন পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)">
-                    <label class="text-xs text-gray-500 font-semibold">Confirm New Password</label>
-                    <input type="password" id="confirm-password" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-red-400" placeholder="আবার নতুন পাসওয়ার্ড">
+                    <h3 class="font-bold text-red-600 mb-3"><i class="fas fa-key mr-2"></i>Change Admin Password</h3>
+                    <input type="password" id="current-password" placeholder="Current Password" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none">
+                    <input type="password" id="new-password" placeholder="New Password (min 6 chars)" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none">
+                    <input type="password" id="confirm-password" placeholder="Confirm New Password" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none">
                     <button onclick="changePassword()" class="w-full bg-red-600 text-white py-3 rounded-xl font-semibold text-sm">
                         <i class="fas fa-shield-alt mr-2"></i> Update Password
                     </button>
@@ -175,47 +160,35 @@
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
                     <h3 class="font-bold navy-text mb-3"><i class="fas fa-image gold-text mr-2"></i>Hero Banner</h3>
                     <label class="text-xs text-gray-500 font-semibold">Banner Title</label>
-                    <input type="text" id="setting-hero-title" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="Smart Living Starts Here">
+                    <input type="text" id="setting-hero-title" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none">
                     <label class="text-xs text-gray-500 font-semibold">Banner Subtitle</label>
-                    <input type="text" id="setting-hero-subtitle" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="Premium appliances for modern homes">
+                    <input type="text" id="setting-hero-subtitle" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none">
                 </div>
 
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-truck gold-text mr-2"></i>Delivery Settings</h3>
+                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-truck gold-text mr-2"></i>Delivery</h3>
                     <label class="text-xs text-gray-500 font-semibold">Delivery Charge (৳)</label>
-                    <input type="number" id="setting-delivery-charge" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="100">
+                    <input type="number" id="setting-delivery-charge" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none">
                     <label class="text-xs text-gray-500 font-semibold">Free Delivery Above (৳)</label>
-                    <input type="number" id="setting-free-delivery" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="5000">
+                    <input type="number" id="setting-free-delivery" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none">
                 </div>
 
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-phone gold-text mr-2"></i>Contact Info</h3>
-                    <label class="text-xs text-gray-500 font-semibold">Address</label>
-                    <input type="text" id="setting-address" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="Dhaka, Bangladesh">
-                    <label class="text-xs text-gray-500 font-semibold">Phone Number</label>
-                    <input type="text" id="setting-phone" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="01XXXXXXXXX">
-                    <label class="text-xs text-gray-500 font-semibold">Email</label>
-                    <input type="email" id="setting-email" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="info@heartix.com">
-                    <label class="text-xs text-gray-500 font-semibold">WhatsApp Number</label>
-                    <input type="text" id="setting-whatsapp" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="8801XXXXXXXXX">
+                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-phone gold-text mr-2"></i>Contact</h3>
+                    <input type="text" id="setting-address" placeholder="Address" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none">
+                    <input type="text" id="setting-phone" placeholder="Phone" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none">
+                    <input type="email" id="setting-email" placeholder="Email" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none">
+                    <input type="text" id="setting-whatsapp" placeholder="WhatsApp (8801XXXXXXXXX)" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none">
                 </div>
 
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-credit-card gold-text mr-2"></i>Payment Info</h3>
-                    <label class="text-xs text-gray-500 font-semibold">bKash Number</label>
-                    <input type="text" id="setting-bkash" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="01XXXXXXXXX">
-                    <label class="text-xs text-gray-500 font-semibold">Nagad Number</label>
-                    <input type="text" id="setting-nagad" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="01XXXXXXXXX">
-                </div>
-
-                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-info-circle gold-text mr-2"></i>About</h3>
-                    <label class="text-xs text-gray-500 font-semibold">About Heartix</label>
-                    <textarea id="setting-about" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none focus:border-gold" placeholder="About your business..."></textarea>
+                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-credit-card gold-text mr-2"></i>Payment</h3>
+                    <input type="text" id="setting-bkash" placeholder="bKash Number" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none">
+                    <input type="text" id="setting-nagad" placeholder="Nagad Number" class="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 outline-none">
                 </div>
 
                 <button onclick="saveSettings()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold mb-4">
-                    <i class="fas fa-save mr-2"></i> Save All Settings
+                    <i class="fas fa-save mr-2"></i> Save Settings
                 </button>
             </div>
 
@@ -226,22 +199,22 @@
         <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div class="navy-bg p-4 rounded-t-2xl flex justify-between items-center sticky top-0 z-10">
                 <h3 id="modal-title" class="text-white font-bold">Add Product</h3>
-                <button onclick="closeModal()" class="text-white/80 hover:text-white"><i class="fas fa-times"></i></button>
+                <button onclick="closeModal()" class="text-white/80"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-5 space-y-3">
                 <input type="hidden" id="edit-product-id">
                 <div>
                     <label class="text-xs text-gray-500 font-semibold">Product Name *</label>
-                    <input type="text" id="p-name" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold" placeholder="e.g. Samsung 32 inch TV">
+                    <input type="text" id="p-name" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-xs text-gray-500 font-semibold">Price (৳) *</label>
-                        <input type="number" id="p-price" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold" placeholder="25000">
+                        <input type="number" id="p-price" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold">
                     </div>
                     <div>
-                        <label class="text-xs text-gray-500 font-semibold">Old Price (Optional)</label>
-                        <input type="number" id="p-oldprice" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold" placeholder="30000">
+                        <label class="text-xs text-gray-500 font-semibold">Old Price</label>
+                        <input type="number" id="p-oldprice" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
@@ -256,31 +229,32 @@
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 font-semibold">Stock Qty</label>
-                        <input type="number" id="p-stock" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold" placeholder="10" value="10">
+                        <input type="number" id="p-stock" value="10" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold">
                     </div>
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Brand (Optional)</label>
-                    <input type="text" id="p-brand" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold" placeholder="e.g. Samsung">
+                    <label class="text-xs text-gray-500 font-semibold">Brand</label>
+                    <input type="text" id="p-brand" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Description (Optional)</label>
-                    <textarea id="p-description" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold" placeholder="Product details..."></textarea>
+                    <label class="text-xs text-gray-500 font-semibold">Description</label>
+                    <textarea id="p-description" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold"></textarea>
                 </div>
+
+                <!-- MULTIPLE IMAGES -->
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Product Image *</label>
-                    <div id="image-current" class="hidden mb-2">
-                        <img id="p-image-preview" class="w-20 h-20 object-cover rounded-lg">
-                    </div>
+                    <label class="text-xs text-gray-500 font-semibold">Product Images * (Max 5)</label>
+                    <div id="image-preview-grid" class="grid grid-cols-4 gap-2 mb-2"></div>
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                         <label for="p-image-file" class="cursor-pointer block">
                             <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-1"></i>
-                            <p class="text-xs text-gray-500">Click to upload image</p>
+                            <p class="text-xs text-gray-500">Click to add images (multi-select)</p>
                         </label>
-                        <input type="file" id="p-image-file" accept="image/*" class="hidden">
-                        <p id="file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
+                        <input type="file" id="p-image-file" accept="image/*" multiple class="hidden">
+                        <p class="text-[10px] text-gray-400 mt-1">প্রথম ছবিটি Main Image হবে</p>
                     </div>
                 </div>
+
                 <button onclick="saveProduct()" id="save-btn" class="w-full navy-bg text-white py-3 rounded-xl font-semibold mt-2">Save Product</button>
             </div>
         </div>
@@ -308,15 +282,14 @@
         let allReviewsList = [];
         let currentOrderFilter = 'all';
         let currentAdminPassword = DEFAULT_PASSWORD;
+        let pendingImages = []; // Array of data URLs
+        let existingImages = []; // existing urls when editing
 
-        // Load current password from Firestore
         async function loadAdminPassword() {
             try {
                 const snap = await getDoc(doc(db, "settings", "admin"));
-                if (snap.exists() && snap.data().password) {
-                    currentAdminPassword = snap.data().password;
-                }
-            } catch (e) { console.log("Using default password"); }
+                if (snap.exists() && snap.data().password) currentAdminPassword = snap.data().password;
+            } catch (e) {}
         }
 
         window.onload = async function() {
@@ -344,15 +317,13 @@
             const current = document.getElementById('current-password').value;
             const newPass = document.getElementById('new-password').value;
             const confirm = document.getElementById('confirm-password').value;
-
             if (current !== currentAdminPassword) return alert("❌ বর্তমান পাসওয়ার্ড ভুল!");
-            if (newPass.length < 6) return alert("❌ নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে!");
-            if (newPass !== confirm) return alert("❌ নতুন পাসওয়ার্ড দুটো মিলছে না!");
-
+            if (newPass.length < 6) return alert("❌ নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষর!");
+            if (newPass !== confirm) return alert("❌ দুটো পাসওয়ার্ড মিলছে না!");
             try {
                 await setDoc(doc(db, "settings", "admin"), { password: newPass }, { merge: true });
                 currentAdminPassword = newPass;
-                alert("✅ পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!\n\nপরবর্তী লগইনে নতুন পাসওয়ার্ড ব্যবহার করুন।");
+                alert("✅ পাসওয়ার্ড পরিবর্তন হয়েছে!");
                 document.getElementById('current-password').value = '';
                 document.getElementById('new-password').value = '';
                 document.getElementById('confirm-password').value = '';
@@ -385,7 +356,7 @@
                 allProductsList = [];
                 snap.forEach(d => allProductsList.push({ id: d.id, ...d.data() }));
                 renderAdminProducts();
-            } catch (e) { console.error(e); }
+            } catch (e) {}
         }
 
         async function loadOrders() {
@@ -396,7 +367,7 @@
                 snap.forEach(d => allOrdersList.push({ id: d.id, ...d.data() }));
                 renderAdminOrders();
                 renderRecentOrders();
-            } catch (e) { console.error(e); }
+            } catch (e) {}
         }
 
         async function loadReviews() {
@@ -406,7 +377,7 @@
                 allReviewsList = [];
                 snap.forEach(d => allReviewsList.push({ id: d.id, ...d.data() }));
                 renderAdminReviews();
-            } catch (e) { console.error(e); }
+            } catch (e) {}
         }
 
         function updateStats() {
@@ -414,7 +385,7 @@
             document.getElementById('stat-orders').innerText = allOrdersList.length;
             const pending = allOrdersList.filter(o => o.status === 'pending').length;
             document.getElementById('stat-pending').innerText = pending;
-            const revenue = allOrdersList.reduce((sum, o) => sum + (o.total || 0), 0);
+            const revenue = allOrdersList.filter(o => o.status === 'delivered').reduce((s, o) => s + (o.total || 0), 0);
             document.getElementById('stat-revenue').innerText = '৳' + revenue.toLocaleString();
         }
 
@@ -424,17 +395,18 @@
             let filtered = allProductsList;
             if (search) filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(search));
             if (filtered.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-400 py-8">No products found</p>';
+                list.innerHTML = '<p class="text-center text-gray-400 py-8">No products</p>';
                 return;
             }
             let html = '';
             filtered.forEach(p => {
+                const imgCount = (p.images && p.images.length) || 1;
                 html += `
                     <div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
-                        <img src="${p.image}" class="w-16 h-16 object-cover rounded-lg">
+                        <img src="${p.image}" class="w-16 h-16 object-contain bg-gray-50 rounded-lg">
                         <div class="flex-1 min-w-0">
                             <p class="font-semibold text-sm navy-text truncate">${p.name}</p>
-                            <p class="text-xs text-gray-500">${p.category || 'N/A'}${p.brand ? ' • ' + p.brand : ''}</p>
+                            <p class="text-xs text-gray-500">${p.category || 'N/A'}${p.brand ? ' • ' + p.brand : ''} • ${imgCount} image${imgCount > 1 ? 's' : ''}</p>
                             <p class="text-sm font-bold gold-text">৳ ${p.price}</p>
                         </div>
                         <div class="flex flex-col gap-1">
@@ -461,8 +433,9 @@
             document.getElementById('p-brand').value = '';
             document.getElementById('p-description').value = '';
             document.getElementById('p-image-file').value = '';
-            document.getElementById('file-name').innerText = '';
-            document.getElementById('image-current').classList.add('hidden');
+            pendingImages = [];
+            existingImages = [];
+            renderImagePreview();
             document.getElementById('product-modal').classList.remove('hidden');
         }
 
@@ -483,16 +456,72 @@
             document.getElementById('p-brand').value = p.brand || '';
             document.getElementById('p-description').value = p.description || '';
             document.getElementById('p-image-file').value = '';
-            document.getElementById('file-name').innerText = '';
-            document.getElementById('p-image-preview').src = p.image;
-            document.getElementById('image-current').classList.remove('hidden');
+            pendingImages = [];
+            existingImages = p.images && p.images.length ? [...p.images] : [p.image];
+            renderImagePreview();
             document.getElementById('product-modal').classList.remove('hidden');
         }
 
+        function renderImagePreview() {
+            const grid = document.getElementById('image-preview-grid');
+            let html = '';
+            // existing images
+            existingImages.forEach((url, i) => {
+                html += `
+                    <div class="img-thumb relative">
+                        <img src="${url}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border ${i === 0 && pendingImages.length === 0 ? 'border-2 border-gold' : 'border-gray-200'}">
+                        <button onclick="removeExistingImage(${i})" class="remove-btn">×</button>
+                        ${i === 0 && pendingImages.length === 0 ? '<span class="absolute bottom-0.5 left-0.5 bg-gold text-navy text-[8px] px-1 rounded">Main</span>' : ''}
+                    </div>`;
+            });
+            // pending (newly added)
+            pendingImages.forEach((dataUrl, i) => {
+                const isMain = existingImages.length === 0 && i === 0;
+                html += `
+                    <div class="img-thumb relative">
+                        <img src="${dataUrl}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border ${isMain ? 'border-2 border-gold' : 'border-gray-200'}">
+                        <button onclick="removePendingImage(${i})" class="remove-btn">×</button>
+                        ${isMain ? '<span class="absolute bottom-0.5 left-0.5 bg-gold text-navy text-[8px] px-1 rounded">Main</span>' : ''}
+                    </div>`;
+            });
+            grid.innerHTML = html;
+        }
+
+        window.removeExistingImage = function(i) {
+            existingImages.splice(i, 1);
+            renderImagePreview();
+        }
+        window.removePendingImage = function(i) {
+            pendingImages.splice(i, 1);
+            renderImagePreview();
+        }
+
         document.getElementById('p-image-file').addEventListener('change', function(e) {
-            const f = e.target.files[0];
-            document.getElementById('file-name').innerText = f ? '✔ ' + f.name : '';
+            const files = Array.from(e.target.files);
+            const totalImages = existingImages.length + pendingImages.length + files.length;
+            if (totalImages > 5) {
+                alert("সর্বোচ্চ ৫টি ছবি দিতে পারবেন!");
+                return;
+            }
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    pendingImages.push({ file, dataUrl: evt.target.result });
+                    renderImagePreview();
+                };
+                reader.readAsDataURL(file);
+            });
+            e.target.value = '';
         });
+
+        async function uploadToImgBB(file) {
+            const fd = new FormData();
+            fd.append('image', file);
+            const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: fd });
+            const result = await res.json();
+            if (!result.success) throw new Error("Image upload failed");
+            return result.data.display_url;
+        }
 
         window.saveProduct = async function() {
             const id = document.getElementById('edit-product-id').value;
@@ -503,33 +532,37 @@
             const stock = parseInt(document.getElementById('p-stock').value) || 0;
             const brand = document.getElementById('p-brand').value.trim();
             const description = document.getElementById('p-description').value.trim();
-            const file = document.getElementById('p-image-file').files[0];
 
             if (!name || !price) return alert("Name and Price required!");
-            if (!id && !file) return alert("Please select an image!");
+            if (existingImages.length === 0 && pendingImages.length === 0) return alert("Please select at least one image!");
 
             const btn = document.getElementById('save-btn');
-            btn.innerText = "Saving...";
+            btn.innerText = "Uploading...";
             btn.disabled = true;
 
             try {
-                let imageUrl = null;
-                if (file) {
-                    const fd = new FormData();
-                    fd.append('image', file);
-                    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: fd });
-                    const result = await res.json();
-                    if (!result.success) throw new Error("Image upload failed");
-                    imageUrl = result.data.display_url;
+                // Upload new images
+                const newUrls = [];
+                for (let i = 0; i < pendingImages.length; i++) {
+                    btn.innerText = `Uploading ${i + 1}/${pendingImages.length}...`;
+                    const url = await uploadToImgBB(pendingImages[i].file);
+                    newUrls.push(url);
                 }
 
+                const allImages = [...existingImages, ...newUrls];
+                const mainImage = allImages[0];
+
+                const data = {
+                    name, price, oldPrice, category, stock, brand, description,
+                    image: mainImage,
+                    images: allImages
+                };
+
                 if (id) {
-                    const updateData = { name, price, oldPrice, category, stock, brand, description };
-                    if (imageUrl) updateData.image = imageUrl;
-                    await updateDoc(doc(db, "products", id), updateData);
+                    await updateDoc(doc(db, "products", id), data);
                     alert("✅ Product updated!");
                 } else {
-                    await addDoc(collection(db, "products"), { name, price, oldPrice, category, stock, brand, description, image: imageUrl });
+                    await addDoc(collection(db, "products"), data);
                     alert("✅ Product added!");
                 }
                 closeModal();
@@ -562,7 +595,7 @@
             let filtered = allOrdersList;
             if (currentOrderFilter !== 'all') filtered = filtered.filter(o => o.status === currentOrderFilter);
             if (filtered.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-400 py-8">No orders found</p>';
+                list.innerHTML = '<p class="text-center text-gray-400 py-8">No orders</p>';
                 return;
             }
             const statusColors = {
@@ -574,36 +607,25 @@
             };
             let html = '';
             filtered.forEach(o => {
-                const itemsHtml = o.items.map(i => `<li class="flex justify-between"><span>${i.name} × ${i.quantity}</span><span class="font-semibold">৳ ${i.price * i.quantity}</span></li>`).join('');
+                const itemsHtml = o.items.map(i => `<li class="flex justify-between"><span>${i.name} × ${i.quantity}</span><span>৳ ${i.price * i.quantity}</span></li>`).join('');
                 html += `
                     <div class="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-gold">
                         <div class="flex justify-between items-start mb-3">
                             <div>
-                                <p class="font-bold navy-text text-sm">${o.customer.name}</p>
-                                <p class="text-xs text-gray-500"><i class="fas fa-phone"></i> ${o.customer.phone}</p>
+                                <p class="font-bold navy-text text-sm">${o.orderNumber || o.id.slice(0,8)}</p>
+                                <p class="text-xs text-gray-500">${o.customer.name} • ${o.customer.phone}</p>
                             </div>
                             <span class="text-[10px] px-2 py-1 rounded-full font-bold uppercase ${statusColors[o.status] || 'bg-gray-100'}">${o.status}</span>
                         </div>
                         <p class="text-xs text-gray-600 mb-3"><i class="fas fa-map-marker-alt gold-text"></i> ${o.customer.address}, ${o.customer.thana}, ${o.customer.district}</p>
                         <div class="bg-gray-50 rounded-lg p-3 mb-3">
-                            <p class="text-[10px] text-gray-500 font-bold uppercase mb-2">Items</p>
                             <ul class="text-xs text-gray-700 space-y-1">${itemsHtml}</ul>
                         </div>
                         <div class="grid grid-cols-3 gap-2 text-center mb-3">
-                            <div class="bg-gray-50 rounded-lg p-2">
-                                <p class="text-[9px] text-gray-500">TOTAL</p>
-                                <p class="text-sm font-bold navy-text">৳${o.total}</p>
-                            </div>
-                            <div class="bg-green-50 rounded-lg p-2">
-                                <p class="text-[9px] text-gray-500">PAID</p>
-                                <p class="text-sm font-bold text-green-700">৳${o.advancePaid}</p>
-                            </div>
-                            <div class="bg-red-50 rounded-lg p-2">
-                                <p class="text-[9px] text-gray-500">DUE</p>
-                                <p class="text-sm font-bold text-red-700">৳${o.dueAmount}</p>
-                            </div>
+                            <div class="bg-gray-50 rounded-lg p-2"><p class="text-[9px] text-gray-500">TOTAL</p><p class="text-sm font-bold">৳${o.total}</p></div>
+                            <div class="bg-green-50 rounded-lg p-2"><p class="text-[9px] text-gray-500">PAID</p><p class="text-sm font-bold text-green-700">৳${o.advancePaid}</p></div>
+                            <div class="bg-red-50 rounded-lg p-2"><p class="text-[9px] text-gray-500">DUE</p><p class="text-sm font-bold text-red-700">৳${o.dueAmount}</p></div>
                         </div>
-                        <p class="text-[10px] text-gray-500 mb-3">Payment: <span class="font-semibold">${o.paymentMethod}</span></p>
                         <div class="flex gap-2">
                             <select onchange="updateOrderStatus('${o.id}', this.value)" class="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-2 outline-none">
                                 <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
@@ -613,7 +635,7 @@
                                 <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                             </select>
                             <a href="tel:${o.customer.phone}" class="px-3 py-2 bg-green-50 text-green-700 rounded-lg text-xs font-semibold flex items-center">
-                                <i class="fas fa-phone"></i> Call
+                                <i class="fas fa-phone"></i>
                             </a>
                         </div>
                     </div>`;
@@ -628,7 +650,6 @@
                 if (order) order.status = status;
                 renderRecentOrders();
                 updateStats();
-                alert("✅ Status updated: " + status);
             } catch (e) { alert("Error: " + e.message); }
         }
 
@@ -644,7 +665,7 @@
                 html += `
                     <div class="flex justify-between items-center py-2 border-b last:border-b-0">
                         <div>
-                            <p class="text-sm font-semibold navy-text">${o.customer.name}</p>
+                            <p class="text-sm font-semibold">${o.customer.name}</p>
                             <p class="text-xs text-gray-500">${o.items.length} item(s) • ৳${o.total}</p>
                         </div>
                         <span class="text-[10px] px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-bold uppercase">${o.status}</span>
@@ -669,9 +690,7 @@
                             <span class="text-yellow-500 text-sm">${stars}</span>
                         </div>
                         <p class="text-xs text-gray-600 mb-2">${r.text}</p>
-                        <button onclick="deleteReview('${r.id}')" class="text-red-500 text-xs">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
+                        <button onclick="deleteReview('${r.id}')" class="text-red-500 text-xs"><i class="fas fa-trash"></i> Delete</button>
                     </div>`;
             });
             list.innerHTML = html;
@@ -698,9 +717,8 @@
                     document.getElementById('setting-whatsapp').value = s.whatsapp || '';
                     document.getElementById('setting-bkash').value = s.bkashNumber || '';
                     document.getElementById('setting-nagad').value = s.nagadNumber || '';
-                    document.getElementById('setting-about').value = s.aboutText || '';
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) {}
         }
 
         window.saveSettings = async function() {
@@ -715,8 +733,7 @@
                     contactEmail: document.getElementById('setting-email').value,
                     whatsapp: document.getElementById('setting-whatsapp').value,
                     bkashNumber: document.getElementById('setting-bkash').value,
-                    nagadNumber: document.getElementById('setting-nagad').value,
-                    aboutText: document.getElementById('setting-about').value
+                    nagadNumber: document.getElementById('setting-nagad').value
                 };
                 await setDoc(doc(db, "settings", "main"), settings, { merge: true });
                 alert("✅ Settings saved!");
