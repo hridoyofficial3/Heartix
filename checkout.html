@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Heartix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .brand-navy { color: #0B1B3D; }
+        .brand-bg-navy { background-color: #0B1B3D; }
+    </style>
+</head>
+<body class="bg-gray-50 pb-20 font-sans">
+
+    <header class="bg-white sticky top-0 z-50 shadow-sm p-4 flex justify-between items-center">
+        <a href="cart.html"><i class="fas fa-arrow-left text-xl text-gray-700"></i></a>
+        <h1 class="text-xl font-bold brand-navy">Checkout</h1>
+        <div class="w-6"></div>
+    </header>
+
+    <div class="p-4 space-y-4">
+        <div class="bg-white rounded-lg shadow-sm p-4">
+            <h3 class="font-bold text-gray-800 mb-3 border-l-4 brand-navy pl-2">Order Review</h3>
+            <div id="order-review"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm p-4">
+            <h3 class="font-bold text-gray-800 mb-3 border-l-4 brand-navy pl-2">Shipping Address</h3>
+            <div class="space-y-3">
+                <input type="text" id="customer-name" placeholder="Your Full Name *" class="w-full border rounded-lg px-3 py-2 outline-none focus:border-[#0B1B3D]">
+                <input type="tel" id="customer-phone" placeholder="Phone Number (01XXXXXXXXX) *" class="w-full border rounded-lg px-3 py-2 outline-none focus:border-[#0B1B3D]">
+                <input type="email" id="customer-email" placeholder="Email (Optional)" class="w-full border rounded-lg px-3 py-2 outline-none focus:border-[#0B1B3D]">
+                <textarea id="customer-address" placeholder="Full Address (House, Road, Area) *" rows="2" class="w-full border rounded-lg px-3 py-2 outline-none focus:border-[#0B1B3D]"></textarea>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="customer-district" placeholder="District *" class="w-full border rounded-lg px-3 py-2 outline-none focus:border-[#0B1B3D]">
+                    <input type="text" id="customer-thana" placeholder="Thana *" class="w-full border rounded-lg px-3 py-2 outline-none focus:border-[#0B1B3D]">
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm p-4">
+            <h3 class="font-bold text-gray-800 mb-3 border-l-4 brand-navy pl-2">Payment Method</h3>
+            <div class="space-y-3">
+                <label class="flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer">
+                    <input type="radio" name="payment" value="full-online" class="mt-1">
+                    <div>
+                        <p class="font-semibold text-gray-800">Full Online Payment</p>
+                        <p class="text-xs text-gray-500">বিকাশ / নগদ / কার্ড দিয়ে সম্পূর্ণ টাকা পরিশোধ করুন</p>
+                    </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer">
+                    <input type="radio" name="payment" value="full-cod" class="mt-1" checked>
+                    <div>
+                        <p class="font-semibold text-gray-800">Cash on Delivery (Full COD)</p>
+                        <p class="text-xs text-gray-500">প্রোডাক্ট হাতে পেয়ে সম্পূর্ণ টাকা দিন</p>
+                    </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer">
+                    <input type="radio" name="payment" value="delivery-advance" class="mt-1">
+                    <div>
+                        <p class="font-semibold text-gray-800">Delivery Charge Advance</p>
+                        <p class="text-xs text-gray-500">শুধু ডেলিভারি চার্জ (৳ 100) অগ্রিম, বাকিটা ক্যাশে</p>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm p-4">
+            <div class="flex justify-between mb-2">
+                <span class="text-gray-600">Subtotal:</span>
+                <span id="checkout-subtotal" class="font-semibold">৳ 0</span>
+            </div>
+            <div class="flex justify-between mb-2">
+                <span class="text-gray-600">Delivery Charge:</span>
+                <span class="font-semibold">৳ 100</span>
+            </div>
+            <div class="border-t pt-2 mt-2 flex justify-between">
+                <span class="font-bold text-lg">Total:</span>
+                <span id="checkout-total" class="font-bold text-lg brand-navy">৳ 0</span>
+            </div>
+            <button id="place-order-btn" onclick="placeOrder()" class="w-full brand-bg-navy text-white py-3 rounded-lg mt-4 font-semibold hover:opacity-90">PLACE ORDER</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
+            authDomain: "heartix.firebaseapp.com",
+            projectId: "heartix",
+            storageBucket: "heartix.firebasestorage.app",
+            messagingSenderId: "551204402338",
+            appId: "1:551204402338:web:169555975c0bbb97f113fb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const DELIVERY_CHARGE = 100;
+
+        function getCart() {
+            const cart = localStorage.getItem('heartix_cart');
+            return cart ? JSON.parse(cart) : [];
+        }
+
+        function renderOrderReview() {
+            const cart = getCart();
+            const reviewDiv = document.getElementById('order-review');
+            let html = '';
+            let subtotal = 0;
+
+            if (cart.length === 0) {
+                reviewDiv.innerHTML = '<p class="text-gray-500">আপনার কার্ট খালি।</p>';
+                return;
+            }
+
+            cart.forEach(item => {
+                subtotal += item.price * item.quantity;
+                html += `
+                    <div class="flex items-center gap-3 py-2 border-b last:border-b-0">
+                        <img src="${item.image}" class="w-12 h-12 object-cover rounded">
+                        <div class="flex-1">
+                            <p class="text-sm font-medium">${item.name}</p>
+                            <p class="text-xs text-gray-500">৳ ${item.price} × ${item.quantity}</p>
+                        </div>
+                        <p class="font-semibold brand-navy">৳ ${item.price * item.quantity}</p>
+                    </div>
+                `;
+            });
+
+            reviewDiv.innerHTML = html;
+            document.getElementById('checkout-subtotal').innerText = '৳ ' + subtotal;
+            document.getElementById('checkout-total').innerText = '৳ ' + (subtotal + DELIVERY_CHARGE);
+        }
+
+        window.placeOrder = async function() {
+            const cart = getCart();
+            if (cart.length === 0) {
+                alert("আপনার কার্ট খালি!");
+                return;
+            }
+
+            const name = document.getElementById('customer-name').value.trim();
+            const phone = document.getElementById('customer-phone').value.trim();
+            const email = document.getElementById('customer-email').value.trim();
+            const address = document.getElementById('customer-address').value.trim();
+            const district = document.getElementById('customer-district').value.trim();
+            const thana = document.getElementById('customer-thana').value.trim();
+            const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+
+            if (!name || !phone || !address || !district || !thana) {
+                alert("অনুগ্রহ করে সব প্রয়োজনীয় তথ্য পূরণ করুন।");
+                return;
+            }
+
+            if (!/^01[0-9]{9}$/.test(phone)) {
+                alert("সঠিক ফোন নাম্বার দিন (01XXXXXXXXX)।");
+                return;
+            }
+
+            let subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const total = subtotal + DELIVERY_CHARGE;
+
+            let advancePaid = 0;
+            if (paymentMethod === 'full-online') advancePaid = total;
+            else if (paymentMethod === 'delivery-advance') advancePaid = DELIVERY_CHARGE;
+
+            const orderData = {
+                customer: { name, phone, email, address, district, thana },
+                items: cart,
+                subtotal: subtotal,
+                deliveryCharge: DELIVERY_CHARGE,
+                total: total,
+                paymentMethod: paymentMethod,
+                advancePaid: advancePaid,
+                dueAmount: total - advancePaid,
+                status: 'pending',
+                createdAt: serverTimestamp()
+            };
+
+            const btn = document.getElementById('place-order-btn');
+            btn.disabled = true;
+            btn.innerText = 'Placing Order...';
+
+            try {
+                await addDoc(collection(db, "orders"), orderData);
+                localStorage.removeItem('heartix_cart');
+                
+                alert(`🎉 আপনার অর্ডার সফলভাবে প্লেস হয়েছে!\n\nমোট বিল: ৳ ${total}\nঅগ্রিম পেমেন্ট: ৳ ${advancePaid}\nবাকি (COD): ৳ ${total - advancePaid}\n\nআমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।`);
+                
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error("Error placing order: ", error);
+                alert("অর্ডার প্লেস করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+                btn.disabled = false;
+                btn.innerText = 'PLACE ORDER';
+            }
+        }
+
+        renderOrderReview();
+    </script>
+</body>
+</html>
