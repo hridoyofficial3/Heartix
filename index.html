@@ -43,7 +43,7 @@
         .toast-error { background: linear-gradient(135deg, #dc2626, #ef4444); }
     </style>
 </head>
-<body class="pb-36">
+<body class="pb-20">
 
     <div id="toast-container"></div>
 
@@ -134,7 +134,7 @@
             </div>
             <div class="slider-item">
                 <div class="bg-gradient-to-br from-[#0F4C5C] via-[#1A6B7C] to-[#2C8B9E] p-8">
-                    <p id="hero-free-title" class="text-gold text-xs tracking-widest uppercase mb-2">🚚 Free Delivery</p>
+                    <p class="text-gold text-xs tracking-widest uppercase mb-2">🚚 Free Delivery</p>
                     <h2 id="hero-free-text" class="font-display text-3xl text-white mb-2 leading-tight">On Orders<br>Above ৳ 5,000</h2>
                     <p class="text-white/70 text-sm">Fast delivery all over Bangladesh</p>
                 </div>
@@ -210,7 +210,7 @@
         </div>
     </div>
 
-    <footer class="navy-gradient px-5 py-8 pb-32 mt-6">
+    <footer class="navy-gradient px-5 py-8 mt-6">
         <div class="flex items-center gap-3 mb-4">
             <img src="logo.png" alt="Heartix" class="h-12 bg-white rounded-lg p-1">
             <div>
@@ -244,32 +244,43 @@
         </div>
     </footer>
 
-    <div class="fixed bottom-3 left-3 right-3 z-40 md:hidden">
-        <div class="navy-gradient rounded-full px-2 py-2 flex justify-around items-center" style="box-shadow: 0 12px 40px rgba(10,22,40,0.45);">
-            <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="flex flex-col items-center py-1 px-3">
-                <i class="fas fa-home text-lg text-gold"></i>
-                <span class="text-[9px] mt-0.5 text-white/80 font-medium">Home</span>
+    <!-- PREMIUM MINIMAL BOTTOM NAV -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#0F1729]/95 backdrop-blur-xl border-t border-white/5" style="padding-bottom: env(safe-area-inset-bottom);">
+        <div class="flex justify-around items-center pt-2 pb-2">
+            <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="flex flex-col items-center py-1.5 px-3 min-w-[58px]">
+                <i class="fas fa-home text-[17px] text-gold"></i>
+                <span class="text-[9px] mt-1 text-gold font-semibold tracking-wide">Home</span>
+                <span class="w-1 h-1 bg-gold rounded-full mt-1"></span>
             </button>
-            <button onclick="openSidebar()" class="flex flex-col items-center py-1 px-3">
-                <i class="fas fa-th-large text-lg text-white/60"></i>
-                <span class="text-[9px] mt-0.5 text-white/60">Menu</span>
+            
+            <button onclick="openSidebar()" class="flex flex-col items-center py-1.5 px-3 min-w-[58px]">
+                <i class="fas fa-th-large text-[17px] text-white/50"></i>
+                <span class="text-[9px] mt-1 text-white/50 font-medium tracking-wide">Menu</span>
+                <span class="w-1 h-1 bg-transparent rounded-full mt-1"></span>
             </button>
-            <a href="cart.html" class="relative -mt-9 flex-shrink-0">
-                <div class="w-16 h-16 gold-gradient rounded-full flex items-center justify-center border-4 border-white" style="box-shadow: 0 8px 25px rgba(212,168,75,0.5);">
-                    <i class="fas fa-shopping-bag text-navy text-xl"></i>
+            
+            <a href="cart.html" class="relative flex flex-col items-center py-1.5 px-3 min-w-[58px]">
+                <div class="relative">
+                    <i class="fas fa-shopping-bag text-[17px] text-white/50"></i>
+                    <span id="cart-count-bottom" class="absolute -top-1.5 -right-2.5 bg-gold text-navy text-[9px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center">0</span>
                 </div>
-                <span id="cart-count-bottom" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">0</span>
+                <span class="text-[9px] mt-1 text-white/50 font-medium tracking-wide">Cart</span>
+                <span class="w-1 h-1 bg-transparent rounded-full mt-1"></span>
             </a>
-            <button onclick="focusSearch()" class="flex flex-col items-center py-1 px-3">
-                <i class="fas fa-search text-lg text-white/60"></i>
-                <span class="text-[9px] mt-0.5 text-white/60">Search</span>
+            
+            <button onclick="focusSearch()" class="flex flex-col items-center py-1.5 px-3 min-w-[58px]">
+                <i class="fas fa-search text-[17px] text-white/50"></i>
+                <span class="text-[9px] mt-1 text-white/50 font-medium tracking-wide">Search</span>
+                <span class="w-1 h-1 bg-transparent rounded-full mt-1"></span>
             </button>
-            <button onclick="showToast('কাস্টমার লগইন শীঘ্রই আসছে','error')" class="flex flex-col items-center py-1 px-3">
-                <i class="fas fa-user text-lg text-white/60"></i>
-                <span class="text-[9px] mt-0.5 text-white/60">Account</span>
+            
+            <button onclick="showToast('কাস্টমার লগইন শীঘ্রই আসছে','error')" class="flex flex-col items-center py-1.5 px-3 min-w-[58px]">
+                <i class="fas fa-user text-[17px] text-white/50"></i>
+                <span class="text-[9px] mt-1 text-white/50 font-medium tracking-wide">Account</span>
+                <span class="w-1 h-1 bg-transparent rounded-full mt-1"></span>
             </button>
         </div>
-    </div>
+    </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
