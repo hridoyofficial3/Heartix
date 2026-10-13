@@ -25,21 +25,40 @@
         .cat-preview { width: 60px; height: 60px; background: #FFFDF7; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(10,22,40,0.06); overflow: hidden; flex-shrink: 0; }
         .cat-preview img { width: 48px; height: 48px; object-fit: contain; }
         .cat-preview .emoji { font-size: 32px; line-height: 1; }
-        .warn-banner { background: linear-gradient(135deg, #FEF3C7, #FDE68A); border: 1px solid #F59E0B; color: #92400E; }
     </style>
 </head>
 <body>
 
+    <!-- LOADING SCREEN -->
+    <div id="loading-section" class="min-h-screen flex items-center justify-center p-4">
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin text-3xl text-[#D4A84B] mb-3"></i>
+            <p class="text-gray-500 text-sm">Loading...</p>
+        </div>
+    </div>
+
     <!-- LOGIN -->
-    <div id="login-section" class="min-h-screen flex items-center justify-center p-4">
+    <div id="login-section" class="hidden min-h-screen flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm">
             <div class="text-center mb-6">
                 <img src="logo.png" alt="Heartix" class="h-14 mx-auto mb-3">
-                <h2 class="text-2xl font-bold navy-text">Admin Control</h2>
+                <h2 class="text-2xl font-bold navy-text">Admin Login</h2>
                 <p class="text-xs text-gray-400 mt-1">Heartix Smart Appliances</p>
             </div>
-            <input type="password" id="admin-password" placeholder="Enter Password" class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 mb-4 outline-none focus:border-[#D4A84B]">
-            <button onclick="login()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Login</button>
+            <input type="email" id="admin-email" placeholder="Email" autocomplete="username" class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 mb-3 outline-none focus:border-[#D4A84B]">
+            <input type="password" id="admin-password" placeholder="Password" autocomplete="current-password" class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 mb-4 outline-none focus:border-[#D4A84B]">
+            <button onclick="login()" id="login-btn" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Login</button>
+            <p id="login-error" class="text-red-500 text-xs text-center mt-3 hidden"></p>
+        </div>
+    </div>
+
+    <!-- NOT ADMIN -->
+    <div id="not-admin-section" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <i class="fas fa-ban text-red-500 text-5xl mb-4"></i>
+            <h2 class="text-xl font-bold navy-text mb-2">Access Denied</h2>
+            <p class="text-sm text-gray-500 mb-4">এই অ্যাকাউন্টটি অ্যাডমিন হিসেবে নিবন্ধিত নয়।</p>
+            <button onclick="logout()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Logout</button>
         </div>
     </div>
 
@@ -53,14 +72,11 @@
                     <p class="gold-text text-[10px]">Heartix Panel</p>
                 </div>
             </div>
-            <button onclick="logout()" class="text-white/80 text-sm"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <div class="flex items-center gap-3">
+                <span id="admin-email-display" class="text-white/60 text-[10px] hidden md:block"></span>
+                <button onclick="logout()" class="text-white/80 text-sm"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
         </header>
-
-        <!-- Default password warning -->
-        <div id="default-pass-warning" class="hidden warn-banner px-4 py-2.5 text-xs flex items-center gap-2 justify-center">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span>আপনি ডিফল্ট পাসওয়ার্ড ব্যবহার করছেন! <button onclick="showTab('settings')" class="font-bold underline">এখনই পরিবর্তন করুন</button></span>
-        </div>
 
         <div class="bg-white shadow-sm overflow-x-auto hide-scrollbar sticky top-[68px] z-30">
             <div class="flex min-w-max">
@@ -202,12 +218,10 @@
             <div id="content-settings" class="tab-content hidden">
                 <h2 class="text-xl font-bold navy-text mb-4">Settings</h2>
 
-                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4 border-2 border-red-100">
-                    <h3 class="font-bold text-red-600 mb-3"><i class="fas fa-key mr-2"></i>Change Password</h3>
-                    <input type="password" id="current-password" placeholder="Current Password" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <input type="password" id="new-password" placeholder="New Password (min 6)" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <input type="password" id="confirm-password" placeholder="Confirm New Password" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <button onclick="changePassword()" class="w-full bg-red-600 text-white py-2 rounded-lg font-semibold text-sm"><i class="fas fa-shield-alt mr-1"></i> Update Password</button>
+                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4 border-2 border-blue-100">
+                    <h3 class="font-bold text-blue-600 mb-3"><i class="fas fa-shield-alt mr-2"></i>Account Security</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">আপনার লগইন এখন Firebase Authentication দ্বারা সুরক্ষিত। পাসওয়ার্ড পরিবর্তন করতে Firebase Console-এ যান।</p>
+                    <p class="text-[11px] text-gray-400 mt-2">Logged in as: <span id="settings-email" class="font-semibold text-gray-600"></span></p>
                 </div>
 
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
@@ -489,6 +503,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, query, orderBy, increment, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         // ⚠️ SECURITY NOTE: ImgBB API key client-side exposed.
         // Production-এ Cloud Function দিয়ে proxy করা উচিত।
@@ -503,7 +518,7 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const DEFAULT_PASSWORD = "heartix2024";
+        const auth = getAuth(app);
 
         const DEFAULT_CATEGORIES = [
             { key: 'TV', label: 'Televisions', icon: '📺' },
@@ -521,8 +536,7 @@
         let testimonials = [];
         let heroBanners = [];
         let currentOrderFilter = 'all';
-        let currentAdminPassword = DEFAULT_PASSWORD;
-        let passwordInFirestore = false;
+        let currentUser = null;
 
         let pendingImages = [];
         let existingImages = [];
@@ -536,55 +550,81 @@
 
         function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
-        async function loadAdminPassword() {
+        // ============================================================
+        // AUTH STATE MANAGEMENT
+        // ============================================================
+        function showSection(id) {
+            ['loading-section', 'login-section', 'not-admin-section', 'dashboard-section'].forEach(s => {
+                document.getElementById(s).classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        async function verifyAdmin(uid) {
             try {
-                const snap = await getDoc(doc(db, "settings", "admin"));
-                if (snap.exists() && snap.data().password) {
-                    currentAdminPassword = snap.data().password;
-                    passwordInFirestore = true;
+                const snap = await getDoc(doc(db, "settings", "admins"));
+                if (snap.exists()) {
+                    const uids = snap.data().uids || [];
+                    return Array.isArray(uids) && uids.includes(uid);
                 }
-            } catch (e) {}
+            } catch (e) { console.warn('Admin check failed:', e); }
+            return false;
         }
 
-        window.onload = async function() {
-            await loadAdminPassword();
-            if (localStorage.getItem('isAdmin') === 'true') showDashboard();
-        }
-
-        function showDashboard() {
-            document.getElementById('login-section').classList.add('hidden');
-            document.getElementById('dashboard-section').classList.remove('hidden');
-            // Show default password warning
-            if (!passwordInFirestore) {
-                document.getElementById('default-pass-warning').classList.remove('hidden');
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                const isAdminUser = await verifyAdmin(user.uid);
+                if (isAdminUser) {
+                    const emailDisplay = document.getElementById('admin-email-display');
+                    if (emailDisplay) emailDisplay.textContent = user.email || '';
+                    const settingsEmail = document.getElementById('settings-email');
+                    if (settingsEmail) settingsEmail.textContent = user.email || '';
+                    showSection('dashboard-section');
+                    loadAllData();
+                } else {
+                    await signOut(auth);
+                    showSection('not-admin-section');
+                }
+            } else {
+                currentUser = null;
+                showSection('login-section');
             }
-            loadAllData();
-        }
+        });
 
         window.login = async function() {
-            await loadAdminPassword();
-            if (document.getElementById('admin-password').value === currentAdminPassword) {
-                localStorage.setItem('isAdmin', 'true');
-                showDashboard();
-            } else alert("ভুল পাসওয়ার্ড!");
+            const email = (document.getElementById('admin-email').value || '').trim();
+            const password = document.getElementById('admin-password').value || '';
+            const errEl = document.getElementById('login-error');
+            errEl.classList.add('hidden');
+            if (!email || !password) {
+                errEl.textContent = 'ইমেইল ও পাসওয়ার্ড দিন';
+                errEl.classList.remove('hidden');
+                return;
+            }
+            const btn = document.getElementById('login-btn');
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                document.getElementById('admin-password').value = '';
+            } catch (e) {
+                let msg = 'লগইন ব্যর্থ হয়েছে';
+                if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') msg = 'ইমেইল বা পাসওয়ার্ড ভুল';
+                else if (e.code === 'auth/user-not-found') msg = 'এই ইমেইলে কোনো ইউজার নেই';
+                else if (e.code === 'auth/invalid-email') msg = 'সঠিক ইমেইল দিন';
+                else if (e.code === 'auth/too-many-requests') msg = 'অনেকবার ভুল করেছেন — কিছুক্ষণ পর চেষ্টা করুন';
+                errEl.textContent = msg;
+                errEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Login';
+            }
         }
-        window.logout = function() { localStorage.removeItem('isAdmin'); location.reload(); }
 
-        window.changePassword = async function() {
-            const current = document.getElementById('current-password').value;
-            const np = document.getElementById('new-password').value;
-            const cp = document.getElementById('confirm-password').value;
-            if (current !== currentAdminPassword) return alert("❌ বর্তমান পাসওয়ার্ড ভুল!");
-            if (np.length < 6) return alert("❌ কমপক্ষে ৬ অক্ষর!");
-            if (np !== cp) return alert("❌ পাসওয়ার্ড মিলছে না!");
-            await setDoc(doc(db, "settings", "admin"), { password: np }, { merge: true });
-            currentAdminPassword = np;
-            passwordInFirestore = true;
-            document.getElementById('default-pass-warning').classList.add('hidden');
-            alert("✅ পাসওয়ার্ড পরিবর্তন হয়েছে!");
-            document.getElementById('current-password').value = '';
-            document.getElementById('new-password').value = '';
-            document.getElementById('confirm-password').value = '';
+        window.logout = async function() {
+            try { await signOut(auth); } catch (e) {}
+            location.reload();
         }
 
         window.showTab = function(tab) {
@@ -876,7 +916,6 @@
             return result.data.display_url;
         }
 
-        // ⚡ FIXED: batch update products on category key rename
         async function updateProductsCategory(oldKey, newKey) {
             const productsSnap = await getDocs(collection(db, "products"));
             const batch = writeBatch(db);
@@ -902,7 +941,6 @@
             const btn = document.getElementById('cat-save-btn');
             btn.disabled = true; btn.innerText = 'Saving...';
             try {
-                // ⚡ FIXED: Priority = new image > emoji > existing image > default
                 let finalIcon = '📦';
                 if (pendingCategoryImage) {
                     btn.innerText = 'Uploading image...';
@@ -922,7 +960,6 @@
                 }
                 await setDoc(doc(db, "settings", "main"), { categories: allCategories }, { merge: true });
 
-                // ⚡ FIXED: If key changed, update all products
                 if (oldKey && oldKey !== key) {
                     btn.innerText = 'Updating products...';
                     const updated = await updateProductsCategory(oldKey, key);
@@ -934,17 +971,15 @@
                 closeCategoryModal();
                 renderAdminCategories();
                 populateCategoryDropdown();
-                await loadProducts(); // Refresh products list
+                await loadProducts();
             } catch (e) { alert("Error: " + e.message); }
             finally { btn.disabled = false; btn.innerText = 'Save'; }
         }
 
-        // ⚡ FIXED: Warn about orphan products before delete
         window.deleteCategory = async function(index) {
             const cat = allCategories[index];
             if (!cat) return;
 
-            // Count products in this category
             let productCount = 0;
             try {
                 const productsSnap = await getDocs(collection(db, "products"));
@@ -959,11 +994,9 @@
             }
             if (!confirm(msg)) return;
 
-            // Remove category
             allCategories.splice(index, 1);
             await setDoc(doc(db, "settings", "main"), { categories: allCategories }, { merge: true });
 
-            // Clear category from orphaned products
             if (productCount > 0) {
                 try {
                     const productsSnap = await getDocs(collection(db, "products"));
@@ -1076,7 +1109,6 @@
             document.getElementById('banner-modal').classList.remove('hidden');
         }
 
-        // ⚡ FIXED: Edit middle banner
         window.editBanner = function(i) {
             const b = middleBanners[i];
             document.getElementById('banner-modal-title').innerText = 'Edit Banner';
@@ -1461,7 +1493,6 @@
             if (oldStatus === status) return;
 
             try {
-                // If cancelling → restore stock
                 if (status === 'cancelled' && oldStatus !== 'cancelled' && order?.items && order.stockDeducted !== false) {
                     for (const item of order.items) {
                         if (!item.id) continue;
@@ -1473,7 +1504,6 @@
                     if (order) order.stockDeducted = false;
                 }
 
-                // If un-cancelling → deduct stock again
                 if (oldStatus === 'cancelled' && status !== 'cancelled' && order?.items) {
                     for (const item of order.items) {
                         if (!item.id) continue;
