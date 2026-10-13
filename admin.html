@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        * { -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background: #F5F5F7; }
         .navy-bg { background: #0A1628; }
         .gold-bg { background: #D4A84B; }
@@ -15,36 +16,39 @@
         .gold-text { color: #D4A84B; }
         .tab-active { background: #0A1628; color: white; }
         .tab-inactive { background: white; color: #666; }
-        .modal-bg { background: rgba(10, 22, 40, 0.7); backdrop-filter: blur(4px); }
+        .modal-bg { background: rgba(10, 22, 40, 0.75); backdrop-filter: blur(4px); }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .img-thumb { position: relative; }
-        .img-thumb .remove-btn { position: absolute; top: -6px; right: -6px; background: #dc2626; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
-        .cat-preview { width: 60px; height: 60px; background: #FFFDF7; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(10,22,40,0.06); overflow: hidden; }
+        .img-thumb .remove-btn { position: absolute; top: -6px; right: -6px; background: #dc2626; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 2px solid white; }
+        .cat-preview { width: 60px; height: 60px; background: #FFFDF7; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(10,22,40,0.06); overflow: hidden; flex-shrink: 0; }
         .cat-preview img { width: 48px; height: 48px; object-fit: contain; }
         .cat-preview .emoji { font-size: 32px; line-height: 1; }
     </style>
 </head>
 <body>
 
+    <!-- LOGIN -->
     <div id="login-section" class="min-h-screen flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm">
             <div class="text-center mb-6">
                 <img src="logo.png" alt="Heartix" class="h-14 mx-auto mb-3">
                 <h2 class="text-2xl font-bold navy-text">Admin Control</h2>
+                <p class="text-xs text-gray-400 mt-1">Heartix Smart Appliances</p>
             </div>
             <input type="password" id="admin-password" placeholder="Enter Password" class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 mb-4 outline-none focus:border-[#D4A84B]">
             <button onclick="login()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Login</button>
         </div>
     </div>
 
+    <!-- DASHBOARD -->
     <div id="dashboard-section" class="hidden min-h-screen">
         <header class="navy-bg sticky top-0 z-40 p-4 flex justify-between items-center shadow-lg">
             <div class="flex items-center gap-3">
                 <img src="logo.png" class="h-9 bg-white rounded p-1">
                 <div>
                     <h1 class="text-white font-bold text-sm">Admin Control</h1>
-                    <p class="gold-text text-[10px]">Full Access</p>
+                    <p class="gold-text text-[10px]">Heartix Panel</p>
                 </div>
             </div>
             <button onclick="logout()" class="text-white/80 text-sm"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -66,6 +70,7 @@
 
             <!-- DASHBOARD -->
             <div id="content-dashboard" class="tab-content">
+                <h2 class="text-xl font-bold navy-text mb-4">Overview</h2>
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <div class="bg-white rounded-2xl p-4 shadow-sm">
                         <i class="fas fa-box text-2xl text-blue-500"></i>
@@ -88,6 +93,10 @@
                         <p class="text-xs text-gray-500">Revenue</p>
                     </div>
                 </div>
+                <div class="bg-white rounded-2xl p-4 shadow-sm">
+                    <h3 class="font-bold navy-text mb-3">Recent Orders</h3>
+                    <div id="recent-orders" class="space-y-2"><p class="text-gray-400 text-sm text-center py-4">No orders yet</p></div>
+                </div>
             </div>
 
             <!-- PRODUCTS -->
@@ -96,14 +105,17 @@
                     <h2 class="text-xl font-bold navy-text">Products</h2>
                     <button onclick="openAddModal()" class="gold-bg text-navy px-4 py-2 rounded-xl font-semibold text-sm"><i class="fas fa-plus mr-1"></i> Add</button>
                 </div>
-                <input type="text" id="product-search" oninput="renderAdminProducts()" placeholder="Search..." class="w-full bg-white rounded-xl px-4 py-3 mb-4 outline-none border">
+                <input type="text" id="product-search" oninput="renderAdminProducts()" placeholder="Search..." class="w-full bg-white rounded-xl px-4 py-3 mb-4 outline-none border border-gray-200">
                 <div id="product-list-admin" class="space-y-3"><p class="text-center text-gray-400 py-8">Loading...</p></div>
             </div>
 
             <!-- CATEGORIES -->
             <div id="content-categories" class="tab-content hidden">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold navy-text">Categories</h2>
+                    <div>
+                        <h2 class="text-xl font-bold navy-text">Categories</h2>
+                        <p class="text-xs text-gray-500 mt-1">নাম, আইকন বা ছবি পরিবর্তন করুন</p>
+                    </div>
                     <button onclick="openCategoryModal()" class="gold-bg text-navy px-4 py-2 rounded-xl font-semibold text-sm"><i class="fas fa-plus mr-1"></i> New</button>
                 </div>
                 <div id="category-list-admin" class="space-y-3"><p class="text-center text-gray-400 py-8">Loading...</p></div>
@@ -113,11 +125,10 @@
             <div id="content-content" class="tab-content hidden">
                 <h2 class="text-xl font-bold navy-text mb-4">Homepage Content</h2>
 
-                <!-- HERO BANNERS -->
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
                     <div class="flex justify-between items-center mb-3">
                         <div>
-                            <h3 class="font-bold navy-text text-base"><i class="fas fa-images gold-text mr-2"></i>Hero Banners (Top Slider)</h3>
+                            <h3 class="font-bold navy-text text-base"><i class="fas fa-images gold-text mr-2"></i>Hero Banners</h3>
                             <p class="text-[11px] text-gray-500 mt-0.5">উপরে স্লাইডিং ব্যানার</p>
                         </div>
                         <button onclick="openHeroModal()" class="gold-bg text-navy px-3 py-1.5 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
@@ -125,36 +136,33 @@
                     <div id="hero-banners-list-admin" class="space-y-2"></div>
                 </div>
 
-                <!-- CUSTOM SECTIONS -->
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
                     <div class="flex justify-between items-center mb-3">
                         <div>
                             <h3 class="font-bold navy-text text-base"><i class="fas fa-layer-group gold-text mr-2"></i>Custom Sections</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5">"All Natural Honey" এর মতো সেকশন</p>
+                            <p class="text-[11px] text-gray-500 mt-0.5">ক্যাটেগরি ভিত্তিক সেকশন</p>
                         </div>
                         <button onclick="openSectionModal()" class="gold-bg text-navy px-3 py-1.5 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
                     </div>
                     <div id="sections-list-admin" class="space-y-2"></div>
                 </div>
 
-                <!-- MIDDLE BANNERS -->
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
                     <div class="flex justify-between items-center mb-3">
                         <div>
                             <h3 class="font-bold navy-text text-base"><i class="fas fa-image gold-text mr-2"></i>Middle Banners</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5">সেকশনের মাঝে দেখানোর ছবি</p>
+                            <p class="text-[11px] text-gray-500 mt-0.5">সেকশনের মাঝে ছবি</p>
                         </div>
                         <button onclick="openBannerModal()" class="gold-bg text-navy px-3 py-1.5 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
                     </div>
                     <div id="banners-list-admin" class="space-y-2"></div>
                 </div>
 
-                <!-- TESTIMONIALS -->
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
                     <div class="flex justify-between items-center mb-3">
                         <div>
                             <h3 class="font-bold navy-text text-base"><i class="fas fa-quote-left gold-text mr-2"></i>Customer Reviews</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5">কাস্টমার রিভিউ স্লাইডার</p>
+                            <p class="text-[11px] text-gray-500 mt-0.5">রিভিউ স্লাইডার</p>
                         </div>
                         <button onclick="openTestimonialModal()" class="gold-bg text-navy px-3 py-1.5 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
                     </div>
@@ -186,31 +194,33 @@
                 <h2 class="text-xl font-bold navy-text mb-4">Settings</h2>
 
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4 border-2 border-red-100">
-                    <h3 class="font-bold text-red-600 mb-3"><i class="fas fa-key mr-2"></i>Password</h3>
-                    <input type="password" id="current-password" placeholder="Current" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <input type="password" id="new-password" placeholder="New (min 6)" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <input type="password" id="confirm-password" placeholder="Confirm" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <button onclick="changePassword()" class="w-full bg-red-600 text-white py-2 rounded-lg font-semibold text-sm">Update</button>
+                    <h3 class="font-bold text-red-600 mb-3"><i class="fas fa-key mr-2"></i>Change Password</h3>
+                    <input type="password" id="current-password" placeholder="Current Password" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
+                    <input type="password" id="new-password" placeholder="New Password (min 6)" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
+                    <input type="password" id="confirm-password" placeholder="Confirm New Password" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
+                    <button onclick="changePassword()" class="w-full bg-red-600 text-white py-2 rounded-lg font-semibold text-sm"><i class="fas fa-shield-alt mr-1"></i> Update Password</button>
                 </div>
 
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <h3 class="font-bold navy-text mb-3">Delivery</h3>
-                    <input type="number" id="setting-delivery-charge" placeholder="Delivery Charge ৳" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <input type="number" id="setting-free-delivery" placeholder="Free above ৳" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
+                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-truck gold-text mr-2"></i>Delivery</h3>
+                    <label class="text-xs text-gray-500 font-semibold">Delivery Charge (৳)</label>
+                    <input type="number" id="setting-delivery-charge" placeholder="100" class="w-full border rounded-lg px-3 py-2 mb-3 outline-none">
+                    <label class="text-xs text-gray-500 font-semibold">Free Delivery Above (৳)</label>
+                    <input type="number" id="setting-free-delivery" placeholder="5000" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
                 </div>
 
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <h3 class="font-bold navy-text mb-3">Contact</h3>
+                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-phone gold-text mr-2"></i>Contact Info</h3>
                     <input type="text" id="setting-address" placeholder="Address" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
                     <input type="text" id="setting-phone" placeholder="Phone" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
                     <input type="email" id="setting-email" placeholder="Email" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <input type="text" id="setting-whatsapp" placeholder="WhatsApp (8801...)" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
+                    <input type="text" id="setting-whatsapp" placeholder="WhatsApp (8801XXXXXXXXX)" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
                 </div>
 
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <h3 class="font-bold navy-text mb-3">Payment</h3>
-                    <input type="text" id="setting-bkash" placeholder="bKash" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <input type="text" id="setting-nagad" placeholder="Nagad" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
+                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-credit-card gold-text mr-2"></i>Payment</h3>
+                    <input type="text" id="setting-bkash" placeholder="bKash Number" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
+                    <input type="text" id="setting-nagad" placeholder="Nagad Number" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
                 </div>
 
                 <button onclick="saveSettings()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold mb-4"><i class="fas fa-save mr-2"></i> Save Settings</button>
@@ -222,30 +232,51 @@
     <!-- PRODUCT MODAL -->
     <div id="product-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div class="navy-bg p-4 rounded-t-2xl flex justify-between sticky top-0 z-10">
+            <div class="navy-bg p-4 rounded-t-2xl flex justify-between items-center sticky top-0 z-10">
                 <h3 id="modal-title" class="text-white font-bold">Add Product</h3>
-                <button onclick="closeModal()" class="text-white/80"><i class="fas fa-times"></i></button>
+                <button onclick="closeModal()" class="text-white/80 w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-5 space-y-3">
                 <input type="hidden" id="edit-product-id">
-                <input type="text" id="p-name" placeholder="Name *" class="w-full border rounded-lg px-3 py-2 outline-none">
-                <div class="grid grid-cols-2 gap-3">
-                    <input type="number" id="p-price" placeholder="Price ৳ *" class="w-full border rounded-lg px-3 py-2 outline-none">
-                    <input type="number" id="p-oldprice" placeholder="Old Price" class="w-full border rounded-lg px-3 py-2 outline-none">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <select id="p-category" class="w-full border rounded-lg px-3 py-2 outline-none"></select>
-                    <input type="number" id="p-stock" value="10" placeholder="Stock" class="w-full border rounded-lg px-3 py-2 outline-none">
-                </div>
-                <input type="text" id="p-brand" placeholder="Brand" class="w-full border rounded-lg px-3 py-2 outline-none">
-                <textarea id="p-description" rows="3" placeholder="Description" class="w-full border rounded-lg px-3 py-2 outline-none"></textarea>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Images (Max 5, first = Main)</label>
+                    <label class="text-xs text-gray-500 font-semibold">Product Name *</label>
+                    <input type="text" id="p-name" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none" placeholder="e.g. Samsung 32 inch TV">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold">Price (৳) *</label>
+                        <input type="number" id="p-price" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold">Old Price</label>
+                        <input type="number" id="p-oldprice" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold">Category *</label>
+                        <select id="p-category" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold">Stock Qty</label>
+                        <input type="number" id="p-stock" value="10" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Brand</label>
+                    <input type="text" id="p-brand" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none" placeholder="e.g. Samsung">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Description</label>
+                    <textarea id="p-description" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none"></textarea>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Images * (Max 5, first = Main)</label>
                     <div id="image-preview-grid" class="grid grid-cols-4 gap-2 my-2"></div>
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
                         <label for="p-image-file" class="cursor-pointer block">
                             <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-1"></i>
-                            <p class="text-xs text-gray-500">Click to upload</p>
+                            <p class="text-xs text-gray-500">Click to upload images</p>
                         </label>
                         <input type="file" id="p-image-file" accept="image/*" multiple class="hidden">
                     </div>
@@ -258,24 +289,36 @@
     <!-- CATEGORY MODAL -->
     <div id="category-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div class="navy-bg p-4 rounded-t-2xl flex justify-between sticky top-0 z-10">
+            <div class="navy-bg p-4 rounded-t-2xl flex justify-between items-center sticky top-0 z-10">
                 <h3 id="cat-modal-title" class="text-white font-bold">Category</h3>
-                <button onclick="closeCategoryModal()" class="text-white/80"><i class="fas fa-times"></i></button>
+                <button onclick="closeCategoryModal()" class="text-white/80 w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-5 space-y-3">
                 <input type="hidden" id="edit-category-key">
-                <input type="text" id="cat-key" placeholder="Key (English, no spaces) *" class="w-full border rounded-lg px-3 py-2 outline-none">
-                <input type="text" id="cat-label" placeholder="Display Name *" class="w-full border rounded-lg px-3 py-2 outline-none">
-                <input type="text" id="cat-icon-emoji" placeholder="Emoji (e.g. 📺)" maxlength="4" class="w-full border rounded-lg px-3 py-2 outline-none">
-                <div class="text-center text-xs text-gray-400">— or image —</div>
-                <div id="cat-image-preview" class="hidden mb-2"><img id="cat-image-preview-img" class="w-16 h-16 object-contain bg-gray-50 rounded-lg border"></div>
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
-                    <label for="cat-image-file" class="cursor-pointer block">
-                        <i class="fas fa-image text-xl text-gray-400"></i>
-                        <p class="text-xs text-gray-500 mt-1">Upload Image</p>
-                    </label>
-                    <input type="file" id="cat-image-file" accept="image/*" class="hidden">
-                    <p id="cat-file-name" class="text-xs text-green-600 mt-1"></p>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Category Key * (English)</label>
+                    <input type="text" id="cat-key" placeholder="e.g. AC" class="w-full border rounded-lg px-3 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Display Name *</label>
+                    <input type="text" id="cat-label" placeholder="e.g. Air Conditioners" class="w-full border rounded-lg px-3 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Icon (Emoji)</label>
+                    <input type="text" id="cat-icon-emoji" placeholder="❄️ 📺 🌀" maxlength="4" class="w-full border rounded-lg px-3 py-2 outline-none">
+                </div>
+                <div class="text-center text-xs text-gray-400">— or —</div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Category Image</label>
+                    <div id="cat-image-preview" class="hidden mb-2"><img id="cat-image-preview-img" class="w-16 h-16 object-contain bg-gray-50 rounded-lg border"></div>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
+                        <label for="cat-image-file" class="cursor-pointer block">
+                            <i class="fas fa-image text-xl text-gray-400"></i>
+                            <p class="text-xs text-gray-500 mt-1">Upload Image</p>
+                        </label>
+                        <input type="file" id="cat-image-file" accept="image/*" class="hidden">
+                        <p id="cat-file-name" class="text-xs text-green-600 mt-1"></p>
+                    </div>
                 </div>
                 <button onclick="saveCategory()" id="cat-save-btn" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Save</button>
             </div>
@@ -291,8 +334,14 @@
             </div>
             <div class="p-5 space-y-3">
                 <input type="hidden" id="edit-section-idx">
-                <input type="text" id="section-title-input" placeholder="Section Title *" class="w-full border rounded-lg px-3 py-2 outline-none">
-                <select id="section-category" class="w-full border rounded-lg px-3 py-2 outline-none"></select>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Section Title *</label>
+                    <input type="text" id="section-title-input" placeholder="e.g. All Natural Honey" class="w-full border rounded-lg px-3 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Category *</label>
+                    <select id="section-category" class="w-full border rounded-lg px-3 py-2 outline-none"></select>
+                </div>
                 <button onclick="saveSection()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Save Section</button>
             </div>
         </div>
@@ -306,12 +355,15 @@
                 <button onclick="closeBannerModal()" class="text-white/80"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-5 space-y-3">
-                <input type="text" id="banner-link" placeholder="Link URL (optional)" class="w-full border rounded-lg px-3 py-2 outline-none">
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Link URL (Optional)</label>
+                    <input type="text" id="banner-link" placeholder="https://..." class="w-full border rounded-lg px-3 py-2 outline-none">
+                </div>
                 <div id="banner-image-preview" class="hidden mb-2"><img id="banner-preview-img" class="w-full h-24 object-contain bg-gray-50 rounded-lg border"></div>
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
                     <label for="banner-image-file" class="cursor-pointer block">
                         <i class="fas fa-image text-2xl text-gray-400"></i>
-                        <p class="text-xs text-gray-500 mt-1">Click to upload banner</p>
+                        <p class="text-xs text-gray-500 mt-1">Upload Banner Image</p>
                     </label>
                     <input type="file" id="banner-image-file" accept="image/*" class="hidden">
                     <p id="banner-file-name" class="text-xs text-green-600 mt-1"></p>
@@ -323,23 +375,35 @@
 
     <!-- TESTIMONIAL MODAL -->
     <div id="testimonial-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md">
-            <div class="navy-bg p-4 rounded-t-2xl flex justify-between">
+        <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="navy-bg p-4 rounded-t-2xl flex justify-between sticky top-0">
                 <h3 id="testimonial-modal-title" class="text-white font-bold">Add Review</h3>
                 <button onclick="closeTestimonialModal()" class="text-white/80"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-5 space-y-3">
                 <input type="hidden" id="edit-testimonial-idx">
-                <input type="text" id="test-name" placeholder="Customer Name *" class="w-full border rounded-lg px-3 py-2 outline-none">
-                <input type="text" id="test-role" placeholder="Role (e.g. Housewife)" class="w-full border rounded-lg px-3 py-2 outline-none">
-                <textarea id="test-text" rows="3" placeholder="Review text *" class="w-full border rounded-lg px-3 py-2 outline-none"></textarea>
-                <select id="test-rating" class="w-full border rounded-lg px-3 py-2 outline-none">
-                    <option value="5">5 Stars</option>
-                    <option value="4">4 Stars</option>
-                    <option value="3">3 Stars</option>
-                    <option value="2">2 Stars</option>
-                    <option value="1">1 Star</option>
-                </select>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Customer Name *</label>
+                    <input type="text" id="test-name" class="w-full border rounded-lg px-3 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Role</label>
+                    <input type="text" id="test-role" placeholder="e.g. Housewife" class="w-full border rounded-lg px-3 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Review Text *</label>
+                    <textarea id="test-text" rows="3" class="w-full border rounded-lg px-3 py-2 outline-none"></textarea>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Rating</label>
+                    <select id="test-rating" class="w-full border rounded-lg px-3 py-2 outline-none">
+                        <option value="5">★★★★★ (5)</option>
+                        <option value="4">★★★★☆ (4)</option>
+                        <option value="3">★★★☆☆ (3)</option>
+                        <option value="2">★★☆☆☆ (2)</option>
+                        <option value="1">★☆☆☆☆ (1)</option>
+                    </select>
+                </div>
                 <div id="test-image-preview" class="hidden mb-2"><img id="test-preview-img" class="w-16 h-16 object-cover rounded-full border"></div>
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
                     <label for="test-image-file" class="cursor-pointer block">
@@ -354,7 +418,7 @@
         </div>
     </div>
 
-    <!-- HERO BANNER MODAL -->
+    <!-- HERO MODAL -->
     <div id="hero-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div class="navy-bg p-4 rounded-t-2xl flex justify-between sticky top-0 z-10">
@@ -365,7 +429,7 @@
                 <input type="hidden" id="edit-hero-idx">
                 <div>
                     <label class="text-xs text-gray-500 font-semibold">Badge (Top small text)</label>
-                    <input type="text" id="hero-badge" placeholder="✨ Premium / 🔥 Offer" class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <input type="text" id="hero-badge" placeholder="✨ Premium" class="w-full border rounded-lg px-3 py-2 outline-none">
                 </div>
                 <div>
                     <label class="text-xs text-gray-500 font-semibold">Title *</label>
@@ -389,7 +453,7 @@
                     <input type="text" id="hero-link" placeholder="https://..." class="w-full border rounded-lg px-3 py-2 outline-none">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Background Image (Optional - overrides color)</label>
+                    <label class="text-xs text-gray-500 font-semibold">Background Image (Optional)</label>
                     <div id="hero-image-preview" class="hidden mb-2"><img id="hero-preview-img" class="w-full h-24 object-cover rounded-lg border"></div>
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
                         <label for="hero-image-file" class="cursor-pointer block">
@@ -421,7 +485,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const DEFAULT_PASSWORD = "heartix2024";
-        
+
         const DEFAULT_CATEGORIES = [
             { key: 'TV', label: 'Televisions', icon: '📺' },
             { key: 'Fridge', label: 'Refrigerators', icon: '❄️' },
@@ -439,6 +503,7 @@
         let heroBanners = [];
         let currentOrderFilter = 'all';
         let currentAdminPassword = DEFAULT_PASSWORD;
+
         let pendingImages = [];
         let existingImages = [];
         let pendingCategoryImage = null;
@@ -480,7 +545,7 @@
             const cp = document.getElementById('confirm-password').value;
             if (current !== currentAdminPassword) return alert("❌ বর্তমান পাসওয়ার্ড ভুল!");
             if (np.length < 6) return alert("❌ কমপক্ষে ৬ অক্ষর!");
-            if (np !== cp) return alert("❌ মিলছে না!");
+            if (np !== cp) return alert("❌ পাসওয়ার্ড মিলছে না!");
             await setDoc(doc(db, "settings", "admin"), { password: np }, { merge: true });
             currentAdminPassword = np;
             alert("✅ পাসওয়ার্ড পরিবর্তন হয়েছে!");
@@ -500,36 +565,35 @@
             const activeBtn = document.getElementById('tab-' + tab);
             if (activeBtn) { activeBtn.classList.add('tab-active'); activeBtn.classList.remove('tab-inactive'); }
             if (tab === 'settings') loadSettings();
-            if (tab === 'dashboard') updateStats();
             window.scrollTo({top:0, behavior:'smooth'});
         }
 
         async function loadAllData() {
-            await loadCategoriesAndContent();
+            await loadSettingsData();
             await loadProducts();
             await loadOrders();
             await loadReviews();
             updateStats();
         }
 
-        async function loadCategoriesAndContent() {
+        async function loadSettingsData() {
             try {
                 const snap = await getDoc(doc(db, "settings", "main"));
                 if (snap.exists()) {
                     const s = snap.data();
-                    if (s.categories && Array.isArray(s.categories) && s.categories.length > 0) allCategories = s.categories;
-                    if (s.customSections) customSections = s.customSections;
-                    if (s.middleBanners) middleBanners = s.middleBanners;
-                    if (s.testimonials) testimonials = s.testimonials;
-                    if (s.heroBanners) heroBanners = s.heroBanners;
+                    if (Array.isArray(s.categories) && s.categories.length > 0) allCategories = s.categories;
+                    if (Array.isArray(s.customSections)) customSections = s.customSections;
+                    if (Array.isArray(s.middleBanners)) middleBanners = s.middleBanners;
+                    if (Array.isArray(s.testimonials)) testimonials = s.testimonials;
+                    if (Array.isArray(s.heroBanners)) heroBanners = s.heroBanners;
                 }
             } catch (e) {}
             renderAdminCategories();
             populateCategoryDropdown();
+            renderHeroBannersList();
             renderSectionsList();
             renderBannersList();
             renderTestimonialsList();
-            renderHeroBannersList();
         }
 
         function populateCategoryDropdown() {
@@ -553,7 +617,7 @@
             }
         }
 
-        // ========== HERO BANNERS ==========
+        // ====== HERO BANNERS ======
         function renderHeroBannersList() {
             const list = document.getElementById('hero-banners-list-admin');
             if (!list) return;
@@ -568,18 +632,15 @@
                 else if (b.bg === 'gold') bgStyle = 'background:linear-gradient(135deg,#B8860B,#E8C77B);';
                 else if (b.bg === 'teal') bgStyle = 'background:linear-gradient(135deg,#0F4C5C,#2C8B9E);';
                 else bgStyle = 'background:linear-gradient(135deg,#0A1628,#152238);';
-                html += `
-                    <div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                        <div class="w-16 h-10 rounded-lg flex items-center justify-center text-[10px] font-bold text-white" style="${bgStyle}">
-                            ${!b.image ? (b.bg || 'navy').toUpperCase() : ''}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold navy-text truncate">${escapeHtml((b.title || '').replace(/<br>/g, ' '))}</p>
-                            <p class="text-[11px] text-gray-500 truncate">${escapeHtml(b.badge || '')}</p>
-                        </div>
-                        <button onclick="editHeroBanner(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-xs"></i></button>
-                        <button onclick="deleteHeroBanner(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
-                    </div>`;
+                html += `<div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                    <div class="w-16 h-10 rounded-lg flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0" style="${bgStyle}">${!b.image ? (b.bg || 'navy').toUpperCase() : ''}</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold navy-text truncate">${escapeHtml((b.title || '').replace(/<br>/g, ' '))}</p>
+                        <p class="text-[11px] text-gray-500 truncate">${escapeHtml(b.badge || '')}</p>
+                    </div>
+                    <button onclick="editHeroBanner(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-edit text-xs"></i></button>
+                    <button onclick="deleteHeroBanner(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
+                </div>`;
             });
             list.innerHTML = html;
         }
@@ -609,8 +670,6 @@
             document.getElementById('hero-subtitle-input').value = b.subtitle || '';
             document.getElementById('hero-bg').value = b.bg || 'navy';
             document.getElementById('hero-link').value = b.link || '';
-            document.getElementById('hero-image-file').value = '';
-            document.getElementById('hero-file-name').innerText = '';
             pendingHeroImage = null;
             if (b.image) {
                 document.getElementById('hero-preview-img').src = b.image;
@@ -645,7 +704,6 @@
 
             const btn = document.getElementById('hero-save-btn');
             btn.disabled = true; btn.innerText = 'Saving...';
-
             try {
                 let image = null;
                 if (pendingHeroImage) {
@@ -672,7 +730,7 @@
             renderHeroBannersList();
         }
 
-        // ========== CATEGORIES ==========
+        // ====== CATEGORIES ======
         window.renderAdminCategories = function() {
             const list = document.getElementById('category-list-admin');
             if (allCategories.length === 0) {
@@ -681,21 +739,19 @@
             }
             let html = '';
             allCategories.forEach((c, i) => {
-                const iconHtml = (c.icon && (c.icon.startsWith('http') || c.icon.startsWith('data:')))
-                    ? `<img src="${c.icon}" class="w-10 h-10 object-contain">`
-                    : `<span class="text-3xl">${c.icon || '📦'}</span>`;
-                html += `
-                    <div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
-                        <div class="cat-preview">${iconHtml}</div>
-                        <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-sm navy-text truncate">${escapeHtml(c.label)}</p>
-                            <p class="text-xs text-gray-500">${escapeHtml(c.key)}</p>
-                        </div>
-                        <div class="flex flex-col gap-1">
-                            <button onclick="editCategory(${i})" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-sm"></i></button>
-                            <button onclick="deleteCategory(${i})" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-sm"></i></button>
-                        </div>
-                    </div>`;
+                const isImg = c.icon && (c.icon.startsWith('http') || c.icon.startsWith('data:'));
+                const iconHtml = isImg ? `<img src="${c.icon}">` : `<span class="emoji">${c.icon || '📦'}</span>`;
+                html += `<div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
+                    <div class="cat-preview">${iconHtml}</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-sm navy-text truncate">${escapeHtml(c.label)}</p>
+                        <p class="text-xs text-gray-500">${escapeHtml(c.key)}</p>
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="editCategory(${i})" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-sm"></i></button>
+                        <button onclick="deleteCategory(${i})" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-sm"></i></button>
+                    </div>
+                </div>`;
             });
             list.innerHTML = html;
         }
@@ -721,11 +777,11 @@
             document.getElementById('edit-category-key').value = c.key;
             document.getElementById('cat-key').value = c.key;
             document.getElementById('cat-label').value = c.label;
-            const isImage = c.icon && (c.icon.startsWith('http') || c.icon.startsWith('data:'));
-            document.getElementById('cat-icon-emoji').value = isImage ? '' : (c.icon || '');
+            const isImg = c.icon && (c.icon.startsWith('http') || c.icon.startsWith('data:'));
+            document.getElementById('cat-icon-emoji').value = isImg ? '' : (c.icon || '');
             pendingCategoryImage = null;
-            existingCategoryImage = isImage ? c.icon : null;
-            if (isImage) {
+            existingCategoryImage = isImg ? c.icon : null;
+            if (isImg) {
                 document.getElementById('cat-image-preview-img').src = c.icon;
                 document.getElementById('cat-image-preview').classList.remove('hidden');
             } else {
@@ -798,7 +854,7 @@
             populateCategoryDropdown();
         }
 
-        // ========== CUSTOM SECTIONS ==========
+        // ====== SECTIONS ======
         function renderSectionsList() {
             const list = document.getElementById('sections-list-admin');
             if (customSections.length === 0) {
@@ -808,15 +864,14 @@
             let html = '';
             customSections.forEach((s, i) => {
                 const cat = allCategories.find(c => c.key === s.categoryKey);
-                html += `
-                    <div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold navy-text">${escapeHtml(s.title)}</p>
-                            <p class="text-[11px] text-gray-500">Category: ${cat ? escapeHtml(cat.label) : escapeHtml(s.categoryKey)}</p>
-                        </div>
-                        <button onclick="editSection(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-xs"></i></button>
-                        <button onclick="deleteSection(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
-                    </div>`;
+                html += `<div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold navy-text">${escapeHtml(s.title)}</p>
+                        <p class="text-[11px] text-gray-500">Category: ${cat ? escapeHtml(cat.label) : escapeHtml(s.categoryKey)}</p>
+                    </div>
+                    <button onclick="editSection(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-edit text-xs"></i></button>
+                    <button onclick="deleteSection(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
+                </div>`;
             });
             list.innerHTML = html;
         }
@@ -860,7 +915,7 @@
             renderSectionsList();
         }
 
-        // ========== MIDDLE BANNERS ==========
+        // ====== BANNERS ======
         function renderBannersList() {
             const list = document.getElementById('banners-list-admin');
             if (middleBanners.length === 0) {
@@ -869,14 +924,13 @@
             }
             let html = '';
             middleBanners.forEach((b, i) => {
-                html += `
-                    <div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                        <img src="${b.image}" class="w-16 h-12 object-contain rounded">
-                        <div class="flex-1 min-w-0">
-                            <p class="text-[11px] text-gray-500 truncate">${escapeHtml(b.link || 'No link')}</p>
-                        </div>
-                        <button onclick="deleteBanner(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
-                    </div>`;
+                html += `<div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                    <img src="${b.image}" class="w-16 h-12 object-contain rounded flex-shrink-0">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[11px] text-gray-500 truncate">${escapeHtml(b.link || 'No link')}</p>
+                    </div>
+                    <button onclick="deleteBanner(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
+                </div>`;
             });
             list.innerHTML = html;
         }
@@ -927,7 +981,7 @@
             renderBannersList();
         }
 
-        // ========== TESTIMONIALS ==========
+        // ====== TESTIMONIALS ======
         function renderTestimonialsList() {
             const list = document.getElementById('testimonials-list-admin');
             if (testimonials.length === 0) {
@@ -936,16 +990,15 @@
             }
             let html = '';
             testimonials.forEach((t, i) => {
-                html += `
-                    <div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                        ${t.image ? `<img src="${t.image}" class="w-10 h-10 rounded-full object-cover">` : `<div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center"><i class="fas fa-user text-gray-400"></i></div>`}
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold navy-text">${escapeHtml(t.name)}</p>
-                            <p class="text-[11px] text-gray-500">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</p>
-                        </div>
-                        <button onclick="editTestimonial(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-xs"></i></button>
-                        <button onclick="deleteTestimonial(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
-                    </div>`;
+                html += `<div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                    ${t.image ? `<img src="${t.image}" class="w-10 h-10 rounded-full object-cover flex-shrink-0">` : `<div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><i class="fas fa-user text-gray-400"></i></div>`}
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold navy-text">${escapeHtml(t.name)}</p>
+                        <p class="text-[11px] text-gray-500">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</p>
+                    </div>
+                    <button onclick="editTestimonial(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-edit text-xs"></i></button>
+                    <button onclick="deleteTestimonial(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
+                </div>`;
             });
             list.innerHTML = html;
         }
@@ -1032,7 +1085,7 @@
             renderTestimonialsList();
         }
 
-        // ========== PRODUCTS ==========
+        // ====== PRODUCTS ======
         async function loadProducts() {
             try {
                 const snap = await getDocs(collection(db, "products"));
@@ -1053,19 +1106,19 @@
             }
             let html = '';
             filtered.forEach(p => {
-                html += `
-                    <div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
-                        <img src="${p.image}" class="w-16 h-16 object-contain bg-gray-50 rounded-lg">
-                        <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-sm navy-text truncate">${escapeHtml(p.name)}</p>
-                            <p class="text-xs text-gray-500">${escapeHtml(p.category || '')}${p.brand ? ' • ' + escapeHtml(p.brand) : ''}</p>
-                            <p class="text-sm font-bold gold-text">৳ ${p.price}</p>
-                        </div>
-                        <div class="flex flex-col gap-1">
-                            <button onclick="editProduct('${p.id}')" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-sm"></i></button>
-                            <button onclick="deleteProduct('${p.id}')" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-sm"></i></button>
-                        </div>
-                    </div>`;
+                const imgCount = (p.images && p.images.length) || 1;
+                html += `<div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
+                    <img src="${p.image}" class="w-16 h-16 object-contain bg-gray-50 rounded-lg flex-shrink-0">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-sm navy-text truncate">${escapeHtml(p.name)}</p>
+                        <p class="text-xs text-gray-500">${escapeHtml(p.category || '')}${p.brand ? ' • ' + escapeHtml(p.brand) : ''} • ${imgCount} img</p>
+                        <p class="text-sm font-bold gold-text">৳ ${p.price}</p>
+                    </div>
+                    <div class="flex flex-col gap-1 flex-shrink-0">
+                        <button onclick="editProduct('${p.id}')" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-sm"></i></button>
+                        <button onclick="deleteProduct('${p.id}')" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-sm"></i></button>
+                    </div>
+                </div>`;
             });
             list.innerHTML = html;
         }
@@ -1109,11 +1162,11 @@
             const grid = document.getElementById('image-preview-grid');
             let html = '';
             existingImages.forEach((url, i) => {
-                html += `<div class="img-thumb"><img src="${url}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border ${i === 0 && pendingImages.length === 0 ? 'border-2 border-gold' : ''}"><button onclick="removeExistingImage(${i})" class="remove-btn">×</button></div>`;
+                html += `<div class="img-thumb"><img src="${url}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border ${i === 0 && pendingImages.length === 0 ? 'border-2 border-[#D4A84B]' : 'border-gray-200'}"><button onclick="removeExistingImage(${i})" class="remove-btn">×</button></div>`;
             });
             pendingImages.forEach((item, i) => {
                 const isMain = existingImages.length === 0 && i === 0;
-                html += `<div class="img-thumb"><img src="${item.dataUrl}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border ${isMain ? 'border-2 border-gold' : ''}"><button onclick="removePendingImage(${i})" class="remove-btn">×</button></div>`;
+                html += `<div class="img-thumb"><img src="${item.dataUrl}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border ${isMain ? 'border-2 border-[#D4A84B]' : 'border-gray-200'}"><button onclick="removePendingImage(${i})" class="remove-btn">×</button></div>`;
             });
             grid.innerHTML = html;
         }
@@ -1122,7 +1175,7 @@
 
         document.getElementById('p-image-file').addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
-            if (existingImages.length + pendingImages.length + files.length > 5) return alert("Max 5!");
+            if (existingImages.length + pendingImages.length + files.length > 5) return alert("Max 5 images!");
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = evt => {
@@ -1144,7 +1197,7 @@
             const brand = document.getElementById('p-brand').value.trim();
             const description = document.getElementById('p-description').value.trim();
             if (!name || !price) return alert("Name and Price required!");
-            if (existingImages.length === 0 && pendingImages.length === 0) return alert("Select images!");
+            if (existingImages.length === 0 && pendingImages.length === 0) return alert("Select at least one image!");
 
             const btn = document.getElementById('save-btn');
             btn.disabled = true; btn.innerText = "Uploading...";
@@ -1167,13 +1220,13 @@
         }
 
         window.deleteProduct = async function(id) {
-            if (!confirm("Delete?")) return;
+            if (!confirm("Delete this product?")) return;
             await deleteDoc(doc(db, "products", id));
             await loadProducts();
             updateStats();
         }
 
-        // ========== ORDERS ==========
+        // ====== ORDERS ======
         async function loadOrders() {
             try {
                 const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
@@ -1181,6 +1234,7 @@
                 allOrdersList = [];
                 snap.forEach(d => allOrdersList.push({ id: d.id, ...d.data() }));
                 renderAdminOrders();
+                renderRecentOrders();
             } catch (e) {}
         }
 
@@ -1203,43 +1257,68 @@
             const colors = { 'pending': 'bg-yellow-100 text-yellow-700', 'confirmed': 'bg-blue-100 text-blue-700', 'shipped': 'bg-purple-100 text-purple-700', 'delivered': 'bg-green-100 text-green-700', 'cancelled': 'bg-red-100 text-red-700' };
             let html = '';
             filtered.forEach(o => {
-                const itemsHtml = o.items.map(i => `<li class="flex justify-between"><span>${escapeHtml(i.name)} × ${i.quantity}</span><span>৳ ${i.price * i.quantity}</span></li>`).join('');
-                html += `
-                    <div class="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-gold">
-                        <div class="flex justify-between items-start mb-2">
-                            <div><p class="font-bold navy-text text-sm">${escapeHtml(o.orderNumber || o.id.slice(0,8))}</p><p class="text-xs text-gray-500">${escapeHtml(o.customer.name)} • ${escapeHtml(o.customer.phone)}</p></div>
-                            <span class="text-[10px] px-2 py-1 rounded-full font-bold uppercase ${colors[o.status] || 'bg-gray-100'}">${o.status}</span>
+                const itemsHtml = (o.items || []).map(i => `<li class="flex justify-between"><span>${escapeHtml(i.name)} × ${i.quantity}</span><span>৳ ${i.price * i.quantity}</span></li>`).join('');
+                html += `<div class="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-[#D4A84B]">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <p class="font-bold navy-text text-sm">${escapeHtml(o.orderNumber || o.id.slice(0,8))}</p>
+                            <p class="text-xs text-gray-500">${escapeHtml(o.customer?.name || '')} • ${escapeHtml(o.customer?.phone || '')}</p>
                         </div>
-                        <p class="text-xs text-gray-600 mb-2">${escapeHtml(o.customer.address)}, ${escapeHtml(o.customer.thana)}, ${escapeHtml(o.customer.district)}</p>
-                        <div class="bg-gray-50 rounded-lg p-2 mb-2"><ul class="text-xs text-gray-700 space-y-1">${itemsHtml}</ul></div>
-                        <div class="grid grid-cols-3 gap-2 text-center mb-2">
-                            <div class="bg-gray-50 rounded-lg p-2"><p class="text-[9px] text-gray-500">TOTAL</p><p class="text-sm font-bold">৳${o.total}</p></div>
-                            <div class="bg-green-50 rounded-lg p-2"><p class="text-[9px] text-gray-500">PAID</p><p class="text-sm font-bold text-green-700">৳${o.advancePaid}</p></div>
-                            <div class="bg-red-50 rounded-lg p-2"><p class="text-[9px] text-gray-500">DUE</p><p class="text-sm font-bold text-red-700">৳${o.dueAmount}</p></div>
-                        </div>
-                        <div class="flex gap-2">
-                            <select onchange="updateOrderStatus('${o.id}', this.value)" class="flex-1 text-xs border rounded-lg px-2 py-2 outline-none">
-                                <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                                <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Shipped</option>
-                                <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-                                <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                            </select>
-                            <a href="tel:${o.customer.phone}" class="px-3 py-2 bg-green-50 text-green-700 rounded-lg text-xs font-semibold flex items-center"><i class="fas fa-phone"></i></a>
-                        </div>
-                    </div>`;
+                        <span class="text-[10px] px-2 py-1 rounded-full font-bold uppercase ${colors[o.status] || 'bg-gray-100'}">${o.status}</span>
+                    </div>
+                    <p class="text-xs text-gray-600 mb-2">${escapeHtml(o.customer?.address || '')}, ${escapeHtml(o.customer?.thana || '')}, ${escapeHtml(o.customer?.district || '')}</p>
+                    <div class="bg-gray-50 rounded-lg p-2 mb-2"><ul class="text-xs text-gray-700 space-y-1">${itemsHtml}</ul></div>
+                    <div class="grid grid-cols-3 gap-2 text-center mb-2">
+                        <div class="bg-gray-50 rounded-lg p-2"><p class="text-[9px] text-gray-500">TOTAL</p><p class="text-sm font-bold">৳${o.total || 0}</p></div>
+                        <div class="bg-green-50 rounded-lg p-2"><p class="text-[9px] text-gray-500">PAID</p><p class="text-sm font-bold text-green-700">৳${o.advancePaid || 0}</p></div>
+                        <div class="bg-red-50 rounded-lg p-2"><p class="text-[9px] text-gray-500">DUE</p><p class="text-sm font-bold text-red-700">৳${o.dueAmount || 0}</p></div>
+                    </div>
+                    <div class="flex gap-2">
+                        <select onchange="updateOrderStatus('${o.id}', this.value)" class="flex-1 text-xs border rounded-lg px-2 py-2 outline-none">
+                            <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                            <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                            <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                        <a href="tel:${o.customer?.phone || ''}" class="px-3 py-2 bg-green-50 text-green-700 rounded-lg text-xs font-semibold flex items-center"><i class="fas fa-phone"></i></a>
+                    </div>
+                </div>`;
             });
             list.innerHTML = html;
         }
 
         window.updateOrderStatus = async function(id, status) {
-            await updateDoc(doc(db, "orders", id), { status });
-            const o = allOrdersList.find(x => x.id === id);
-            if (o) o.status = status;
-            updateStats();
+            try {
+                await updateDoc(doc(db, "orders", id), { status });
+                const o = allOrdersList.find(x => x.id === id);
+                if (o) o.status = status;
+                renderRecentOrders();
+                updateStats();
+            } catch (e) { alert("Error: " + e.message); }
         }
 
-        // ========== REVIEWS ==========
+        function renderRecentOrders() {
+            const list = document.getElementById('recent-orders');
+            const recent = allOrdersList.slice(0, 3);
+            if (recent.length === 0) {
+                list.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">No orders yet</p>';
+                return;
+            }
+            let html = '';
+            recent.forEach(o => {
+                html += `<div class="flex justify-between items-center py-2 border-b last:border-b-0">
+                    <div>
+                        <p class="text-sm font-semibold">${escapeHtml(o.customer?.name || '')}</p>
+                        <p class="text-xs text-gray-500">${(o.items || []).length} item(s) • ৳${o.total || 0}</p>
+                    </div>
+                    <span class="text-[10px] px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-bold uppercase">${o.status}</span>
+                </div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        // ====== REVIEWS ======
         async function loadReviews() {
             try {
                 const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
@@ -1255,7 +1334,7 @@
             if (allReviewsList.length === 0) { list.innerHTML = '<p class="text-center text-gray-400 py-8">No reviews</p>'; return; }
             let html = '';
             allReviewsList.forEach(r => {
-                const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+                const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
                 html += `<div class="bg-white rounded-xl p-3 shadow-sm">
                     <div class="flex justify-between items-center mb-1">
                         <p class="font-semibold navy-text text-sm">${escapeHtml(r.name)}</p>
@@ -1269,7 +1348,7 @@
         }
 
         window.deleteReview = async function(id) {
-            if (!confirm("Delete?")) return;
+            if (!confirm("Delete this review?")) return;
             await deleteDoc(doc(db, "reviews", id));
             await loadReviews();
         }
@@ -1281,7 +1360,7 @@
             document.getElementById('stat-revenue').innerText = '৳' + allOrdersList.filter(o => o.status === 'delivered').reduce((s, o) => s + (o.total || 0), 0).toLocaleString();
         }
 
-        // ========== SETTINGS ==========
+        // ====== SETTINGS ======
         async function loadSettings() {
             try {
                 const snap = await getDoc(doc(db, "settings", "main"));
@@ -1300,18 +1379,20 @@
         }
 
         window.saveSettings = async function() {
-            const settings = {
-                deliveryCharge: parseFloat(document.getElementById('setting-delivery-charge').value) || 100,
-                freeDeliveryAbove: parseFloat(document.getElementById('setting-free-delivery').value) || 0,
-                contactAddress: document.getElementById('setting-address').value,
-                contactPhone: document.getElementById('setting-phone').value,
-                contactEmail: document.getElementById('setting-email').value,
-                whatsapp: document.getElementById('setting-whatsapp').value,
-                bkashNumber: document.getElementById('setting-bkash').value,
-                nagadNumber: document.getElementById('setting-nagad').value
-            };
-            await setDoc(doc(db, "settings", "main"), settings, { merge: true });
-            alert("✅ Settings saved!");
+            try {
+                const settings = {
+                    deliveryCharge: parseFloat(document.getElementById('setting-delivery-charge').value) || 100,
+                    freeDeliveryAbove: parseFloat(document.getElementById('setting-free-delivery').value) || 0,
+                    contactAddress: document.getElementById('setting-address').value,
+                    contactPhone: document.getElementById('setting-phone').value,
+                    contactEmail: document.getElementById('setting-email').value,
+                    whatsapp: document.getElementById('setting-whatsapp').value,
+                    bkashNumber: document.getElementById('setting-bkash').value,
+                    nagadNumber: document.getElementById('setting-nagad').value
+                };
+                await setDoc(doc(db, "settings", "main"), settings, { merge: true });
+                alert("✅ Settings saved!");
+            } catch (e) { alert("Error: " + e.message); }
         }
     </script>
 </body>
