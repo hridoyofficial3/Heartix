@@ -2,50 +2,75 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Order Success - Heartix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     <script>
-        tailwind.config = { theme: { extend: { colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' }, cream: '#FBF8F3' }, fontFamily: { 'display': ['Playfair Display', 'serif'] }}}}
+        tailwind.config = { theme: { extend: {
+            colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' }, cream: '#FBF8F3' },
+            fontFamily: { 'display': ['Playfair Display', 'serif'] }
+        }}}
     </script>
     <style>
+        * { -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background: #FBF8F3; }
         .font-display { font-family: 'Playfair Display', serif; }
         .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
         .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
-        @keyframes pop { 0% { transform: scale(0); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
-        .pop { animation: pop 0.5s ease-out; }
+        .gold-text { color: #D4A84B; }
+        .navy-text { color: #0A1628; }
+        .premium-shadow { box-shadow: 0 8px 30px rgba(10,22,40,0.12); }
+        @keyframes pop { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+        .pop { animation: pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-up { animation: fadeUp 0.6s ease-out; }
+        .delay-1 { animation-delay: 0.15s; opacity: 0; animation-fill-mode: forwards; }
+        .delay-2 { animation-delay: 0.3s; opacity: 0; animation-fill-mode: forwards; }
+        .delay-3 { animation-delay: 0.45s; opacity: 0; animation-fill-mode: forwards; }
+        .delay-4 { animation-delay: 0.6s; opacity: 0; animation-fill-mode: forwards; }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
     <div class="w-full max-w-md">
-        <div class="bg-white rounded-3xl shadow-xl p-8 text-center">
-            <div class="w-24 h-24 gold-gradient rounded-full mx-auto flex items-center justify-center mb-6 pop">
+        <div class="bg-white rounded-3xl premium-shadow p-6 md:p-8 text-center">
+
+            <!-- SUCCESS ICON -->
+            <div class="w-24 h-24 gold-gradient rounded-full mx-auto flex items-center justify-center mb-5 pop">
                 <i class="fas fa-check text-navy text-5xl"></i>
             </div>
-            
-            <h1 class="font-display text-3xl text-navy mb-2">অর্ডার সফল!</h1>
-            <p class="text-gray-500 text-sm mb-6">আপনার অর্ডারটি আমরা পেয়েছি। শীঘ্রই আমরা কল করে কনফার্ম করব।</p>
-            
-            <div class="bg-cream rounded-2xl p-5 mb-6">
+
+            <h1 class="font-display text-3xl navy-text font-bold mb-2 fade-up delay-1">অর্ডার সফল!</h1>
+            <p class="text-gray-500 text-sm mb-6 fade-up delay-1">
+                আপনার অর্ডারটি আমরা পেয়েছি। শীঘ্রই কল করে কনফার্ম করব।
+            </p>
+
+            <!-- ORDER NUMBER -->
+            <div class="bg-cream rounded-2xl p-5 mb-5 fade-up delay-2">
                 <p class="text-xs text-gray-500 mb-1">আপনার অর্ডার নাম্বার</p>
-                <p id="order-number" class="font-display text-2xl font-bold text-navy">HX00000000</p>
+                <p id="order-number" class="font-display text-2xl font-bold navy-text tracking-wider">HX00000000</p>
+                <button onclick="copyOrderNumber()" class="mt-2 text-xs gold-text font-semibold">
+                    <i class="fas fa-copy mr-1"></i> কপি করুন
+                </button>
             </div>
 
-            <div class="bg-blue-50 rounded-xl p-4 mb-6 text-left">
-                <p class="text-xs text-navy font-semibold mb-2"><i class="fas fa-info-circle text-blue-500 mr-1"></i> পরবর্তী ধাপ</p>
-                <ul class="text-xs text-gray-600 space-y-1">
-                    <li>✓ অর্ডার কনফার্ম করতে আমরা কল দেব</li>
-                    <li>✓ বিকাশ/নগদে অগ্রিম দিলে TrxID পাঠাবেন</li>
-                    <li>✓ কনফার্ম হলে ২-৩ দিনে ডেলিভারি</li>
+            <!-- NEXT STEPS -->
+            <div class="bg-blue-50 rounded-xl p-4 mb-5 text-left fade-up delay-3">
+                <p class="text-xs navy-text font-semibold mb-2 flex items-center gap-1.5">
+                    <i class="fas fa-info-circle text-blue-500"></i> পরবর্তী ধাপ
+                </p>
+                <ul class="text-xs text-gray-600 space-y-1.5">
+                    <li><i class="fas fa-check-circle text-green-500 mr-1"></i> অর্ডার কনফার্ম করতে আমরা কল দেব</li>
+                    <li><i class="fas fa-check-circle text-green-500 mr-1"></i> অগ্রিম দিলে TrxID পাঠাবেন</li>
+                    <li><i class="fas fa-check-circle text-green-500 mr-1"></i> কনফার্ম হলে ২-৩ দিনে ডেলিভারি</li>
                 </ul>
             </div>
 
-            <div class="grid grid-cols-2 gap-3 mb-3">
-                <a href="track-order.html?order=" id="track-btn" class="bg-white border-2 border-navy text-navy font-semibold py-3 rounded-xl text-sm text-center">
+            <!-- ACTION BUTTONS -->
+            <div class="grid grid-cols-2 gap-3 mb-3 fade-up delay-4">
+                <a id="track-btn" href="track-order.html" class="bg-white border-2 border-[#0A1628] text-navy font-semibold py-3 rounded-xl text-sm text-center">
                     <i class="fas fa-truck mr-1"></i> Track Order
                 </a>
                 <a href="index.html" class="navy-gradient text-white font-semibold py-3 rounded-xl text-sm text-center">
@@ -53,14 +78,22 @@
                 </a>
             </div>
 
-            <p class="text-xs text-gray-400 mt-4">আমাদের WhatsApp: <span id="wa-number" class="font-semibold">-</span></p>
+            <!-- WHATSAPP -->
+            <p id="wa-line" class="text-xs text-gray-400 mt-4 fade-up delay-4 hidden">
+                আমাদের WhatsApp: <a id="wa-link" href="#" target="_blank" class="font-semibold gold-text">চ্যাট করুন</a>
+            </p>
+
+            <p class="text-[10px] text-gray-400 mt-3">
+                <i class="fas fa-shield-alt text-gray-300 mr-1"></i> এই নাম্বার সংরক্ষণ করুন
+            </p>
+
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        
+
         const firebaseConfig = {
             apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
             authDomain: "heartix.firebaseapp.com",
@@ -69,22 +102,56 @@
             messagingSenderId: "551204402338",
             appId: "1:551204402338:web:169555975c0bbb97f113fb"
         };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
 
+        let db;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+        } catch (e) { console.error('Firebase init:', e); }
+
+        // GET ORDER NUMBER FROM URL
         const params = new URLSearchParams(window.location.search);
-        const orderNum = params.get('order') || 'HX00000000';
-        document.getElementById('order-number').textContent = orderNum;
-        document.getElementById('track-btn').href = 'track-order.html?order=' + orderNum;
+        const orderNum = params.get('order') || '';
 
-        (async () => {
+        const orderEl = document.getElementById('order-number');
+        const trackBtn = document.getElementById('track-btn');
+
+        if (orderNum) {
+            orderEl.textContent = orderNum;
+            trackBtn.href = 'track-order.html?order=' + encodeURIComponent(orderNum);
+        } else {
+            // No order number, generate placeholder
+            orderEl.textContent = 'HX--------';
+            trackBtn.href = 'track-order.html';
+        }
+
+        // COPY ORDER NUMBER
+        window.copyOrderNumber = function() {
+            const text = orderEl.textContent;
+            if (navigator.clipboard && text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const btn = event.target.closest('button');
+                    const orig = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check mr-1"></i> কপি হয়েছে!';
+                    setTimeout(() => { btn.innerHTML = orig; }, 1500);
+                }).catch(() => {});
+            }
+        }
+
+        // FETCH WHATSAPP FROM SETTINGS
+        if (db) {
             try {
                 const snap = await getDoc(doc(db, "settings", "main"));
-                if (snap.exists() && snap.data().whatsapp) {
-                    document.getElementById('wa-number').textContent = snap.data().whatsapp;
+                if (snap.exists()) {
+                    const s = snap.data();
+                    if (s.whatsapp) {
+                        document.getElementById('wa-line').classList.remove('hidden');
+                        const waMsg = encodeURIComponent(`Hi, my order number is: ${orderNum}`);
+                        document.getElementById('wa-link').href = `https://wa.me/${s.whatsapp}?text=${waMsg}`;
+                    }
                 }
-            } catch(e) {}
-        })();
+            } catch (e) { console.warn('Settings fetch:', e); }
+        }
     </script>
 </body>
 </html>
