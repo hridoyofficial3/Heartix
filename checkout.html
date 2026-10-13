@@ -2,108 +2,198 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Checkout - Heartix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     <script>
-        tailwind.config = { theme: { extend: { colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' }, cream: '#FBF8F3' }, fontFamily: { 'display': ['Playfair Display', 'serif'] }}}}
+        tailwind.config = { theme: { extend: {
+            colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' }, cream: '#FBF8F3' },
+            fontFamily: { 'display': ['Playfair Display', 'serif'] }
+        }}}
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #FBF8F3; }
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: #FBF8F3; overflow-x: hidden; }
         .font-display { font-family: 'Playfair Display', serif; }
+        .navy-bg { background: #0A1628; }
         .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
         .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
+        .gold-text { color: #D4A84B; }
+        .navy-text { color: #0A1628; }
+        .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
         .premium-shadow { box-shadow: 0 4px 20px rgba(10,22,40,0.08); }
-        .payment-option { transition: all 0.2s ease; }
+        .payment-option { transition: all 0.2s ease; cursor: pointer; }
         .payment-option.selected { border-color: #D4A84B; background: #FBF8F3; }
+        .payment-option.selected .check-circle { display: block; }
+        .check-circle { display: none; }
+        #toast-container { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; pointer-events: none; }
+        .toast-bar { padding: 14px 20px; color: white; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s ease; justify-content: center; }
+        .toast-bar.success { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .toast-bar.error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        .toast-bar.warn { background: linear-gradient(135deg, #ea580c, #f97316); }
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+        input, select, textarea { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="pb-32">
+<body class="pb-24">
 
-    <header class="bg-white sticky top-0 z-30 px-4 py-3 flex justify-between items-center shadow-sm">
+    <div id="toast-container"></div>
+
+    <!-- HEADER -->
+    <header class="glass sticky top-0 z-30 px-3 py-2 flex justify-between items-center border-b border-gray-100">
         <a href="cart.html" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream">
             <i class="fas fa-arrow-left text-navy text-lg"></i>
         </a>
-        <h1 class="font-display text-xl text-navy">Checkout</h1>
+        <h1 class="font-display text-xl navy-text font-bold">Checkout</h1>
         <div class="w-10"></div>
     </header>
 
-    <div class="p-4 max-w-2xl mx-auto space-y-4">
-        
-        <div class="bg-white rounded-2xl premium-shadow p-5">
-            <h3 class="font-display text-lg text-navy mb-3 pb-2 border-b border-gray-100">Order Review</h3>
-            <div id="order-review"></div>
+    <!-- LOADING -->
+    <div id="loading-skeleton" class="p-4 max-w-2xl mx-auto space-y-3">
+        <div class="bg-white rounded-2xl p-5 premium-shadow">
+            <div class="h-5 w-32 shimmer rounded mb-4"></div>
+            <div class="h-16 w-full shimmer rounded-lg mb-2"></div>
+            <div class="h-16 w-full shimmer rounded-lg"></div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 premium-shadow">
+            <div class="h-5 w-40 shimmer rounded mb-4"></div>
+            <div class="h-10 w-full shimmer rounded-lg mb-2"></div>
+            <div class="h-10 w-full shimmer rounded-lg mb-2"></div>
+            <div class="h-10 w-full shimmer rounded-lg"></div>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div id="main-content" class="p-4 max-w-2xl mx-auto space-y-4 hidden">
+
+        <!-- EMPTY CART -->
+        <div id="empty-cart" class="hidden text-center py-16">
+            <i class="fas fa-shopping-bag text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg font-medium">আপনার কার্ট খালি!</p>
+            <a href="index.html" class="inline-block mt-5 navy-gradient text-white px-8 py-3 rounded-xl font-semibold text-sm">
+                <i class="fas fa-shopping-bag mr-2"></i> শপিং শুরু করুন
+            </a>
         </div>
 
-        <div class="bg-white rounded-2xl premium-shadow p-5">
-            <h3 class="font-display text-lg text-navy mb-4 pb-2 border-b border-gray-100">Shipping Address</h3>
-            <div class="space-y-3">
-                <input type="text" id="customer-name" placeholder="Full Name *" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-gold text-sm">
-                <input type="tel" id="customer-phone" placeholder="Phone (01XXXXXXXXX) *" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-gold text-sm">
-                <input type="email" id="customer-email" placeholder="Email (Optional)" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-gold text-sm">
-                <textarea id="customer-address" placeholder="Full Address *" rows="2" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-gold text-sm"></textarea>
-                <div class="grid grid-cols-2 gap-3">
-                    <select id="customer-district" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-gold text-sm bg-white">
-                        <option value="">Select District *</option>
-                    </select>
-                    <input type="text" id="customer-thana" placeholder="Thana *" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-gold text-sm">
+        <!-- FORM -->
+        <div id="checkout-form" class="space-y-4 hidden">
+
+            <!-- ORDER REVIEW -->
+            <div class="bg-white rounded-2xl premium-shadow p-5">
+                <h3 class="font-display text-lg navy-text font-bold mb-3 pb-2 border-b border-gray-100 flex items-center gap-2">
+                    <i class="fas fa-shopping-bag gold-text"></i> Order Review
+                </h3>
+                <div id="order-review"></div>
+            </div>
+
+            <!-- SHIPPING -->
+            <div class="bg-white rounded-2xl premium-shadow p-5">
+                <h3 class="font-display text-lg navy-text font-bold mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
+                    <i class="fas fa-map-marker-alt gold-text"></i> Shipping Address
+                </h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 mb-1 block">Full Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="customer-name" placeholder="আপনার পূর্ণ নাম" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#D4A84B] text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 mb-1 block">Phone Number <span class="text-red-500">*</span></label>
+                        <input type="tel" id="customer-phone" placeholder="01XXXXXXXXX" maxlength="11" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#D4A84B] text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 mb-1 block">Email <span class="text-gray-400">(Optional)</span></label>
+                        <input type="email" id="customer-email" placeholder="email@example.com" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#D4A84B] text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 mb-1 block">Full Address <span class="text-red-500">*</span></label>
+                        <textarea id="customer-address" placeholder="বাসা নম্বর, রোড, এলাকা" rows="2" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#D4A84B] text-sm resize-none"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 mb-1 block">District <span class="text-red-500">*</span></label>
+                            <select id="customer-district" class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none focus:border-[#D4A84B] text-sm bg-white">
+                                <option value="">Select District</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 mb-1 block">Thana <span class="text-red-500">*</span></label>
+                            <input type="text" id="customer-thana" placeholder="থানা" class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none focus:border-[#D4A84B] text-sm">
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="bg-white rounded-2xl premium-shadow p-5">
-            <h3 class="font-display text-lg text-navy mb-4 pb-2 border-b border-gray-100">Payment Method</h3>
-            <div class="space-y-3">
-                <label class="payment-option flex items-start gap-3 p-4 border-2 border-gray-200 rounded-xl cursor-pointer" data-method="full-cod">
-                    <input type="radio" name="payment" value="full-cod" class="mt-1 accent-[#D4A84B]" checked>
-                    <div class="flex-1">
-                        <p class="font-semibold text-navy text-sm">ক্যাশ অন ডেলিভারি</p>
-                        <p class="text-xs text-gray-500 mt-1">প্রোডাক্ট হাতে পেয়ে সম্পূর্ণ টাকা দিন</p>
-                    </div>
-                </label>
+            <!-- PAYMENT METHOD -->
+            <div class="bg-white rounded-2xl premium-shadow p-5">
+                <h3 class="font-display text-lg navy-text font-bold mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
+                    <i class="fas fa-credit-card gold-text"></i> Payment Method
+                </h3>
+                <div class="space-y-3">
+                    <label class="payment-option flex items-start gap-3 p-4 border-2 border-gray-200 rounded-xl" data-method="full-cod">
+                        <input type="radio" name="payment" value="full-cod" class="mt-1 accent-[#D4A84B]" checked>
+                        <div class="flex-1">
+                            <p class="font-semibold navy-text text-sm">ক্যাশ অন ডেলিভারি</p>
+                            <p class="text-xs text-gray-500 mt-1">প্রোডাক্ট হাতে পেয়ে সম্পূর্ণ টাকা দিন</p>
+                        </div>
+                        <i class="fas fa-check-circle check-circle gold-text mt-1"></i>
+                    </label>
 
-                <label class="payment-option flex items-start gap-3 p-4 border-2 border-gray-200 rounded-xl cursor-pointer" data-method="delivery-advance">
-                    <input type="radio" name="payment" value="delivery-advance" class="mt-1 accent-[#D4A84B]">
-                    <div class="flex-1">
-                        <p class="font-semibold text-navy text-sm">শুধু ডেলিভারি চার্জ অগ্রিম</p>
-                        <p class="text-xs text-gray-500 mt-1">ডেলিভারি চার্জ এখন, বাকিটা ক্যাশে</p>
-                    </div>
-                </label>
+                    <label class="payment-option flex items-start gap-3 p-4 border-2 border-gray-200 rounded-xl" data-method="delivery-advance">
+                        <input type="radio" name="payment" value="delivery-advance" class="mt-1 accent-[#D4A84B]">
+                        <div class="flex-1">
+                            <p class="font-semibold navy-text text-sm">শুধু ডেলিভারি চার্জ অগ্রিম</p>
+                            <p class="text-xs text-gray-500 mt-1">ডেলিভারি চার্জ এখন, বাকিটা ক্যাশে</p>
+                        </div>
+                        <i class="fas fa-check-circle check-circle gold-text mt-1"></i>
+                    </label>
 
-                <label class="payment-option flex items-start gap-3 p-4 border-2 border-gray-200 rounded-xl cursor-pointer" data-method="full-online">
-                    <input type="radio" name="payment" value="full-online" class="mt-1 accent-[#D4A84B]">
-                    <div class="flex-1">
-                        <p class="font-semibold text-navy text-sm">সম্পূর্ণ অনলাইন পেমেন্ট</p>
-                        <p class="text-xs text-gray-500 mt-1">বিকাশ/নগদে সম্পূর্ণ টাকা অগ্রিম</p>
-                    </div>
-                </label>
+                    <label class="payment-option flex items-start gap-3 p-4 border-2 border-gray-200 rounded-xl" data-method="full-online">
+                        <input type="radio" name="payment" value="full-online" class="mt-1 accent-[#D4A84B]">
+                        <div class="flex-1">
+                            <p class="font-semibold navy-text text-sm">সম্পূর্ণ অনলাইন পেমেন্ট</p>
+                            <p class="text-xs text-gray-500 mt-1">বিকাশ/নগদে সম্পূর্ণ টাকা অগ্রিম</p>
+                        </div>
+                        <i class="fas fa-check-circle check-circle gold-text mt-1"></i>
+                    </label>
+                </div>
 
-                <div id="payment-instructions" class="hidden bg-cream border border-gold/30 rounded-xl p-4 text-sm">
-                    <p class="font-semibold text-navy mb-2"><i class="fas fa-info-circle text-gold mr-1"></i> পেমেন্ট তথ্য</p>
+                <!-- PAYMENT INFO -->
+                <div id="payment-instructions" class="hidden mt-4 bg-cream border border-[#D4A84B]/30 rounded-xl p-4 text-sm">
+                    <p class="font-semibold navy-text mb-2 flex items-center gap-1">
+                        <i class="fas fa-info-circle gold-text"></i> পেমেন্ট তথ্য
+                    </p>
                     <div id="payment-info-content"></div>
-                    <p class="text-xs text-gray-600 mt-3">পেমেন্ট করে অবশ্যই আমাদের WhatsApp/ফোনে ট্রানজেকশন আইডি জানাবেন।</p>
+                    <p class="text-xs text-gray-600 mt-3 italic">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 mr-1"></i>
+                        পেমেন্ট করে অবশ্যই আমাদের WhatsApp/ফোনে ট্রানজেকশন আইডি জানাবেন।
+                    </p>
                 </div>
             </div>
-        </div>
 
-        <div class="bg-white rounded-2xl premium-shadow p-5">
-            <div class="flex justify-between mb-3 text-sm">
-                <span class="text-gray-600">Subtotal</span>
-                <span id="checkout-subtotal" class="font-semibold">৳ 0</span>
+            <!-- SUMMARY -->
+            <div class="bg-white rounded-2xl premium-shadow p-5">
+                <div class="flex justify-between mb-3 text-sm">
+                    <span class="text-gray-600">Subtotal</span>
+                    <span id="checkout-subtotal" class="font-semibold navy-text">৳ 0</span>
+                </div>
+                <div class="flex justify-between mb-3 text-sm">
+                    <span class="text-gray-600">Delivery Charge</span>
+                    <span id="checkout-delivery" class="font-semibold navy-text">৳ 0</span>
+                </div>
+                <div id="checkout-free-note" class="hidden bg-green-50 border border-green-200 text-green-700 text-xs p-3 rounded-lg mb-3">
+                    <i class="fas fa-check-circle mr-1"></i> ফ্রি ডেলিভারি!
+                </div>
+                <div class="border-t border-gray-100 pt-3 mt-3 flex justify-between items-baseline">
+                    <span class="font-bold navy-text">Total</span>
+                    <span id="checkout-total" class="font-display text-2xl font-bold navy-text">৳ 0</span>
+                </div>
+                <button id="place-order-btn" onclick="placeOrder()" class="w-full navy-gradient text-white py-4 rounded-xl mt-5 font-bold text-sm">
+                    <i class="fas fa-check-circle mr-1"></i> PLACE ORDER
+                </button>
             </div>
-            <div class="flex justify-between mb-3 text-sm">
-                <span class="text-gray-600">Delivery Charge</span>
-                <span id="checkout-delivery" class="font-semibold">৳ 0</span>
-            </div>
-            <div class="border-t border-gray-100 pt-3 mt-3 flex justify-between items-baseline">
-                <span class="font-bold text-navy">Total</span>
-                <span id="checkout-total" class="font-display text-2xl font-bold text-navy">৳ 0</span>
-            </div>
-            <button id="place-order-btn" onclick="placeOrder()" class="w-full navy-gradient text-white py-4 rounded-xl mt-5 font-bold text-sm">
-                <i class="fas fa-check-circle mr-1"></i> PLACE ORDER
-            </button>
+
         </div>
     </div>
 
@@ -119,91 +209,191 @@
             messagingSenderId: "551204402338",
             appId: "1:551204402338:web:169555975c0bbb97f113fb"
         };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+
+        let app, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+        } catch (e) { console.error('Firebase init:', e); }
+
+        // ============ STATE ============
         let settings = { deliveryCharge: 100, freeDeliveryAbove: 0, bkashNumber: '', nagadNumber: '', whatsapp: '' };
+        let isLoading = true;
+        let isPlacingOrder = false;
 
-        const DISTRICTS = ["Dhaka","Chittagong","Rajshahi","Khulna","Barishal","Sylhet","Rangpur","Mymensingh","Comilla","Narayanganj","Gazipur","Bogura","Jessore","Cox's Bazar","Dinajpur","Noakhali","Brahmanbaria","Tangail","Kushtia","Feni","Pabna","Kishoreganj","Narsingdi","Manikganj","Munshiganj","Faridpur","Madaripur","Gopalganj","Shariatpur","Rajbari","Jamalpur","Sherpur","Netrokona","Mymensingh","Sunamganj","Habiganj","Moulvibazar","Sylhet","Chapainawabganj","Naogaon","Natore","Sirajganj","Joypurhat","Bagerhat","Chuadanga","Jhenaidah","Magura","Meherpur","Narail","Satkhira","Barguna","Bhola","Jhalokati","Patuakhali","Pirojpur","Bagerhat","Khulna","Panchagarh","Thakurgaon","Nilphamari","Lalmonirhat","Kurigram","Gaibandha","Rangpur"];
+        // ============ 64 DISTRICTS ============
+        const DISTRICTS = [
+            "Dhaka","Faridpur","Gazipur","Gopalganj","Kishoreganj","Madaripur","Manikganj","Munshiganj","Narayanganj","Narsingdi","Rajbari","Shariatpur","Tangail",
+            "Chittagong","Bandarban","Brahmanbaria","Chandpur","Comilla","Cox's Bazar","Feni","Khagrachari","Lakshmipur","Noakhali","Rangamati",
+            "Rajshahi","Bogura","Chapainawabganj","Joypurhat","Naogaon","Natore","Nawabganj","Pabna","Sirajganj",
+            "Khulna","Bagerhat","Chuadanga","Jessore","Jhenaidah","Kushtia","Magura","Meherpur","Narail","Satkhira",
+            "Barishal","Barguna","Bhola","Jhalokati","Patuakhali","Pirojpur",
+            "Sylhet","Habiganj","Moulvibazar","Sunamganj",
+            "Rangpur","Dinajpur","Gaibandha","Kurigram","Lalmonirhat","Nilphamari","Panchagarh","Thakurgaon",
+            "Mymensingh","Jamalpur","Netrokona","Sherpur"
+        ];
 
-        function getCart() { return JSON.parse(localStorage.getItem('heartix_cart') || '[]'); }
+        // ============ UTILS ============
+        function showToast(msg, type = 'success') {
+            const c = document.getElementById('toast-container');
+            if (!c) return;
+            const t = document.createElement('div');
+            t.className = 'toast-bar ' + type;
+            const icon = type === 'success' ? 'check-circle' : (type === 'warn' ? 'exclamation-circle' : 'times-circle');
+            t.innerHTML = `<i class="fas fa-${icon}"></i><span>${msg}</span>`;
+            c.appendChild(t);
+            setTimeout(() => {
+                t.style.transition = 'opacity 0.3s';
+                t.style.opacity = '0';
+                setTimeout(() => t.remove(), 300);
+            }, 3000);
+        }
+
+        function escapeHtml(t) {
+            if (t === null || t === undefined) return '';
+            const d = document.createElement('div');
+            d.textContent = String(t);
+            return d.innerHTML;
+        }
+
         function formatPrice(n) { return Number(n || 0).toLocaleString('en-IN'); }
-        function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
 
+        function getCart() {
+            try { return JSON.parse(localStorage.getItem('heartix_cart') || '[]'); }
+            catch (e) { return []; }
+        }
+
+        function validatePhone(phone) {
+            return /^01[3-9]\d{8}$/.test(phone);
+        }
+
+        function generateOrderNumber() {
+            const date = new Date();
+            const y = date.getFullYear().toString().slice(-2);
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+            return `HX${y}${m}${d}${rand}`;
+        }
+
+        // ============ INIT DISTRICTS ============
         function initDistricts() {
             const sel = document.getElementById('customer-district');
-            const unique = [...new Set(DISTRICTS)].sort();
-            unique.forEach(d => {
+            if (!sel) return;
+            sel.innerHTML = '<option value="">Select District</option>';
+            const sorted = [...new Set(DISTRICTS)].sort();
+            sorted.forEach(d => {
                 const opt = document.createElement('option');
-                opt.value = d; opt.textContent = d;
+                opt.value = d;
+                opt.textContent = d;
                 sel.appendChild(opt);
             });
         }
 
+        // ============ LOAD SETTINGS ============
         async function loadSettings() {
+            if (!db) { isLoading = false; afterLoad(); return; }
             try {
                 const snap = await getDoc(doc(db, "settings", "main"));
                 if (snap.exists()) {
                     const s = snap.data();
-                    settings.deliveryCharge = s.deliveryCharge || 100;
-                    settings.freeDeliveryAbove = s.freeDeliveryAbove || 0;
+                    settings.deliveryCharge = Number(s.deliveryCharge) || 100;
+                    settings.freeDeliveryAbove = Number(s.freeDeliveryAbove) || 0;
                     settings.bkashNumber = s.bkashNumber || '';
                     settings.nagadNumber = s.nagadNumber || '';
                     settings.whatsapp = s.whatsapp || '';
                 }
-                renderOrderReview();
-            } catch (e) { renderOrderReview(); }
+            } catch (e) {
+                console.warn('Settings load error:', e);
+            }
+            isLoading = false;
+            afterLoad();
         }
 
-        function renderOrderReview() {
-            const cart = getCart();
-            const reviewDiv = document.getElementById('order-review');
-            let html = '';
-            let subtotal = 0;
+        function afterLoad() {
+            document.getElementById('loading-skeleton').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
 
+            const cart = getCart();
             if (cart.length === 0) {
-                reviewDiv.innerHTML = '<p class="text-gray-500 text-sm py-4">আপনার কার্ট খালি।</p>';
-                document.getElementById('place-order-btn').disabled = true;
-                document.getElementById('place-order-btn').style.opacity = '0.5';
+                document.getElementById('empty-cart').classList.remove('hidden');
+                document.getElementById('checkout-form').classList.add('hidden');
                 return;
             }
 
+            document.getElementById('empty-cart').classList.add('hidden');
+            document.getElementById('checkout-form').classList.remove('hidden');
+
+            renderOrderReview();
+            initDistricts();
+            attachPaymentListeners();
+            updatePaymentInfo('full-cod');
+            updateSummary();
+        }
+
+        // ============ ORDER REVIEW ============
+        function renderOrderReview() {
+            const cart = getCart();
+            const reviewDiv = document.getElementById('order-review');
+            if (!reviewDiv) return;
+
+            let html = '';
             cart.forEach(item => {
-                subtotal += item.price * item.quantity;
+                const qty = Number(item.quantity) || 1;
+                const price = Number(item.price) || 0;
                 html += `
-                    <div class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
-                        <img src="${item.image}" class="w-14 h-14 object-contain rounded-lg bg-gray-50">
+                    <div class="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0">
+                        <img src="${item.image || 'https://via.placeholder.com/60x60?text=?'}" class="w-14 h-14 object-contain rounded-lg bg-gray-50 flex-shrink-0" onerror="this.src='https://via.placeholder.com/60x60?text=?'">
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-navy truncate">${escapeHtml(item.name)}</p>
-                            <p class="text-xs text-gray-500">৳ ${formatPrice(item.price)} × ${item.quantity}</p>
+                            <p class="text-sm font-medium navy-text line-clamp-2">${escapeHtml(item.name)}</p>
+                            <p class="text-xs text-gray-500 mt-0.5">৳ ${formatPrice(price)} × ${qty}</p>
                         </div>
-                        <p class="font-semibold text-navy text-sm">৳ ${formatPrice(item.price * item.quantity)}</p>
+                        <p class="font-semibold navy-text text-sm flex-shrink-0">৳ ${formatPrice(price * qty)}</p>
                     </div>`;
             });
             reviewDiv.innerHTML = html;
-
-            const isFree = settings.freeDeliveryAbove > 0 && subtotal >= settings.freeDeliveryAbove;
-            const dc = isFree ? 0 : settings.deliveryCharge;
-
-            document.getElementById('checkout-subtotal').innerText = '৳ ' + formatPrice(subtotal);
-            document.getElementById('checkout-delivery').innerText = dc === 0 ? 'ফ্রি' : '৳ ' + formatPrice(dc);
-            document.getElementById('checkout-total').innerText = '৳ ' + formatPrice(subtotal + dc);
         }
 
-        // Payment method change
-        document.querySelectorAll('input[name="payment"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
-                this.closest('.payment-option').classList.add('selected');
-                updatePaymentInfo(this.value);
+        // ============ SUMMARY ============
+        function updateSummary() {
+            const cart = getCart();
+            const subtotal = cart.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0);
+            const isFree = settings.freeDeliveryAbove > 0 && subtotal >= settings.freeDeliveryAbove;
+            const deliveryCharge = isFree ? 0 : settings.deliveryCharge;
+            const total = subtotal + deliveryCharge;
+
+            document.getElementById('checkout-subtotal').innerText = '৳ ' + formatPrice(subtotal);
+            document.getElementById('checkout-delivery').innerText = deliveryCharge === 0 ? 'ফ্রি' : '৳ ' + formatPrice(deliveryCharge);
+            document.getElementById('checkout-total').innerText = '৳ ' + formatPrice(total);
+
+            const freeNote = document.getElementById('checkout-free-note');
+            if (isFree) freeNote.classList.remove('hidden');
+            else freeNote.classList.add('hidden');
+        }
+
+        // ============ PAYMENT ============
+        function attachPaymentListeners() {
+            document.querySelectorAll('input[name="payment"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+                    this.closest('.payment-option').classList.add('selected');
+                    updatePaymentInfo(this.value);
+                });
             });
-        });
-        document.querySelector('.payment-option[data-method="full-cod"]').classList.add('selected');
+            // Initial selection
+            const initial = document.querySelector('input[name="payment"]:checked');
+            if (initial) {
+                initial.closest('.payment-option').classList.add('selected');
+            }
+        }
 
         function updatePaymentInfo(method) {
             const box = document.getElementById('payment-instructions');
             const content = document.getElementById('payment-info-content');
+            if (!box || !content) return;
+
             const cart = getCart();
-            const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+            const subtotal = cart.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0);
             const isFree = settings.freeDeliveryAbove > 0 && subtotal >= settings.freeDeliveryAbove;
             const dc = isFree ? 0 : settings.deliveryCharge;
             const total = subtotal + dc;
@@ -216,84 +406,108 @@
 
             let html = '';
             if (method === 'delivery-advance') {
-                html += `<p class="text-navy mb-2">ডেলিভারি চার্জ <strong>৳ ${formatPrice(dc)}</strong> পাঠাতে হবে:</p>`;
+                html += `<p class="text-navy mb-2">ডেলিভারি চার্জ <strong class="gold-text">৳ ${formatPrice(dc)}</strong> পাঠাতে হবে:</p>`;
             } else {
-                html += `<p class="text-navy mb-2">সম্পূর্ণ <strong>৳ ${formatPrice(total)}</strong> পাঠাতে হবে:</p>`;
+                html += `<p class="text-navy mb-2">সম্পূর্ণ <strong class="gold-text">৳ ${formatPrice(total)}</strong> পাঠাতে হবে:</p>`;
             }
-            if (settings.bkashNumber) html += `<p class="text-sm mb-1"><i class="fas fa-mobile-alt text-pink-500 mr-2"></i><strong>bKash:</strong> ${escapeHtml(settings.bkashNumber)} (Personal)</p>`;
-            if (settings.nagadNumber) html += `<p class="text-sm mb-1"><i class="fas fa-mobile-alt text-orange-500 mr-2"></i><strong>Nagad:</strong> ${escapeHtml(settings.nagadNumber)} (Personal)</p>`;
+
+            if (settings.bkashNumber) {
+                html += `<p class="text-sm mb-1 flex items-center gap-2"><i class="fas fa-mobile-alt text-pink-500"></i><strong>bKash (Personal):</strong> <span class="font-mono">${escapeHtml(settings.bkashNumber)}</span></p>`;
+            }
+            if (settings.nagadNumber) {
+                html += `<p class="text-sm mb-1 flex items-center gap-2"><i class="fas fa-mobile-alt text-orange-500"></i><strong>Nagad (Personal):</strong> <span class="font-mono">${escapeHtml(settings.nagadNumber)}</span></p>`;
+            }
             if (!settings.bkashNumber && !settings.nagadNumber) {
-                html += `<p class="text-red-500 text-sm">⚠️ অ্যাডমিন এখনো পেমেন্ট নম্বর সেট করেননি</p>`;
+                html += `<p class="text-red-500 text-sm"><i class="fas fa-exclamation-triangle mr-1"></i> অ্যাডমিন এখনো পেমেন্ট নম্বর সেট করেননি। দয়া করে COD বেছে নিন বা অ্যাডমিনের সাথে যোগাযোগ করুন।</p>`;
             }
             content.innerHTML = html;
         }
 
+        // ============ PLACE ORDER ============
         window.placeOrder = async function() {
+            if (isPlacingOrder) return;
+            
             const cart = getCart();
-            if (cart.length === 0) return;
+            if (cart.length === 0) {
+                showToast("আপনার কার্ট খালি!", 'error');
+                return;
+            }
 
-            const name = document.getElementById('customer-name').value.trim();
-            const phone = document.getElementById('customer-phone').value.trim();
-            const email = document.getElementById('customer-email').value.trim();
-            const address = document.getElementById('customer-address').value.trim();
+            // Get form values
+            const name = (document.getElementById('customer-name').value || '').trim();
+            const phone = (document.getElementById('customer-phone').value || '').trim();
+            const email = (document.getElementById('customer-email').value || '').trim();
+            const address = (document.getElementById('customer-address').value || '').trim();
             const district = document.getElementById('customer-district').value;
-            const thana = document.getElementById('customer-thana').value.trim();
+            const thana = (document.getElementById('customer-thana').value || '').trim();
             const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
 
-            if (!name || !phone || !address || !district || !thana) return showError("সব প্রয়োজনীয় তথ্য পূরণ করুন।");
-            if (!/^01[0-9]{9}$/.test(phone)) return showError("সঠিক ফোন নাম্বার দিন (01XXXXXXXXX)।");
+            // Validation
+            if (!name || name.length < 2) return showToast("সঠিক নাম দিন", 'error');
+            if (!phone) return showToast("ফোন নাম্বার দিন", 'error');
+            if (!validatePhone(phone)) return showToast("সঠিক ফোন নাম্বার দিন (01XXXXXXXXX)", 'error');
+            if (!address || address.length < 5) return showToast("সম্পূর্ণ ঠিকানা দিন", 'error');
+            if (!district) return showToast("জেলা সিলেক্ট করুন", 'error');
+            if (!thana) return showToast("থানার নাম দিন", 'error');
+            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast("সঠিক ইমেইল দিন", 'error');
 
-            const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+            // Calculate totals
+            const subtotal = cart.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0);
             const isFree = settings.freeDeliveryAbove > 0 && subtotal >= settings.freeDeliveryAbove;
-            const dc = isFree ? 0 : settings.deliveryCharge;
-            const total = subtotal + dc;
+            const deliveryCharge = isFree ? 0 : settings.deliveryCharge;
+            const total = subtotal + deliveryCharge;
 
             let advancePaid = 0;
             if (paymentMethod === 'full-online') advancePaid = total;
-            else if (paymentMethod === 'delivery-advance') advancePaid = dc;
+            else if (paymentMethod === 'delivery-advance') advancePaid = deliveryCharge;
 
-            const orderNumber = 'HX' + Date.now().toString().slice(-8);
+            const orderNumber = generateOrderNumber();
 
             const btn = document.getElementById('place-order-btn');
-            btn.innerText = 'Placing Order...';
             btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Placing Order...';
+            isPlacingOrder = true;
 
             try {
+                if (!db) throw new Error("Database connection failed");
+
                 await addDoc(collection(db, "orders"), {
                     orderNumber,
                     customer: { name, phone, email, address, district, thana },
-                    items: cart,
-                    subtotal, deliveryCharge: dc, total,
-                    paymentMethod, advancePaid, dueAmount: total - advancePaid,
+                    items: cart.map(i => ({
+                        id: i.id,
+                        name: i.name,
+                        price: Number(i.price) || 0,
+                        quantity: Number(i.quantity) || 1,
+                        image: i.image || ''
+                    })),
+                    subtotal,
+                    deliveryCharge,
+                    total,
+                    paymentMethod,
+                    advancePaid,
+                    dueAmount: total - advancePaid,
                     status: 'pending',
                     createdAt: serverTimestamp()
                 });
+
                 localStorage.removeItem('heartix_cart');
-                window.location.href = 'order-success.html?order=' + orderNumber;
+                window.location.href = 'order-success.html?order=' + encodeURIComponent(orderNumber);
             } catch (e) {
-                showError("সমস্যা হয়েছে: " + e.message);
-                btn.innerText = 'PLACE ORDER';
+                console.error('Order error:', e);
+                showToast("অর্ডার প্লেস করা যায়নি। আবার চেষ্টা করুন।", 'error');
                 btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i> PLACE ORDER';
+                isPlacingOrder = false;
             }
         }
 
-        function showError(msg) {
-            const c = document.getElementById('toast-container') || createToastContainer();
-            const t = document.createElement('div');
-            t.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#dc2626;color:white;padding:14px 20px;border-radius:14px;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,0.2);font-size:14px;font-weight:500;max-width:90%';
-            t.textContent = msg;
-            c.appendChild(t);
-            setTimeout(() => t.remove(), 2500);
+        // ============ INIT ============
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadSettings);
+        } else {
+            loadSettings();
         }
-        function createToastContainer() {
-            const c = document.createElement('div');
-            c.id = 'toast-container';
-            document.body.appendChild(c);
-            return c;
-        }
-
-        initDistricts();
-        loadSettings();
     </script>
 </body>
 </html>
