@@ -2,429 +2,770 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Heartix</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Control - Heartix</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config = { theme: { extend: { colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' } }}}}</script>
+    <script>
+        tailwind.config = { theme: { extend: {
+            colors: {
+                navy: { DEFAULT: '#0A1628', light: '#152238', dark: '#060D1A' },
+                gold: { DEFAULT: '#D4A84B', light: '#E8C77B', dark: '#B8860B' },
+                cream: '#FBF8F3'
+            },
+            fontFamily: {
+                'display': ['Playfair Display', 'serif'],
+                'sans': ['Inter', 'sans-serif']
+            }
+        }}}
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         * { -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; background: #F5F5F7; }
-        .navy-bg { background: #0A1628; }
-        .gold-bg { background: #D4A84B; }
-        .navy-text { color: #0A1628; }
-        .gold-text { color: #D4A84B; }
-        .tab-active { background: #0A1628; color: white; }
-        .tab-inactive { background: white; color: #666; }
-        .modal-bg { background: rgba(10, 22, 40, 0.75); backdrop-filter: blur(4px); }
+        body { font-family: 'Inter', sans-serif; background: #F5F5F7; overflow-x: hidden; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
+        .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
+        .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .premium-shadow { box-shadow: 0 4px 20px rgba(10,22,40,0.06); }
+        .premium-shadow-lg { box-shadow: 0 12px 40px rgba(10,22,40,0.12); }
+        .modal-bg { background: rgba(10, 22, 40, 0.75); backdrop-filter: blur(6px); }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .img-thumb { position: relative; }
-        .img-thumb .remove-btn { position: absolute; top: -6px; right: -6px; background: #dc2626; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 2px solid white; }
-        .cat-preview { width: 60px; height: 60px; background: #FFFDF7; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(10,22,40,0.06); overflow: hidden; flex-shrink: 0; }
-        .cat-preview img { width: 48px; height: 48px; object-fit: contain; }
-        .cat-preview .emoji { font-size: 32px; line-height: 1; }
+        .img-thumb .remove-btn { position: absolute; top: -6px; right: -6px; background: #dc2626; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid white; cursor: pointer; }
+        .cat-preview { width: 56px; height: 56px; background: #FFFDF7; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(10,22,40,0.06); overflow: hidden; flex-shrink: 0; }
+        .cat-preview img { width: 44px; height: 44px; object-fit: contain; }
+        .cat-preview .emoji { font-size: 28px; line-height: 1; }
+        .nav-item { transition: all 0.2s ease; }
+        .nav-item.active { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 100%); color: #0A1628; box-shadow: 0 4px 12px rgba(212,168,75,0.35); }
+        .nav-item.active .nav-icon { color: #0A1628; }
+        .nav-item:not(.active):hover { background: #F5F5F7; }
+        
+        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+        .shimmer { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size: 1000px 100%; animation: shimmer 1.5s infinite; }
+        
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .animate-slide-down { animation: slideDown 0.35s ease-out; }
+        .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.4,0,0.2,1); }
+        .animate-fade-in { animation: fadeIn 0.3s ease; }
+        
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; pointer-events: none; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .toast { min-width: 260px; max-width: 90vw; padding: 14px 20px; border-radius: 14px; color: white; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.2); animation: slideDown 0.35s ease-out; pointer-events: auto; }
+        .toast-success { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .toast-error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        .toast-warn { background: linear-gradient(135deg, #ea580c, #f97316); }
+        .toast-info { background: linear-gradient(135deg, #0A1628, #152238); }
+        
+        .stat-card { position: relative; overflow: hidden; transition: all 0.3s ease; }
+        .stat-card::before { content: ''; position: absolute; top: 0; right: 0; width: 100px; height: 100px; border-radius: 50%; opacity: 0.08; transform: translate(30px, -30px); }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(10,22,40,0.12); }
+        .stat-card.blue::before { background: #3b82f6; }
+        .stat-card.purple::before { background: #8b5cf6; }
+        .stat-card.yellow::before { background: #eab308; }
+        .stat-card.green::before { background: #22c55e; }
+        
+        .order-status { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-pending { background: #FEF3C7; color: #92400E; }
+        .status-confirmed { background: #DBEAFE; color: #1E40AF; }
+        .status-shipped { background: #E9D5FF; color: #6B21A8; }
+        .status-delivered { background: #D1FAE5; color: #065F46; }
+        .status-cancelled { background: #FEE2E2; color: #991B1B; }
+        
+        input, select, textarea { font-family: 'Inter', sans-serif; transition: all 0.2s ease; }
+        input:focus, select:focus, textarea:focus { border-color: #D4A84B !important; box-shadow: 0 0 0 3px rgba(212,168,75,0.12); }
+        
+        .btn-primary { background: linear-gradient(135deg, #0A1628, #152238); color: white; transition: all 0.2s ease; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(10,22,40,0.25); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-gold { background: linear-gradient(135deg, #D4A84B, #E8C77B); color: #0A1628; transition: all 0.2s ease; }
+        .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(212,168,75,0.4); }
+        
+        @media (min-width: 768px) {
+            body { padding-left: 240px; }
+            .sidebar-desktop { display: flex !important; }
+            .mobile-bottom-nav { display: none !important; }
+            .desktop-header-extra { display: flex !important; }
+        }
+        @media (max-width: 767px) {
+            .sidebar-desktop { display: none !important; }
+        }
     </style>
 </head>
-<body>
+<body class="pb-20 md:pb-6">
 
-    <!-- LOADING SCREEN -->
-    <div id="loading-section" class="min-h-screen flex items-center justify-center p-4">
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container"></div>
+
+    <!-- LOADING -->
+    <div id="loading-section" class="min-h-screen flex items-center justify-center">
         <div class="text-center">
-            <i class="fas fa-spinner fa-spin text-3xl text-[#D4A84B] mb-3"></i>
-            <p class="text-gray-500 text-sm">Loading...</p>
+            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl gold-gradient flex items-center justify-center animate-pulse">
+                <i class="fas fa-crown text-navy text-2xl"></i>
+            </div>
+            <p class="text-gray-400 text-sm font-medium">Loading your workspace...</p>
         </div>
     </div>
 
     <!-- LOGIN -->
     <div id="login-section" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm">
-            <div class="text-center mb-6">
-                <img src="logo.png" alt="Heartix" class="h-14 mx-auto mb-3">
-                <h2 class="text-2xl font-bold navy-text">Admin Login</h2>
-                <p class="text-xs text-gray-400 mt-1">Heartix Smart Appliances</p>
+        <div class="w-full max-w-sm">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-3xl navy-gradient flex items-center justify-center shadow-2xl">
+                    <i class="fas fa-crown text-gold text-3xl"></i>
+                </div>
+                <h1 class="font-display text-3xl text-navy font-bold mb-1">Admin Control</h1>
+                <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold">Heartix Premium Panel</p>
             </div>
-            <input type="email" id="admin-email" placeholder="Email" autocomplete="username" class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 mb-3 outline-none focus:border-[#D4A84B]">
-            <input type="password" id="admin-password" placeholder="Password" autocomplete="current-password" class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 mb-4 outline-none focus:border-[#D4A84B]">
-            <button onclick="login()" id="login-btn" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Login</button>
-            <p id="login-error" class="text-red-500 text-xs text-center mt-3 hidden"></p>
+
+            <div class="bg-white rounded-3xl premium-shadow-lg p-6">
+                <div class="mb-4">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Email</label>
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="email" id="admin-email" placeholder="admin@heartix.com" autocomplete="username" class="w-full border-2 border-gray-100 rounded-xl pl-11 pr-4 py-3.5 outline-none text-sm font-medium">
+                    </div>
+                </div>
+                <div class="mb-5">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Password</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="password" id="admin-password" placeholder="••••••••" autocomplete="current-password" class="w-full border-2 border-gray-100 rounded-xl pl-11 pr-4 py-3.5 outline-none text-sm font-medium">
+                    </div>
+                </div>
+                <button onclick="login()" id="login-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm tracking-wide">
+                    <i class="fas fa-sign-in-alt mr-2"></i> SIGN IN
+                </button>
+                <p id="login-error" class="text-red-500 text-xs text-center mt-4 hidden font-medium"></p>
+            </div>
+
+            <p class="text-center text-[10px] text-gray-400 mt-6">© 2026 Heartix. Secured by Firebase.</p>
         </div>
     </div>
 
     <!-- NOT ADMIN -->
     <div id="not-admin-section" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
-            <i class="fas fa-ban text-red-500 text-5xl mb-4"></i>
-            <h2 class="text-xl font-bold navy-text mb-2">Access Denied</h2>
-            <p class="text-sm text-gray-500 mb-4">এই অ্যাকাউন্টটি অ্যাডমিন হিসেবে নিবন্ধিত নয়।</p>
-            <button onclick="logout()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Logout</button>
+        <div class="bg-white p-8 rounded-3xl premium-shadow-lg w-full max-w-sm text-center">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-3xl bg-red-50 flex items-center justify-center">
+                <i class="fas fa-shield-halved text-red-500 text-3xl"></i>
+            </div>
+            <h2 class="font-display text-2xl font-bold text-navy mb-2">Access Denied</h2>
+            <p class="text-sm text-gray-500 mb-6 leading-relaxed">এই অ্যাকাউন্টটি অ্যাডমিন হিসেবে নিবন্ধিত নয়। অনুগ্রহ করে সঠিক অ্যাকাউন্ট দিয়ে লগইন করুন।</p>
+            <button onclick="logout()" class="btn-primary w-full py-3.5 rounded-xl font-bold text-sm">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+            </button>
         </div>
     </div>
 
-    <!-- DASHBOARD -->
+    <!-- ============ DASHBOARD ============ -->
     <div id="dashboard-section" class="hidden min-h-screen">
-        <header class="navy-bg sticky top-0 z-40 p-4 flex justify-between items-center shadow-lg">
-            <div class="flex items-center gap-3">
-                <img src="logo.png" class="h-9 bg-white rounded p-1">
-                <div>
-                    <h1 class="text-white font-bold text-sm">Admin Control</h1>
-                    <p class="gold-text text-[10px]">Heartix Panel</p>
+
+        <!-- DESKTOP SIDEBAR -->
+        <aside class="sidebar-desktop hidden md:flex fixed left-0 top-0 bottom-0 w-[240px] navy-gradient flex-col z-40">
+            <div class="p-6 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl gold-gradient flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-crown text-navy text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-white font-display font-bold text-lg leading-none">Heartix</p>
+                        <p class="text-gold text-[10px] tracking-widest uppercase mt-1">Admin</p>
+                    </div>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <span id="admin-email-display" class="text-white/60 text-[10px] hidden md:block"></span>
-                <button onclick="logout()" class="text-white/80 text-sm"><i class="fas fa-sign-out-alt"></i> Logout</button>
+
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto hide-scrollbar">
+                <p class="text-[10px] text-white/40 font-bold uppercase tracking-wider px-3 mb-2 mt-2">Main</p>
+                <button onclick="showTab('dashboard')" data-tab="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-white/80 text-left">
+                    <i class="fas fa-chart-pie nav-icon text-white/60 w-5 text-center"></i> Dashboard
+                </button>
+                <button onclick="showTab('orders')" data-tab="orders" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-white/80 text-left">
+                    <i class="fas fa-receipt nav-icon text-white/60 w-5 text-center"></i> Orders
+                    <span id="orders-badge" class="ml-auto bg-gold text-navy text-[10px] font-bold rounded-full px-2 py-0.5 hidden">0</span>
+                </button>
+
+                <p class="text-[10px] text-white/40 font-bold uppercase tracking-wider px-3 mb-2 mt-6">Catalog</p>
+                <button onclick="showTab('products')" data-tab="products" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-white/80 text-left">
+                    <i class="fas fa-box nav-icon text-white/60 w-5 text-center"></i> Products
+                </button>
+                <button onclick="showTab('categories')" data-tab="categories" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-white/80 text-left">
+                    <i class="fas fa-th-large nav-icon text-white/60 w-5 text-center"></i> Categories
+                </button>
+                <button onclick="showTab('reviews')" data-tab="reviews" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-white/80 text-left">
+                    <i class="fas fa-star nav-icon text-white/60 w-5 text-center"></i> Reviews
+                </button>
+
+                <p class="text-[10px] text-white/40 font-bold uppercase tracking-wider px-3 mb-2 mt-6">Website</p>
+                <button onclick="showTab('content')" data-tab="content" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-white/80 text-left">
+                    <i class="fas fa-layer-group nav-icon text-white/60 w-5 text-center"></i> Content
+                </button>
+                <button onclick="showTab('settings')" data-tab="settings" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-white/80 text-left">
+                    <i class="fas fa-cog nav-icon text-white/60 w-5 text-center"></i> Settings
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-white/10">
+                <div class="bg-white/5 rounded-xl p-3 mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user-shield text-gold text-xs"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-white text-xs font-semibold truncate" id="admin-email-display"></p>
+                            <p class="text-gold text-[9px] uppercase font-bold tracking-wider">Administrator</p>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full text-white/70 hover:text-white text-xs font-semibold py-2.5 rounded-lg hover:bg-white/5 transition flex items-center justify-center gap-2">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
             </div>
+        </aside>
+
+        <!-- MOBILE HEADER -->
+        <header class="md:hidden glass sticky top-0 z-30 px-4 py-3 flex justify-between items-center border-b border-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl gold-gradient flex items-center justify-center">
+                    <i class="fas fa-crown text-navy text-sm"></i>
+                </div>
+                <div>
+                    <h1 class="text-navy font-display font-bold text-base leading-none">Heartix</h1>
+                    <p class="text-gold text-[9px] uppercase font-bold tracking-widest mt-0.5">Admin</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-9 h-9 rounded-full bg-red-50 text-red-500 flex items-center justify-center">
+                <i class="fas fa-sign-out-alt text-sm"></i>
+            </button>
         </header>
 
-        <div class="bg-white shadow-sm overflow-x-auto hide-scrollbar sticky top-[68px] z-30">
-            <div class="flex min-w-max">
-                <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-active px-4 py-3 text-xs font-semibold whitespace-nowrap"><i class="fas fa-chart-line mr-1"></i> Dashboard</button>
-                <button onclick="showTab('products')" id="tab-products" class="tab-inactive px-4 py-3 text-xs font-semibold whitespace-nowrap"><i class="fas fa-box mr-1"></i> Products</button>
-                <button onclick="showTab('categories')" id="tab-categories" class="tab-inactive px-4 py-3 text-xs font-semibold whitespace-nowrap"><i class="fas fa-th-large mr-1"></i> Categories</button>
-                <button onclick="showTab('content')" id="tab-content" class="tab-inactive px-4 py-3 text-xs font-semibold whitespace-nowrap"><i class="fas fa-layer-group mr-1"></i> Content</button>
-                <button onclick="showTab('orders')" id="tab-orders" class="tab-inactive px-4 py-3 text-xs font-semibold whitespace-nowrap"><i class="fas fa-receipt mr-1"></i> Orders</button>
-                <button onclick="showTab('reviews')" id="tab-reviews" class="tab-inactive px-4 py-3 text-xs font-semibold whitespace-nowrap"><i class="fas fa-star mr-1"></i> Reviews</button>
-                <button onclick="showTab('settings')" id="tab-settings" class="tab-inactive px-4 py-3 text-xs font-semibold whitespace-nowrap"><i class="fas fa-cog mr-1"></i> Settings</button>
-            </div>
-        </div>
+        <!-- MAIN CONTENT -->
+        <main class="p-4 md:p-8 max-w-6xl mx-auto">
 
-        <div class="p-4 max-w-4xl mx-auto pb-24">
-
-            <!-- DASHBOARD -->
-            <div id="content-dashboard" class="tab-content">
-                <h2 class="text-xl font-bold navy-text mb-4">Overview</h2>
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <div class="bg-white rounded-2xl p-4 shadow-sm">
-                        <i class="fas fa-box text-2xl text-blue-500"></i>
-                        <p id="stat-products" class="text-2xl font-bold navy-text mt-2">0</p>
-                        <p class="text-xs text-gray-500">Products</p>
-                    </div>
-                    <div class="bg-white rounded-2xl p-4 shadow-sm">
-                        <i class="fas fa-receipt text-2xl text-purple-500"></i>
-                        <p id="stat-orders" class="text-2xl font-bold navy-text mt-2">0</p>
-                        <p class="text-xs text-gray-500">Orders</p>
-                    </div>
-                    <div class="bg-white rounded-2xl p-4 shadow-sm">
-                        <i class="fas fa-clock text-2xl text-yellow-500"></i>
-                        <p id="stat-pending" class="text-2xl font-bold navy-text mt-2">0</p>
-                        <p class="text-xs text-gray-500">Pending</p>
-                    </div>
-                    <div class="bg-white rounded-2xl p-4 shadow-sm">
-                        <i class="fas fa-money-bill-wave text-2xl text-green-500"></i>
-                        <p id="stat-revenue" class="text-2xl font-bold navy-text mt-2">৳0</p>
-                        <p class="text-xs text-gray-500">Revenue</p>
-                    </div>
+            <!-- ============ DASHBOARD TAB ============ -->
+            <div id="content-dashboard" class="tab-content animate-fade-in">
+                <div class="mb-6">
+                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Dashboard</h2>
+                    <p class="text-sm text-gray-500">Welcome back! Here's your business overview.</p>
                 </div>
-                <div class="bg-white rounded-2xl p-4 shadow-sm">
-                    <h3 class="font-bold navy-text mb-3">Recent Orders</h3>
-                    <div id="recent-orders" class="space-y-2"><p class="text-gray-400 text-sm text-center py-4">No orders yet</p></div>
-                </div>
-            </div>
 
-            <!-- PRODUCTS -->
-            <div id="content-products" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold navy-text">Products</h2>
-                    <button onclick="openAddModal()" class="gold-bg text-navy px-4 py-2 rounded-xl font-semibold text-sm"><i class="fas fa-plus mr-1"></i> Add</button>
-                </div>
-                <input type="text" id="product-search" oninput="renderAdminProducts()" placeholder="Search..." class="w-full bg-white rounded-xl px-4 py-3 mb-4 outline-none border border-gray-200">
-                <div id="product-list-admin" class="space-y-3"><p class="text-center text-gray-400 py-8">Loading...</p></div>
-            </div>
-
-            <!-- CATEGORIES -->
-            <div id="content-categories" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h2 class="text-xl font-bold navy-text">Categories</h2>
-                        <p class="text-xs text-gray-500 mt-1">নাম, আইকন বা ছবি পরিবর্তন করুন</p>
-                    </div>
-                    <button onclick="openCategoryModal()" class="gold-bg text-navy px-4 py-2 rounded-xl font-semibold text-sm"><i class="fas fa-plus mr-1"></i> New</button>
-                </div>
-                <div id="category-list-admin" class="space-y-3"><p class="text-center text-gray-400 py-8">Loading...</p></div>
-            </div>
-
-            <!-- CONTENT -->
-            <div id="content-content" class="tab-content hidden">
-                <h2 class="text-xl font-bold navy-text mb-4">Homepage Content</h2>
-
-                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <div class="flex justify-between items-center mb-3">
-                        <div>
-                            <h3 class="font-bold navy-text text-base"><i class="fas fa-images gold-text mr-2"></i>Hero Banners</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5">উপরে স্লাইডিং ব্যানার</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+                    <div class="stat-card blue bg-white rounded-2xl p-4 md:p-5 premium-shadow">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                                <i class="fas fa-box text-blue-600 text-base"></i>
+                            </div>
+                            <i class="fas fa-chart-line text-blue-200 text-xs"></i>
                         </div>
-                        <button onclick="openHeroModal()" class="gold-bg text-navy px-3 py-1.5 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
+                        <p id="stat-products" class="text-2xl md:text-3xl font-bold text-navy leading-none">0</p>
+                        <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Products</p>
+                    </div>
+
+                    <div class="stat-card purple bg-white rounded-2xl p-4 md:p-5 premium-shadow">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+                                <i class="fas fa-receipt text-purple-600 text-base"></i>
+                            </div>
+                            <i class="fas fa-arrow-trend-up text-purple-200 text-xs"></i>
+                        </div>
+                        <p id="stat-orders" class="text-2xl md:text-3xl font-bold text-navy leading-none">0</p>
+                        <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Orders</p>
+                    </div>
+
+                    <div class="stat-card yellow bg-white rounded-2xl p-4 md:p-5 premium-shadow">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center">
+                                <i class="fas fa-clock text-yellow-600 text-base"></i>
+                            </div>
+                            <i class="fas fa-hourglass-half text-yellow-200 text-xs"></i>
+                        </div>
+                        <p id="stat-pending" class="text-2xl md:text-3xl font-bold text-navy leading-none">0</p>
+                        <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Pending</p>
+                    </div>
+
+                    <div class="stat-card green bg-white rounded-2xl p-4 md:p-5 premium-shadow">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                                <i class="fas fa-money-bill-wave text-green-600 text-base"></i>
+                            </div>
+                            <i class="fas fa-coins text-green-200 text-xs"></i>
+                        </div>
+                        <p id="stat-revenue" class="text-xl md:text-2xl font-bold text-navy leading-none break-words">৳0</p>
+                        <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Revenue</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl premium-shadow p-5 md:p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-display text-lg font-bold text-navy">Recent Orders</h3>
+                        <button onclick="showTab('orders')" class="text-xs text-gold font-bold tracking-wide uppercase">View All →</button>
+                    </div>
+                    <div id="recent-orders" class="space-y-2">
+                        <p class="text-gray-400 text-sm text-center py-8">No orders yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ PRODUCTS TAB ============ -->
+            <div id="content-products" class="tab-content hidden animate-fade-in">
+                <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Products</h2>
+                        <p class="text-sm text-gray-500">Manage your product catalog</p>
+                    </div>
+                    <button onclick="openAddModal()" class="btn-gold px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                        <i class="fas fa-plus"></i> Add Product
+                    </button>
+                </div>
+
+                <div class="relative mb-4">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" id="product-search" oninput="renderAdminProducts()" placeholder="Search products..." class="w-full bg-white rounded-xl pl-11 pr-4 py-3.5 outline-none border-2 border-gray-100 text-sm font-medium">
+                </div>
+
+                <div id="product-list-admin" class="space-y-3"></div>
+            </div>
+
+            <!-- ============ CATEGORIES TAB ============ -->
+            <div id="content-categories" class="tab-content hidden animate-fade-in">
+                <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Categories</h2>
+                        <p class="text-sm text-gray-500">নাম, আইকন বা ছবি পরিবর্তন করুন</p>
+                    </div>
+                    <button onclick="openCategoryModal()" class="btn-gold px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                        <i class="fas fa-plus"></i> New Category
+                    </button>
+                </div>
+                <div id="category-list-admin" class="space-y-3"></div>
+            </div>
+
+            <!-- ============ CONTENT TAB ============ -->
+            <div id="content-content" class="tab-content hidden animate-fade-in">
+                <div class="mb-6">
+                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Website Content</h2>
+                    <p class="text-sm text-gray-500">হোমপেজের ব্যানার, সেকশন ও কনটেন্ট ম্যানেজ করুন</p>
+                </div>
+
+                <div class="bg-white rounded-2xl premium-shadow p-5 md:p-6 mb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-images text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-navy text-base">Hero Banners</h3>
+                                <p class="text-[11px] text-gray-500">উপরে স্লাইডিং ব্যানার</p>
+                            </div>
+                        </div>
+                        <button onclick="openHeroModal()" class="btn-gold px-4 py-2 rounded-lg font-semibold text-xs flex items-center gap-1.5">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
                     </div>
                     <div id="hero-banners-list-admin" class="space-y-2"></div>
                 </div>
 
-                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <div class="flex justify-between items-center mb-3">
-                        <div>
-                            <h3 class="font-bold navy-text text-base"><i class="fas fa-layer-group gold-text mr-2"></i>Custom Sections</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5">ক্যাটেগরি ভিত্তিক সেকশন</p>
+                <div class="bg-white rounded-2xl premium-shadow p-5 md:p-6 mb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-layer-group text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-navy text-base">Custom Sections</h3>
+                                <p class="text-[11px] text-gray-500">ক্যাটেগরি ভিত্তিক সেকশন</p>
+                            </div>
                         </div>
-                        <button onclick="openSectionModal()" class="gold-bg text-navy px-3 py-1.5 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
+                        <button onclick="openSectionModal()" class="btn-gold px-4 py-2 rounded-lg font-semibold text-xs flex items-center gap-1.5">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
                     </div>
                     <div id="sections-list-admin" class="space-y-2"></div>
                 </div>
 
-                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <div class="flex justify-between items-center mb-3">
-                        <div>
-                            <h3 class="font-bold navy-text text-base"><i class="fas fa-image gold-text mr-2"></i>Middle Banners</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5">সেকশনের মাঝে ছবি</p>
+                <div class="bg-white rounded-2xl premium-shadow p-5 md:p-6 mb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-image text-green-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-navy text-base">Middle Banners</h3>
+                                <p class="text-[11px] text-gray-500">সেকশনের মাঝে ছবি</p>
+                            </div>
                         </div>
-                        <button onclick="openBannerModal()" class="gold-bg text-navy px-3 py-1.5 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
+                        <button onclick="openBannerModal()" class="btn-gold px-4 py-2 rounded-lg font-semibold text-xs flex items-center gap-1.5">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
                     </div>
                     <div id="banners-list-admin" class="space-y-2"></div>
                 </div>
 
-                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <div class="flex justify-between items-center mb-3">
-                        <div>
-                            <h3 class="font-bold navy-text text-base"><i class="fas fa-quote-left gold-text mr-2"></i>Customer Reviews</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5">রিভিউ স্লাইডার</p>
+                <div class="bg-white rounded-2xl premium-shadow p-5 md:p-6 mb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-quote-left text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-navy text-base">Customer Reviews</h3>
+                                <p class="text-[11px] text-gray-500">রিভিউ স্লাইডার</p>
+                            </div>
                         </div>
-                        <button onclick="openTestimonialModal()" class="gold-bg text-navy px-3 py-1.5 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
+                        <button onclick="openTestimonialModal()" class="btn-gold px-4 py-2 rounded-lg font-semibold text-xs flex items-center gap-1.5">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
                     </div>
                     <div id="testimonials-list-admin" class="space-y-2"></div>
                 </div>
             </div>
 
-            <!-- ORDERS -->
-            <div id="content-orders" class="tab-content hidden">
-                <h2 class="text-xl font-bold navy-text mb-4">Orders</h2>
-                <div class="flex gap-2 mb-4 overflow-x-auto hide-scrollbar">
-                    <button onclick="filterOrders('all', this)" class="order-filter-btn bg-navy text-white px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">All</button>
-                    <button onclick="filterOrders('pending', this)" class="order-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Pending</button>
-                    <button onclick="filterOrders('confirmed', this)" class="order-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Confirmed</button>
-                    <button onclick="filterOrders('shipped', this)" class="order-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Shipped</button>
-                    <button onclick="filterOrders('delivered', this)" class="order-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Delivered</button>
-                    <button onclick="filterOrders('cancelled', this)" class="order-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Cancelled</button>
+            <!-- ============ ORDERS TAB ============ -->
+            <div id="content-orders" class="tab-content hidden animate-fade-in">
+                <div class="mb-6">
+                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Orders</h2>
+                    <p class="text-sm text-gray-500">গ্রাহকের অর্ডার ট্র্যাক ও ম্যানেজ করুন</p>
                 </div>
-                <div id="order-list-admin" class="space-y-3"><p class="text-center text-gray-400 py-8">Loading...</p></div>
+
+                <div class="flex gap-2 mb-4 overflow-x-auto hide-scrollbar pb-1">
+                    <button onclick="filterOrders('all', this)" class="order-filter-btn bg-navy text-white px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition">All</button>
+                    <button onclick="filterOrders('pending', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition">Pending</button>
+                    <button onclick="filterOrders('confirmed', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition">Confirmed</button>
+                    <button onclick="filterOrders('shipped', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition">Shipped</button>
+                    <button onclick="filterOrders('delivered', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition">Delivered</button>
+                    <button onclick="filterOrders('cancelled', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition">Cancelled</button>
+                </div>
+
+                <div id="order-list-admin" class="space-y-3"></div>
             </div>
 
-            <!-- REVIEWS -->
-            <div id="content-reviews" class="tab-content hidden">
-                <h2 class="text-xl font-bold navy-text mb-4">Product Reviews</h2>
-                <div id="reviews-list-admin" class="space-y-3"><p class="text-center text-gray-400 py-8">Loading...</p></div>
+            <!-- ============ REVIEWS TAB ============ -->
+            <div id="content-reviews" class="tab-content hidden animate-fade-in">
+                <div class="mb-6">
+                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Product Reviews</h2>
+                    <p class="text-sm text-gray-500">গ্রাহকদের রিভিউ দেখুন ও ম্যানেজ করুন</p>
+                </div>
+                <div id="reviews-list-admin" class="space-y-3"></div>
             </div>
 
-            <!-- SETTINGS -->
-            <div id="content-settings" class="tab-content hidden">
-                <h2 class="text-xl font-bold navy-text mb-4">Settings</h2>
-
-                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4 border-2 border-blue-100">
-                    <h3 class="font-bold text-blue-600 mb-3"><i class="fas fa-shield-alt mr-2"></i>Account Security</h3>
-                    <p class="text-xs text-gray-500 leading-relaxed">আপনার লগইন এখন Firebase Authentication দ্বারা সুরক্ষিত। পাসওয়ার্ড পরিবর্তন করতে Firebase Console-এ যান।</p>
-                    <p class="text-[11px] text-gray-400 mt-2">Logged in as: <span id="settings-email" class="font-semibold text-gray-600"></span></p>
+            <!-- ============ SETTINGS TAB ============ -->
+            <div id="content-settings" class="tab-content hidden animate-fade-in">
+                <div class="mb-6">
+                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Settings</h2>
+                    <p class="text-sm text-gray-500">সাইট কনফিগারেশন ম্যানেজ করুন</p>
                 </div>
 
-                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-truck gold-text mr-2"></i>Delivery</h3>
-                    <label class="text-xs text-gray-500 font-semibold">Delivery Charge (৳)</label>
-                    <input type="number" id="setting-delivery-charge" placeholder="100" class="w-full border rounded-lg px-3 py-2 mb-3 outline-none">
-                    <label class="text-xs text-gray-500 font-semibold">Free Delivery Above (৳)</label>
-                    <input type="number" id="setting-free-delivery" placeholder="5000" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-5 mb-4 border border-blue-200">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-shield-halved text-blue-600"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h3 class="font-bold text-blue-900 mb-1">Account Security</h3>
+                            <p class="text-xs text-blue-800 leading-relaxed mb-2">আপনার লগইন Firebase Authentication দ্বারা সুরক্ষিত। পাসওয়ার্ড পরিবর্তন করতে Firebase Console-এ যান।</p>
+                            <p class="text-[11px] text-blue-600 font-semibold break-all">Logged in: <span id="settings-email"></span></p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-phone gold-text mr-2"></i>Contact Info</h3>
-                    <input type="text" id="setting-address" placeholder="Address" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <input type="text" id="setting-phone" placeholder="Phone" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <input type="email" id="setting-email" placeholder="Email" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <input type="text" id="setting-whatsapp" placeholder="WhatsApp (8801XXXXXXXXX)" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
+                <div class="bg-white rounded-2xl premium-shadow p-5 md:p-6 mb-4">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+                            <i class="fas fa-truck text-purple-600"></i>
+                        </div>
+                        <h3 class="font-bold text-navy">Delivery Settings</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Delivery Charge (৳)</label>
+                            <input type="number" id="setting-delivery-charge" placeholder="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Free Delivery Above (৳)</label>
+                            <input type="number" id="setting-free-delivery" placeholder="5000" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <h3 class="font-bold navy-text mb-3"><i class="fas fa-credit-card gold-text mr-2"></i>Payment</h3>
-                    <input type="text" id="setting-bkash" placeholder="bKash Number" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <input type="text" id="setting-nagad" placeholder="Nagad Number" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
+                <div class="bg-white rounded-2xl premium-shadow p-5 md:p-6 mb-4">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                            <i class="fas fa-address-book text-green-600"></i>
+                        </div>
+                        <h3 class="font-bold text-navy">Contact Information</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Address</label>
+                            <input type="text" id="setting-address" placeholder="Dhaka, Bangladesh" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Phone</label>
+                                <input type="text" id="setting-phone" placeholder="+8801XXXXXXXXX" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">WhatsApp</label>
+                                <input type="text" id="setting-whatsapp" placeholder="8801XXXXXXXXX" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Email</label>
+                            <input type="email" id="setting-email" placeholder="info@heartix.com" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
+                        </div>
+                    </div>
                 </div>
 
-                <button onclick="saveSettings()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold mb-4"><i class="fas fa-save mr-2"></i> Save Settings</button>
+                <div class="bg-white rounded-2xl premium-shadow p-5 md:p-6 mb-4">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
+                            <i class="fas fa-credit-card text-orange-600"></i>
+                        </div>
+                        <h3 class="font-bold text-navy">Payment Numbers</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">bKash Number</label>
+                            <input type="text" id="setting-bkash" placeholder="01XXXXXXXXX" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Nagad Number</label>
+                            <input type="text" id="setting-nagad" placeholder="01XXXXXXXXX" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="saveSettings()" class="btn-primary w-full py-4 rounded-xl font-bold text-sm tracking-wide mb-4">
+                    <i class="fas fa-save mr-2"></i> SAVE ALL SETTINGS
+                </button>
             </div>
 
-        </div>
+        </main>
+
+        <!-- MOBILE BOTTOM NAV -->
+        <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white border-t border-gray-100" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
+            <div class="flex justify-around items-center py-1.5">
+                <button onclick="showTab('dashboard')" data-tab="dashboard" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400 transition">
+                    <i class="fas fa-chart-pie text-lg"></i>
+                    <span class="text-[9px] mt-1 font-semibold">Home</span>
+                </button>
+                <button onclick="showTab('orders')" data-tab="orders" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400 transition relative">
+                    <i class="fas fa-receipt text-lg"></i>
+                    <span class="text-[9px] mt-1 font-semibold">Orders</span>
+                    <span id="orders-badge-mob" class="absolute top-0 right-1 bg-red-500 text-white text-[9px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center hidden">0</span>
+                </button>
+                <button onclick="showTab('products')" data-tab="products" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400 transition">
+                    <i class="fas fa-box text-lg"></i>
+                    <span class="text-[9px] mt-1 font-semibold">Products</span>
+                </button>
+                <button onclick="showTab('content')" data-tab="content" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400 transition">
+                    <i class="fas fa-layer-group text-lg"></i>
+                    <span class="text-[9px] mt-1 font-semibold">Content</span>
+                </button>
+                <button onclick="showTab('settings')" data-tab="settings" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400 transition">
+                    <i class="fas fa-cog text-lg"></i>
+                    <span class="text-[9px] mt-1 font-semibold">More</span>
+                </button>
+            </div>
+        </nav>
+
     </div>
 
+    <!-- ============ MODALS (same as before, kept identical) ============ -->
+
     <!-- PRODUCT MODAL -->
-    <div id="product-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div class="navy-bg p-4 rounded-t-2xl flex justify-between items-center sticky top-0 z-10">
-                <h3 id="modal-title" class="text-white font-bold">Add Product</h3>
-                <button onclick="closeModal()" class="text-white/80 w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
+    <div id="product-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
+            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
+                <h3 id="modal-title" class="text-white font-bold text-lg">Add Product</h3>
+                <button onclick="closeModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="p-5 space-y-3">
+            <div class="p-5 space-y-4">
                 <input type="hidden" id="edit-product-id">
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Product Name *</label>
-                    <input type="text" id="p-name" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none" placeholder="e.g. Samsung 32 inch TV">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Product Name *</label>
+                    <input type="text" id="p-name" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium" placeholder="e.g. Samsung 32 inch TV">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-xs text-gray-500 font-semibold">Price (৳) *</label>
-                        <input type="number" id="p-price" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none">
+                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Price (৳) *</label>
+                        <input type="number" id="p-price" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                     </div>
                     <div>
-                        <label class="text-xs text-gray-500 font-semibold">Old Price</label>
-                        <input type="number" id="p-oldprice" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none">
+                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Old Price</label>
+                        <input type="number" id="p-oldprice" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-xs text-gray-500 font-semibold">Category *</label>
-                        <select id="p-category" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none"></select>
+                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category *</label>
+                        <select id="p-category" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white"></select>
                     </div>
                     <div>
-                        <label class="text-xs text-gray-500 font-semibold">Stock Qty</label>
-                        <input type="number" id="p-stock" value="10" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none">
+                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Stock Qty</label>
+                        <input type="number" id="p-stock" value="10" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                     </div>
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Brand</label>
-                    <input type="text" id="p-brand" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none" placeholder="e.g. Samsung">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Brand</label>
+                    <input type="text" id="p-brand" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium" placeholder="e.g. Samsung">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Description</label>
-                    <textarea id="p-description" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none"></textarea>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Description</label>
+                    <textarea id="p-description" rows="3" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium resize-none"></textarea>
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Images * (Max 5, first = Main)</label>
-                    <div id="image-preview-grid" class="grid grid-cols-4 gap-2 my-2"></div>
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Images * (Max 5, first = Main)</label>
+                    <div id="image-preview-grid" class="grid grid-cols-4 gap-2 my-3"></div>
+                    <div class="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center hover:border-gold transition cursor-pointer">
                         <label for="p-image-file" class="cursor-pointer block">
-                            <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-1"></i>
-                            <p class="text-xs text-gray-500">Click to upload images</p>
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-2"></i>
+                            <p class="text-xs text-gray-500 font-semibold">Click to upload images</p>
+                            <p class="text-[10px] text-gray-400 mt-1">JPG, PNG (Max 5)</p>
                         </label>
                         <input type="file" id="p-image-file" accept="image/*" multiple class="hidden">
                     </div>
                 </div>
-                <button onclick="saveProduct()" id="save-btn" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Save Product</button>
+                <button onclick="saveProduct()" id="save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm">
+                    <i class="fas fa-check mr-2"></i> SAVE PRODUCT
+                </button>
             </div>
         </div>
     </div>
 
     <!-- CATEGORY MODAL -->
-    <div id="category-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div class="navy-bg p-4 rounded-t-2xl flex justify-between items-center sticky top-0 z-10">
-                <h3 id="cat-modal-title" class="text-white font-bold">Category</h3>
-                <button onclick="closeCategoryModal()" class="text-white/80 w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
+    <div id="category-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
+            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
+                <h3 id="cat-modal-title" class="text-white font-bold text-lg">Category</h3>
+                <button onclick="closeCategoryModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="p-5 space-y-3">
+            <div class="p-5 space-y-4">
                 <input type="hidden" id="edit-category-key">
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Category Key * (English)</label>
-                    <input type="text" id="cat-key" placeholder="e.g. AC" class="w-full border rounded-lg px-3 py-2 outline-none">
-                    <p class="text-[10px] text-gray-400 mt-0.5">⚠️ Key পরিবর্তন করলে সব প্রোডাক্টে নতুন key update হবে</p>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category Key * (English)</label>
+                    <input type="text" id="cat-key" placeholder="e.g. AC" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
+                    <p class="text-[10px] text-gray-400 mt-1.5"><i class="fas fa-info-circle mr-1"></i> Key পরিবর্তন করলে সব প্রোডাক্টে নতুন key update হবে</p>
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Display Name *</label>
-                    <input type="text" id="cat-label" placeholder="e.g. Air Conditioners" class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Display Name *</label>
+                    <input type="text" id="cat-label" placeholder="e.g. Air Conditioners" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Icon (Emoji)</label>
-                    <input type="text" id="cat-icon-emoji" placeholder="❄️ 📺 🌀" maxlength="4" class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Icon (Emoji)</label>
+                    <input type="text" id="cat-icon-emoji" placeholder="❄️ 📺 🌀" maxlength="4" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium text-center text-2xl">
                 </div>
-                <div class="text-center text-xs text-gray-400">— or —</div>
+                <div class="text-center text-xs text-gray-400 font-bold uppercase tracking-wider py-1">— OR —</div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Category Image</label>
-                    <div id="cat-image-preview" class="hidden mb-2 relative">
-                        <img id="cat-image-preview-img" class="w-16 h-16 object-contain bg-gray-50 rounded-lg border">
-                        <button type="button" onclick="clearCategoryImage()" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow"><i class="fas fa-times"></i></button>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category Image</label>
+                    <div id="cat-image-preview" class="hidden mb-3 relative inline-block">
+                        <img id="cat-image-preview-img" class="w-20 h-20 object-contain bg-gray-50 rounded-xl border-2 border-gold">
+                        <button type="button" onclick="clearCategoryImage()" class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-lg"><i class="fas fa-times"></i></button>
                     </div>
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
+                    <div class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center">
                         <label for="cat-image-file" class="cursor-pointer block">
-                            <i class="fas fa-image text-xl text-gray-400"></i>
-                            <p class="text-xs text-gray-500 mt-1">Upload Image</p>
+                            <i class="fas fa-image text-2xl text-gray-300 mb-1"></i>
+                            <p class="text-xs text-gray-500 font-semibold">Upload Image</p>
                         </label>
                         <input type="file" id="cat-image-file" accept="image/*" class="hidden">
-                        <p id="cat-file-name" class="text-xs text-green-600 mt-1"></p>
+                        <p id="cat-file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
                     </div>
                 </div>
-                <button onclick="saveCategory()" id="cat-save-btn" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Save</button>
+                <button onclick="saveCategory()" id="cat-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm">
+                    <i class="fas fa-check mr-2"></i> SAVE CATEGORY
+                </button>
             </div>
         </div>
     </div>
 
     <!-- SECTION MODAL -->
-    <div id="section-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md">
-            <div class="navy-bg p-4 rounded-t-2xl flex justify-between">
-                <h3 id="section-modal-title" class="text-white font-bold">Add Section</h3>
-                <button onclick="closeSectionModal()" class="text-white/80"><i class="fas fa-times"></i></button>
+    <div id="section-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
+            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
+                <h3 id="section-modal-title" class="text-white font-bold text-lg">Add Section</h3>
+                <button onclick="closeSectionModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="p-5 space-y-3">
+            <div class="p-5 space-y-4">
                 <input type="hidden" id="edit-section-idx">
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Section Title *</label>
-                    <input type="text" id="section-title-input" placeholder="e.g. All Natural Honey" class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Section Title *</label>
+                    <input type="text" id="section-title-input" placeholder="e.g. Top Smart TVs" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Category *</label>
-                    <select id="section-category" class="w-full border rounded-lg px-3 py-2 outline-none"></select>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category *</label>
+                    <select id="section-category" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white"></select>
                 </div>
-                <button onclick="saveSection()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Save Section</button>
+                <button onclick="saveSection()" class="btn-primary w-full py-4 rounded-xl font-bold text-sm">
+                    <i class="fas fa-check mr-2"></i> SAVE SECTION
+                </button>
             </div>
         </div>
     </div>
 
     <!-- BANNER MODAL -->
-    <div id="banner-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md">
-            <div class="navy-bg p-4 rounded-t-2xl flex justify-between">
-                <h3 id="banner-modal-title" class="text-white font-bold">Add Banner</h3>
-                <button onclick="closeBannerModal()" class="text-white/80"><i class="fas fa-times"></i></button>
+    <div id="banner-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
+            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
+                <h3 id="banner-modal-title" class="text-white font-bold text-lg">Add Banner</h3>
+                <button onclick="closeBannerModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="p-5 space-y-3">
+            <div class="p-5 space-y-4">
                 <input type="hidden" id="edit-banner-idx">
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Link URL (Optional)</label>
-                    <input type="text" id="banner-link" placeholder="https://..." class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Link URL (Optional)</label>
+                    <input type="text" id="banner-link" placeholder="https://..." class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                 </div>
-                <div id="banner-image-preview" class="hidden mb-2"><img id="banner-preview-img" class="w-full h-24 object-contain bg-gray-50 rounded-lg border"></div>
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
+                <div id="banner-image-preview" class="hidden mb-2"><img id="banner-preview-img" class="w-full h-28 object-contain bg-gray-50 rounded-xl border-2 border-gold"></div>
+                <div class="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center">
                     <label for="banner-image-file" class="cursor-pointer block">
-                        <i class="fas fa-image text-2xl text-gray-400"></i>
-                        <p class="text-xs text-gray-500 mt-1" id="banner-upload-hint">Upload Banner Image</p>
+                        <i class="fas fa-image text-3xl text-gray-300 mb-2"></i>
+                        <p class="text-xs text-gray-500 font-semibold" id="banner-upload-hint">Upload Banner Image</p>
                     </label>
                     <input type="file" id="banner-image-file" accept="image/*" class="hidden">
-                    <p id="banner-file-name" class="text-xs text-green-600 mt-1"></p>
+                    <p id="banner-file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
                 </div>
-                <button onclick="saveBanner()" id="banner-save-btn" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Save Banner</button>
+                <button onclick="saveBanner()" id="banner-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm">
+                    <i class="fas fa-check mr-2"></i> SAVE BANNER
+                </button>
             </div>
         </div>
     </div>
 
     <!-- TESTIMONIAL MODAL -->
-    <div id="testimonial-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div class="navy-bg p-4 rounded-t-2xl flex justify-between sticky top-0">
-                <h3 id="testimonial-modal-title" class="text-white font-bold">Add Review</h3>
-                <button onclick="closeTestimonialModal()" class="text-white/80"><i class="fas fa-times"></i></button>
+    <div id="testimonial-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
+            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
+                <h3 id="testimonial-modal-title" class="text-white font-bold text-lg">Add Review</h3>
+                <button onclick="closeTestimonialModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="p-5 space-y-3">
+            <div class="p-5 space-y-4">
                 <input type="hidden" id="edit-testimonial-idx">
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Customer Name *</label>
-                    <input type="text" id="test-name" class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Customer Name *</label>
+                    <input type="text" id="test-name" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Role</label>
-                    <input type="text" id="test-role" placeholder="e.g. Housewife" class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Role</label>
+                    <input type="text" id="test-role" placeholder="e.g. Housewife" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Review Text *</label>
-                    <textarea id="test-text" rows="3" class="w-full border rounded-lg px-3 py-2 outline-none"></textarea>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Review Text *</label>
+                    <textarea id="test-text" rows="3" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium resize-none"></textarea>
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Rating</label>
-                    <select id="test-rating" class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Rating</label>
+                    <select id="test-rating" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white">
                         <option value="5">★★★★★ (5)</option>
                         <option value="4">★★★★☆ (4)</option>
                         <option value="3">★★★☆☆ (3)</option>
@@ -432,70 +773,76 @@
                         <option value="1">★☆☆☆☆ (1)</option>
                     </select>
                 </div>
-                <div id="test-image-preview" class="hidden mb-2"><img id="test-preview-img" class="w-16 h-16 object-cover rounded-full border"></div>
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
+                <div id="test-image-preview" class="hidden mb-2"><img id="test-preview-img" class="w-20 h-20 object-cover rounded-full border-2 border-gold"></div>
+                <div class="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center">
                     <label for="test-image-file" class="cursor-pointer block">
-                        <i class="fas fa-user-circle text-2xl text-gray-400"></i>
-                        <p class="text-xs text-gray-500 mt-1">Customer Photo (Optional)</p>
+                        <i class="fas fa-user-circle text-3xl text-gray-300 mb-2"></i>
+                        <p class="text-xs text-gray-500 font-semibold">Customer Photo (Optional)</p>
                     </label>
                     <input type="file" id="test-image-file" accept="image/*" class="hidden">
-                    <p id="test-file-name" class="text-xs text-green-600 mt-1"></p>
+                    <p id="test-file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
                 </div>
-                <button onclick="saveTestimonial()" id="test-save-btn" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Save Review</button>
+                <button onclick="saveTestimonial()" id="test-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm">
+                    <i class="fas fa-check mr-2"></i> SAVE REVIEW
+                </button>
             </div>
         </div>
     </div>
 
     <!-- HERO MODAL -->
-    <div id="hero-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div class="navy-bg p-4 rounded-t-2xl flex justify-between sticky top-0 z-10">
-                <h3 id="hero-modal-title" class="text-white font-bold">Add Hero Banner</h3>
-                <button onclick="closeHeroModal()" class="text-white/80"><i class="fas fa-times"></i></button>
+    <div id="hero-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
+            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
+                <h3 id="hero-modal-title" class="text-white font-bold text-lg">Add Hero Banner</h3>
+                <button onclick="closeHeroModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="p-5 space-y-3">
+            <div class="p-5 space-y-4">
                 <input type="hidden" id="edit-hero-idx">
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Badge (Top small text)</label>
-                    <input type="text" id="hero-badge" placeholder="✨ Premium" class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Badge</label>
+                    <input type="text" id="hero-badge" placeholder="✨ Premium" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Title *</label>
-                    <input type="text" id="hero-title-input" placeholder="Smart Living Starts Here" class="w-full border rounded-lg px-3 py-2 outline-none">
-                    <p class="text-[10px] text-gray-400 mt-0.5">লাইন ভাঙতে &lt;br&gt; ব্যবহার করুন</p>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Title *</label>
+                    <input type="text" id="hero-title-input" placeholder="Smart Living Starts Here" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
+                    <p class="text-[10px] text-gray-400 mt-1"><i class="fas fa-info-circle mr-1"></i> লাইন ভাঙতে &lt;br&gt; ব্যবহার করুন</p>
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Subtitle</label>
-                    <input type="text" id="hero-subtitle-input" placeholder="Premium appliances" class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Subtitle</label>
+                    <input type="text" id="hero-subtitle-input" placeholder="Premium appliances" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Background Color</label>
-                    <select id="hero-bg" class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Background Color</label>
+                    <select id="hero-bg" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white">
                         <option value="navy">Navy (Dark Blue)</option>
                         <option value="gold">Gold (Yellow)</option>
                         <option value="teal">Teal (Cyan)</option>
                     </select>
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Link (Optional)</label>
-                    <input type="text" id="hero-link" placeholder="https://..." class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Link (Optional)</label>
+                    <input type="text" id="hero-link" placeholder="https://..." class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 font-semibold">Background Image (Optional)</label>
-                    <div id="hero-image-preview" class="hidden mb-2 relative">
-                        <img id="hero-preview-img" class="w-full h-24 object-cover rounded-lg border">
-                        <button type="button" onclick="clearHeroImage()" class="absolute top-1 right-1 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow"><i class="fas fa-times"></i></button>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Background Image (Optional)</label>
+                    <div id="hero-image-preview" class="hidden mb-3 relative">
+                        <img id="hero-preview-img" class="w-full h-28 object-cover rounded-xl border-2 border-gold">
+                        <button type="button" onclick="clearHeroImage()" class="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-lg"><i class="fas fa-times"></i></button>
                     </div>
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
+                    <div class="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center">
                         <label for="hero-image-file" class="cursor-pointer block">
-                            <i class="fas fa-image text-2xl text-gray-400"></i>
-                            <p class="text-xs text-gray-500 mt-1">Click to upload banner image</p>
+                            <i class="fas fa-image text-3xl text-gray-300 mb-2"></i>
+                            <p class="text-xs text-gray-500 font-semibold">Click to upload banner image</p>
                         </label>
                         <input type="file" id="hero-image-file" accept="image/*" class="hidden">
-                        <p id="hero-file-name" class="text-xs text-green-600 mt-1"></p>
+                        <p id="hero-file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
                     </div>
                 </div>
-                <button onclick="saveHeroBanner()" id="hero-save-btn" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Save Banner</button>
+                <button onclick="saveHeroBanner()" id="hero-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm">
+                    <i class="fas fa-check mr-2"></i> SAVE BANNER
+                </button>
             </div>
         </div>
     </div>
@@ -505,9 +852,9 @@
         import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, query, orderBy, increment, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-        // ⚠️ SECURITY NOTE: ImgBB API key client-side exposed.
-        // Production-এ Cloud Function দিয়ে proxy করা উচিত।
-        const IMGBB_API_KEY = "df6ee25bc91b9b7200070d5328644463";
+        const CLOUDINARY_CLOUD_NAME = "ju2w6e9r";
+        const CLOUDINARY_UPLOAD_PRESET = "heartix_unsigned";
+
         const firebaseConfig = {
             apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
             authDomain: "heartix.firebaseapp.com",
@@ -550,9 +897,24 @@
 
         function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
-        // ============================================================
-        // AUTH STATE MANAGEMENT
-        // ============================================================
+        // ====== TOAST NOTIFICATIONS ======
+        function toast(msg, type = 'success') {
+            const c = document.getElementById('toast-container');
+            if (!c) return;
+            const t = document.createElement('div');
+            t.className = 'toast toast-' + type;
+            const icons = { success: 'check-circle', error: 'times-circle', warn: 'exclamation-triangle', info: 'info-circle' };
+            t.innerHTML = `<i class="fas fa-${icons[type] || 'info-circle'}"></i><span>${escapeHtml(msg)}</span>`;
+            c.appendChild(t);
+            setTimeout(() => {
+                t.style.transition = 'all 0.3s ease';
+                t.style.opacity = '0';
+                t.style.transform = 'translateY(-20px)';
+                setTimeout(() => t.remove(), 300);
+            }, 3000);
+        }
+
+        // ====== AUTH ======
         function showSection(id) {
             ['loading-section', 'login-section', 'not-admin-section', 'dashboard-section'].forEach(s => {
                 document.getElementById(s).classList.add('hidden');
@@ -576,10 +938,10 @@
                 currentUser = user;
                 const isAdminUser = await verifyAdmin(user.uid);
                 if (isAdminUser) {
-                    const emailDisplay = document.getElementById('admin-email-display');
-                    if (emailDisplay) emailDisplay.textContent = user.email || '';
-                    const settingsEmail = document.getElementById('settings-email');
-                    if (settingsEmail) settingsEmail.textContent = user.email || '';
+                    const ed = document.getElementById('admin-email-display');
+                    if (ed) ed.textContent = user.email || '';
+                    const se = document.getElementById('settings-email');
+                    if (se) se.textContent = user.email || '';
                     showSection('dashboard-section');
                     loadAllData();
                 } else {
@@ -604,7 +966,7 @@
             }
             const btn = document.getElementById('login-btn');
             btn.disabled = true;
-            btn.textContent = 'Logging in...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Signing in...';
             try {
                 await signInWithEmailAndPassword(auth, email, password);
                 document.getElementById('admin-password').value = '';
@@ -618,7 +980,7 @@
                 errEl.classList.remove('hidden');
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Login';
+                btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> SIGN IN';
             }
         }
 
@@ -627,16 +989,33 @@
             location.reload();
         }
 
+        // ====== TAB NAVIGATION ======
         window.showTab = function(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById('content-' + tab).classList.remove('hidden');
-            ['dashboard','products','categories','content','orders','reviews','settings'].forEach(t => {
-                const btn = document.getElementById('tab-' + t);
-                if (!btn) return;
-                btn.classList.remove('tab-active'); btn.classList.add('tab-inactive');
+            const c = document.getElementById('content-' + tab);
+            if (c) { c.classList.remove('hidden'); c.classList.add('animate-fade-in'); }
+            
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                const isMatch = btn.dataset.tab === tab;
+                btn.classList.toggle('active', isMatch);
+                if (!isMatch) {
+                    btn.classList.add('text-white/80');
+                } else {
+                    btn.classList.remove('text-white/80');
+                }
             });
-            const activeBtn = document.getElementById('tab-' + tab);
-            if (activeBtn) { activeBtn.classList.add('tab-active'); activeBtn.classList.remove('tab-inactive'); }
+            
+            document.querySelectorAll('.mob-nav-btn').forEach(btn => {
+                const isMatch = btn.dataset.tab === tab;
+                if (isMatch) {
+                    btn.classList.remove('text-gray-400');
+                    btn.classList.add('text-gold');
+                } else {
+                    btn.classList.remove('text-gold');
+                    btn.classList.add('text-gray-400');
+                }
+            });
+
             if (tab === 'settings') loadSettings();
             window.scrollTo({top:0, behavior:'smooth'});
         }
@@ -672,25 +1051,25 @@
         function populateCategoryDropdown() {
             const sel = document.getElementById('p-category');
             if (sel) {
-                const currentVal = sel.value;
+                const cv = sel.value;
                 sel.innerHTML = '';
                 allCategories.forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c.key; opt.textContent = c.label;
-                    sel.appendChild(opt);
+                    const o = document.createElement('option');
+                    o.value = c.key; o.textContent = c.label;
+                    sel.appendChild(o);
                 });
-                if (currentVal) sel.value = currentVal;
+                if (cv) sel.value = cv;
             }
             const sel2 = document.getElementById('section-category');
             if (sel2) {
-                const currentVal2 = sel2.value;
+                const cv2 = sel2.value;
                 sel2.innerHTML = '';
                 allCategories.forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c.key; opt.textContent = c.label;
-                    sel2.appendChild(opt);
+                    const o = document.createElement('option');
+                    o.value = c.key; o.textContent = c.label;
+                    sel2.appendChild(o);
                 });
-                if (currentVal2) sel2.value = currentVal2;
+                if (cv2) sel2.value = cv2;
             }
         }
 
@@ -699,7 +1078,7 @@
             const list = document.getElementById('hero-banners-list-admin');
             if (!list) return;
             if (heroBanners.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">No hero banners yet</p>';
+                list.innerHTML = '<p class="text-center text-gray-400 text-xs py-6">No hero banners yet</p>';
                 return;
             }
             let html = '';
@@ -709,14 +1088,14 @@
                 else if (b.bg === 'gold') bgStyle = 'background:linear-gradient(135deg,#B8860B,#E8C77B);';
                 else if (b.bg === 'teal') bgStyle = 'background:linear-gradient(135deg,#0F4C5C,#2C8B9E);';
                 else bgStyle = 'background:linear-gradient(135deg,#0A1628,#152238);';
-                html += `<div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                    <div class="w-16 h-10 rounded-lg flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0" style="${bgStyle}">${!b.image ? (b.bg || 'navy').toUpperCase() : ''}</div>
+                html += `<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div class="w-16 h-12 rounded-lg flex-shrink-0" style="${bgStyle}"></div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold navy-text truncate">${escapeHtml((b.title || '').replace(/<br>/g, ' '))}</p>
+                        <p class="text-sm font-semibold text-navy truncate">${escapeHtml((b.title || '').replace(/<br>/g, ' '))}</p>
                         <p class="text-[11px] text-gray-500 truncate">${escapeHtml(b.badge || '')}</p>
                     </div>
-                    <button onclick="editHeroBanner(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-edit text-xs"></i></button>
-                    <button onclick="deleteHeroBanner(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
+                    <button onclick="editHeroBanner(${i})" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-edit text-xs"></i></button>
+                    <button onclick="deleteHeroBanner(${i})" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
                 </div>`;
             });
             list.innerHTML = html;
@@ -790,14 +1169,14 @@
             const subtitle = document.getElementById('hero-subtitle-input').value.trim();
             const bg = document.getElementById('hero-bg').value;
             const link = document.getElementById('hero-link').value.trim();
-            if (!title) return alert("Title required!");
+            if (!title) return toast("Title required!", 'error');
 
             const btn = document.getElementById('hero-save-btn');
-            btn.disabled = true; btn.innerText = 'Saving...';
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
             try {
                 let image = null;
                 if (pendingHeroImage) {
-                    btn.innerText = 'Uploading...';
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading...';
                     image = await uploadToImgBB(pendingHeroImage.file);
                 } else if (idx !== '' && heroBanners[parseInt(idx)].image && !removeHeroImage) {
                     image = heroBanners[parseInt(idx)].image;
@@ -808,9 +1187,9 @@
                 await setDoc(doc(db, "settings", "main"), { heroBanners }, { merge: true });
                 closeHeroModal();
                 renderHeroBannersList();
-                alert("✅ Hero banner saved!");
-            } catch (e) { alert("Error: " + e.message); }
-            finally { btn.disabled = false; btn.innerText = 'Save Banner'; }
+                toast('Hero banner saved!');
+            } catch (e) { toast("Error: " + e.message, 'error'); }
+            finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE BANNER'; }
         }
 
         window.deleteHeroBanner = async function(i) {
@@ -818,26 +1197,27 @@
             heroBanners.splice(i, 1);
             await setDoc(doc(db, "settings", "main"), { heroBanners }, { merge: true });
             renderHeroBannersList();
+            toast('Deleted', 'warn');
         }
 
         // ====== CATEGORIES ======
         window.renderAdminCategories = function() {
             const list = document.getElementById('category-list-admin');
             if (allCategories.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-400 py-8">No categories</p>';
+                list.innerHTML = '<p class="text-center text-gray-400 py-12">No categories</p>';
                 return;
             }
             let html = '';
             allCategories.forEach((c, i) => {
                 const isImg = c.icon && (c.icon.startsWith('http') || c.icon.startsWith('data:'));
                 const iconHtml = isImg ? `<img src="${c.icon}">` : `<span class="emoji">${c.icon || '📦'}</span>`;
-                html += `<div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
+                html += `<div class="bg-white rounded-2xl p-4 premium-shadow flex items-center gap-3">
                     <div class="cat-preview">${iconHtml}</div>
                     <div class="flex-1 min-w-0">
-                        <p class="font-semibold text-sm navy-text truncate">${escapeHtml(c.label)}</p>
+                        <p class="font-semibold text-sm text-navy truncate">${escapeHtml(c.label)}</p>
                         <p class="text-xs text-gray-500">${escapeHtml(c.key)}</p>
                     </div>
-                    <div class="flex gap-1">
+                    <div class="flex gap-1.5">
                         <button onclick="editCategory(${i})" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-sm"></i></button>
                         <button onclick="deleteCategory(${i})" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-sm"></i></button>
                     </div>
@@ -909,11 +1289,18 @@
 
         async function uploadToImgBB(file) {
             const fd = new FormData();
-            fd.append('image', file);
-            const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: fd });
+            fd.append('file', file);
+            fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: fd
+            });
             const result = await res.json();
-            if (!result.success) throw new Error("Upload failed");
-            return result.data.display_url;
+            if (!result.secure_url) {
+                console.error('Cloudinary error:', result);
+                throw new Error(result.error?.message || "Upload failed");
+            }
+            return result.secure_url;
         }
 
         async function updateProductsCategory(oldKey, newKey) {
@@ -935,15 +1322,15 @@
             const key = document.getElementById('cat-key').value.trim().replace(/\s+/g, '');
             const label = document.getElementById('cat-label').value.trim();
             const emoji = document.getElementById('cat-icon-emoji').value.trim();
-            if (!key || !label) return alert("Key and Name required!");
-            if (key !== oldKey && allCategories.some(c => c.key === key)) return alert("Key already exists!");
+            if (!key || !label) return toast("Key and Name required!", 'error');
+            if (key !== oldKey && allCategories.some(c => c.key === key)) return toast("Key already exists!", 'error');
 
             const btn = document.getElementById('cat-save-btn');
-            btn.disabled = true; btn.innerText = 'Saving...';
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
             try {
                 let finalIcon = '📦';
                 if (pendingCategoryImage) {
-                    btn.innerText = 'Uploading image...';
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading image...';
                     finalIcon = await uploadToImgBB(pendingCategoryImage.file);
                 } else if (emoji) {
                     finalIcon = emoji;
@@ -961,19 +1348,19 @@
                 await setDoc(doc(db, "settings", "main"), { categories: allCategories }, { merge: true });
 
                 if (oldKey && oldKey !== key) {
-                    btn.innerText = 'Updating products...';
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Updating products...';
                     const updated = await updateProductsCategory(oldKey, key);
-                    alert(`✅ Category saved! ${updated} টি প্রোডাক্ট আপডেট হয়েছে।`);
+                    toast(`Category saved! ${updated} টি প্রোডাক্ট আপডেট হয়েছে।`);
                 } else {
-                    alert("✅ Saved!");
+                    toast('Category saved!');
                 }
 
                 closeCategoryModal();
                 renderAdminCategories();
                 populateCategoryDropdown();
                 await loadProducts();
-            } catch (e) { alert("Error: " + e.message); }
-            finally { btn.disabled = false; btn.innerText = 'Save'; }
+            } catch (e) { toast("Error: " + e.message, 'error'); }
+            finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE CATEGORY'; }
         }
 
         window.deleteCategory = async function(index) {
@@ -990,7 +1377,7 @@
 
             let msg = `"${cat.label}" ক্যাটেগরি ডিলিট করবেন?`;
             if (productCount > 0) {
-                msg = `⚠️ এই ক্যাটেগরিতে ${productCount} টি প্রোডাক্ট আছে!\n\nডিলিট করলে প্রোডাক্টগুলো কোনো ক্যাটেগরিতে থাকবে না (All Products-এ দেখা যাবে, কিন্তু Featured Category-তে নয়)।\n\nতবুও ডিলিট করবেন?`;
+                msg = `⚠️ এই ক্যাটেগরিতে ${productCount} টি প্রোডাক্ট আছে!\n\nডিলিট করলে প্রোডাক্টগুলো কোনো ক্যাটেগরিতে থাকবে না।\n\nতবুও ডিলিট করবেন?`;
             }
             if (!confirm(msg)) return;
 
@@ -1013,25 +1400,26 @@
             renderAdminCategories();
             populateCategoryDropdown();
             await loadProducts();
+            toast('Category deleted', 'warn');
         }
 
         // ====== SECTIONS ======
         function renderSectionsList() {
             const list = document.getElementById('sections-list-admin');
             if (customSections.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">No sections yet</p>';
+                list.innerHTML = '<p class="text-center text-gray-400 text-xs py-6">No sections yet</p>';
                 return;
             }
             let html = '';
             customSections.forEach((s, i) => {
                 const cat = allCategories.find(c => c.key === s.categoryKey);
-                html += `<div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                html += `<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold navy-text">${escapeHtml(s.title)}</p>
+                        <p class="text-sm font-semibold text-navy">${escapeHtml(s.title)}</p>
                         <p class="text-[11px] text-gray-500">Category: ${cat ? escapeHtml(cat.label) : escapeHtml(s.categoryKey)}</p>
                     </div>
-                    <button onclick="editSection(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-edit text-xs"></i></button>
-                    <button onclick="deleteSection(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
+                    <button onclick="editSection(${i})" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-edit text-xs"></i></button>
+                    <button onclick="deleteSection(${i})" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
                 </div>`;
             });
             list.innerHTML = html;
@@ -1059,14 +1447,14 @@
             const idx = document.getElementById('edit-section-idx').value;
             const title = document.getElementById('section-title-input').value.trim();
             const categoryKey = document.getElementById('section-category').value;
-            if (!title || !categoryKey) return alert("All fields required!");
+            if (!title || !categoryKey) return toast("All fields required!", 'error');
             const sec = { title, categoryKey };
             if (idx !== '') customSections[parseInt(idx)] = sec;
             else customSections.push(sec);
             await setDoc(doc(db, "settings", "main"), { customSections }, { merge: true });
             closeSectionModal();
             renderSectionsList();
-            alert("✅ Section saved!");
+            toast('Section saved!');
         }
 
         window.deleteSection = async function(i) {
@@ -1074,24 +1462,25 @@
             customSections.splice(i, 1);
             await setDoc(doc(db, "settings", "main"), { customSections }, { merge: true });
             renderSectionsList();
+            toast('Deleted', 'warn');
         }
 
-        // ====== MIDDLE BANNERS ======
+        // ====== BANNERS ======
         function renderBannersList() {
             const list = document.getElementById('banners-list-admin');
             if (middleBanners.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">No banners yet</p>';
+                list.innerHTML = '<p class="text-center text-gray-400 text-xs py-6">No banners yet</p>';
                 return;
             }
             let html = '';
             middleBanners.forEach((b, i) => {
-                html += `<div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                    <img src="${b.image}" class="w-16 h-12 object-contain rounded flex-shrink-0">
+                html += `<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <img src="${b.image}" class="w-16 h-12 object-contain rounded-lg flex-shrink-0 bg-white">
                     <div class="flex-1 min-w-0">
                         <p class="text-[11px] text-gray-500 truncate">${escapeHtml(b.link || 'No link')}</p>
                     </div>
-                    <button onclick="editBanner(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-edit text-xs"></i></button>
-                    <button onclick="deleteBanner(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
+                    <button onclick="editBanner(${i})" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-edit text-xs"></i></button>
+                    <button onclick="deleteBanner(${i})" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
                 </div>`;
             });
             list.innerHTML = html;
@@ -1141,14 +1530,14 @@
         window.saveBanner = async function() {
             const idx = document.getElementById('edit-banner-idx').value;
             const isEdit = idx !== '';
-            if (!isEdit && !pendingBannerImage) return alert("Please select a banner image!");
+            if (!isEdit && !pendingBannerImage) return toast("Please select a banner image!", 'error');
 
             const btn = document.getElementById('banner-save-btn');
-            btn.disabled = true; btn.innerText = 'Saving...';
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
             try {
                 let image = isEdit ? middleBanners[parseInt(idx)].image : null;
                 if (pendingBannerImage) {
-                    btn.innerText = 'Uploading...';
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading...';
                     image = await uploadToImgBB(pendingBannerImage.file);
                 }
                 const link = document.getElementById('banner-link').value.trim();
@@ -1158,9 +1547,9 @@
                 await setDoc(doc(db, "settings", "main"), { middleBanners }, { merge: true });
                 closeBannerModal();
                 renderBannersList();
-                alert("✅ Banner saved!");
-            } catch (e) { alert("Error: " + e.message); }
-            finally { btn.disabled = false; btn.innerText = 'Save Banner'; }
+                toast('Banner saved!');
+            } catch (e) { toast("Error: " + e.message, 'error'); }
+            finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE BANNER'; }
         }
 
         window.deleteBanner = async function(i) {
@@ -1168,25 +1557,26 @@
             middleBanners.splice(i, 1);
             await setDoc(doc(db, "settings", "main"), { middleBanners }, { merge: true });
             renderBannersList();
+            toast('Deleted', 'warn');
         }
 
         // ====== TESTIMONIALS ======
         function renderTestimonialsList() {
             const list = document.getElementById('testimonials-list-admin');
             if (testimonials.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">No reviews yet</p>';
+                list.innerHTML = '<p class="text-center text-gray-400 text-xs py-6">No reviews yet</p>';
                 return;
             }
             let html = '';
             testimonials.forEach((t, i) => {
-                html += `<div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                html += `<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                     ${t.image ? `<img src="${t.image}" class="w-10 h-10 rounded-full object-cover flex-shrink-0">` : `<div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><i class="fas fa-user text-gray-400"></i></div>`}
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold navy-text">${escapeHtml(t.name)}</p>
-                        <p class="text-[11px] text-gray-500">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</p>
+                        <p class="text-sm font-semibold text-navy">${escapeHtml(t.name)}</p>
+                        <p class="text-[11px] text-yellow-500">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</p>
                     </div>
-                    <button onclick="editTestimonial(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-edit text-xs"></i></button>
-                    <button onclick="deleteTestimonial(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
+                    <button onclick="editTestimonial(${i})" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-edit text-xs"></i></button>
+                    <button onclick="deleteTestimonial(${i})" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
                 </div>`;
             });
             list.innerHTML = html;
@@ -1246,14 +1636,14 @@
             const role = document.getElementById('test-role').value.trim();
             const text = document.getElementById('test-text').value.trim();
             const rating = parseInt(document.getElementById('test-rating').value);
-            if (!name || !text) return alert("Name and Review required!");
+            if (!name || !text) return toast("Name and Review required!", 'error');
 
             const btn = document.getElementById('test-save-btn');
-            btn.disabled = true; btn.innerText = 'Saving...';
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
             try {
                 let image = null;
                 if (pendingTestImage) {
-                    btn.innerText = 'Uploading...';
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading...';
                     image = await uploadToImgBB(pendingTestImage.file);
                 } else if (idx !== '' && testimonials[parseInt(idx)].image) {
                     image = testimonials[parseInt(idx)].image;
@@ -1264,9 +1654,9 @@
                 await setDoc(doc(db, "settings", "main"), { testimonials }, { merge: true });
                 closeTestimonialModal();
                 renderTestimonialsList();
-                alert("✅ Saved!");
-            } catch (e) { alert("Error: " + e.message); }
-            finally { btn.disabled = false; btn.innerText = 'Save Review'; }
+                toast('Review saved!');
+            } catch (e) { toast("Error: " + e.message, 'error'); }
+            finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE REVIEW'; }
         }
 
         window.deleteTestimonial = async function(i) {
@@ -1274,6 +1664,7 @@
             testimonials.splice(i, 1);
             await setDoc(doc(db, "settings", "main"), { testimonials }, { merge: true });
             renderTestimonialsList();
+            toast('Deleted', 'warn');
         }
 
         // ====== PRODUCTS ======
@@ -1292,28 +1683,28 @@
             let filtered = allProductsList;
             if (search) filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(search));
             if (filtered.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-400 py-8">No products</p>';
+                list.innerHTML = '<div class="bg-white rounded-2xl p-12 text-center premium-shadow"><i class="fas fa-box-open text-4xl text-gray-200 mb-3"></i><p class="text-sm text-gray-500">No products found</p></div>';
                 return;
             }
             let html = '';
             filtered.forEach(p => {
                 const stock = Number(p.stock) || 0;
                 const stockBadge = stock <= 0
-                    ? '<span class="text-[10px] font-bold bg-red-100 text-red-600 px-1.5 py-0.5 rounded">Stock: 0</span>'
+                    ? '<span class="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">OUT</span>'
                     : (stock < 5
-                        ? `<span class="text-[10px] font-bold bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded">Stock: ${stock}</span>`
-                        : `<span class="text-[10px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded">Stock: ${stock}</span>`);
-                html += `<div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
-                    <img src="${p.image}" class="w-16 h-16 object-contain bg-gray-50 rounded-lg flex-shrink-0">
+                        ? `<span class="text-[10px] font-bold bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">${stock} left</span>`
+                        : `<span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">${stock} in stock</span>`);
+                html += `<div class="bg-white rounded-2xl p-3 premium-shadow flex items-center gap-3">
+                    <img src="${p.image}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl flex-shrink-0" onerror="this.src='https://via.placeholder.com/100x100?text=?'">
                     <div class="flex-1 min-w-0">
-                        <p class="font-semibold text-sm navy-text truncate">${escapeHtml(p.name)}</p>
-                        <div class="flex items-center gap-2 mt-0.5 flex-wrap">
-                            <p class="text-xs text-gray-500">${escapeHtml(p.category || '')}${p.brand ? ' • ' + escapeHtml(p.brand) : ''}</p>
+                        <p class="font-semibold text-sm text-navy truncate">${escapeHtml(p.name)}</p>
+                        <div class="flex items-center gap-2 mt-1 flex-wrap">
+                            <p class="text-[11px] text-gray-500 font-medium">${escapeHtml(p.category || '')}</p>
                             ${stockBadge}
                         </div>
-                        <p class="text-sm font-bold gold-text">৳ ${p.price}</p>
+                        <p class="text-sm font-bold gold-text mt-0.5">৳ ${Number(p.price).toLocaleString('en-IN')}</p>
                     </div>
-                    <div class="flex flex-col gap-1 flex-shrink-0">
+                    <div class="flex flex-col gap-1.5 flex-shrink-0">
                         <button onclick="editProduct('${p.id}')" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-sm"></i></button>
                         <button onclick="deleteProduct('${p.id}')" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-sm"></i></button>
                     </div>
@@ -1361,11 +1752,11 @@
             const grid = document.getElementById('image-preview-grid');
             let html = '';
             existingImages.forEach((url, i) => {
-                html += `<div class="img-thumb"><img src="${url}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border ${i === 0 && pendingImages.length === 0 ? 'border-2 border-[#D4A84B]' : 'border-gray-200'}"><button onclick="removeExistingImage(${i})" class="remove-btn">×</button></div>`;
+                html += `<div class="img-thumb"><img src="${url}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border-2 ${i === 0 && pendingImages.length === 0 ? 'border-gold' : 'border-gray-200'}"><button onclick="removeExistingImage(${i})" class="remove-btn">×</button></div>`;
             });
             pendingImages.forEach((item, i) => {
                 const isMain = existingImages.length === 0 && i === 0;
-                html += `<div class="img-thumb"><img src="${item.dataUrl}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border ${isMain ? 'border-2 border-[#D4A84B]' : 'border-gray-200'}"><button onclick="removePendingImage(${i})" class="remove-btn">×</button></div>`;
+                html += `<div class="img-thumb"><img src="${item.dataUrl}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border-2 ${isMain ? 'border-gold' : 'border-gray-200'}"><button onclick="removePendingImage(${i})" class="remove-btn">×</button></div>`;
             });
             grid.innerHTML = html;
         }
@@ -1374,7 +1765,7 @@
 
         document.getElementById('p-image-file').addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
-            if (existingImages.length + pendingImages.length + files.length > 5) return alert("Max 5 images!");
+            if (existingImages.length + pendingImages.length + files.length > 5) return toast("Max 5 images!", 'error');
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = evt => {
@@ -1395,27 +1786,27 @@
             const stock = parseInt(document.getElementById('p-stock').value) || 0;
             const brand = document.getElementById('p-brand').value.trim();
             const description = document.getElementById('p-description').value.trim();
-            if (!name || !price) return alert("Name and Price required!");
-            if (existingImages.length === 0 && pendingImages.length === 0) return alert("Select at least one image!");
+            if (!name || !price) return toast("Name and Price required!", 'error');
+            if (existingImages.length === 0 && pendingImages.length === 0) return toast("Select at least one image!", 'error');
 
             const btn = document.getElementById('save-btn');
-            btn.disabled = true; btn.innerText = "Uploading...";
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading...';
             try {
                 const newUrls = [];
                 for (let i = 0; i < pendingImages.length; i++) {
-                    btn.innerText = `Uploading ${i + 1}/${pendingImages.length}...`;
+                    btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Uploading ${i + 1}/${pendingImages.length}...`;
                     newUrls.push(await uploadToImgBB(pendingImages[i].file));
                 }
                 const allImages = [...existingImages, ...newUrls];
                 const data = { name, price, oldPrice, category, stock, brand, description, image: allImages[0], images: allImages };
                 if (id) await updateDoc(doc(db, "products", id), data);
                 else await addDoc(collection(db, "products"), data);
-                alert("✅ Saved!");
+                toast('Product saved!');
                 closeModal();
                 await loadProducts();
                 updateStats();
-            } catch (e) { alert("Error: " + e.message); }
-            finally { btn.disabled = false; btn.innerText = "Save Product"; }
+            } catch (e) { toast("Error: " + e.message, 'error'); }
+            finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE PRODUCT'; }
         }
 
         window.deleteProduct = async function(id) {
@@ -1423,6 +1814,7 @@
             await deleteDoc(doc(db, "products", id));
             await loadProducts();
             updateStats();
+            toast('Product deleted', 'warn');
         }
 
         // ====== ORDERS ======
@@ -1434,7 +1826,21 @@
                 snap.forEach(d => allOrdersList.push({ id: d.id, ...d.data() }));
                 renderAdminOrders();
                 renderRecentOrders();
+                updateOrderBadge();
             } catch (e) {}
+        }
+
+        function updateOrderBadge() {
+            const pending = allOrdersList.filter(o => o.status === 'pending').length;
+            const b1 = document.getElementById('orders-badge');
+            const b2 = document.getElementById('orders-badge-mob');
+            if (pending > 0) {
+                if (b1) { b1.textContent = pending; b1.classList.remove('hidden'); }
+                if (b2) { b2.textContent = pending; b2.classList.remove('hidden'); }
+            } else {
+                if (b1) b1.classList.add('hidden');
+                if (b2) b2.classList.add('hidden');
+            }
         }
 
         window.filterOrders = function(filter, btn) {
@@ -1452,35 +1858,43 @@
             const list = document.getElementById('order-list-admin');
             let filtered = allOrdersList;
             if (currentOrderFilter !== 'all') filtered = filtered.filter(o => o.status === currentOrderFilter);
-            if (filtered.length === 0) { list.innerHTML = '<p class="text-center text-gray-400 py-8">No orders</p>'; return; }
-            const colors = { 'pending': 'bg-yellow-100 text-yellow-700', 'confirmed': 'bg-blue-100 text-blue-700', 'shipped': 'bg-purple-100 text-purple-700', 'delivered': 'bg-green-100 text-green-700', 'cancelled': 'bg-red-100 text-red-700' };
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="bg-white rounded-2xl p-12 text-center premium-shadow"><i class="fas fa-receipt text-4xl text-gray-200 mb-3"></i><p class="text-sm text-gray-500">No orders found</p></div>';
+                return;
+            }
             let html = '';
             filtered.forEach(o => {
-                const itemsHtml = (o.items || []).map(i => `<li class="flex justify-between"><span>${escapeHtml(i.name)} × ${i.quantity}</span><span>৳ ${i.price * i.quantity}</span></li>`).join('');
-                html += `<div class="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-[#D4A84B]">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <p class="font-bold navy-text text-sm">${escapeHtml(o.orderNumber || o.id.slice(0,8))}</p>
-                            <p class="text-xs text-gray-500">${escapeHtml(o.customer?.name || '')} • ${escapeHtml(o.customer?.phone || '')}</p>
+                const itemsHtml = (o.items || []).map(i => `<li class="flex justify-between gap-2"><span class="truncate">${escapeHtml(i.name)} <span class="text-gray-400">× ${i.quantity}</span></span><span class="font-semibold flex-shrink-0">৳${Number(i.price * i.quantity).toLocaleString('en-IN')}</span></li>`).join('');
+                const statusClass = 'status-' + (o.status || 'pending');
+                const orderDate = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '';
+                html += `<div class="bg-white rounded-2xl p-4 premium-shadow border-l-4 border-gold">
+                    <div class="flex justify-between items-start mb-3 gap-2">
+                        <div class="min-w-0 flex-1">
+                            <p class="font-bold text-navy text-sm">${escapeHtml(o.orderNumber || o.id.slice(0,8))}</p>
+                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">${escapeHtml(o.customer?.name || '')} • ${escapeHtml(o.customer?.phone || '')}</p>
                         </div>
-                        <span class="text-[10px] px-2 py-1 rounded-full font-bold uppercase ${colors[o.status] || 'bg-gray-100'}">${o.status}</span>
+                        <div class="text-right flex-shrink-0">
+                            <span class="order-status ${statusClass}">${o.status}</span>
+                            ${orderDate ? `<p class="text-[10px] text-gray-400 mt-1">${orderDate}</p>` : ''}
+                        </div>
                     </div>
-                    <p class="text-xs text-gray-600 mb-2">${escapeHtml(o.customer?.address || '')}, ${escapeHtml(o.customer?.thana || '')}, ${escapeHtml(o.customer?.district || '')}</p>
-                    <div class="bg-gray-50 rounded-lg p-2 mb-2"><ul class="text-xs text-gray-700 space-y-1">${itemsHtml}</ul></div>
-                    <div class="grid grid-cols-3 gap-2 text-center mb-2">
-                        <div class="bg-gray-50 rounded-lg p-2"><p class="text-[9px] text-gray-500">TOTAL</p><p class="text-sm font-bold">৳${o.total || 0}</p></div>
-                        <div class="bg-green-50 rounded-lg p-2"><p class="text-[9px] text-gray-500">PAID</p><p class="text-sm font-bold text-green-700">৳${o.advancePaid || 0}</p></div>
-                        <div class="bg-red-50 rounded-lg p-2"><p class="text-[9px] text-gray-500">DUE</p><p class="text-sm font-bold text-red-700">৳${o.dueAmount || 0}</p></div>
+                    <p class="text-xs text-gray-600 mb-3"><i class="fas fa-map-marker-alt text-gray-300 mr-1"></i>${escapeHtml(o.customer?.address || '')}, ${escapeHtml(o.customer?.thana || '')}, ${escapeHtml(o.customer?.district || '')}</p>
+                    <div class="bg-gray-50 rounded-xl p-3 mb-3"><ul class="text-xs text-gray-700 space-y-1.5">${itemsHtml}</ul></div>
+                    <div class="grid grid-cols-3 gap-2 text-center mb-3">
+                        <div class="bg-gray-50 rounded-xl p-2.5"><p class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Total</p><p class="text-sm font-bold text-navy mt-0.5">৳${Number(o.total || 0).toLocaleString('en-IN')}</p></div>
+                        <div class="bg-green-50 rounded-xl p-2.5"><p class="text-[9px] text-green-700 font-bold uppercase tracking-wider">Paid</p><p class="text-sm font-bold text-green-700 mt-0.5">৳${Number(o.advancePaid || 0).toLocaleString('en-IN')}</p></div>
+                        <div class="bg-red-50 rounded-xl p-2.5"><p class="text-[9px] text-red-700 font-bold uppercase tracking-wider">Due</p><p class="text-sm font-bold text-red-700 mt-0.5">৳${Number(o.dueAmount || 0).toLocaleString('en-IN')}</p></div>
                     </div>
                     <div class="flex gap-2">
-                        <select onchange="updateOrderStatus('${o.id}', this.value)" class="flex-1 text-xs border rounded-lg px-2 py-2 outline-none">
-                            <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
-                            <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                            <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Shipped</option>
-                            <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-                            <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        <select onchange="updateOrderStatus('${o.id}', this.value)" class="flex-1 text-xs border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none font-semibold bg-white">
+                            <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>⏳ Pending</option>
+                            <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>✓ Confirmed</option>
+                            <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>🚚 Shipped</option>
+                            <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>📦 Delivered</option>
+                            <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>✕ Cancelled</option>
                         </select>
-                        <a href="tel:${o.customer?.phone || ''}" class="px-3 py-2 bg-green-50 text-green-700 rounded-lg text-xs font-semibold flex items-center"><i class="fas fa-phone"></i></a>
+                        <a href="tel:${o.customer?.phone || ''}" class="px-4 py-2.5 bg-green-50 text-green-700 rounded-xl text-xs font-bold flex items-center justify-center"><i class="fas fa-phone"></i></a>
+                        <a href="https://wa.me/88${(o.customer?.phone || '').replace(/^0/, '')}?text=${encodeURIComponent('Order ' + (o.orderNumber || '') + ' — Heartix')}" target="_blank" class="px-4 py-2.5 bg-emerald-50 text-emerald-600 rounded-xl text-xs font-bold flex items-center justify-center"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>`;
             });
@@ -1521,9 +1935,11 @@
                 renderRecentOrders();
                 updateStats();
                 renderAdminOrders();
+                updateOrderBadge();
                 await loadProducts();
+                toast('Order status updated');
             } catch (e) {
-                alert("Error: " + e.message);
+                toast("Error: " + e.message, 'error');
             }
         }
 
@@ -1531,17 +1947,18 @@
             const list = document.getElementById('recent-orders');
             const recent = allOrdersList.slice(0, 3);
             if (recent.length === 0) {
-                list.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">No orders yet</p>';
+                list.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">No orders yet</p>';
                 return;
             }
             let html = '';
             recent.forEach(o => {
-                html += `<div class="flex justify-between items-center py-2 border-b last:border-b-0">
-                    <div>
-                        <p class="text-sm font-semibold">${escapeHtml(o.customer?.name || '')}</p>
-                        <p class="text-xs text-gray-500">${(o.items || []).length} item(s) • ৳${o.total || 0}</p>
+                const statusClass = 'status-' + (o.status || 'pending');
+                html += `<div class="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm font-semibold text-navy truncate">${escapeHtml(o.customer?.name || '')}</p>
+                        <p class="text-[11px] text-gray-500">${(o.items || []).length} item(s) • ৳${Number(o.total || 0).toLocaleString('en-IN')}</p>
                     </div>
-                    <span class="text-[10px] px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-bold uppercase">${o.status}</span>
+                    <span class="order-status ${statusClass} ml-2">${o.status}</span>
                 </div>`;
             });
             list.innerHTML = html;
@@ -1560,17 +1977,20 @@
 
         function renderAdminReviews() {
             const list = document.getElementById('reviews-list-admin');
-            if (allReviewsList.length === 0) { list.innerHTML = '<p class="text-center text-gray-400 py-8">No reviews</p>'; return; }
+            if (allReviewsList.length === 0) {
+                list.innerHTML = '<div class="bg-white rounded-2xl p-12 text-center premium-shadow"><i class="fas fa-star text-4xl text-gray-200 mb-3"></i><p class="text-sm text-gray-500">No reviews yet</p></div>';
+                return;
+            }
             let html = '';
             allReviewsList.forEach(r => {
                 const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
-                html += `<div class="bg-white rounded-xl p-3 shadow-sm">
-                    <div class="flex justify-between items-center mb-1">
-                        <p class="font-semibold navy-text text-sm">${escapeHtml(r.name)}</p>
+                html += `<div class="bg-white rounded-2xl p-4 premium-shadow">
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="font-semibold text-navy text-sm">${escapeHtml(r.name)}</p>
                         <span class="text-yellow-500 text-sm">${stars}</span>
                     </div>
-                    <p class="text-xs text-gray-600 mb-2">${escapeHtml(r.text)}</p>
-                    <button onclick="deleteReview('${r.id}')" class="text-red-500 text-xs"><i class="fas fa-trash"></i> Delete</button>
+                    <p class="text-xs text-gray-600 mb-3 leading-relaxed">${escapeHtml(r.text)}</p>
+                    <button onclick="deleteReview('${r.id}')" class="text-red-500 text-xs font-semibold"><i class="fas fa-trash mr-1"></i> Delete</button>
                 </div>`;
             });
             list.innerHTML = html;
@@ -1580,13 +2000,21 @@
             if (!confirm("Delete this review?")) return;
             await deleteDoc(doc(db, "reviews", id));
             await loadReviews();
+            toast('Review deleted', 'warn');
         }
 
         function updateStats() {
-            document.getElementById('stat-products').innerText = allProductsList.length;
-            document.getElementById('stat-orders').innerText = allOrdersList.length;
-            document.getElementById('stat-pending').innerText = allOrdersList.filter(o => o.status === 'pending').length;
-            document.getElementById('stat-revenue').innerText = '৳' + allOrdersList.filter(o => o.status === 'delivered').reduce((s, o) => s + (o.total || 0), 0).toLocaleString();
+            const products = document.getElementById('stat-products');
+            const orders = document.getElementById('stat-orders');
+            const pending = document.getElementById('stat-pending');
+            const revenue = document.getElementById('stat-revenue');
+            if (products) products.innerText = allProductsList.length;
+            if (orders) orders.innerText = allOrdersList.length;
+            if (pending) pending.innerText = allOrdersList.filter(o => o.status === 'pending').length;
+            if (revenue) {
+                const rev = allOrdersList.filter(o => o.status === 'delivered').reduce((s, o) => s + (o.total || 0), 0);
+                revenue.innerText = '৳' + rev.toLocaleString('en-IN');
+            }
         }
 
         // ====== SETTINGS ======
@@ -1620,8 +2048,8 @@
                     nagadNumber: document.getElementById('setting-nagad').value
                 };
                 await setDoc(doc(db, "settings", "main"), settings, { merge: true });
-                alert("✅ Settings saved!");
-            } catch (e) { alert("Error: " + e.message); }
+                toast('Settings saved successfully!');
+            } catch (e) { toast("Error: " + e.message, 'error'); }
         }
     </script>
 </body>
