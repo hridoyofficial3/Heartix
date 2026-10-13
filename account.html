@@ -44,6 +44,25 @@
 
     <div id="toast-container"></div>
 
+    <!-- ⚡ BULLETPROOF FALLBACK: Firebase fail হলেও login form দেখাবে -->
+    <script>
+        (function() {
+            // 4 seconds পর form force-show
+            setTimeout(function() {
+                var loading = document.getElementById('loading');
+                var auth = document.getElementById('auth-section');
+                var logged = document.getElementById('logged-section');
+                if (loading && !loading.classList.contains('hidden')) {
+                    loading.classList.add('hidden');
+                    if (auth && (!logged || logged.classList.contains('hidden'))) {
+                        auth.classList.remove('hidden');
+                    }
+                    console.log('Fallback triggered at ' + new Date().toLocaleTimeString());
+                }
+            }, 4000);
+        })();
+    </script>
+
     <header class="glass sticky top-0 z-30 px-3 py-2 flex justify-between items-center border-b border-gray-100">
         <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream">
             <i class="fas fa-arrow-left text-navy text-lg"></i>
@@ -223,9 +242,50 @@
 
     </div>
 
+    <!-- ====== FALLBACK FUNCTIONS (Plain JS — module fail হলেও কাজ করবে) ====== -->
+    <script>
+        // Tab switch — module fail হলেও কাজ করবে
+        window.switchTab = function(tab) {
+            var loginTab = document.getElementById('tab-login');
+            var regTab = document.getElementById('tab-register');
+            var loginForm = document.getElementById('login-form');
+            var regForm = document.getElementById('register-form');
+            if (tab === 'login') {
+                if (loginTab) loginTab.classList.add('active');
+                if (regTab) regTab.classList.remove('active');
+                if (loginForm) loginForm.classList.remove('hidden');
+                if (regForm) regForm.classList.add('hidden');
+            } else {
+                if (regTab) regTab.classList.add('active');
+                if (loginTab) loginTab.classList.remove('active');
+                if (regForm) regForm.classList.remove('hidden');
+                if (loginForm) loginForm.classList.add('hidden');
+            }
+        };
+
+        // Placeholder functions — module load হলে override হবে
+        window.loginUser = window.loginUser || function() { alert('Firebase লোড হচ্ছে... কিছুক্ষণ পর চেষ্টা করুন'); };
+        window.registerUser = window.registerUser || function() { alert('Firebase লোড হচ্ছে... কিছুক্ষণ পর চেষ্টা করুন'); };
+        window.forgotPassword = window.forgotPassword || function() { alert('Firebase লোড হচ্ছে...'); };
+        window.logoutUser = window.logoutUser || function() { location.reload(); };
+        window.saveProfile = window.saveProfile || function() { alert('Firebase লোড হচ্ছে...'); };
+        window.loadMyOrders = window.loadMyOrders || function() {};
+
+        // Initial cart badge
+        (function() {
+            try {
+                var cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
+                var count = cart.reduce(function(s, i) { return s + (Number(i.quantity) || 0); }, 0);
+                var h = document.getElementById('cart-count-header');
+                if (h) h.textContent = count;
+            } catch(e) {}
+        })();
+    </script>
+
+    <!-- ====== FIREBASE MODULE ====== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = {
@@ -244,59 +304,29 @@
             auth = getAuth(app);
         } catch (e) { console.error('Firebase init:', e); }
 
-        function showToast(msg, type = 'success') {
+        function showToast(msg, type) {
+            type = type || 'success';
             const c = document.getElementById('toast-container');
             if (!c) return;
             const t = document.createElement('div');
             t.className = 'toast-bar ' + type;
             const icon = type === 'success' ? 'check-circle' : (type === 'warn' ? 'exclamation-circle' : 'times-circle');
-            t.innerHTML = `<i class="fas fa-${icon}"></i><span>${msg}</span>`;
+            t.innerHTML = '<i class="fas fa-' + icon + '"></i><span>' + msg + '</span>';
             c.appendChild(t);
-            setTimeout(() => { t.style.transition='opacity 0.3s'; t.style.opacity='0'; setTimeout(() => t.remove(), 300); }, 3000);
+            setTimeout(function() {
+                t.style.transition = 'opacity 0.3s';
+                t.style.opacity = '0';
+                setTimeout(function() { t.remove(); }, 300);
+            }, 3000);
         }
 
         function escapeHtml(t) { if (t === null || t === undefined) return ''; const d = document.createElement('div'); d.textContent = String(t); return d.innerHTML; }
         function formatPrice(n) { return Number(n || 0).toLocaleString('en-IN'); }
         function validatePhone(p) { return /^01[3-9]\d{8}$/.test(p); }
 
-        // ====== TABS ======
-        window.switchTab = function(tab) {
-            ['login','register'].forEach(t => {
-                const btn = document.getElementById('tab-' + t);
-                btn.classList.toggle('active', t === tab);
-                btn.classList.toggle('text-gray-500', t !== tab);
-            });
-            document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
-            document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
-        }
-
-        // ====== INITIAL BADGE ======
-        (function() {
-            try {
-                const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
-                const count = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
-                const h = document.getElementById('cart-count-header');
-                if (h) h.textContent = count;
-            } catch(e) {}
-        })();
-
         // ====== AUTH STATE ======
-        let authResolved = false;
-
-        // Fallback: 5 seconds পর loading বন্ধ
-        setTimeout(() => {
-            if (!authResolved) {
-                console.warn('Auth timeout — showing login form');
-                const loadingEl = document.getElementById('loading');
-                const authEl = document.getElementById('auth-section');
-                if (loadingEl) loadingEl.classList.add('hidden');
-                if (!currentUser && authEl) authEl.classList.remove('hidden');
-            }
-        }, 5000);
-
         if (auth) {
-            onAuthStateChanged(auth, async (user) => {
-                authResolved = true;
+            onAuthStateChanged(auth, async function(user) {
                 document.getElementById('loading').classList.add('hidden');
                 if (user) {
                     currentUser = user;
@@ -314,13 +344,11 @@
                 }
             });
         } else {
-            authResolved = true;
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('auth-section').classList.remove('hidden');
-            showToast('Authentication লোড হয়নি', 'error');
         }
 
-        // ====== REGISTER ======
+        // ====== REGISTER (override fallback) ======
         window.registerUser = async function() {
             const name = (document.getElementById('reg-name').value || '').trim();
             const phone = (document.getElementById('reg-phone').value || '').trim();
@@ -344,14 +372,14 @@
                 try {
                     await setDoc(doc(db, "customers", cred.user.uid), {
                         uid: cred.user.uid,
-                        name, phone, email,
+                        name: name, phone: phone, email: email,
                         createdAt: new Date().toISOString()
                     }, { merge: true });
                 } catch (e) { console.warn('Profile save failed:', e); }
 
                 showToast('Account তৈরি হয়েছে!', 'success');
-                ['reg-name','reg-phone','reg-email','reg-password','reg-confirm'].forEach(id => {
-                    const el = document.getElementById(id);
+                ['reg-name','reg-phone','reg-email','reg-password','reg-confirm'].forEach(function(id) {
+                    var el = document.getElementById(id);
                     if (el) el.value = '';
                 });
             } catch (e) {
@@ -449,7 +477,7 @@
 
             try {
                 await setDoc(doc(db, "customers", currentUser.uid), {
-                    name, phone, email: currentUser.email
+                    name: name, phone: phone, email: currentUser.email
                 }, { merge: true });
                 try { await updateProfile(currentUser, { displayName: name }); } catch (e) {}
                 document.getElementById('user-display-name').textContent = name;
@@ -472,42 +500,42 @@
             try {
                 const allSnap = await getDocs(collection(db, "orders"));
                 let orders = [];
-                allSnap.forEach(d => {
+                allSnap.forEach(function(d) {
                     const data = d.data();
-                    if (data.customer?.email === currentUser.email) orders.push({ id: d.id, ...data });
+                    if (data.customer && data.customer.email === currentUser.email) orders.push({ id: d.id, ...data });
                 });
-                orders.sort((a, b) => {
-                    const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-                    const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+                orders.sort(function(a, b) {
+                    const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+                    const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
                     return tb - ta;
                 });
 
                 if (orders.length === 0) {
-                    list.innerHTML = `<div class="text-center py-8">
-                        <i class="fas fa-receipt text-4xl text-gray-200 mb-3"></i>
-                        <p class="text-xs text-gray-500">এখনো কোনো অর্ডার নেই</p>
-                        <a href="index.html" class="inline-block mt-3 navy-gradient text-white px-5 py-2 rounded-lg text-[11px] font-semibold">শপিং করুন</a>
-                    </div>`;
+                    list.innerHTML = '<div class="text-center py-8">' +
+                        '<i class="fas fa-receipt text-4xl text-gray-200 mb-3"></i>' +
+                        '<p class="text-xs text-gray-500">এখনো কোনো অর্ডার নেই</p>' +
+                        '<a href="index.html" class="inline-block mt-3 navy-gradient text-white px-5 py-2 rounded-lg text-[11px] font-semibold">শপিং করুন</a>' +
+                        '</div>';
                     return;
                 }
 
                 let html = '';
-                orders.slice(0, 10).forEach(o => {
+                orders.slice(0, 10).forEach(function(o) {
                     const statusClass = 'status-' + (o.status || 'pending');
-                    const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
-                    html += `<a href="track-order.html?order=${encodeURIComponent(o.orderNumber || '')}" class="block bg-gray-50 rounded-xl p-3 active:bg-gray-100">
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="min-w-0">
-                                <p class="font-bold text-navy text-xs">${escapeHtml(o.orderNumber || '')}</p>
-                                <p class="text-[10px] text-gray-500 mt-0.5">${date} • ${(o.items || []).length} item(s)</p>
-                            </div>
-                            <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${statusClass}">${o.status || 'pending'}</span>
-                        </div>
-                        <div class="flex justify-between items-baseline">
-                            <span class="text-[10px] text-gray-500">Total</span>
-                            <span class="font-bold text-navy text-sm">৳${formatPrice(o.total)}</span>
-                        </div>
-                    </a>`;
+                    const date = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+                    html += '<a href="track-order.html?order=' + encodeURIComponent(o.orderNumber || '') + '" class="block bg-gray-50 rounded-xl p-3 active:bg-gray-100">' +
+                        '<div class="flex justify-between items-start mb-2">' +
+                        '<div class="min-w-0">' +
+                        '<p class="font-bold text-navy text-xs">' + escapeHtml(o.orderNumber || '') + '</p>' +
+                        '<p class="text-[10px] text-gray-500 mt-0.5">' + date + ' • ' + (o.items || []).length + ' item(s)</p>' +
+                        '</div>' +
+                        '<span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ' + statusClass + '">' + (o.status || 'pending') + '</span>' +
+                        '</div>' +
+                        '<div class="flex justify-between items-baseline">' +
+                        '<span class="text-[10px] text-gray-500">Total</span>' +
+                        '<span class="font-bold text-navy text-sm">৳' + formatPrice(o.total) + '</span>' +
+                        '</div>' +
+                        '</a>';
                 });
                 list.innerHTML = html;
             } catch (e) {
@@ -520,7 +548,7 @@
         function updateBadges() {
             try {
                 const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
-                const cCount = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
+                const cCount = cart.reduce(function(s, i) { return s + (Number(i.quantity) || 0); }, 0);
                 const el = document.getElementById('cart-count-header');
                 if (el) el.textContent = cCount;
                 const ct = document.getElementById('cart-count-text');
