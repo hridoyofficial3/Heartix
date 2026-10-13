@@ -17,7 +17,6 @@
         * { -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background: #FBF8F3; overflow-x: hidden; }
         .font-display { font-family: 'Playfair Display', serif; }
-        .navy-bg { background: #0A1628; }
         .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
         .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
         .gold-text { color: #D4A84B; }
@@ -37,6 +36,8 @@
         @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
         .shimmer { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size: 1000px 100%; animation: shimmer 1.5s infinite; }
         input, select, textarea { font-family: 'Inter', sans-serif; }
+        input:focus, select:focus, textarea:focus { border-color: #D4A84B !important; }
+        .field-error { border-color: #dc2626 !important; background: #FEF2F2; }
     </style>
 </head>
 <body class="pb-24">
@@ -90,30 +91,30 @@
                 <div class="space-y-3">
                     <div>
                         <label class="text-xs font-semibold text-gray-600 mb-1 block">Full Name <span class="text-red-500">*</span></label>
-                        <input type="text" id="customer-name" placeholder="আপনার পূর্ণ নাম" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#D4A84B] text-sm">
+                        <input type="text" id="customer-name" placeholder="আপনার পূর্ণ নাম" maxlength="100" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none text-sm">
                     </div>
                     <div>
                         <label class="text-xs font-semibold text-gray-600 mb-1 block">Phone Number <span class="text-red-500">*</span></label>
-                        <input type="tel" id="customer-phone" placeholder="01XXXXXXXXX" maxlength="11" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#D4A84B] text-sm">
+                        <input type="tel" id="customer-phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none text-sm">
                     </div>
                     <div>
                         <label class="text-xs font-semibold text-gray-600 mb-1 block">Email <span class="text-gray-400">(Optional)</span></label>
-                        <input type="email" id="customer-email" placeholder="email@example.com" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#D4A84B] text-sm">
+                        <input type="email" id="customer-email" placeholder="email@example.com" maxlength="120" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none text-sm">
                     </div>
                     <div>
                         <label class="text-xs font-semibold text-gray-600 mb-1 block">Full Address <span class="text-red-500">*</span></label>
-                        <textarea id="customer-address" placeholder="বাসা নম্বর, রোড, এলাকা" rows="2" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#D4A84B] text-sm resize-none"></textarea>
+                        <textarea id="customer-address" placeholder="বাসা নম্বর, রোড, এলাকা" rows="2" maxlength="500" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none text-sm resize-none"></textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="text-xs font-semibold text-gray-600 mb-1 block">District <span class="text-red-500">*</span></label>
-                            <select id="customer-district" class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none focus:border-[#D4A84B] text-sm bg-white">
+                            <select id="customer-district" class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none text-sm bg-white">
                                 <option value="">Select District</option>
                             </select>
                         </div>
                         <div>
                             <label class="text-xs font-semibold text-gray-600 mb-1 block">Thana <span class="text-red-500">*</span></label>
-                            <input type="text" id="customer-thana" placeholder="থানা" class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none focus:border-[#D4A84B] text-sm">
+                            <input type="text" id="customer-thana" placeholder="থানা" maxlength="60" class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none text-sm">
                         </div>
                     </div>
                 </div>
@@ -169,6 +170,10 @@
                     <span class="text-gray-600">Subtotal</span>
                     <span id="checkout-subtotal" class="font-semibold navy-text">৳ 0</span>
                 </div>
+                <div id="checkout-discount-row" class="hidden flex justify-between mb-3 text-sm">
+                    <span class="text-green-600">Discount <span id="checkout-coupon-badge" class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold"></span></span>
+                    <span id="checkout-discount" class="font-semibold text-green-600">-৳ 0</span>
+                </div>
                 <div class="flex justify-between mb-3 text-sm">
                     <span class="text-gray-600">Delivery Charge</span>
                     <span id="checkout-delivery" class="font-semibold navy-text">৳ 0</span>
@@ -183,6 +188,9 @@
                 <button id="place-order-btn" onclick="placeOrder()" class="w-full navy-gradient text-white py-4 rounded-xl mt-5 font-bold text-sm">
                     <i class="fas fa-check-circle mr-1"></i> PLACE ORDER
                 </button>
+                <p class="text-[10px] text-gray-400 text-center mt-2">
+                    <i class="fas fa-lock mr-1"></i> নিরাপদ ও এনক্রিপ্টেড
+                </p>
             </div>
 
         </div>
@@ -201,7 +209,7 @@
             appId: "1:551204402338:web:169555975c0bbb97f113fb"
         };
 
-        let db;
+        let db = null;
         try {
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
@@ -210,6 +218,8 @@
         let settings = { deliveryCharge: 100, freeDeliveryAbove: 0, bkashNumber: '', nagadNumber: '', whatsapp: '' };
         let isLoading = true;
         let isPlacingOrder = false;
+        let cachedFreshPrices = {};
+        let appliedCoupon = null;
 
         const DISTRICTS = [
             "Dhaka","Faridpur","Gazipur","Gopalganj","Kishoreganj","Madaripur","Manikganj","Munshiganj","Narayanganj","Narsingdi","Rajbari","Shariatpur","Tangail",
@@ -235,14 +245,18 @@
 
         function escapeHtml(t) { if (t === null || t === undefined) return ''; const d = document.createElement('div'); d.textContent = String(t); return d.innerHTML; }
         function formatPrice(n) { return Number(n || 0).toLocaleString('en-IN'); }
-        function getCart() { try { return JSON.parse(localStorage.getItem('heartix_cart') || '[]'); } catch (e) { return []; } }
-        function saveCart(c) { localStorage.setItem('heartix_cart', JSON.stringify(c)); }
 
-        // ⚡ FIXED: Better phone validation (all BD operators)
+        function getCart() {
+            try {
+                const raw = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
+                if (!Array.isArray(raw)) return [];
+                return raw.filter(i => i && typeof i === 'object' && i.id && (Number(i.quantity) || 0) > 0);
+            } catch (e) { return []; }
+        }
+        function saveCart(c) { try { localStorage.setItem('heartix_cart', JSON.stringify(c)); } catch(e) {} }
+
         function validatePhone(phone) { return /^01[3-9]\d{8}$/.test(phone); }
 
-        // ⚡ FIXED: Collision-resistant order number
-        // Format: HX + YYMMDD + 4-char random (36^4 = 1.6M/দিন) + 3-digit ms
         function generateOrderNumber() {
             const d = new Date();
             const y = d.getFullYear().toString().slice(-2);
@@ -266,6 +280,71 @@
             });
         }
 
+        // Load saved coupon
+        try {
+            const saved = JSON.parse(localStorage.getItem('heartix_coupon') || 'null');
+            if (saved && saved.code) appliedCoupon = saved;
+        } catch (e) {}
+
+        // ====== Fresh price + stock validation ======
+        async function loadFreshCartData() {
+            const cart = getCart();
+            if (cart.length === 0) return { ok: true };
+            const fresh = {};
+            const issues = [];
+            for (const item of cart) {
+                try {
+                    const snap = await getDoc(doc(db, "products", item.id));
+                    if (!snap.exists()) {
+                        issues.push({ type: 'missing', name: item.name });
+                        continue;
+                    }
+                    const data = snap.data();
+                    const stock = Number(data.stock) || 0;
+                    if (stock < item.quantity) {
+                        issues.push({ type: 'stock', name: data.name || item.name, stock });
+                        continue;
+                    }
+                    fresh[item.id] = {
+                        id: item.id,
+                        name: data.name || item.name,
+                        price: Number(data.price) || 0,
+                        image: data.image || item.image || '',
+                        quantity: item.quantity
+                    };
+                } catch (e) {
+                    issues.push({ type: 'error', name: item.name });
+                }
+            }
+            cachedFreshPrices = fresh;
+            return { ok: issues.length === 0, issues };
+        }
+
+        // ====== Coupon validation ======
+        async function validateCoupon(coupon, subtotal) {
+            if (!coupon || !coupon.code) return { valid: false, discount: 0, reason: 'no_coupon' };
+            try {
+                const snap = await getDoc(doc(db, "coupons", coupon.code));
+                if (!snap.exists()) return { valid: false, discount: 0, reason: 'not_found' };
+                const c = snap.data();
+                if (c.active === false) return { valid: false, discount: 0, reason: 'inactive' };
+                if (c.expiry && new Date(c.expiry) < new Date()) return { valid: false, discount: 0, reason: 'expired' };
+                if (c.maxUses > 0 && (c.usedCount || 0) >= c.maxUses) return { valid: false, discount: 0, reason: 'exhausted' };
+                if (c.minOrder > 0 && subtotal < c.minOrder) return { valid: false, discount: 0, reason: 'min_order' };
+                let discount = 0;
+                if (c.type === 'percentage') {
+                    discount = Math.round((subtotal * Number(c.value || 0)) / 100);
+                } else {
+                    discount = Number(c.value || 0);
+                }
+                discount = Math.min(discount, subtotal);
+                discount = Math.max(discount, 0);
+                return { valid: true, discount, type: c.type, value: c.value, code: snap.id };
+            } catch (e) {
+                return { valid: false, discount: 0, reason: 'error' };
+            }
+        }
+
         async function loadSettings() {
             if (!db) { isLoading = false; afterLoad(); return; }
             try {
@@ -283,39 +362,54 @@
             afterLoad();
         }
 
-        function afterLoad() {
+        async function afterLoad() {
             document.getElementById('loading-skeleton').classList.add('hidden');
             document.getElementById('main-content').classList.remove('hidden');
             const cart = getCart();
-            // ⚡ FIXED: Filter out invalid cart items
-            const validCart = cart.filter(i => i.id && (Number(i.quantity) || 0) > 0);
-            if (validCart.length === 0) {
+            if (cart.length === 0) {
                 document.getElementById('empty-cart').classList.remove('hidden');
                 document.getElementById('checkout-form').classList.add('hidden');
                 return;
             }
             document.getElementById('empty-cart').classList.add('hidden');
             document.getElementById('checkout-form').classList.remove('hidden');
-            renderOrderReview();
             initDistricts();
             attachPaymentListeners();
+
+            const result = await loadFreshCartData();
+            renderOrderReview();
+            await updateSummary();
+
             updatePaymentInfo('full-cod');
-            updateSummary();
+
+            if (!result.ok) {
+                const missing = result.issues.filter(i => i.type === 'missing').length;
+                const lowStock = result.issues.filter(i => i.type === 'stock').length;
+                let msg = '';
+                if (missing) msg += `${missing} টি প্রোডাক্ট আর নেই। `;
+                if (lowStock) msg += `${lowStock} টি প্রোডাক্টের স্টক কম। `;
+                showToast(msg + 'কার্টে ফিরে ঠিক করুন', 'error');
+                document.getElementById('place-order-btn').disabled = true;
+                document.getElementById('place-order-btn').classList.add('opacity-50', 'cursor-not-allowed');
+            }
         }
 
         function renderOrderReview() {
-            const cart = getCart().filter(i => i.id && (Number(i.quantity) || 0) > 0);
+            const cart = getCart();
             const reviewDiv = document.getElementById('order-review');
             if (!reviewDiv) return;
             let html = '';
             cart.forEach(item => {
+                const fresh = cachedFreshPrices[item.id];
+                const price = fresh ? fresh.price : (Number(item.price) || 0);
                 const qty = Number(item.quantity) || 1;
-                const price = Number(item.price) || 0;
+                const image = fresh ? fresh.image : item.image;
+                const name = fresh ? fresh.name : item.name;
                 html += `
                     <div class="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0">
-                        <img src="${item.image || 'https://via.placeholder.com/60x60?text=?'}" class="w-14 h-14 object-contain rounded-lg bg-gray-50 flex-shrink-0" onerror="this.src='https://via.placeholder.com/60x60?text=?'">
+                        <img src="${image || 'https://via.placeholder.com/60x60?text=?'}" class="w-14 h-14 object-contain rounded-lg bg-gray-50 flex-shrink-0" onerror="this.src='https://via.placeholder.com/60x60?text=?'">
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium navy-text line-clamp-2">${escapeHtml(item.name)}</p>
+                            <p class="text-sm font-medium navy-text line-clamp-2">${escapeHtml(name)}</p>
                             <p class="text-xs text-gray-500 mt-0.5">৳ ${formatPrice(price)} × ${qty}</p>
                         </div>
                         <p class="font-semibold navy-text text-sm flex-shrink-0">৳ ${formatPrice(price * qty)}</p>
@@ -324,14 +418,55 @@
             reviewDiv.innerHTML = html;
         }
 
-        function updateSummary() {
-            const cart = getCart().filter(i => i.id && (Number(i.quantity) || 0) > 0);
-            const subtotal = cart.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0);
-            const isFree = settings.freeDeliveryAbove > 0 && subtotal >= settings.freeDeliveryAbove;
+        async function updateSummary() {
+            const cart = getCart();
+            let subtotal = 0;
+            cart.forEach(item => {
+                const fresh = cachedFreshPrices[item.id];
+                const price = fresh ? fresh.price : (Number(item.price) || 0);
+                subtotal += price * (Number(item.quantity) || 0);
+            });
+
+            // Validate coupon
+            let discount = 0;
+            if (appliedCoupon && appliedCoupon.code) {
+                const validation = await validateCoupon(appliedCoupon, subtotal);
+                if (validation.valid) {
+                    discount = validation.discount;
+                } else {
+                    // Auto-remove invalid coupon
+                    if (validation.reason !== 'no_coupon') {
+                        let msg = 'Coupon আর কাজ করছে না';
+                        if (validation.reason === 'expired') msg = 'Coupon expired';
+                        else if (validation.reason === 'inactive') msg = 'Coupon inactive';
+                        else if (validation.reason === 'exhausted') msg = 'Coupon সীমা শেষ';
+                        else if (validation.reason === 'min_order') msg = 'Minimum order পূরণ হয়নি';
+                        showToast(msg, 'warn');
+                        appliedCoupon = null;
+                        try { localStorage.removeItem('heartix_coupon'); } catch(e) {}
+                    }
+                }
+            }
+
+            const afterDiscount = subtotal - discount;
+            const isFree = settings.freeDeliveryAbove > 0 && afterDiscount >= settings.freeDeliveryAbove;
             const dc = isFree ? 0 : settings.deliveryCharge;
+            const total = afterDiscount + dc;
+
             document.getElementById('checkout-subtotal').innerText = '৳ ' + formatPrice(subtotal);
+
+            const discountRow = document.getElementById('checkout-discount-row');
+            if (discount > 0) {
+                discountRow.classList.remove('hidden');
+                document.getElementById('checkout-discount').innerText = '-৳ ' + formatPrice(discount);
+                document.getElementById('checkout-coupon-badge').textContent = appliedCoupon.code;
+            } else {
+                discountRow.classList.add('hidden');
+            }
+
             document.getElementById('checkout-delivery').innerText = dc === 0 ? 'ফ্রি' : '৳ ' + formatPrice(dc);
-            document.getElementById('checkout-total').innerText = '৳ ' + formatPrice(subtotal + dc);
+            document.getElementById('checkout-total').innerText = '৳ ' + formatPrice(total);
+
             const fn = document.getElementById('checkout-free-note');
             if (isFree) fn.classList.remove('hidden');
             else fn.classList.add('hidden');
@@ -349,15 +484,29 @@
             if (initial) initial.closest('.payment-option').classList.add('selected');
         }
 
-        function updatePaymentInfo(method) {
+        async function updatePaymentInfo(method) {
             const box = document.getElementById('payment-instructions');
             const content = document.getElementById('payment-info-content');
             if (!box || !content) return;
-            const cart = getCart().filter(i => i.id && (Number(i.quantity) || 0) > 0);
-            const subtotal = cart.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0);
-            const isFree = settings.freeDeliveryAbove > 0 && subtotal >= settings.freeDeliveryAbove;
+            const cart = getCart();
+            let subtotal = 0;
+            cart.forEach(item => {
+                const fresh = cachedFreshPrices[item.id];
+                const price = fresh ? fresh.price : (Number(item.price) || 0);
+                subtotal += price * (Number(item.quantity) || 0);
+            });
+
+            let discount = 0;
+            if (appliedCoupon && appliedCoupon.code) {
+                const validation = await validateCoupon(appliedCoupon, subtotal);
+                if (validation.valid) discount = validation.discount;
+            }
+
+            const afterDiscount = subtotal - discount;
+            const isFree = settings.freeDeliveryAbove > 0 && afterDiscount >= settings.freeDeliveryAbove;
             const dc = isFree ? 0 : settings.deliveryCharge;
-            const total = subtotal + dc;
+            const total = afterDiscount + dc;
+
             if (method === 'full-cod') { box.classList.add('hidden'); return; }
             box.classList.remove('hidden');
             let html = '';
@@ -374,17 +523,49 @@
             content.innerHTML = html;
         }
 
-        // ============================================================
-        // ⚡ FIXED: ATOMIC ORDER PLACEMENT USING FIRESTORE TRANSACTION
-        // ============================================================
-        // Transaction ensures: stock check + stock decrement + order
-        // create সব একসাথে হয়। কোনো একটা fail করলে অন্যগুলোও rollback।
-        // এতে race condition এবং orphaned stock দুটোই ঠিক হয়।
-        // ============================================================
+        function setFieldError(id, hasError) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (hasError) el.classList.add('field-error');
+            else el.classList.remove('field-error');
+        }
+
+        function validateForm() {
+            const name = (document.getElementById('customer-name').value || '').trim();
+            const phone = (document.getElementById('customer-phone').value || '').trim();
+            const email = (document.getElementById('customer-email').value || '').trim();
+            const address = (document.getElementById('customer-address').value || '').trim();
+            const district = document.getElementById('customer-district').value;
+            const thana = (document.getElementById('customer-thana').value || '').trim();
+            let ok = true;
+
+            if (!name || name.length < 2) { setFieldError('customer-name', true); if (ok) showToast('সঠিক নাম দিন', 'error'); ok = false; }
+            else setFieldError('customer-name', false);
+
+            if (!validatePhone(phone)) { setFieldError('customer-phone', true); if (ok) showToast('সঠিক ফোন নাম্বার (01XXXXXXXXX)', 'error'); ok = false; }
+            else setFieldError('customer-phone', false);
+
+            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setFieldError('customer-email', true); if (ok) showToast('সঠিক ইমেইল দিন', 'error'); ok = false; }
+            else setFieldError('customer-email', false);
+
+            if (!address || address.length < 5) { setFieldError('customer-address', true); if (ok) showToast('সম্পূর্ণ ঠিকানা দিন', 'error'); ok = false; }
+            else setFieldError('customer-address', false);
+
+            if (!district) { setFieldError('customer-district', true); if (ok) showToast('জেলা সিলেক্ট করুন', 'error'); ok = false; }
+            else setFieldError('customer-district', false);
+
+            if (!thana) { setFieldError('customer-thana', true); if (ok) showToast('থানা দিন', 'error'); ok = false; }
+            else setFieldError('customer-thana', false);
+
+            return ok;
+        }
+
+        // ⚡ SERVER-AUTHORITATIVE PRICING + ATOMIC TRANSACTION
         window.placeOrder = async function() {
             if (isPlacingOrder) return;
-            const cart = getCart().filter(i => i.id && (Number(i.quantity) || 0) > 0);
+            const cart = getCart();
             if (cart.length === 0) return showToast("কার্ট খালি!", 'error');
+            if (!validateForm()) return;
 
             const name = (document.getElementById('customer-name').value || '').trim();
             const phone = (document.getElementById('customer-phone').value || '').trim();
@@ -394,23 +575,6 @@
             const thana = (document.getElementById('customer-thana').value || '').trim();
             const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
 
-            if (!name || name.length < 2) return showToast("সঠিক নাম দিন", 'error');
-            if (!validatePhone(phone)) return showToast("সঠিক ফোন নাম্বার (01XXXXXXXXX)", 'error');
-            if (!address || address.length < 5) return showToast("সম্পূর্ণ ঠিকানা দিন", 'error');
-            if (!district) return showToast("জেলা সিলেক্ট করুন", 'error');
-            if (!thana) return showToast("থানা দিন", 'error');
-            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast("সঠিক ইমেইল", 'error');
-
-            const subtotal = cart.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0);
-            const isFree = settings.freeDeliveryAbove > 0 && subtotal >= settings.freeDeliveryAbove;
-            const deliveryCharge = isFree ? 0 : settings.deliveryCharge;
-            const total = subtotal + deliveryCharge;
-            let advancePaid = 0;
-            if (paymentMethod === 'full-online') advancePaid = total;
-            else if (paymentMethod === 'delivery-advance') advancePaid = deliveryCharge;
-
-            const orderNumber = generateOrderNumber();
-
             const btn = document.getElementById('place-order-btn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Placing Order...';
@@ -419,61 +583,120 @@
             try {
                 if (!db) throw new Error("Database connection failed");
 
-                // Pre-generate order doc ref so we can set it inside transaction
-                const orderRef = doc(collection(db, "orders"));
+                // Fetch fresh coupon data
+                let couponData = null;
+                if (appliedCoupon && appliedCoupon.code) {
+                    const cSnap = await getDoc(doc(db, "coupons", appliedCoupon.code));
+                    if (cSnap.exists()) couponData = { code: cSnap.id, ...cSnap.data() };
+                }
 
-                // ⚡ ATOMIC TRANSACTION
+                const orderRef = doc(collection(db, "orders"));
+                const orderNumber = generateOrderNumber();
+
+                let finalSubtotal = 0;
+                let finalTotal = 0;
+                let finalDelivery = 0;
+                let finalAdvance = 0;
+                let finalDiscount = 0;
+                let finalItems = [];
+
                 await runTransaction(db, async (transaction) => {
-                    // Step 1: READ all product stocks inside transaction
-                    const productRefs = [];
-                    const productDocs = [];
+                    // Step 1: READ products + coupon (must be inside transaction for consistency)
+                    const readData = [];
                     for (const item of cart) {
                         const pRef = doc(db, "products", item.id);
                         const pSnap = await transaction.get(pRef);
-                        if (!pSnap.exists()) {
-                            throw new Error(`প্রোডাক্টটি আর নেই: ${item.name}`);
-                        }
+                        if (!pSnap.exists()) throw new Error(`প্রোডাক্টটি আর নেই: ${item.name}`);
                         const data = pSnap.data();
                         const currentStock = Number(data.stock) || 0;
-                        if (currentStock < item.quantity) {
-                            throw new Error(`"${item.name}" - স্টকে মাত্র ${currentStock} টি আছে`);
+                        const qty = Number(item.quantity) || 1;
+                        if (currentStock < qty) throw new Error(`"${data.name || item.name}" - স্টকে মাত্র ${currentStock} টি আছে`);
+                        readData.push({
+                            ref: pRef,
+                            freshPrice: Number(data.price) || 0,
+                            freshName: data.name || item.name,
+                            freshImage: data.image || item.image || '',
+                            stock: currentStock,
+                            qty
+                        });
+                    }
+
+                    // Read coupon inside transaction
+                    let couponSnapData = null;
+                    let couponRef = null;
+                    if (couponData) {
+                        couponRef = doc(db, "coupons", couponData.code);
+                        const cSnap = await transaction.get(couponRef);
+                        if (cSnap.exists()) couponSnapData = cSnap.data();
+                    }
+
+                    // Step 2: Calculate totals from FRESH prices
+                    finalSubtotal = readData.reduce((s, r) => s + r.freshPrice * r.qty, 0);
+
+                    // Validate coupon again with fresh data
+                    finalDiscount = 0;
+                    let couponValid = false;
+                    if (couponSnapData) {
+                        const c = couponSnapData;
+                        couponValid = c.active !== false
+                            && (!c.expiry || new Date(c.expiry) >= new Date())
+                            && (!c.maxUses || (c.usedCount || 0) < c.maxUses)
+                            && (!c.minOrder || finalSubtotal >= c.minOrder);
+                        if (couponValid) {
+                            if (c.type === 'percentage') finalDiscount = Math.round((finalSubtotal * Number(c.value || 0)) / 100);
+                            else finalDiscount = Number(c.value || 0);
+                            finalDiscount = Math.min(finalDiscount, finalSubtotal);
                         }
-                        productRefs.push(pRef);
-                        productDocs.push({ snap: pSnap, item });
                     }
 
-                    // Step 2: WRITE stock decrements
-                    for (let i = 0; i < productRefs.length; i++) {
-                        const { snap, item } = productDocs[i];
-                        const currentStock = Number(snap.data().stock) || 0;
-                        transaction.update(productRefs[i], { stock: currentStock - item.quantity });
+                    const afterDiscount = finalSubtotal - finalDiscount;
+                    const isFree = settings.freeDeliveryAbove > 0 && afterDiscount >= settings.freeDeliveryAbove;
+                    finalDelivery = isFree ? 0 : settings.deliveryCharge;
+                    finalTotal = afterDiscount + finalDelivery;
+                    if (paymentMethod === 'full-online') finalAdvance = finalTotal;
+                    else if (paymentMethod === 'delivery-advance') finalAdvance = finalDelivery;
+
+                    finalItems = readData.map(r => ({
+                        id: r.ref.id,
+                        name: r.freshName,
+                        price: r.freshPrice,
+                        quantity: r.qty,
+                        image: r.freshImage
+                    }));
+
+                    // Step 3: Deduct stock
+                    for (const r of readData) {
+                        transaction.update(r.ref, { stock: r.stock - r.qty });
                     }
 
-                    // Step 3: WRITE order doc
+                    // Step 4: Update coupon usage
+                    if (couponValid && couponRef && couponSnapData) {
+                        const newCount = (couponSnapData.usedCount || 0) + 1;
+                        transaction.update(couponRef, { usedCount: newCount });
+                    }
+
+                    // Step 5: Create order
                     transaction.set(orderRef, {
                         orderNumber,
                         customer: { name, phone, email, address, district, thana },
-                        items: cart.map(i => ({
-                            id: i.id,
-                            name: i.name,
-                            price: Number(i.price) || 0,
-                            quantity: Number(i.quantity) || 1,
-                            image: i.image || ''
-                        })),
-                        subtotal,
-                        deliveryCharge,
-                        total,
+                        items: finalItems,
+                        subtotal: finalSubtotal,
+                        discount: finalDiscount,
+                        couponCode: couponValid ? couponData.code : '',
+                        deliveryCharge: finalDelivery,
+                        total: finalTotal,
                         paymentMethod,
-                        advancePaid,
-                        dueAmount: total - advancePaid,
+                        advancePaid: finalAdvance,
+                        dueAmount: finalTotal - finalAdvance,
                         status: 'pending',
                         stockDeducted: true,
                         createdAt: serverTimestamp()
                     });
                 });
 
-                // Success: clear cart, redirect
+                // Success
                 saveCart([]);
+                try { localStorage.removeItem('heartix_coupon'); } catch(e) {}
                 window.location.href = 'order-success.html?order=' + encodeURIComponent(orderNumber);
             } catch (e) {
                 console.error('Order error:', e);
@@ -482,7 +705,7 @@
                 btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i> PLACE ORDER';
                 isPlacingOrder = false;
             }
-        }
+        };
 
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadSettings);
         else loadSettings();
