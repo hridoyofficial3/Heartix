@@ -25,19 +25,25 @@
         @keyframes pop { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
         .pop { animation: pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-up { animation: fadeUp 0.6s ease-out; }
-        .delay-1 { animation-delay: 0.15s; opacity: 0; animation-fill-mode: forwards; }
-        .delay-2 { animation-delay: 0.3s; opacity: 0; animation-fill-mode: forwards; }
-        .delay-3 { animation-delay: 0.45s; opacity: 0; animation-fill-mode: forwards; }
-        .delay-4 { animation-delay: 0.6s; opacity: 0; animation-fill-mode: forwards; }
+        .fade-up { animation: fadeUp 0.6s ease-out both; }
+        .delay-1 { animation-delay: 0.15s; }
+        .delay-2 { animation-delay: 0.3s; }
+        .delay-3 { animation-delay: 0.45s; }
+        .delay-4 { animation-delay: 0.6s; }
+        #toast-container { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; pointer-events: none; }
+        .toast-bar { padding: 14px 20px; color: white; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s ease; justify-content: center; }
+        .toast-bar.success { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .toast-bar.error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
+    <div id="toast-container"></div>
+
     <div class="w-full max-w-md">
         <div class="bg-white rounded-3xl premium-shadow p-6 md:p-8 text-center">
 
-            <!-- SUCCESS ICON -->
             <div class="w-24 h-24 gold-gradient rounded-full mx-auto flex items-center justify-center mb-5 pop">
                 <i class="fas fa-check text-navy text-5xl"></i>
             </div>
@@ -47,16 +53,14 @@
                 আপনার অর্ডারটি আমরা পেয়েছি। শীঘ্রই কল করে কনফার্ম করব।
             </p>
 
-            <!-- ORDER NUMBER -->
             <div class="bg-cream rounded-2xl p-5 mb-5 fade-up delay-2">
                 <p class="text-xs text-gray-500 mb-1">আপনার অর্ডার নাম্বার</p>
                 <p id="order-number" class="font-display text-2xl font-bold navy-text tracking-wider">HX00000000</p>
-                <button onclick="copyOrderNumber()" class="mt-2 text-xs gold-text font-semibold">
+                <button onclick="copyOrderNumber(event)" class="mt-2 text-xs gold-text font-semibold">
                     <i class="fas fa-copy mr-1"></i> কপি করুন
                 </button>
             </div>
 
-            <!-- NEXT STEPS -->
             <div class="bg-blue-50 rounded-xl p-4 mb-5 text-left fade-up delay-3">
                 <p class="text-xs navy-text font-semibold mb-2 flex items-center gap-1.5">
                     <i class="fas fa-info-circle text-blue-500"></i> পরবর্তী ধাপ
@@ -68,7 +72,6 @@
                 </ul>
             </div>
 
-            <!-- ACTION BUTTONS -->
             <div class="grid grid-cols-2 gap-3 mb-3 fade-up delay-4">
                 <a id="track-btn" href="track-order.html" class="bg-white border-2 border-[#0A1628] text-navy font-semibold py-3 rounded-xl text-sm text-center">
                     <i class="fas fa-truck mr-1"></i> Track Order
@@ -78,9 +81,8 @@
                 </a>
             </div>
 
-            <!-- WHATSAPP -->
             <p id="wa-line" class="text-xs text-gray-400 mt-4 fade-up delay-4 hidden">
-                আমাদের WhatsApp: <a id="wa-link" href="#" target="_blank" class="font-semibold gold-text">চ্যাট করুন</a>
+                আমাদের WhatsApp: <a id="wa-link" href="#" target="_blank" rel="noopener" class="font-semibold gold-text">চ্যাট করুন</a>
             </p>
 
             <p class="text-[10px] text-gray-400 mt-3">
@@ -103,15 +105,25 @@
             appId: "1:551204402338:web:169555975c0bbb97f113fb"
         };
 
-        let db;
+        let db = null;
         try {
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
         } catch (e) { console.error('Firebase init:', e); }
 
-        // GET ORDER NUMBER FROM URL
+        function showToast(msg, type = 'success') {
+            const c = document.getElementById('toast-container');
+            if (!c) return;
+            const t = document.createElement('div');
+            t.className = 'toast-bar ' + type;
+            const icon = type === 'success' ? 'check-circle' : 'times-circle';
+            t.innerHTML = `<i class="fas fa-${icon}"></i><span>${msg}</span>`;
+            c.appendChild(t);
+            setTimeout(() => { t.style.transition='opacity 0.3s'; t.style.opacity='0'; setTimeout(() => t.remove(), 300); }, 2500);
+        }
+
         const params = new URLSearchParams(window.location.search);
-        const orderNum = params.get('order') || '';
+        const orderNum = (params.get('order') || '').trim().toUpperCase();
 
         const orderEl = document.getElementById('order-number');
         const trackBtn = document.getElementById('track-btn');
@@ -120,25 +132,49 @@
             orderEl.textContent = orderNum;
             trackBtn.href = 'track-order.html?order=' + encodeURIComponent(orderNum);
         } else {
-            // No order number, generate placeholder
             orderEl.textContent = 'HX--------';
             trackBtn.href = 'track-order.html';
         }
 
-        // COPY ORDER NUMBER
-        window.copyOrderNumber = function() {
+        // ⚡ FIXED: Accept event param + clipboard fallback
+        window.copyOrderNumber = function(e) {
             const text = orderEl.textContent;
-            if (navigator.clipboard && text) {
-                navigator.clipboard.writeText(text).then(() => {
-                    const btn = event.target.closest('button');
-                    const orig = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check mr-1"></i> কপি হয়েছে!';
-                    setTimeout(() => { btn.innerHTML = orig; }, 1500);
-                }).catch(() => {});
-            }
-        }
+            if (!text || text === 'HX--------') return;
 
-        // FETCH WHATSAPP FROM SETTINGS
+            const doCopy = (success) => {
+                const btn = e && e.target ? e.target.closest('button') : null;
+                if (!btn) return;
+                const orig = btn.innerHTML;
+                if (success) {
+                    btn.innerHTML = '<i class="fas fa-check mr-1"></i> কপি হয়েছে!';
+                    showToast('অর্ডার নাম্বার কপি হয়েছে', 'success');
+                } else {
+                    btn.innerHTML = '<i class="fas fa-times mr-1"></i> ব্যর্থ';
+                    showToast('কপি করা যায়নি', 'error');
+                }
+                setTimeout(() => { btn.innerHTML = orig; }, 1500);
+            };
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => doCopy(true)).catch(() => doCopy(false));
+            } else {
+                // Fallback
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    doCopy(true);
+                } catch (err) {
+                    doCopy(false);
+                }
+            }
+        };
+
         if (db) {
             try {
                 const snap = await getDoc(doc(db, "settings", "main"));
@@ -146,7 +182,7 @@
                     const s = snap.data();
                     if (s.whatsapp) {
                         document.getElementById('wa-line').classList.remove('hidden');
-                        const waMsg = encodeURIComponent(`Hi, my order number is: ${orderNum}`);
+                        const waMsg = encodeURIComponent(`Hi, my order number is: ${orderNum || '(unknown)'}`);
                         document.getElementById('wa-link').href = `https://wa.me/${s.whatsapp}?text=${waMsg}`;
                     }
                 }
