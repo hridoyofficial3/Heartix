@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Track Order - Heartix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: {
+            colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' }, cream: '#FBF8F3' },
+            fontFamily: { 'display': ['Playfair Display', 'serif'] }
+        }}}
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: #FBF8F3; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
+        .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
+        .gold-text { color: #D4A84B; }
+        .navy-text { color: #0A1628; }
+        .glass { background: rgba(255,255,255,0.9); backdrop-filter: blur(20px); }
+        .premium-shadow { box-shadow: 0 4px 20px rgba(10,22,40,0.08); }
+        #toast-container { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; pointer-events: none; }
+        .toast-bar { padding: 14px 20px; color: white; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s ease; justify-content: center; }
+        .toast-bar.success { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .toast-bar.error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        .toast-bar.warn { background: linear-gradient(135deg, #ea580c, #f97316); }
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+
+        .timeline-step { position: relative; padding-left: 44px; }
+        .timeline-step .dot {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e5e7eb;
+            color: #9ca3af;
+            font-size: 13px;
+            z-index: 2;
+        }
+        .timeline-step.done .dot { background: linear-gradient(135deg, #16a34a, #22c55e); color: white; }
+        .timeline-step.active .dot { background: linear-gradient(135deg, #D4A84B, #E8C77B); color: #0A1628; box-shadow: 0 0 0 4px rgba(212,168,75,0.25); }
+        .timeline-step:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 32px;
+            bottom: -8px;
+            width: 2px;
+            background: #e5e7eb;
+        }
+        .timeline-step.done:not(:last-child)::before { background: linear-gradient(180deg, #16a34a, #22c55e); }
+    </style>
+</head>
+<body class="pb-8">
+
+    <div id="toast-container"></div>
+
+    <header class="glass sticky top-0 z-30 px-3 py-2 flex justify-between items-center border-b border-gray-100">
+        <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream">
+            <i class="fas fa-arrow-left text-navy text-lg"></i>
+        </a>
+        <h1 class="font-display text-xl navy-text font-bold">Track Order</h1>
+        <div class="w-10"></div>
+    </header>
+
+    <div class="p-4 max-w-md mx-auto">
+
+        <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
+            <h2 class="font-display text-lg navy-text font-bold mb-3 flex items-center gap-2">
+                <i class="fas fa-search gold-text"></i> অর্ডার নাম্বার দিন
+            </h2>
+            <div class="flex gap-2">
+                <input type="text" id="order-input" placeholder="HX241013AB12" class="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#D4A84B] text-sm font-mono uppercase" maxlength="20">
+                <button onclick="trackOrder()" class="gold-gradient text-navy px-5 py-3 rounded-xl font-bold text-sm">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <p class="text-[10px] text-gray-400 mt-2">
+                <i class="fas fa-info-circle mr-1"></i> অর্ডার কনফার্মেশন SMS/WhatsApp-এ পাবেন
+            </p>
+        </div>
+
+        <div id="loading" class="hidden text-center py-10">
+            <i class="fas fa-spinner fa-spin text-3xl gold-text mb-3"></i>
+            <p class="text-gray-500 text-sm">খোঁজা হচ্ছে...</p>
+        </div>
+
+        <div id="not-found" class="hidden bg-white rounded-2xl premium-shadow p-8 text-center">
+            <i class="fas fa-search-minus text-5xl text-gray-300 mb-3"></i>
+            <p class="text-gray-500 font-medium mb-2">কোনো অর্ডার পাওয়া যায়নি</p>
+            <p class="text-xs text-gray-400">অর্ডার নাম্বার সঠিকভাবে দিন</p>
+        </div>
+
+        <div id="result" class="hidden space-y-4">
+
+            <div class="bg-white rounded-2xl premium-shadow p-5">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Order Number</p>
+                        <p id="res-order-num" class="font-display text-lg navy-text font-bold tracking-wider">-</p>
+                    </div>
+                    <span id="res-status-badge" class="text-[10px] px-2.5 py-1 rounded-full font-bold uppercase">PENDING</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                        <p class="text-gray-500 mb-0.5">Customer</p>
+                        <p id="res-name" class="font-semibold navy-text">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 mb-0.5">Phone</p>
+                        <p id="res-phone" class="font-semibold navy-text">-</p>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <p class="text-gray-500 mb-0.5 text-xs">Delivery Address</p>
+                    <p id="res-address" class="text-xs navy-text">-</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl premium-shadow p-5">
+                <h3 class="font-display text-base navy-text font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-route gold-text"></i> Order Status
+                </h3>
+                <div class="space-y-5" id="timeline"></div>
+            </div>
+
+            <div class="bg-white rounded-2xl premium-shadow p-5">
+                <h3 class="font-display text-base navy-text font-bold mb-3 flex items-center gap-2">
+                    <i class="fas fa-shopping-bag gold-text"></i> Items
+                </h3>
+                <div id="res-items" class="space-y-2"></div>
+            </div>
+
+            <div class="bg-white rounded-2xl premium-shadow p-5">
+                <h3 class="font-display text-base navy-text font-bold mb-3 flex items-center gap-2">
+                    <i class="fas fa-credit-card gold-text"></i> Payment
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Subtotal</span>
+                        <span id="res-subtotal" class="font-semibold navy-text">৳0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Delivery Charge</span>
+                        <span id="res-delivery" class="font-semibold navy-text">৳0</span>
+                    </div>
+                    <div class="flex justify-between border-t border-gray-100 pt-2 mt-1">
+                        <span class="font-bold navy-text">Total</span>
+                        <span id="res-total" class="font-bold navy-text">৳0</span>
+                    </div>
+                    <div class="flex justify-between bg-green-50 rounded-lg p-2 -mx-1">
+                        <span class="text-green-700 text-xs">Advance Paid</span>
+                        <span id="res-advance" class="text-green-700 font-bold text-xs">৳0</span>
+                    </div>
+                    <div class="flex justify-between bg-red-50 rounded-lg p-2 -mx-1">
+                        <span class="text-red-700 text-xs">Due (COD)</span>
+                        <span id="res-due" class="text-red-700 font-bold text-xs">৳0</span>
+                    </div>
+                    <p class="text-[10px] text-gray-500 pt-1">
+                        Method: <span id="res-method" class="font-semibold">-</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 rounded-2xl p-4 text-center">
+                <p class="text-xs text-blue-800 mb-2"><i class="fas fa-headset mr-1"></i> কোনো সমস্যা হলে যোগাযোগ করুন</p>
+                <div class="flex gap-2 justify-center">
+                    <a id="call-help" href="#" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-semibold">
+                        <i class="fas fa-phone mr-1"></i> Call Us
+                    </a>
+                    <a id="wa-help" href="#" target="_blank" class="bg-green-500 text-white px-4 py-2 rounded-lg text-xs font-semibold">
+                        <i class="fab fa-whatsapp mr-1"></i> WhatsApp
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
+            authDomain: "heartix.firebaseapp.com",
+            projectId: "heartix",
+            storageBucket: "heartix.firebasestorage.app",
+            messagingSenderId: "551204402338",
+            appId: "1:551204402338:web:169555975c0bbb97f113fb"
+        };
+
+        let db;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+        } catch (e) { console.error('Firebase init:', e); }
+
+        let settings = { whatsapp: '', contactPhone: '' };
+
+        function showToast(msg, type = 'success') {
+            const c = document.getElementById('toast-container');
+            if (!c) return;
+            const t = document.createElement('div');
+            t.className = 'toast-bar ' + type;
+            const icon = type === 'success' ? 'check-circle' : (type === 'warn' ? 'exclamation-circle' : 'times-circle');
+            t.innerHTML = `<i class="fas fa-${icon}"></i><span>${msg}</span>`;
+            c.appendChild(t);
+            setTimeout(() => {
+                t.style.transition = 'opacity 0.3s';
+                t.style.opacity = '0';
+                setTimeout(() => t.remove(), 300);
+            }, 2500);
+        }
+
+        function escapeHtml(t) {
+            if (t === null || t === undefined) return '';
+            const d = document.createElement('div');
+            d.textContent = String(t);
+            return d.innerHTML;
+        }
+
+        function formatPrice(n) { return Number(n || 0).toLocaleString('en-IN'); }
+
+        const STATUS_STEPS = [
+            { key: 'pending', label: 'Pending', icon: 'clock', desc: 'আপনার অর্ডার পাওয়া গেছে' },
+            { key: 'confirmed', label: 'Confirmed', icon: 'check', desc: 'অর্ডার কনফার্ম হয়েছে' },
+            { key: 'shipped', label: 'Shipped', icon: 'truck', desc: 'ডেলিভারির জন্য পাঠানো হয়েছে' },
+            { key: 'delivered', label: 'Delivered', icon: 'home', desc: 'ডেলিভারি সম্পন্ন' }
+        ];
+
+        const STATUS_COLORS = {
+            'pending': 'bg-yellow-100 text-yellow-700',
+            'confirmed': 'bg-blue-100 text-blue-700',
+            'shipped': 'bg-purple-100 text-purple-700',
+            'delivered': 'bg-green-100 text-green-700',
+            'cancelled': 'bg-red-100 text-red-700'
+        };
+
+        window.trackOrder = async function() {
+            const input = document.getElementById('order-input').value.trim().toUpperCase();
+            if (!input) {
+                showToast('অর্ডার নাম্বার দিন', 'error');
+                return;
+            }
+
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('not-found').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+
+            if (!db) {
+                document.getElementById('loading').classList.add('hidden');
+                showToast('সার্ভার সংযোগ নেই', 'error');
+                return;
+            }
+
+            try {
+                let orderSnap = await getDocs(query(collection(db, "orders"), where("orderNumber", "==", input)));
+
+                if (orderSnap.empty) {
+                    try {
+                        const docSnap = await getDoc(doc(db, "orders", input));
+                        if (docSnap.exists()) {
+                            document.getElementById('loading').classList.add('hidden');
+                            renderOrder({ id: docSnap.id, ...docSnap.data() });
+                            return;
+                        }
+                    } catch (e) {}
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('not-found').classList.remove('hidden');
+                    return;
+                }
+
+                const orderData = orderSnap.docs[0].data();
+                document.getElementById('loading').classList.add('hidden');
+                renderOrder({ id: orderSnap.docs[0].id, ...orderData });
+            } catch (e) {
+                console.error('Track error:', e);
+                document.getElementById('loading').classList.add('hidden');
+                showToast('খুঁজতে সমস্যা হয়েছে', 'error');
+            }
+        }
+
+        function renderOrder(o) {
+            const customer = o.customer || {};
+            const items = o.items || [];
+
+            document.getElementById('res-order-num').textContent = o.orderNumber || o.id.slice(0, 10);
+            document.getElementById('res-name').textContent = customer.name || '-';
+            document.getElementById('res-phone').textContent = customer.phone || '-';
+            document.getElementById('res-address').textContent = 
+                [customer.address, customer.thana, customer.district].filter(Boolean).join(', ') || '-';
+
+            const badge = document.getElementById('res-status-badge');
+            badge.textContent = (o.status || 'pending').toUpperCase();
+            badge.className = `text-[10px] px-2.5 py-1 rounded-full font-bold uppercase ${STATUS_COLORS[o.status] || 'bg-gray-100 text-gray-600'}`;
+
+            const currentIdx = STATUS_STEPS.findIndex(s => s.key === o.status);
+            let timelineHtml = '';
+            if (o.status === 'cancelled') {
+                timelineHtml = `<div class="timeline-step active">
+                    <div class="dot" style="background: linear-gradient(135deg,#dc2626,#ef4444); color:white;">
+                        <i class="fas fa-times text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-red-600 text-sm">Cancelled</p>
+                        <p class="text-xs text-gray-500 mt-0.5">অর্ডারটি বাতিল করা হয়েছে</p>
+                    </div>
+                </div>`;
+            } else {
+                STATUS_STEPS.forEach((s, i) => {
+                    const isDone = i < currentIdx;
+                    const isActive = i === currentIdx;
+                    const cls = isDone ? 'done' : (isActive ? 'active' : '');
+                    timelineHtml += `
+                        <div class="timeline-step ${cls}">
+                            <div class="dot"><i class="fas fa-${isDone ? 'check' : s.icon}"></i></div>
+                            <div>
+                                <p class="font-bold navy-text text-sm">${s.label}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">${s.desc}</p>
+                            </div>
+                        </div>`;
+                });
+            }
+            document.getElementById('timeline').innerHTML = timelineHtml;
+
+            const itemsHtml = items.map(item => `
+                <div class="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0">
+                    <img src="${item.image || 'https://via.placeholder.com/50x50?text=?'}" class="w-12 h-12 object-contain rounded-lg bg-gray-50 flex-shrink-0" onerror="this.src='https://via.placeholder.com/50x50?text=?'">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-medium navy-text line-clamp-1">${escapeHtml(item.name)}</p>
+                        <p class="text-[10px] text-gray-500">৳${formatPrice(item.price)} × ${item.quantity}</p>
+                    </div>
+                    <p class="text-xs font-bold navy-text flex-shrink-0">৳${formatPrice((item.price || 0) * (item.quantity || 1))}</p>
+                </div>
+            `).join('');
+            document.getElementById('res-items').innerHTML = itemsHtml || '<p class="text-xs text-gray-400 text-center py-2">No items</p>';
+
+            document.getElementById('res-subtotal').textContent = '৳' + formatPrice(o.subtotal);
+            document.getElementById('res-delivery').textContent = Number(o.deliveryCharge) === 0 ? 'ফ্রি' : '৳' + formatPrice(o.deliveryCharge);
+            document.getElementById('res-total').textContent = '৳' + formatPrice(o.total);
+            document.getElementById('res-advance').textContent = '৳' + formatPrice(o.advancePaid);
+            document.getElementById('res-due').textContent = '৳' + formatPrice(o.dueAmount);
+            document.getElementById('res-method').textContent = o.paymentMethod === 'full-cod' ? 'Cash on Delivery' : 
+                                                                  o.paymentMethod === 'delivery-advance' ? 'Delivery Advance Paid' :
+                                                                  o.paymentMethod === 'full-online' ? 'Full Online Payment' : (o.paymentMethod || '-');
+
+            const callBtn = document.getElementById('call-help');
+            const waBtn = document.getElementById('wa-help');
+            if (settings.contactPhone) callBtn.href = `tel:${settings.contactPhone}`;
+            else callBtn.style.display = 'none';
+            if (settings.whatsapp) waBtn.href = `https://wa.me/${settings.whatsapp}?text=${encodeURIComponent('Order query: ' + (o.orderNumber || o.id))}`;
+            else waBtn.style.display = 'none';
+
+            document.getElementById('result').classList.remove('hidden');
+        }
+
+        async function init() {
+            if (db) {
+                try {
+                    const snap = await getDoc(doc(db, "settings", "main"));
+                    if (snap.exists()) {
+                        const s = snap.data();
+                        settings.whatsapp = s.whatsapp || '';
+                        settings.contactPhone = s.contactPhone || '';
+                    }
+                } catch (e) {}
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            const orderNum = params.get('order');
+            if (orderNum) {
+                document.getElementById('order-input').value = orderNum;
+                setTimeout(() => trackOrder(), 300);
+            }
+
+            document.getElementById('order-input').addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+
+            document.getElementById('order-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    trackOrder();
+                }
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
