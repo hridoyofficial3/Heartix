@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Contact Us - Heartix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>tailwind.config = { theme: { extend: { colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' } }, fontFamily: { 'display': ['Playfair Display', 'serif'] }}}}</script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #FBF8F3; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
+        .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
+        .gold-text { color: #D4A84B; }
+        .navy-text { color: #0A1628; }
+        .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); }
+        .premium-shadow { box-shadow: 0 4px 20px rgba(10,22,40,0.08); }
+        .contact-item { transition: all 0.2s; }
+        .contact-item:active { transform: scale(0.98); }
+    </style>
+</head>
+<body class="pb-6">
+
+    <header class="glass sticky top-0 z-30 px-3 py-0 flex justify-between items-center border-b border-gray-100">
+        <div class="flex items-center gap-1 flex-1 min-w-0">
+            <a href="index.html" class="w-8 h-8 flex items-center justify-center flex-shrink-0 -ml-1">
+                <i class="fas fa-arrow-left text-navy text-base"></i>
+            </a>
+            <img src="logo.png" alt="Heartix" class="h-14 object-contain" style="mix-blend-mode: multiply;">
+        </div>
+        <a href="cart.html" class="relative w-9 h-9 flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-shopping-bag text-navy text-lg"></i>
+            <span id="cart-count-header" class="absolute -top-1 -right-1 gold-gradient text-navy text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+        </a>
+    </header>
+
+    <div class="px-4 pt-4">
+        <div class="navy-gradient rounded-2xl p-6 text-center premium-shadow">
+            <i class="fas fa-headset text-gold text-3xl mb-2"></i>
+            <h1 class="font-display text-2xl text-white font-bold">Contact Us</h1>
+            <p class="text-white/60 text-xs mt-1">আমরা সাহায্য করতে প্রস্তুত</p>
+        </div>
+    </div>
+
+    <div class="p-4 max-w-2xl mx-auto space-y-4">
+
+        <div class="bg-white rounded-2xl premium-shadow p-5">
+            <h2 class="font-display text-base navy-text font-bold mb-3">যোগাযোগের মাধ্যম</h2>
+
+            <a id="phone-card" href="tel:+8801XXXXXXXXX" class="contact-item flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 border border-gray-100 mb-2">
+                <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-phone text-blue-600"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs text-gray-500">ফোন করুন</p>
+                    <p id="phone-text" class="font-semibold navy-text text-sm">+880 1XXX-XXXXXX</p>
+                </div>
+                <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+            </a>
+
+            <a id="wa-card" href="#" target="_blank" class="contact-item flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 border border-gray-100 mb-2">
+                <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
+                    <i class="fab fa-whatsapp text-green-600"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs text-gray-500">WhatsApp</p>
+                    <p id="wa-text" class="font-semibold navy-text text-sm">চ্যাট করুন</p>
+                </div>
+                <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+            </a>
+
+            <a id="email-card" href="mailto:info@heartix.com" class="contact-item flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 border border-gray-100 mb-2">
+                <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-envelope text-purple-600"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs text-gray-500">ইমেইল</p>
+                    <p id="email-text" class="font-semibold navy-text text-sm">info@heartix.com</p>
+                </div>
+                <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+            </a>
+        </div>
+
+        <div class="bg-white rounded-2xl premium-shadow p-5">
+            <h2 class="font-display text-base navy-text font-bold mb-3">অফিসের ঠিকানা</h2>
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-map-marker-alt text-orange-600"></i>
+                </div>
+                <div>
+                    <p class="text-sm navy-text font-medium" id="address-text">Dhaka, Bangladesh</p>
+                    <p class="text-xs text-gray-500 mt-1">সকাল ৯টা — রাত ৯টা (প্রতিদিন)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4">
+            <p class="text-xs text-blue-800 leading-relaxed">
+                <i class="fas fa-info-circle mr-1"></i> অর্ডার সংক্রান্ত যেকোনো সমস্যায় যোগাযোগের সময় আপনার <strong>অর্ডার নাম্বার</strong> বলুন। এতে দ্রুত সমাধান পাবেন।
+            </p>
+        </div>
+
+    </div>
+
+    <footer class="navy-gradient px-5 py-6 mt-6 text-center">
+        <p class="text-white/50 text-[10px]">© 2025 Heartix. All rights reserved.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
+            authDomain: "heartix.firebaseapp.com",
+            projectId: "heartix",
+            storageBucket: "heartix.firebasestorage.app",
+            messagingSenderId: "551204402338",
+            appId: "1:551204402338:web:169555975c0bbb97f113fb"
+        };
+
+        // Cart badge
+        try {
+            const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
+            const count = cart.reduce((s, i) => s + (i.quantity || 0), 0);
+            document.getElementById('cart-count-header').textContent = count;
+        } catch (e) {}
+
+        // Load settings from Firebase
+        try {
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            const snap = await getDoc(doc(db, "settings", "main"));
+            if (snap.exists()) {
+                const s = snap.data();
+                if (s.contactPhone) {
+                    document.getElementById('phone-text').textContent = s.contactPhone;
+                    document.getElementById('phone-card').href = 'tel:' + s.contactPhone;
+                }
+                if (s.whatsapp) {
+                    document.getElementById('wa-text').textContent = '+' + s.whatsapp;
+                    document.getElementById('wa-card').href = 'https://wa.me/' + s.whatsapp;
+                }
+                if (s.contactEmail) {
+                    document.getElementById('email-text').textContent = s.contactEmail;
+                    document.getElementById('email-card').href = 'mailto:' + s.contactEmail;
+                }
+                if (s.contactAddress) {
+                    document.getElementById('address-text').textContent = s.contactAddress;
+                }
+            }
+        } catch (e) { console.warn(e); }
+    </script>
+</body>
+</html>
