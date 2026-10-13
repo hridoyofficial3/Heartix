@@ -109,16 +109,28 @@
                 <div id="category-list-admin" class="space-y-3"><p class="text-center text-gray-400 py-8">Loading...</p></div>
             </div>
 
-            <!-- CONTENT (Sections + Banners + Testimonials) -->
+            <!-- CONTENT -->
             <div id="content-content" class="tab-content hidden">
                 <h2 class="text-xl font-bold navy-text mb-4">Homepage Content</h2>
+
+                <!-- HERO BANNERS -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <h3 class="font-bold navy-text text-base"><i class="fas fa-images gold-text mr-2"></i>Hero Banners (Top Slider)</h3>
+                            <p class="text-[11px] text-gray-500 mt-0.5">উপরে স্লাইডিং ব্যানার</p>
+                        </div>
+                        <button onclick="openHeroModal()" class="gold-bg text-navy px-3 py-1.5 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
+                    </div>
+                    <div id="hero-banners-list-admin" class="space-y-2"></div>
+                </div>
 
                 <!-- CUSTOM SECTIONS -->
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
                     <div class="flex justify-between items-center mb-3">
                         <div>
                             <h3 class="font-bold navy-text text-base"><i class="fas fa-layer-group gold-text mr-2"></i>Custom Sections</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5">যেমন: "All Natural Honey", "Premium Dates"</p>
+                            <p class="text-[11px] text-gray-500 mt-0.5">"All Natural Honey" এর মতো সেকশন</p>
                         </div>
                         <button onclick="openSectionModal()" class="gold-bg text-navy px-3 py-1.5 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
                     </div>
@@ -163,7 +175,7 @@
                 <div id="order-list-admin" class="space-y-3"><p class="text-center text-gray-400 py-8">Loading...</p></div>
             </div>
 
-            <!-- REVIEWS (product reviews) -->
+            <!-- REVIEWS -->
             <div id="content-reviews" class="tab-content hidden">
                 <h2 class="text-xl font-bold navy-text mb-4">Product Reviews</h2>
                 <div id="reviews-list-admin" class="space-y-3"><p class="text-center text-gray-400 py-8">Loading...</p></div>
@@ -182,14 +194,8 @@
                 </div>
 
                 <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <h3 class="font-bold navy-text mb-3">Hero Banner</h3>
-                    <input type="text" id="setting-hero-title" placeholder="Title" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                    <input type="text" id="setting-hero-subtitle" placeholder="Subtitle" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
-                </div>
-
-                <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
                     <h3 class="font-bold navy-text mb-3">Delivery</h3>
-                    <input type="number" id="setting-delivery-charge" placeholder="Charge ৳" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
+                    <input type="number" id="setting-delivery-charge" placeholder="Delivery Charge ৳" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
                     <input type="number" id="setting-free-delivery" placeholder="Free above ৳" class="w-full border rounded-lg px-3 py-2 mb-2 outline-none">
                 </div>
 
@@ -285,9 +291,8 @@
             </div>
             <div class="p-5 space-y-3">
                 <input type="hidden" id="edit-section-idx">
-                <input type="text" id="section-title-input" placeholder="Section Title (e.g. All Natural Honey) *" class="w-full border rounded-lg px-3 py-2 outline-none">
+                <input type="text" id="section-title-input" placeholder="Section Title *" class="w-full border rounded-lg px-3 py-2 outline-none">
                 <select id="section-category" class="w-full border rounded-lg px-3 py-2 outline-none"></select>
-                <p class="text-[11px] text-gray-500">এই সেকশনে নির্দিষ্ট ক্যাটেগরির প্রোডাক্টগুলো দেখাবে</p>
                 <button onclick="saveSection()" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Save Section</button>
             </div>
         </div>
@@ -349,6 +354,57 @@
         </div>
     </div>
 
+    <!-- HERO BANNER MODAL -->
+    <div id="hero-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="navy-bg p-4 rounded-t-2xl flex justify-between sticky top-0 z-10">
+                <h3 id="hero-modal-title" class="text-white font-bold">Add Hero Banner</h3>
+                <button onclick="closeHeroModal()" class="text-white/80"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-5 space-y-3">
+                <input type="hidden" id="edit-hero-idx">
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Badge (Top small text)</label>
+                    <input type="text" id="hero-badge" placeholder="✨ Premium / 🔥 Offer" class="w-full border rounded-lg px-3 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Title *</label>
+                    <input type="text" id="hero-title-input" placeholder="Smart Living Starts Here" class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <p class="text-[10px] text-gray-400 mt-0.5">লাইন ভাঙতে &lt;br&gt; ব্যবহার করুন</p>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Subtitle</label>
+                    <input type="text" id="hero-subtitle-input" placeholder="Premium appliances" class="w-full border rounded-lg px-3 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Background Color</label>
+                    <select id="hero-bg" class="w-full border rounded-lg px-3 py-2 outline-none">
+                        <option value="navy">Navy (Dark Blue)</option>
+                        <option value="gold">Gold (Yellow)</option>
+                        <option value="teal">Teal (Cyan)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Link (Optional)</label>
+                    <input type="text" id="hero-link" placeholder="https://..." class="w-full border rounded-lg px-3 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-semibold">Background Image (Optional - overrides color)</label>
+                    <div id="hero-image-preview" class="hidden mb-2"><img id="hero-preview-img" class="w-full h-24 object-cover rounded-lg border"></div>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
+                        <label for="hero-image-file" class="cursor-pointer block">
+                            <i class="fas fa-image text-2xl text-gray-400"></i>
+                            <p class="text-xs text-gray-500 mt-1">Click to upload banner image</p>
+                        </label>
+                        <input type="file" id="hero-image-file" accept="image/*" class="hidden">
+                        <p id="hero-file-name" class="text-xs text-green-600 mt-1"></p>
+                    </div>
+                </div>
+                <button onclick="saveHeroBanner()" id="hero-save-btn" class="w-full navy-bg text-white py-3 rounded-xl font-semibold">Save Banner</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -377,9 +433,10 @@
         let allOrdersList = [];
         let allReviewsList = [];
         let allCategories = [...DEFAULT_CATEGORIES];
-        let customSections = [];      // [{ title, categoryKey }]
-        let middleBanners = [];       // [{ image, link }]
-        let testimonials = [];        // [{ name, role, text, rating, image }]
+        let customSections = [];
+        let middleBanners = [];
+        let testimonials = [];
+        let heroBanners = [];
         let currentOrderFilter = 'all';
         let currentAdminPassword = DEFAULT_PASSWORD;
         let pendingImages = [];
@@ -388,6 +445,9 @@
         let existingCategoryImage = null;
         let pendingBannerImage = null;
         let pendingTestImage = null;
+        let pendingHeroImage = null;
+
+        function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
         async function loadAdminPassword() {
             try {
@@ -457,12 +517,11 @@
                 const snap = await getDoc(doc(db, "settings", "main"));
                 if (snap.exists()) {
                     const s = snap.data();
-                    if (s.categories && Array.isArray(s.categories) && s.categories.length > 0) {
-                        allCategories = s.categories;
-                    }
+                    if (s.categories && Array.isArray(s.categories) && s.categories.length > 0) allCategories = s.categories;
                     if (s.customSections) customSections = s.customSections;
                     if (s.middleBanners) middleBanners = s.middleBanners;
                     if (s.testimonials) testimonials = s.testimonials;
+                    if (s.heroBanners) heroBanners = s.heroBanners;
                 }
             } catch (e) {}
             renderAdminCategories();
@@ -470,6 +529,7 @@
             renderSectionsList();
             renderBannersList();
             renderTestimonialsList();
+            renderHeroBannersList();
         }
 
         function populateCategoryDropdown() {
@@ -478,8 +538,7 @@
                 sel.innerHTML = '';
                 allCategories.forEach(c => {
                     const opt = document.createElement('option');
-                    opt.value = c.key;
-                    opt.textContent = c.label;
+                    opt.value = c.key; opt.textContent = c.label;
                     sel.appendChild(opt);
                 });
             }
@@ -488,11 +547,129 @@
                 sel2.innerHTML = '';
                 allCategories.forEach(c => {
                     const opt = document.createElement('option');
-                    opt.value = c.key;
-                    opt.textContent = c.label;
+                    opt.value = c.key; opt.textContent = c.label;
                     sel2.appendChild(opt);
                 });
             }
+        }
+
+        // ========== HERO BANNERS ==========
+        function renderHeroBannersList() {
+            const list = document.getElementById('hero-banners-list-admin');
+            if (!list) return;
+            if (heroBanners.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">No hero banners yet</p>';
+                return;
+            }
+            let html = '';
+            heroBanners.forEach((b, i) => {
+                let bgStyle = '';
+                if (b.image) bgStyle = `background-image:url('${b.image}');background-size:cover;background-position:center;`;
+                else if (b.bg === 'gold') bgStyle = 'background:linear-gradient(135deg,#B8860B,#E8C77B);';
+                else if (b.bg === 'teal') bgStyle = 'background:linear-gradient(135deg,#0F4C5C,#2C8B9E);';
+                else bgStyle = 'background:linear-gradient(135deg,#0A1628,#152238);';
+                html += `
+                    <div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                        <div class="w-16 h-10 rounded-lg flex items-center justify-center text-[10px] font-bold text-white" style="${bgStyle}">
+                            ${!b.image ? (b.bg || 'navy').toUpperCase() : ''}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold navy-text truncate">${escapeHtml((b.title || '').replace(/<br>/g, ' '))}</p>
+                            <p class="text-[11px] text-gray-500 truncate">${escapeHtml(b.badge || '')}</p>
+                        </div>
+                        <button onclick="editHeroBanner(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-xs"></i></button>
+                        <button onclick="deleteHeroBanner(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
+                    </div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        window.openHeroModal = function() {
+            document.getElementById('hero-modal-title').innerText = 'Add Hero Banner';
+            document.getElementById('edit-hero-idx').value = '';
+            document.getElementById('hero-badge').value = '';
+            document.getElementById('hero-title-input').value = '';
+            document.getElementById('hero-subtitle-input').value = '';
+            document.getElementById('hero-bg').value = 'navy';
+            document.getElementById('hero-link').value = '';
+            document.getElementById('hero-image-file').value = '';
+            document.getElementById('hero-file-name').innerText = '';
+            document.getElementById('hero-image-preview').classList.add('hidden');
+            pendingHeroImage = null;
+            document.getElementById('hero-modal').classList.remove('hidden');
+        }
+        window.closeHeroModal = function() { document.getElementById('hero-modal').classList.add('hidden'); }
+
+        window.editHeroBanner = function(i) {
+            const b = heroBanners[i];
+            document.getElementById('hero-modal-title').innerText = 'Edit Hero Banner';
+            document.getElementById('edit-hero-idx').value = i;
+            document.getElementById('hero-badge').value = b.badge || '';
+            document.getElementById('hero-title-input').value = b.title || '';
+            document.getElementById('hero-subtitle-input').value = b.subtitle || '';
+            document.getElementById('hero-bg').value = b.bg || 'navy';
+            document.getElementById('hero-link').value = b.link || '';
+            document.getElementById('hero-image-file').value = '';
+            document.getElementById('hero-file-name').innerText = '';
+            pendingHeroImage = null;
+            if (b.image) {
+                document.getElementById('hero-preview-img').src = b.image;
+                document.getElementById('hero-image-preview').classList.remove('hidden');
+            } else {
+                document.getElementById('hero-image-preview').classList.add('hidden');
+            }
+            document.getElementById('hero-modal').classList.remove('hidden');
+        }
+
+        document.getElementById('hero-image-file').addEventListener('change', function(e) {
+            const f = e.target.files[0];
+            if (!f) return;
+            document.getElementById('hero-file-name').innerText = '✔ ' + f.name;
+            const reader = new FileReader();
+            reader.onload = evt => {
+                pendingHeroImage = { file: f, dataUrl: evt.target.result };
+                document.getElementById('hero-preview-img').src = evt.target.result;
+                document.getElementById('hero-image-preview').classList.remove('hidden');
+            };
+            reader.readAsDataURL(f);
+        });
+
+        window.saveHeroBanner = async function() {
+            const idx = document.getElementById('edit-hero-idx').value;
+            const badge = document.getElementById('hero-badge').value.trim();
+            const title = document.getElementById('hero-title-input').value.trim();
+            const subtitle = document.getElementById('hero-subtitle-input').value.trim();
+            const bg = document.getElementById('hero-bg').value;
+            const link = document.getElementById('hero-link').value.trim();
+            if (!title) return alert("Title required!");
+
+            const btn = document.getElementById('hero-save-btn');
+            btn.disabled = true; btn.innerText = 'Saving...';
+
+            try {
+                let image = null;
+                if (pendingHeroImage) {
+                    btn.innerText = 'Uploading...';
+                    image = await uploadToImgBB(pendingHeroImage.file);
+                } else if (idx !== '' && heroBanners[parseInt(idx)].image) {
+                    image = heroBanners[parseInt(idx)].image;
+                }
+                const b = { badge, title, subtitle, bg, link, image };
+                if (idx !== '') heroBanners[parseInt(idx)] = b;
+                else heroBanners.push(b);
+                await setDoc(doc(db, "settings", "main"), { heroBanners }, { merge: true });
+                closeHeroModal();
+                renderHeroBannersList();
+                alert("✅ Hero banner saved!");
+            } catch (e) { alert("Error: " + e.message); }
+            finally { btn.disabled = false; btn.innerText = 'Save Banner'; }
+        }
+
+        window.deleteHeroBanner = async function(i) {
+            if (!confirm("Delete this hero banner?")) return;
+            heroBanners.splice(i, 1);
+            await setDoc(doc(db, "settings", "main"), { heroBanners }, { merge: true });
+            renderHeroBannersList();
         }
 
         // ========== CATEGORIES ==========
@@ -511,8 +688,8 @@
                     <div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
                         <div class="cat-preview">${iconHtml}</div>
                         <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-sm navy-text truncate">${c.label}</p>
-                            <p class="text-xs text-gray-500">${c.key}</p>
+                            <p class="font-semibold text-sm navy-text truncate">${escapeHtml(c.label)}</p>
+                            <p class="text-xs text-gray-500">${escapeHtml(c.key)}</p>
                         </div>
                         <div class="flex flex-col gap-1">
                             <button onclick="editCategory(${i})" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-sm"></i></button>
@@ -634,8 +811,8 @@
                 html += `
                     <div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold navy-text">${s.title}</p>
-                            <p class="text-[11px] text-gray-500">Category: ${cat ? cat.label : s.categoryKey}</p>
+                            <p class="text-sm font-semibold navy-text">${escapeHtml(s.title)}</p>
+                            <p class="text-[11px] text-gray-500">Category: ${cat ? escapeHtml(cat.label) : escapeHtml(s.categoryKey)}</p>
                         </div>
                         <button onclick="editSection(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-xs"></i></button>
                         <button onclick="deleteSection(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
@@ -696,7 +873,7 @@
                     <div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
                         <img src="${b.image}" class="w-16 h-12 object-contain rounded">
                         <div class="flex-1 min-w-0">
-                            <p class="text-[11px] text-gray-500 truncate">${b.link || 'No link'}</p>
+                            <p class="text-[11px] text-gray-500 truncate">${escapeHtml(b.link || 'No link')}</p>
                         </div>
                         <button onclick="deleteBanner(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
                     </div>`;
@@ -763,7 +940,7 @@
                     <div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
                         ${t.image ? `<img src="${t.image}" class="w-10 h-10 rounded-full object-cover">` : `<div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center"><i class="fas fa-user text-gray-400"></i></div>`}
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold navy-text">${t.name}</p>
+                            <p class="text-sm font-semibold navy-text">${escapeHtml(t.name)}</p>
                             <p class="text-[11px] text-gray-500">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</p>
                         </div>
                         <button onclick="editTestimonial(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-xs"></i></button>
@@ -880,8 +1057,8 @@
                     <div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
                         <img src="${p.image}" class="w-16 h-16 object-contain bg-gray-50 rounded-lg">
                         <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-sm navy-text truncate">${p.name}</p>
-                            <p class="text-xs text-gray-500">${p.category || ''}${p.brand ? ' • ' + p.brand : ''}</p>
+                            <p class="font-semibold text-sm navy-text truncate">${escapeHtml(p.name)}</p>
+                            <p class="text-xs text-gray-500">${escapeHtml(p.category || '')}${p.brand ? ' • ' + escapeHtml(p.brand) : ''}</p>
                             <p class="text-sm font-bold gold-text">৳ ${p.price}</p>
                         </div>
                         <div class="flex flex-col gap-1">
@@ -1026,14 +1203,14 @@
             const colors = { 'pending': 'bg-yellow-100 text-yellow-700', 'confirmed': 'bg-blue-100 text-blue-700', 'shipped': 'bg-purple-100 text-purple-700', 'delivered': 'bg-green-100 text-green-700', 'cancelled': 'bg-red-100 text-red-700' };
             let html = '';
             filtered.forEach(o => {
-                const itemsHtml = o.items.map(i => `<li class="flex justify-between"><span>${i.name} × ${i.quantity}</span><span>৳ ${i.price * i.quantity}</span></li>`).join('');
+                const itemsHtml = o.items.map(i => `<li class="flex justify-between"><span>${escapeHtml(i.name)} × ${i.quantity}</span><span>৳ ${i.price * i.quantity}</span></li>`).join('');
                 html += `
                     <div class="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-gold">
                         <div class="flex justify-between items-start mb-2">
-                            <div><p class="font-bold navy-text text-sm">${o.orderNumber || o.id.slice(0,8)}</p><p class="text-xs text-gray-500">${o.customer.name} • ${o.customer.phone}</p></div>
+                            <div><p class="font-bold navy-text text-sm">${escapeHtml(o.orderNumber || o.id.slice(0,8))}</p><p class="text-xs text-gray-500">${escapeHtml(o.customer.name)} • ${escapeHtml(o.customer.phone)}</p></div>
                             <span class="text-[10px] px-2 py-1 rounded-full font-bold uppercase ${colors[o.status] || 'bg-gray-100'}">${o.status}</span>
                         </div>
-                        <p class="text-xs text-gray-600 mb-2">${o.customer.address}, ${o.customer.thana}, ${o.customer.district}</p>
+                        <p class="text-xs text-gray-600 mb-2">${escapeHtml(o.customer.address)}, ${escapeHtml(o.customer.thana)}, ${escapeHtml(o.customer.district)}</p>
                         <div class="bg-gray-50 rounded-lg p-2 mb-2"><ul class="text-xs text-gray-700 space-y-1">${itemsHtml}</ul></div>
                         <div class="grid grid-cols-3 gap-2 text-center mb-2">
                             <div class="bg-gray-50 rounded-lg p-2"><p class="text-[9px] text-gray-500">TOTAL</p><p class="text-sm font-bold">৳${o.total}</p></div>
@@ -1081,10 +1258,10 @@
                 const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
                 html += `<div class="bg-white rounded-xl p-3 shadow-sm">
                     <div class="flex justify-between items-center mb-1">
-                        <p class="font-semibold navy-text text-sm">${r.name}</p>
+                        <p class="font-semibold navy-text text-sm">${escapeHtml(r.name)}</p>
                         <span class="text-yellow-500 text-sm">${stars}</span>
                     </div>
-                    <p class="text-xs text-gray-600 mb-2">${r.text}</p>
+                    <p class="text-xs text-gray-600 mb-2">${escapeHtml(r.text)}</p>
                     <button onclick="deleteReview('${r.id}')" class="text-red-500 text-xs"><i class="fas fa-trash"></i> Delete</button>
                 </div>`;
             });
@@ -1110,8 +1287,6 @@
                 const snap = await getDoc(doc(db, "settings", "main"));
                 if (snap.exists()) {
                     const s = snap.data();
-                    document.getElementById('setting-hero-title').value = s.heroTitle || '';
-                    document.getElementById('setting-hero-subtitle').value = s.heroSubtitle || '';
                     document.getElementById('setting-delivery-charge').value = s.deliveryCharge || 100;
                     document.getElementById('setting-free-delivery').value = s.freeDeliveryAbove || '';
                     document.getElementById('setting-address').value = s.contactAddress || '';
@@ -1126,8 +1301,6 @@
 
         window.saveSettings = async function() {
             const settings = {
-                heroTitle: document.getElementById('setting-hero-title').value,
-                heroSubtitle: document.getElementById('setting-hero-subtitle').value,
                 deliveryCharge: parseFloat(document.getElementById('setting-delivery-charge').value) || 100,
                 freeDeliveryAbove: parseFloat(document.getElementById('setting-free-delivery').value) || 0,
                 contactAddress: document.getElementById('setting-address').value,
