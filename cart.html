@@ -32,11 +32,10 @@
         .toast-bar.error { background: linear-gradient(135deg, #dc2626, #ef4444); }
         .toast-bar.warn { background: linear-gradient(135deg, #ea580c, #f97316); }
         @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-        .qty-control { display: flex; align-items: center; background: #0A1628; border-radius: 9px; overflow: hidden; height: 34px; }
-        .qty-control button { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; user-select: none; }
-        .qty-control button:active { background: rgba(255,255,255,0.15); }
-        .qty-control .qty-num { color: white; font-weight: 700; min-width: 34px; text-align: center; font-size: 13px; }
         .prod-img { object-fit: contain; background: #f9fafb; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin 1s linear infinite; }
+        .coupon-input:focus { border-color: #D4A84B !important; box-shadow: 0 0 0 3px rgba(212,168,75,0.12); }
     </style>
 </head>
 <body class="pb-24">
@@ -49,12 +48,13 @@
             <i class="fas fa-arrow-left text-navy text-lg"></i>
         </a>
         <h1 class="font-display text-xl navy-text font-bold">Shopping Cart</h1>
-        <div class="w-10"></div>
+        <button id="clear-cart-btn" onclick="clearCart()" class="hidden w-10 h-10 items-center justify-center rounded-full hover:bg-red-50 text-red-500" title="Clear cart">
+            <i class="fas fa-trash-alt text-base"></i>
+        </button>
     </header>
 
-    <!-- MAIN -->
     <div class="p-4 max-w-2xl mx-auto">
-        <!-- LOADING SKELETON -->
+        <!-- SKELETON -->
         <div id="loading-skeleton" class="space-y-3">
             <div class="bg-white rounded-2xl p-4 premium-shadow">
                 <div class="flex gap-3">
@@ -78,6 +78,16 @@
             </div>
         </div>
 
+        <!-- ERROR STATE -->
+        <div id="error-state" class="hidden bg-white rounded-2xl p-8 text-center premium-shadow">
+            <i class="fas fa-exclamation-triangle text-5xl text-yellow-400 mb-3"></i>
+            <p class="text-gray-600 font-semibold mb-2">লোড করা যায়নি</p>
+            <p class="text-xs text-gray-400 mb-4">ইন্টারনেট সংযোগ চেক করুন</p>
+            <button onclick="location.reload()" class="navy-gradient text-white px-5 py-2.5 rounded-xl text-xs font-semibold">
+                <i class="fas fa-redo mr-1"></i> আবার চেষ্টা করুন
+            </button>
+        </div>
+
         <!-- CART ITEMS -->
         <div id="cart-items" class="space-y-3 hidden"></div>
 
@@ -95,9 +105,40 @@
         <div id="cart-summary" class="hidden bg-white rounded-2xl premium-shadow p-5 mt-6">
             <h3 class="font-display text-lg navy-text font-bold mb-4 pb-3 border-b border-gray-100">Order Summary</h3>
 
+            <!-- COUPON INPUT -->
+            <div id="coupon-block" class="mb-4">
+                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">
+                    <i class="fas fa-ticket-alt gold-text mr-1"></i>Have a coupon?
+                </label>
+                <div id="coupon-input-wrap" class="flex gap-2">
+                    <input type="text" id="coupon-input" placeholder="Enter code" maxlength="20" class="coupon-input flex-1 border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-bold uppercase tracking-wider">
+                    <button onclick="applyCoupon()" id="coupon-apply-btn" class="navy-gradient text-white px-5 py-3 rounded-xl text-xs font-bold whitespace-nowrap">
+                        Apply
+                    </button>
+                </div>
+                <div id="coupon-applied" class="hidden flex items-center justify-between bg-green-50 border border-green-200 rounded-xl p-3 mt-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i class="fas fa-check-circle text-green-600"></i>
+                        <div class="min-w-0">
+                            <p id="coupon-applied-code" class="text-xs font-bold text-green-700"></p>
+                            <p id="coupon-applied-desc" class="text-[10px] text-green-600 truncate"></p>
+                        </div>
+                    </div>
+                    <button onclick="removeCoupon()" class="text-red-500 text-xs font-bold ml-2 flex-shrink-0">
+                        <i class="fas fa-times-circle"></i> Remove
+                    </button>
+                </div>
+                <p id="coupon-error" class="hidden text-red-500 text-xs mt-2"></p>
+            </div>
+
             <div class="flex justify-between mb-3 text-sm">
-                <span class="text-gray-600">Subtotal</span>
+                <span class="text-gray-600">Subtotal (<span id="cart-count-summary">0</span> items)</span>
                 <span id="subtotal" class="font-semibold navy-text">৳ 0</span>
+            </div>
+
+            <div id="discount-row" class="hidden flex justify-between mb-3 text-sm">
+                <span class="text-green-600">Discount</span>
+                <span id="discount-amount" class="font-semibold text-green-600">-৳ 0</span>
             </div>
 
             <div class="flex justify-between mb-3 text-sm">
@@ -113,14 +154,18 @@
                 <i class="fas fa-info-circle mr-1"></i> <span id="free-delivery-hint-text"></span>
             </div>
 
+            <div id="stock-warning-box" class="hidden bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded-lg mb-3">
+                <i class="fas fa-exclamation-triangle mr-1"></i> <span id="stock-warning-text"></span>
+            </div>
+
             <div class="border-t border-gray-100 pt-3 mt-3 flex justify-between items-baseline">
                 <span class="font-bold navy-text">Total</span>
                 <span id="total" class="font-display text-2xl font-bold navy-text">৳ 0</span>
             </div>
 
-            <a href="checkout.html" class="block w-full navy-gradient text-white text-center py-3.5 rounded-xl mt-5 font-semibold text-sm">
+            <button id="checkout-btn" onclick="proceedToCheckout()" class="block w-full navy-gradient text-white text-center py-3.5 rounded-xl mt-5 font-semibold text-sm">
                 <i class="fas fa-arrow-right mr-2"></i> Proceed to Checkout
-            </a>
+            </button>
 
             <a href="index.html" class="block w-full text-center text-gray-500 text-xs mt-3 py-2">
                 <i class="fas fa-plus mr-1"></i> আরও শপিং করুন
@@ -141,18 +186,20 @@
             appId: "1:551204402338:web:169555975c0bbb97f113fb"
         };
 
-        let app, db;
+        let db = null;
         try {
-            app = initializeApp(firebaseConfig);
+            const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
         } catch (e) { console.error('Firebase init:', e); }
 
-        // ============ STATE ============
         let settings = { deliveryCharge: 100, freeDeliveryAbove: 0 };
         let allProductsMap = {};
         let isLoading = true;
+        let loadFailed = false;
 
-        // ============ UTILS ============
+        // Coupon state (stored in localStorage so checkout can use it)
+        let appliedCoupon = null;
+
         function showToast(msg, type = 'success') {
             const c = document.getElementById('toast-container');
             if (!c) return;
@@ -167,6 +214,7 @@
                 setTimeout(() => t.remove(), 300);
             }, 2500);
         }
+        window.showToast = showToast;
 
         function escapeHtml(t) {
             if (t === null || t === undefined) return '';
@@ -174,33 +222,51 @@
             d.textContent = String(t);
             return d.innerHTML;
         }
-
         function formatPrice(n) { return Number(n || 0).toLocaleString('en-IN'); }
 
         function getCart() {
-            try { return JSON.parse(localStorage.getItem('heartix_cart') || '[]'); }
-            catch (e) { return []; }
+            try {
+                const raw = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
+                if (!Array.isArray(raw)) return [];
+                return raw.filter(i => i && typeof i === 'object' && i.id && (Number(i.quantity) || 0) > 0);
+            } catch (e) { return []; }
         }
-        function saveCart(c) { localStorage.setItem('heartix_cart', JSON.stringify(c)); }
+        function saveCart(c) {
+            try { localStorage.setItem('heartix_cart', JSON.stringify(c)); } catch (e) {}
+        }
+
+        function getWishlist() {
+            try { const w = JSON.parse(localStorage.getItem('heartix_wishlist') || '[]'); return Array.isArray(w) ? w : []; } catch (e) { return []; }
+        }
+        function saveWishlist(w) {
+            try { localStorage.setItem('heartix_wishlist', JSON.stringify(w)); } catch (e) {}
+        }
 
         function getStock(productId) {
             const p = allProductsMap[productId];
-            return p && p.stock !== undefined ? p.stock : 999;
+            if (!p) return null;
+            return p.stock !== undefined ? Number(p.stock) : 999;
         }
+
+        // Load saved coupon from localStorage (if exists)
+        try {
+            const saved = JSON.parse(localStorage.getItem('heartix_coupon') || 'null');
+            if (saved && saved.code) appliedCoupon = saved;
+        } catch (e) {}
 
         // ============ LOAD DATA ============
         async function loadData() {
             if (!db) {
                 isLoading = false;
+                loadFailed = true;
                 renderCart();
                 return;
             }
             try {
-                const promises = [
-                    getDoc(doc(db, "settings", "main")).catch(e => { console.warn('Settings:', e); return null; }),
-                    getDocs(collection(db, "products")).catch(e => { console.warn('Products:', e); return null; })
-                ];
-                const [setSnap, prodSnap] = await Promise.all(promises);
+                const [setSnap, prodSnap] = await Promise.all([
+                    getDoc(doc(db, "settings", "main")).catch(() => null),
+                    getDocs(collection(db, "products")).catch(() => null)
+                ]);
 
                 if (setSnap && setSnap.exists()) {
                     const s = setSnap.data();
@@ -215,45 +281,53 @@
                 }
             } catch (e) {
                 console.error('Load error:', e);
+                loadFailed = true;
             }
             isLoading = false;
             renderCart();
         }
 
-        // ============ RENDER CART ============
+        // ============ RENDER ============
         function renderCart() {
             const skeleton = document.getElementById('loading-skeleton');
+            const errorState = document.getElementById('error-state');
             const cartItemsDiv = document.getElementById('cart-items');
             const emptyCart = document.getElementById('empty-cart');
             const cartSummary = document.getElementById('cart-summary');
-
-            if (isLoading) {
-                skeleton.classList.remove('hidden');
-                cartItemsDiv.classList.add('hidden');
-                emptyCart.classList.add('hidden');
-                cartSummary.classList.add('hidden');
-                return;
-            }
+            const clearBtn = document.getElementById('clear-cart-btn');
 
             skeleton.classList.add('hidden');
 
+            if (loadFailed) {
+                errorState.classList.remove('hidden');
+                cartItemsDiv.classList.add('hidden');
+                emptyCart.classList.add('hidden');
+                cartSummary.classList.add('hidden');
+                clearBtn.classList.remove('flex'); clearBtn.classList.add('hidden');
+                return;
+            }
+            errorState.classList.add('hidden');
+
             const cart = getCart();
 
-            // Empty cart
             if (cart.length === 0) {
                 cartItemsDiv.innerHTML = '';
                 cartItemsDiv.classList.add('hidden');
                 emptyCart.classList.remove('hidden');
                 cartSummary.classList.add('hidden');
+                clearBtn.classList.remove('flex'); clearBtn.classList.add('hidden');
                 return;
             }
 
             emptyCart.classList.add('hidden');
             cartItemsDiv.classList.remove('hidden');
             cartSummary.classList.remove('hidden');
+            clearBtn.classList.remove('hidden'); clearBtn.classList.add('flex');
 
             let html = '';
             let subtotal = 0;
+            let hasStockIssue = false;
+            let hasMissingProduct = false;
 
             cart.forEach((item, index) => {
                 const stock = getStock(item.id);
@@ -262,26 +336,37 @@
                 const lineTotal = price * qty;
                 subtotal += lineTotal;
 
-                const stockWarning = (stock !== 999 && qty > stock)
-                    ? `<p class="text-[10px] text-red-500 mt-1"><i class="fas fa-exclamation-triangle"></i> স্টকে মাত্র ${stock} টি আছে</p>`
-                    : '';
+                const productMissing = stock === null;
+                const notEnoughStock = !productMissing && stock !== 999 && qty > stock;
+                if (productMissing) hasMissingProduct = true;
+                if (notEnoughStock) hasStockIssue = true;
+
+                let warning = '';
+                if (productMissing) {
+                    warning = `<p class="text-[10px] text-red-600 mt-1 font-semibold"><i class="fas fa-exclamation-circle"></i> প্রোডাক্টটি আর পাওয়া যাচ্ছে না</p>`;
+                } else if (notEnoughStock) {
+                    warning = `<p class="text-[10px] text-red-500 mt-1"><i class="fas fa-exclamation-triangle"></i> স্টকে মাত্র ${stock} টি আছে</p>`;
+                }
 
                 html += `
-                    <div class="bg-white rounded-2xl premium-shadow p-3 flex items-center gap-3">
+                    <div class="bg-white rounded-2xl premium-shadow p-3 flex items-center gap-3 ${productMissing ? 'opacity-60' : ''}">
                         <img src="${item.image || 'https://via.placeholder.com/100x100?text=?'}" alt="${escapeHtml(item.name)}" class="w-20 h-20 object-contain rounded-xl bg-gray-50 flex-shrink-0" onerror="this.src='https://via.placeholder.com/100x100?text=?'">
                         <div class="flex-1 min-w-0">
                             <h4 class="text-sm font-semibold navy-text line-clamp-2 mb-1">${escapeHtml(item.name)}</h4>
                             <p class="font-display text-base font-bold navy-text mb-2">৳ ${formatPrice(price)}</p>
-                            ${stockWarning}
-                            <div class="flex items-center gap-2 mt-1">
+                            ${warning}
+                            <div class="flex items-center gap-2 mt-1 flex-wrap">
                                 <button onclick="changeQty(${index}, -1)" class="w-8 h-8 bg-cream rounded-lg flex items-center justify-center text-navy font-bold text-lg">−</button>
                                 <span class="font-semibold text-sm w-8 text-center navy-text">${qty}</span>
-                                <button onclick="changeQty(${index}, 1)" class="w-8 h-8 bg-cream rounded-lg flex items-center justify-center text-navy font-bold text-lg">+</button>
+                                <button onclick="changeQty(${index}, 1)" class="w-8 h-8 bg-cream rounded-lg flex items-center justify-center text-navy font-bold text-lg ${(!productMissing && stock !== 999 && qty >= stock) ? 'opacity-40' : ''}" ${(!productMissing && stock !== 999 && qty >= stock) ? 'disabled' : ''}>+</button>
+                                <button onclick="moveToWishlist(${index})" class="ml-1 text-[10px] text-gray-500 font-semibold px-2 py-1 rounded-lg bg-gray-50 hover:bg-gray-100">
+                                    <i class="fas fa-heart text-red-400 mr-1"></i> Save
+                                </button>
                             </div>
                         </div>
                         <div class="text-right flex-shrink-0">
                             <p class="font-bold navy-text mb-2 text-sm">৳ ${formatPrice(lineTotal)}</p>
-                            <button onclick="removeItem(${index})" class="text-red-500 text-sm w-8 h-8 flex items-center justify-center ml-auto">
+                            <button onclick="removeItem(${index})" class="text-red-500 text-sm w-8 h-8 flex items-center justify-center ml-auto" aria-label="Remove">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -290,14 +375,45 @@
 
             cartItemsDiv.innerHTML = html;
 
-            // Delivery calculation
-            const isFreeDelivery = settings.freeDeliveryAbove > 0 && subtotal >= settings.freeDeliveryAbove;
+            document.getElementById('cart-count-summary').textContent = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
+
+            // Calculate discount
+            let discount = 0;
+            if (appliedCoupon && appliedCoupon.value > 0) {
+                if (appliedCoupon.type === 'percentage') {
+                    discount = Math.round((subtotal * appliedCoupon.value) / 100);
+                } else {
+                    discount = Math.min(appliedCoupon.value, subtotal);
+                }
+                // Min order check
+                if (appliedCoupon.minOrder > 0 && subtotal < appliedCoupon.minOrder) {
+                    discount = 0;
+                }
+            }
+            if (discount < 0) discount = 0;
+            if (discount > subtotal) discount = subtotal;
+
+            const afterDiscount = subtotal - discount;
+            const isFreeDelivery = settings.freeDeliveryAbove > 0 && afterDiscount >= settings.freeDeliveryAbove;
             const deliveryCharge = isFreeDelivery ? 0 : settings.deliveryCharge;
-            const total = subtotal + deliveryCharge;
+            const total = afterDiscount + deliveryCharge;
 
             document.getElementById('subtotal').innerText = '৳ ' + formatPrice(subtotal);
+
+            // Discount row
+            const discountRow = document.getElementById('discount-row');
+            if (discount > 0) {
+                discountRow.classList.remove('hidden');
+                document.getElementById('discount-amount').innerText = '-৳ ' + formatPrice(discount);
+            } else {
+                discountRow.classList.add('hidden');
+            }
+
             document.getElementById('delivery-charge').innerText = deliveryCharge === 0 ? 'ফ্রি' : '৳ ' + formatPrice(deliveryCharge);
             document.getElementById('total').innerText = '৳ ' + formatPrice(total);
+
+            // Coupon UI sync
+            updateCouponUI();
 
             // Free delivery note
             const freeNote = document.getElementById('free-delivery-note');
@@ -307,18 +423,155 @@
                 freeNote.classList.remove('hidden');
                 document.getElementById('free-delivery-amount').innerText = formatPrice(settings.freeDeliveryAbove);
                 freeHint.classList.add('hidden');
-            } else if (settings.freeDeliveryAbove > 0) {
-                const remaining = settings.freeDeliveryAbove - subtotal;
-                freeHint.classList.remove('hidden');
-                document.getElementById('free-delivery-hint-text').innerText = `আর ৳${formatPrice(remaining)} যোগ করলে ফ্রি ডেলিভারি পাবেন!`;
+            } else if (settings.freeDeliveryAbove > 0 && afterDiscount > 0) {
+                const remaining = settings.freeDeliveryAbove - afterDiscount;
+                if (remaining > 0) {
+                    freeHint.classList.remove('hidden');
+                    document.getElementById('free-delivery-hint-text').innerText = `আর ৳${formatPrice(remaining)} যোগ করলে ফ্রি ডেলিভারি পাবেন!`;
+                } else {
+                    freeHint.classList.add('hidden');
+                }
                 freeNote.classList.add('hidden');
             } else {
                 freeNote.classList.add('hidden');
                 freeHint.classList.add('hidden');
             }
+
+            // Stock warning
+            const stockWarnBox = document.getElementById('stock-warning-box');
+            const stockWarnText = document.getElementById('stock-warning-text');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            if (hasMissingProduct || hasStockIssue) {
+                stockWarnBox.classList.remove('hidden');
+                if (hasMissingProduct) stockWarnText.textContent = 'কিছু প্রোডাক্ট আর পাওয়া যাচ্ছে না। সেগুলো সরিয়ে ফেলুন।';
+                else stockWarnText.textContent = 'কিছু প্রোডাক্টের স্টক কম। পরিমাণ ঠিক করুন।';
+                checkoutBtn.disabled = true;
+                checkoutBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                stockWarnBox.classList.add('hidden');
+                checkoutBtn.disabled = false;
+                checkoutBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
         }
 
-        // ============ CART ACTIONS ============
+        // ============ COUPON ============
+        function updateCouponUI() {
+            const inputWrap = document.getElementById('coupon-input-wrap');
+            const appliedBox = document.getElementById('coupon-applied');
+            if (appliedCoupon && appliedCoupon.code) {
+                inputWrap.classList.add('hidden');
+                appliedBox.classList.remove('hidden');
+                document.getElementById('coupon-applied-code').textContent = appliedCoupon.code;
+                document.getElementById('coupon-applied-desc').textContent =
+                    appliedCoupon.type === 'percentage'
+                        ? `${appliedCoupon.value}% off`
+                        : `৳${appliedCoupon.value} off`;
+            } else {
+                inputWrap.classList.remove('hidden');
+                appliedBox.classList.add('hidden');
+            }
+            document.getElementById('coupon-error').classList.add('hidden');
+        }
+
+        window.applyCoupon = async function() {
+            const input = document.getElementById('coupon-input');
+            const code = (input.value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const errEl = document.getElementById('coupon-error');
+            errEl.classList.add('hidden');
+
+            if (!code) {
+                errEl.textContent = 'Coupon code দিন';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            if (!db) {
+                errEl.textContent = 'সার্ভার সংযোগ নেই';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            const btn = document.getElementById('coupon-apply-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner spin"></i>';
+
+            try {
+                const snap = await getDoc(doc(db, "coupons", code));
+                if (!snap.exists()) {
+                    errEl.textContent = 'এই coupon নেই';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+                const c = snap.data();
+                if (c.active === false) {
+                    errEl.textContent = 'Coupon টি active নেই';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+                if (c.expiry && new Date(c.expiry) < new Date()) {
+                    errEl.textContent = 'Coupon টি expired';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+                if (c.maxUses > 0 && (c.usedCount || 0) >= c.maxUses) {
+                    errEl.textContent = 'Coupon টি ব্যবহারের সীমা শেষ';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+
+                const cart = getCart();
+                const subtotal = cart.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0);
+                if (c.minOrder > 0 && subtotal < c.minOrder) {
+                    errEl.textContent = `এই coupon ব্যবহারে কমপক্ষে ৳${formatPrice(c.minOrder)} এর অর্ডার দরকার`;
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+
+                appliedCoupon = {
+                    code: snap.id,
+                    type: c.type || 'percentage',
+                    value: Number(c.value) || 0,
+                    minOrder: Number(c.minOrder) || 0
+                };
+                try { localStorage.setItem('heartix_coupon', JSON.stringify(appliedCoupon)); } catch (e) {}
+                showToast('Coupon applied!', 'success');
+                input.value = '';
+                renderCart();
+            } catch (e) {
+                console.error('Coupon error:', e);
+                errEl.textContent = 'Coupon check করা যায়নি';
+                errEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Apply';
+            }
+        }
+
+        window.removeCoupon = function() {
+            appliedCoupon = null;
+            try { localStorage.removeItem('heartix_coupon'); } catch (e) {}
+            document.getElementById('coupon-input').value = '';
+            showToast('Coupon removed', 'warn');
+            renderCart();
+        }
+
+        // ============ ACTIONS ============
+        window.proceedToCheckout = function() {
+            const cart = getCart();
+            for (const item of cart) {
+                const stock = getStock(item.id);
+                if (stock === null) {
+                    showToast('কিছু প্রোডাক্ট আর নেই, কার্ট রিফ্রেশ করুন', 'error');
+                    return;
+                }
+                if (stock !== 999 && item.quantity > stock) {
+                    showToast(`"${item.name}" স্টকে মাত্র ${stock} টি`, 'error');
+                    return;
+                }
+            }
+            window.location.href = 'checkout.html';
+        }
+
         window.changeQty = function(index, change) {
             let cart = getCart();
             if (!cart[index]) return;
@@ -327,9 +580,8 @@
             const stock = getStock(productId);
             const newQty = (Number(cart[index].quantity) || 0) + change;
 
-            // Remove if <= 0
             if (newQty <= 0) {
-                const name = cart[index].name;
+                const name = cart[index].name || '';
                 cart.splice(index, 1);
                 saveCart(cart);
                 renderCart();
@@ -337,8 +589,7 @@
                 return;
             }
 
-            // Stock check
-            if (stock !== 999 && newQty > stock) {
+            if (stock !== null && stock !== 999 && newQty > stock) {
                 showToast(`স্টকে মাত্র ${stock} টি আছে`, 'error');
                 return;
             }
@@ -346,7 +597,7 @@
             cart[index].quantity = newQty;
             saveCart(cart);
             renderCart();
-        }
+        };
 
         window.removeItem = function(index) {
             let cart = getCart();
@@ -356,9 +607,35 @@
             saveCart(cart);
             renderCart();
             showToast(name.substring(0, 30) + ' সরানো হয়েছে', 'warn');
-        }
+        };
 
-        // ============ INIT ============
+        window.clearCart = function() {
+            const cart = getCart();
+            if (cart.length === 0) return;
+            if (!confirm('আপনি কি পুরো কার্ট খালি করতে চান?')) return;
+            saveCart([]);
+            try { localStorage.removeItem('heartix_coupon'); } catch (e) {}
+            appliedCoupon = null;
+            renderCart();
+            showToast('কার্ট খালি করা হয়েছে', 'warn');
+        };
+
+        // ⚡ NEW: Save for later (moves item to wishlist)
+        window.moveToWishlist = function(index) {
+            let cart = getCart();
+            if (!cart[index]) return;
+            const item = cart[index];
+            let wl = getWishlist();
+            if (!wl.includes(item.id)) {
+                wl.push(item.id);
+                saveWishlist(wl);
+            }
+            cart.splice(index, 1);
+            saveCart(cart);
+            renderCart();
+            showToast('Wishlist-এ সরানো হয়েছে', 'success');
+        };
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', loadData);
         } else {
