@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     
-    <!-- IMMEDIATE CART RESTORE (before page renders) -->
     <script>
         (function() {
             try {
@@ -79,57 +78,148 @@
 
     <div id="overlay" onclick="closeSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden"></div>
 
-    <!-- SIDEBAR -->
-    <div id="sidebar" class="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl overflow-y-auto" style="transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);">
-        <div class="navy-gradient p-6 text-white">
-            <div class="flex justify-between items-center mb-4">
-                <div class="bg-white rounded-xl p-2"><img src="logo.png" alt="Heartix" class="h-8"></div>
-                <button onclick="closeSidebar()" class="text-white/80 text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10"><i class="fas fa-times"></i></button>
+    <!-- ============ PREMIUM SIDEBAR ============ -->
+    <div id="sidebar" class="fixed top-0 left-0 h-full w-[85vw] max-w-[340px] bg-white z-50 shadow-2xl overflow-y-auto hide-scrollbar" style="transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);">
+        
+        <!-- HEADER -->
+        <div class="navy-gradient px-5 py-5 text-white relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 bg-[#D4A84B]/10 rounded-full -ml-12 -mb-12"></div>
+            
+            <div class="relative">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="bg-white rounded-xl p-1.5 shadow-sm">
+                        <img src="logo.png" alt="Heartix" class="h-7 object-contain">
+                    </div>
+                    <button onclick="closeSidebar()" class="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition">
+                        <i class="fas fa-times text-white text-sm"></i>
+                    </button>
+                </div>
+
+                <p class="text-[10px] text-[#D4A84B] tracking-[0.2em] uppercase font-bold mb-1">Welcome to</p>
+                <p class="font-display text-3xl font-bold leading-none mb-1">Heartix</p>
+                <p class="text-[11px] text-white/50">Premium Smart Appliances</p>
             </div>
-            <p class="text-xs text-gold tracking-widest uppercase">Welcome</p>
-            <p class="font-display text-2xl font-bold">Heartix</p>
-            <p class="text-xs text-white/60 mt-1">Premium Smart Appliances</p>
         </div>
-        <nav class="p-5">
-            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-3">Browse</p>
-            <a href="#" onclick="filterByCategory('all'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
-                <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center text-lg">🛍️</span>
-                <span class="font-medium text-navy">All Products</span>
+
+        <!-- SIGN IN CARD -->
+        <div class="px-4 pt-4">
+            <a href="#" onclick="showToast('কাস্টমার লগইন শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 bg-gradient-to-r from-[#FBF8F3] to-[#F5EEDF] border border-[#D4A84B]/20 rounded-2xl p-3 active:scale-[0.98] transition">
+                <div class="w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-user text-[#0A1628] text-base"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-[#0A1628] text-sm">Hello, Guest!</p>
+                    <p class="text-[11px] text-gray-500">Sign in to your account</p>
+                </div>
+                <i class="fas fa-chevron-right text-[#D4A84B] text-xs"></i>
             </a>
-            <div id="sidebar-categories"></div>
-            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-6 mb-3">Quick Links</p>
-            <a href="cart.html" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
-                <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-shopping-bag text-navy"></i></span>
-                <span class="font-medium text-navy">My Cart</span>
-            </a>
-            <a href="track-order.html" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
-                <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-truck text-navy"></i></span>
-                <span class="font-medium text-navy">Track Order</span>
-            </a>
-            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-6 mb-3">Support</p>
-            <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
-                <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-headset text-navy"></i></span>
-                <span class="font-medium text-navy">Contact Us</span>
-            </a>
-            <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
-                <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-info-circle text-navy"></i></span>
-                <span class="font-medium text-navy">About Heartix</span>
-            </a>
-            <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
-                <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-question-circle text-navy"></i></span>
-                <span class="font-medium text-navy">FAQ</span>
-            </a>
-            <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
-                <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-undo text-navy"></i></span>
-                <span class="font-medium text-navy">Return Policy</span>
-            </a>
-        </nav>
+        </div>
+
+        <!-- BROWSE -->
+        <div class="px-4 mt-5">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="w-1 h-3.5 bg-[#D4A84B] rounded-full"></span>
+                <p class="text-[10px] font-bold text-[#0A1628] tracking-[0.15em] uppercase">Browse</p>
+            </div>
+            
+            <div class="space-y-0.5">
+                <a href="#" onclick="filterByCategory('all'); closeSidebar(); return false;" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
+                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center text-base flex-shrink-0 transition">🛍️</span>
+                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">All Products</span>
+                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
+                </a>
+                <div id="sidebar-categories"></div>
+            </div>
+        </div>
+
+        <!-- QUICK LINKS -->
+        <div class="px-4 mt-5">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="w-1 h-3.5 bg-[#D4A84B] rounded-full"></span>
+                <p class="text-[10px] font-bold text-[#0A1628] tracking-[0.15em] uppercase">Quick Links</p>
+            </div>
+            
+            <div class="space-y-0.5">
+                <a href="cart.html" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
+                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition">
+                        <i class="fas fa-shopping-bag text-[#0A1628] text-sm"></i>
+                    </span>
+                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">My Cart</span>
+                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
+                </a>
+                <a href="track-order.html" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
+                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition">
+                        <i class="fas fa-truck-fast text-[#0A1628] text-sm"></i>
+                    </span>
+                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">Track Order</span>
+                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- SUPPORT -->
+        <div class="px-4 mt-5 mb-4">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="w-1 h-3.5 bg-[#D4A84B] rounded-full"></span>
+                <p class="text-[10px] font-bold text-[#0A1628] tracking-[0.15em] uppercase">Support</p>
+            </div>
+            
+            <div class="space-y-0.5">
+                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
+                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition">
+                        <i class="fas fa-headset text-[#0A1628] text-sm"></i>
+                    </span>
+                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">Contact Us</span>
+                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
+                </a>
+                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
+                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition">
+                        <i class="fas fa-circle-info text-[#0A1628] text-sm"></i>
+                    </span>
+                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">About Heartix</span>
+                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
+                </a>
+                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
+                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition">
+                        <i class="fas fa-circle-question text-[#0A1628] text-sm"></i>
+                    </span>
+                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">FAQ</span>
+                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
+                </a>
+                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
+                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition">
+                        <i class="fas fa-arrow-rotate-left text-[#0A1628] text-sm"></i>
+                    </span>
+                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">Return Policy</span>
+                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- PREMIUM BADGE -->
+        <div class="px-4 pb-5">
+            <div class="navy-gradient rounded-2xl p-4 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-[#D4A84B]/20 rounded-full -mr-10 -mt-10"></div>
+                <div class="relative flex items-center gap-3">
+                    <div class="w-10 h-10 gold-gradient rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-crown text-[#0A1628] text-base"></i>
+                    </div>
+                    <div>
+                        <p class="text-white text-xs font-bold leading-none mb-1">Premium Service</p>
+                        <p class="text-white/60 text-[10px] leading-none">100% Authentic Products</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- HEADER -->
     <header class="glass sticky top-0 z-30 px-3 py-0 flex justify-between items-center border-b border-gray-100">
         <div class="flex items-center gap-1 flex-1 min-w-0">
-            <button onclick="openSidebar()" class="w-8 h-8 flex items-center justify-center flex-shrink-0 -ml-1"><i class="fas fa-bars text-navy text-base"></i></button>
+            <button onclick="openSidebar()" class="w-8 h-8 flex items-center justify-center flex-shrink-0 -ml-1">
+                <i class="fas fa-bars text-navy text-base"></i>
+            </button>
             <img src="logo.png" alt="Heartix" class="h-14 object-contain" style="mix-blend-mode: multiply;">
         </div>
         <a href="cart.html" class="relative w-9 h-9 flex items-center justify-center flex-shrink-0">
@@ -143,18 +233,18 @@
         <div class="relative pt-3 pb-1">
             <input type="text" id="search-input" oninput="searchProducts()" placeholder="Search products..." class="w-full bg-white rounded-2xl py-3.5 pl-12 pr-12 outline-none premium-shadow text-sm">
             <i class="fas fa-search absolute left-4 top-7 text-gold"></i>
-            <button onclick="closeSearch()" class="absolute right-4 top-7 text-gray-400 w-6 h-6 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            <button onclick="closeSearch()" class="absolute right-4 top-7 text-gray-400 w-6 h-6 flex items-center justify-center">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
     </div>
 
-    <!-- HERO SLIDER (with LOADING SKELETON) -->
+    <!-- HERO SLIDER -->
     <div class="px-5 pt-3">
         <div class="slider-viewport">
-            <!-- Skeleton (shown until hero loads) -->
-            <div id="slider-skeleton" class="absolute inset-0 z-20 p-0">
+            <div id="slider-skeleton" class="absolute inset-0 z-20">
                 <div class="w-full h-full shimmer rounded-3xl"></div>
             </div>
-            <!-- Track (hidden until loaded) -->
             <div id="slider-track" class="slider-track opacity-0 transition-opacity duration-300"></div>
         </div>
         <div id="slider-dots" class="flex justify-center gap-1.5 mt-3"></div>
@@ -164,7 +254,6 @@
     <div class="mt-7">
         <h3 class="section-title px-5">Featured Categories</h3>
         <div id="category-scroll-container" class="flex overflow-x-auto hide-scrollbar gap-1.5 pb-2 px-5">
-            <!-- Default skeleton (will be replaced by JS) -->
             <div class="flex flex-col items-center" style="min-width:78px; flex-shrink:0;">
                 <div class="category-card"><div class="shimmer w-12 h-12 rounded-lg"></div></div>
                 <div class="shimmer h-3 w-12 rounded mt-2"></div>
@@ -188,7 +277,6 @@
     <div class="mt-8 px-5">
         <h3 id="section-title" class="section-title">Top Selling Products</h3>
         <div id="product-list" class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <!-- Default skeleton (will be replaced by JS) -->
             <div class="bg-white rounded-2xl p-2.5 premium-shadow">
                 <div class="w-full h-28 shimmer rounded-lg mb-2"></div>
                 <div class="h-3.5 w-3/4 shimmer rounded mb-2"></div>
@@ -305,12 +393,14 @@
         </div>
     </nav>
 
-    <!-- IMMEDIATE CART BADGE RESTORE (inline, before module) -->
+    <!-- IMMEDIATE CART BADGE RESTORE -->
     <script>
         (function() {
             const count = window.__cartCount || 0;
-            document.getElementById('cart-count-header').textContent = count;
-            document.getElementById('cart-count-bottom').textContent = count;
+            const h = document.getElementById('cart-count-header');
+            const b = document.getElementById('cart-count-bottom');
+            if (h) h.textContent = count;
+            if (b) b.textContent = count;
         })();
     </script>
 
@@ -459,7 +549,7 @@
             }
         }
 
-        // ============ HERO SLIDER (No Flash) ============
+        // ============ HERO SLIDER ============
         let slideIndex = 0, totalSlides = 0, heroTimer = null;
 
         function getDefaultHeroBanners() {
@@ -511,10 +601,11 @@
 
             slideIndex = 0; updateSlide();
 
-            // Reveal slider (fade in)
-            skeleton.style.transition = 'opacity 0.3s';
-            skeleton.style.opacity = '0';
-            setTimeout(() => { skeleton.style.display = 'none'; }, 300);
+            if (skeleton) {
+                skeleton.style.transition = 'opacity 0.3s';
+                skeleton.style.opacity = '0';
+                setTimeout(() => { skeleton.style.display = 'none'; }, 300);
+            }
             track.classList.remove('opacity-0');
 
             if (heroTimer) clearInterval(heroTimer);
@@ -566,9 +657,10 @@
                     <span class="text-[11px] mt-1.5 text-navy text-center font-medium" style="max-width:78px;line-height:1.2;">${escapeHtml(c.label)}</span>
                 </div>`;
                 const sideIcon = isImg ? '📦' : (c.icon || '📦');
-                sideHtml += `<a href="#" onclick="filterByCategory('${c.key}'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
-                    <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center text-lg">${sideIcon}</span>
-                    <span class="font-medium text-navy">${escapeHtml(c.label)}</span>
+                sideHtml += `<a href="#" onclick="filterByCategory('${c.key}'); closeSidebar(); return false;" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
+                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition text-base">${sideIcon}</span>
+                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">${escapeHtml(c.label)}</span>
+                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
                 </a>`;
             });
             list.innerHTML = html;
@@ -747,7 +839,6 @@
             }
         }
 
-        // INIT — everything runs immediately
         updateCartUI();
         loadAll();
     </script>
