@@ -66,6 +66,8 @@
         .cat-card { transition: all 0.15s ease; }
         .cat-card:active { transform: scale(0.98); }
         .order-item-row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 8px; background: #F9FAFB; border-radius: 12px; margin-bottom: 8px; }
+        .coupon-card { transition: all 0.15s ease; }
+        .coupon-card:active { transform: scale(0.98); }
         @media (min-width: 768px) {
             body { padding-left: 240px; }
             .sidebar-desktop { display: flex !important; }
@@ -169,6 +171,9 @@
                 <button onclick="showTab('reviews')" data-tab="reviews" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left">
                     <i class="fas fa-star nav-icon w-5 text-center"></i> Reviews
                 </button>
+                <button onclick="showTab('coupons')" data-tab="coupons" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left">
+                    <i class="fas fa-ticket-alt nav-icon w-5 text-center"></i> Coupons
+                </button>
                 <p class="text-[10px] text-white/40 font-bold uppercase tracking-wider px-3 mb-2 mt-6">Website</p>
                 <button onclick="showTab('content')" data-tab="content" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left">
                     <i class="fas fa-layer-group nav-icon w-5 text-center"></i> Content
@@ -211,487 +216,548 @@
         </header>
 
         <main class="p-4 md:p-8 max-w-6xl mx-auto">
-
-            <div id="content-dashboard" class="tab-content">
-                <div class="mb-6">
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Dashboard</h2>
-                    <p class="text-sm text-gray-500">Welcome back! Here's your business overview.</p>
+<div id="content-dashboard" class="tab-content">
+            <div class="mb-6">
+                <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Dashboard</h2>
+                <p class="text-sm text-gray-500">Welcome back! Here's your business overview.</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+                <div class="bg-white rounded-2xl p-4 md:p-5 premium-shadow">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
+                        <i class="fas fa-box text-blue-600 text-base"></i>
+                    </div>
+                    <p id="stat-products" class="text-2xl md:text-3xl font-bold text-navy leading-none">0</p>
+                    <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Products</p>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-                    <div class="bg-white rounded-2xl p-4 md:p-5 premium-shadow">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
-                            <i class="fas fa-box text-blue-600 text-base"></i>
-                        </div>
-                        <p id="stat-products" class="text-2xl md:text-3xl font-bold text-navy leading-none">0</p>
-                        <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Products</p>
+                <div class="bg-white rounded-2xl p-4 md:p-5 premium-shadow">
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center mb-3">
+                        <i class="fas fa-receipt text-purple-600 text-base"></i>
                     </div>
-                    <div class="bg-white rounded-2xl p-4 md:p-5 premium-shadow">
-                        <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center mb-3">
-                            <i class="fas fa-receipt text-purple-600 text-base"></i>
-                        </div>
-                        <p id="stat-orders" class="text-2xl md:text-3xl font-bold text-navy leading-none">0</p>
-                        <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Orders</p>
-                    </div>
-                    <div class="bg-white rounded-2xl p-4 md:p-5 premium-shadow">
-                        <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center mb-3">
-                            <i class="fas fa-clock text-yellow-600 text-base"></i>
-                        </div>
-                        <p id="stat-pending" class="text-2xl md:text-3xl font-bold text-navy leading-none">0</p>
-                        <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Pending</p>
-                    </div>
-                    <div class="bg-white rounded-2xl p-4 md:p-5 premium-shadow">
-                        <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-3">
-                            <i class="fas fa-money-bill-wave text-green-600 text-base"></i>
-                        </div>
-                        <p id="stat-revenue" class="text-xl md:text-2xl font-bold text-navy leading-none break-words">৳0</p>
-                        <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Revenue</p>
-                    </div>
+                    <p id="stat-orders" class="text-2xl md:text-3xl font-bold text-navy leading-none">0</p>
+                    <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Orders</p>
                 </div>
-                <div class="bg-white rounded-2xl premium-shadow p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-display text-lg font-bold text-navy">Recent Orders</h3>
-                        <button onclick="showTab('orders')" class="text-xs text-gold font-bold tracking-wide uppercase">View All →</button>
+                <div class="bg-white rounded-2xl p-4 md:p-5 premium-shadow">
+                    <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center mb-3">
+                        <i class="fas fa-clock text-yellow-600 text-base"></i>
                     </div>
-                    <div id="recent-orders"></div>
+                    <p id="stat-pending" class="text-2xl md:text-3xl font-bold text-navy leading-none">0</p>
+                    <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Pending</p>
+                </div>
+                <div class="bg-white rounded-2xl p-4 md:p-5 premium-shadow">
+                    <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-3">
+                        <i class="fas fa-money-bill-wave text-green-600 text-base"></i>
+                    </div>
+                    <p id="stat-revenue" class="text-xl md:text-2xl font-bold text-navy leading-none break-words">৳0</p>
+                    <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Revenue</p>
                 </div>
             </div>
-
-            <div id="content-products" class="tab-content hidden">
-                <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Products</h2>
-                        <p class="text-sm text-gray-500">Manage your product catalog</p>
-                    </div>
-                    <button onclick="openAddModal()" class="btn-gold px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
-                        <i class="fas fa-plus"></i> Add Product
-                    </button>
+            <div class="bg-white rounded-2xl premium-shadow p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-display text-lg font-bold text-navy">Recent Orders</h3>
+                    <button onclick="showTab('orders')" class="text-xs text-gold font-bold tracking-wide uppercase">View All →</button>
                 </div>
-                <div class="relative mb-4">
+                <div id="recent-orders"></div>
+            </div>
+        </div>
+
+        <div id="content-products" class="tab-content hidden">
+            <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Products</h2>
+                    <p class="text-sm text-gray-500">Manage your product catalog</p>
+                </div>
+                <button onclick="openAddModal()" class="btn-gold px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                    <i class="fas fa-plus"></i> Add Product
+                </button>
+            </div>
+            <div class="relative mb-4">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" id="product-search" oninput="renderAdminProducts()" placeholder="Search products..." class="w-full bg-white rounded-xl pl-11 pr-4 py-3.5 outline-none border-2 border-gray-100 text-sm font-medium">
+            </div>
+            <div id="product-list-admin" class="space-y-3"></div>
+        </div>
+
+        <div id="content-categories" class="tab-content hidden">
+            <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Categories</h2>
+                    <p class="text-sm text-gray-500">যেকোনো ক্যাটেগরিতে ট্যাপ করে এডিট করুন</p>
+                </div>
+                <button onclick="openCategoryModal()" class="btn-gold px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                    <i class="fas fa-plus"></i> New Category
+                </button>
+            </div>
+            <div id="category-list-admin" class="space-y-3"></div>
+        </div>
+
+        <div id="content-coupons" class="tab-content hidden">
+            <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Coupons</h2>
+                    <p class="text-sm text-gray-500">Discount codes তৈরি ও ম্যানেজ করুন</p>
+                </div>
+                <button onclick="openCouponModal()" class="btn-gold px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                    <i class="fas fa-plus"></i> New Coupon
+                </button>
+            </div>
+            <div id="coupon-list-admin" class="space-y-3"></div>
+        </div>
+
+        <div id="content-content" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Website Content</h2>
+                <p class="text-sm text-gray-500">হোমপেজের ব্যানার ও কনটেন্ট</p>
+            </div>
+            <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center"><i class="fas fa-images text-purple-600"></i></div>
+                        <div><h3 class="font-bold text-navy">Hero Banners</h3><p class="text-[11px] text-gray-500">উপরে স্লাইডিং ব্যানার</p></div>
+                    </div>
+                    <button onclick="openHeroModal()" class="btn-gold px-4 py-2 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
+                </div>
+                <div id="hero-banners-list-admin" class="space-y-2"></div>
+            </div>
+            <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><i class="fas fa-layer-group text-blue-600"></i></div>
+                        <div><h3 class="font-bold text-navy">Custom Sections</h3><p class="text-[11px] text-gray-500">ক্যাটেগরি ভিত্তিক সেকশন</p></div>
+                    </div>
+                    <button onclick="openSectionModal()" class="btn-gold px-4 py-2 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
+                </div>
+                <div id="sections-list-admin" class="space-y-2"></div>
+            </div>
+            <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center"><i class="fas fa-image text-green-600"></i></div>
+                        <div><h3 class="font-bold text-navy">Middle Banners</h3><p class="text-[11px] text-gray-500">সেকশনের মাঝে ছবি</p></div>
+                    </div>
+                    <button onclick="openBannerModal()" class="btn-gold px-4 py-2 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
+                </div>
+                <div id="banners-list-admin" class="space-y-2"></div>
+            </div>
+            <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center"><i class="fas fa-quote-left text-yellow-600"></i></div>
+                        <div><h3 class="font-bold text-navy">Customer Reviews</h3><p class="text-[11px] text-gray-500">রিভিউ স্লাইডার</p></div>
+                    </div>
+                    <button onclick="openTestimonialModal()" class="btn-gold px-4 py-2 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
+                </div>
+                <div id="testimonials-list-admin" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <div id="content-orders" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Orders</h2>
+                <p class="text-sm text-gray-500">Edit করুন, status পরিবর্তন করুন, সব এক জায়গায়</p>
+            </div>
+
+            <div class="flex gap-2 mb-3">
+                <div class="relative flex-1">
                     <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                    <input type="text" id="product-search" oninput="renderAdminProducts()" placeholder="Search products..." class="w-full bg-white rounded-xl pl-11 pr-4 py-3.5 outline-none border-2 border-gray-100 text-sm font-medium">
+                    <input type="text" id="order-search" oninput="renderAdminOrders()" placeholder="Order number, name বা phone..." class="w-full bg-white rounded-xl pl-11 pr-4 py-3 outline-none border-2 border-gray-100 text-sm font-medium">
                 </div>
-                <div id="product-list-admin" class="space-y-3"></div>
+                <button onclick="exportOrdersCSV()" class="bg-white border-2 border-gray-100 px-4 py-3 rounded-xl text-xs font-bold text-navy hover:border-gold transition whitespace-nowrap">
+                    <i class="fas fa-download mr-1"></i> CSV
+                </button>
             </div>
 
-            <div id="content-categories" class="tab-content hidden">
-                <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex gap-2 mb-4 overflow-x-auto hide-scrollbar pb-1">
+                <button onclick="filterOrders('all', this)" class="order-filter-btn bg-navy text-white px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">All</button>
+                <button onclick="filterOrders('pending', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Pending</button>
+                <button onclick="filterOrders('confirmed', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Confirmed</button>
+                <button onclick="filterOrders('shipped', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Shipped</button>
+                <button onclick="filterOrders('delivered', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Delivered</button>
+                <button onclick="filterOrders('cancelled', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Cancelled</button>
+            </div>
+            <div id="order-list-admin" class="space-y-3"></div>
+        </div>
+
+        <div id="content-reviews" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Product Reviews</h2>
+                <p class="text-sm text-gray-500">গ্রাহকদের রিভিউ</p>
+            </div>
+            <div id="reviews-list-admin" class="space-y-3"></div>
+        </div>
+
+        <div id="content-settings" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Settings</h2>
+                <p class="text-sm text-gray-500">সাইট কনফিগারেশন</p>
+            </div>
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-5 mb-4 border border-blue-200">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0"><i class="fas fa-shield-halved text-blue-600"></i></div>
                     <div>
-                        <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Categories</h2>
-                        <p class="text-sm text-gray-500">যেকোনো ক্যাটেগরিতে ট্যাপ করে এডিট করুন</p>
-                    </div>
-                    <button onclick="openCategoryModal()" class="btn-gold px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
-                        <i class="fas fa-plus"></i> New Category
-                    </button>
-                </div>
-                <div id="category-list-admin" class="space-y-3"></div>
-            </div>
-
-            <div id="content-content" class="tab-content hidden">
-                <div class="mb-6">
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Website Content</h2>
-                    <p class="text-sm text-gray-500">হোমপেজের ব্যানার ও কনটেন্ট</p>
-                </div>
-                <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center"><i class="fas fa-images text-purple-600"></i></div>
-                            <div><h3 class="font-bold text-navy">Hero Banners</h3><p class="text-[11px] text-gray-500">উপরে স্লাইডিং ব্যানার</p></div>
-                        </div>
-                        <button onclick="openHeroModal()" class="btn-gold px-4 py-2 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
-                    </div>
-                    <div id="hero-banners-list-admin" class="space-y-2"></div>
-                </div>
-                <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><i class="fas fa-layer-group text-blue-600"></i></div>
-                            <div><h3 class="font-bold text-navy">Custom Sections</h3><p class="text-[11px] text-gray-500">ক্যাটেগরি ভিত্তিক সেকশন</p></div>
-                        </div>
-                        <button onclick="openSectionModal()" class="btn-gold px-4 py-2 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
-                    </div>
-                    <div id="sections-list-admin" class="space-y-2"></div>
-                </div>
-                <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center"><i class="fas fa-image text-green-600"></i></div>
-                            <div><h3 class="font-bold text-navy">Middle Banners</h3><p class="text-[11px] text-gray-500">সেকশনের মাঝে ছবি</p></div>
-                        </div>
-                        <button onclick="openBannerModal()" class="btn-gold px-4 py-2 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
-                    </div>
-                    <div id="banners-list-admin" class="space-y-2"></div>
-                </div>
-                <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center"><i class="fas fa-quote-left text-yellow-600"></i></div>
-                            <div><h3 class="font-bold text-navy">Customer Reviews</h3><p class="text-[11px] text-gray-500">রিভিউ স্লাইডার</p></div>
-                        </div>
-                        <button onclick="openTestimonialModal()" class="btn-gold px-4 py-2 rounded-lg font-semibold text-xs"><i class="fas fa-plus mr-1"></i> Add</button>
-                    </div>
-                    <div id="testimonials-list-admin" class="space-y-2"></div>
-                </div>
-            </div>
-
-            <div id="content-orders" class="tab-content hidden">
-                <div class="mb-6">
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Orders</h2>
-                    <p class="text-sm text-gray-500">Edit করুন, status পরিবর্তন করুন, সব এক জায়গায়</p>
-                </div>
-                <div class="flex gap-2 mb-4 overflow-x-auto hide-scrollbar pb-1">
-                    <button onclick="filterOrders('all', this)" class="order-filter-btn bg-navy text-white px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">All</button>
-                    <button onclick="filterOrders('pending', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Pending</button>
-                    <button onclick="filterOrders('confirmed', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Confirmed</button>
-                    <button onclick="filterOrders('shipped', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Shipped</button>
-                    <button onclick="filterOrders('delivered', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Delivered</button>
-                    <button onclick="filterOrders('cancelled', this)" class="order-filter-btn bg-white text-gray-600 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Cancelled</button>
-                </div>
-                <div id="order-list-admin" class="space-y-3"></div>
-            </div>
-
-            <div id="content-reviews" class="tab-content hidden">
-                <div class="mb-6">
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Product Reviews</h2>
-                    <p class="text-sm text-gray-500">গ্রাহকদের রিভিউ</p>
-                </div>
-                <div id="reviews-list-admin" class="space-y-3"></div>
-            </div>
-
-            <div id="content-settings" class="tab-content hidden">
-                <div class="mb-6">
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Settings</h2>
-                    <p class="text-sm text-gray-500">সাইট কনফিগারেশন</p>
-                </div>
-                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-5 mb-4 border border-blue-200">
-                    <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0"><i class="fas fa-shield-halved text-blue-600"></i></div>
-                        <div>
-                            <h3 class="font-bold text-blue-900 mb-1">Account Security</h3>
-                            <p class="text-xs text-blue-800">Firebase Authentication দ্বারা সুরক্ষিত।</p>
-                            <p class="text-[11px] text-blue-600 font-semibold mt-1">Logged in: <span id="settings-email"></span></p>
-                        </div>
+                        <h3 class="font-bold text-blue-900 mb-1">Account Security</h3>
+                        <p class="text-xs text-blue-800">Firebase Authentication দ্বারা সুরক্ষিত।</p>
+                        <p class="text-[11px] text-blue-600 font-semibold mt-1">Logged in: <span id="settings-email"></span></p>
                     </div>
                 </div>
-                <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
-                    <h3 class="font-bold text-navy mb-4"><i class="fas fa-truck text-purple-600 mr-2"></i>Delivery Settings</h3>
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Delivery Charge (৳)</label>
-                    <input type="number" id="setting-delivery-charge" placeholder="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-4">
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Free Delivery Above (৳)</label>
-                    <input type="number" id="setting-free-delivery" placeholder="5000" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
-                </div>
-                <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
-                    <h3 class="font-bold text-navy mb-4"><i class="fas fa-address-book text-green-600 mr-2"></i>Contact Info</h3>
-                    <input type="text" id="setting-address" placeholder="Address" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
-                    <input type="text" id="setting-phone" placeholder="Phone" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
-                    <input type="email" id="setting-email" placeholder="Email" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
-                    <input type="text" id="setting-whatsapp" placeholder="WhatsApp (8801XXXXXXXXX)" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
-                </div>
-                <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
-                    <h3 class="font-bold text-navy mb-4"><i class="fas fa-credit-card text-orange-600 mr-2"></i>Payment</h3>
-                    <input type="text" id="setting-bkash" placeholder="bKash Number" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
-                    <input type="text" id="setting-nagad" placeholder="Nagad Number" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
-                </div>
-                <button onclick="saveSettings()" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-save mr-2"></i> SAVE SETTINGS</button>
             </div>
-
-        </main>
-
-        <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white border-t border-gray-100" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
-            <div class="flex justify-around items-center py-1.5">
-                <button onclick="showTab('dashboard')" data-tab="dashboard" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
-                    <i class="fas fa-chart-pie text-lg"></i><span class="text-[9px] mt-1 font-semibold">Home</span>
-                </button>
-                <button onclick="showTab('orders')" data-tab="orders" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400 relative">
-                    <i class="fas fa-receipt text-lg"></i><span class="text-[9px] mt-1 font-semibold">Orders</span>
-                    <span id="orders-badge-mob" class="absolute top-0 right-1 bg-red-500 text-white text-[9px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center hidden">0</span>
-                </button>
-                <button onclick="showTab('products')" data-tab="products" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
-                    <i class="fas fa-box text-lg"></i><span class="text-[9px] mt-1 font-semibold">Products</span>
-                </button>
-                <button onclick="showTab('categories')" data-tab="categories" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
-                    <i class="fas fa-th-large text-lg"></i><span class="text-[9px] mt-1 font-semibold">Category</span>
-                </button>
-                <button onclick="showTab('settings')" data-tab="settings" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
-                    <i class="fas fa-cog text-lg"></i><span class="text-[9px] mt-1 font-semibold">More</span>
-                </button>
+            <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
+                <h3 class="font-bold text-navy mb-4"><i class="fas fa-truck text-purple-600 mr-2"></i>Delivery Settings</h3>
+                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Delivery Charge (৳)</label>
+                <input type="number" id="setting-delivery-charge" placeholder="100" min="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-4">
+                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Free Delivery Above (৳)</label>
+                <input type="number" id="setting-free-delivery" placeholder="5000" min="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
             </div>
-        </nav>
-
-    </div>
-
-    <!-- ORDER EDIT MODAL -->
-    <div id="order-edit-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto animate-slide-up">
-            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
-                <div>
-                    <h3 class="text-white font-bold text-lg">Edit Order</h3>
-                    <p id="oe-order-num" class="text-gold text-[11px] font-mono"></p>
-                </div>
-                <button onclick="closeOrderEdit()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
-                    <i class="fas fa-times"></i>
-                </button>
+            <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
+                <h3 class="font-bold text-navy mb-4"><i class="fas fa-address-book text-green-600 mr-2"></i>Contact Info</h3>
+                <input type="text" id="setting-address" placeholder="Address" maxlength="200" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
+                <input type="text" id="setting-phone" placeholder="Phone" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
+                <input type="email" id="setting-email" placeholder="Email" maxlength="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
+                <input type="text" id="setting-whatsapp" placeholder="WhatsApp (8801XXXXXXXXX)" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
             </div>
-            <div class="p-5 space-y-4">
-                <div class="bg-gray-50 rounded-2xl p-4">
-                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Customer</p>
-                    <p id="oe-customer" class="text-sm font-bold text-navy"></p>
-                    <p id="oe-phone" class="text-xs text-gray-600 mt-0.5"></p>
-                    <p id="oe-address" class="text-xs text-gray-500 mt-1"></p>
-                </div>
-                <div>
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Items</label>
-                        <button onclick="openProductPicker()" class="text-gold text-xs font-bold"><i class="fas fa-plus mr-1"></i>Add Item</button>
-                    </div>
-                    <div id="oe-items-list"></div>
-                </div>
-                <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200">
-                    <p class="text-[11px] font-bold text-amber-800 uppercase tracking-wider mb-3"><i class="fas fa-tag mr-1"></i>Adjustments</p>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-600 mb-1 block">Discount (৳)</label>
-                            <input type="number" id="oe-discount" placeholder="0" min="0" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-sm font-medium bg-white" oninput="recalcOrderEdit()">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-600 mb-1 block">Delivery Charge (৳)</label>
-                            <input type="number" id="oe-delivery" placeholder="0" min="0" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-sm font-medium bg-white" oninput="recalcOrderEdit()">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-600 mb-1 block">Advance Paid (৳)</label>
-                            <input type="number" id="oe-advance" placeholder="0" min="0" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-sm font-medium bg-white" oninput="recalcOrderEdit()">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-600 mb-1 block">Admin Note (Internal)</label>
-                            <textarea id="oe-note" rows="2" placeholder="কাস্টমারের সাথে কথা হয়েছে..." class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-xs font-medium resize-none bg-white"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="navy-gradient rounded-2xl p-4 space-y-2">
-                    <div class="flex justify-between text-xs"><span class="text-white/70">Subtotal</span><span id="oe-subtotal" class="text-white font-semibold">৳0</span></div>
-                    <div class="flex justify-between text-xs"><span class="text-white/70">Discount</span><span id="oe-discount-display" class="text-red-300 font-semibold">-৳0</span></div>
-                    <div class="flex justify-between text-xs"><span class="text-white/70">Delivery</span><span id="oe-delivery-display" class="text-white font-semibold">৳0</span></div>
-                    <div class="flex justify-between text-sm border-t border-white/20 pt-2 mt-2"><span class="text-white font-bold">Total</span><span id="oe-total" class="text-gold font-bold text-lg">৳0</span></div>
-                    <div class="flex justify-between text-xs"><span class="text-white/70">Advance</span><span id="oe-advance-display" class="text-green-300 font-semibold">৳0</span></div>
-                    <div class="flex justify-between text-xs"><span class="text-white/70">Due</span><span id="oe-due" class="text-red-300 font-bold">৳0</span></div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="saveOrderEdit()" id="oe-save-btn" class="btn-success py-3.5 rounded-xl font-bold text-sm">
-                        <i class="fas fa-check mr-1"></i> SAVE
-                    </button>
-                    <button onclick="confirmDeleteOrder()" class="btn-danger py-3.5 rounded-xl font-bold text-sm">
-                        <i class="fas fa-trash mr-1"></i> DELETE
-                    </button>
-                </div>
+            <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
+                <h3 class="font-bold text-navy mb-4"><i class="fas fa-credit-card text-orange-600 mr-2"></i>Payment</h3>
+                <input type="text" id="setting-bkash" placeholder="bKash Number" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
+                <input type="text" id="setting-nagad" placeholder="Nagad Number" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
             </div>
+            <button onclick="saveSettings()" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-save mr-2"></i> SAVE SETTINGS</button>
         </div>
-    </div>
 
-    <!-- PRODUCT PICKER MODAL -->
-    <div id="product-picker-modal" class="hidden fixed inset-0 modal-bg z-[60] flex items-end md:items-center justify-center">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[85vh] overflow-y-auto animate-slide-up">
-            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
-                <h3 class="text-white font-bold text-lg">Add Item</h3>
-                <button onclick="closeProductPicker()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="p-5">
-                <input type="text" id="picker-search" oninput="renderPickerProducts()" placeholder="Search products..." class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
-                <div id="picker-list" class="space-y-2 max-h-[50vh] overflow-y-auto"></div>
-            </div>
+    </main>
+
+    <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white border-t border-gray-100" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
+        <div class="flex justify-around items-center py-1.5">
+            <button onclick="showTab('dashboard')" data-tab="dashboard" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
+                <i class="fas fa-chart-pie text-lg"></i><span class="text-[9px] mt-1 font-semibold">Home</span>
+            </button>
+            <button onclick="showTab('orders')" data-tab="orders" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400 relative">
+                <i class="fas fa-receipt text-lg"></i><span class="text-[9px] mt-1 font-semibold">Orders</span>
+                <span id="orders-badge-mob" class="absolute top-0 right-1 bg-red-500 text-white text-[9px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center hidden">0</span>
+            </button>
+            <button onclick="showTab('products')" data-tab="products" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
+                <i class="fas fa-box text-lg"></i><span class="text-[9px] mt-1 font-semibold">Products</span>
+            </button>
+            <button onclick="showTab('categories')" data-tab="categories" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
+                <i class="fas fa-th-large text-lg"></i><span class="text-[9px] mt-1 font-semibold">Category</span>
+            </button>
+            <button onclick="showTab('settings')" data-tab="settings" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
+                <i class="fas fa-cog text-lg"></i><span class="text-[9px] mt-1 font-semibold">More</span>
+            </button>
         </div>
-    </div>
+    </nav>
 
-    <!-- PREMIUM STATUS PICKER MODAL -->
-    <div id="status-picker-modal" class="hidden fixed inset-0 modal-bg z-[65] flex items-end md:items-center justify-center">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
-            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
-                <div>
-                    <h3 class="text-white font-bold text-lg">Change Status</h3>
-                    <p id="sp-order-num" class="text-gold text-[11px] font-mono mt-0.5"></p>
+</div>
+
+<!-- ORDER EDIT MODAL -->
+<div id="order-edit-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+    <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto animate-slide-up">
+        <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
+            <div>
+                <h3 class="text-white font-bold text-lg">Edit Order</h3>
+                <p id="oe-order-num" class="text-gold text-[11px] font-mono"></p>
+            </div>
+            <button onclick="closeOrderEdit()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-5 space-y-4">
+            <div class="bg-gray-50 rounded-2xl p-4">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Customer</p>
+                <p id="oe-customer" class="text-sm font-bold text-navy"></p>
+                <p id="oe-phone" class="text-xs text-gray-600 mt-0.5"></p>
+                <p id="oe-address" class="text-xs text-gray-500 mt-1"></p>
+            </div>
+            <div>
+                <div class="flex justify-between items-center mb-3">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Items</label>
+                    <button onclick="openProductPicker()" class="text-gold text-xs font-bold"><i class="fas fa-plus mr-1"></i>Add Item</button>
                 </div>
-                <button onclick="closeStatusPicker()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div id="oe-items-list"></div>
             </div>
-            <div class="p-4 space-y-2" id="status-options-list"></div>
-        </div>
-    </div>
-
-    <!-- STATUS CONFIRM MODAL -->
-    <div id="status-confirm-modal" class="hidden fixed inset-0 modal-bg z-[70] flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl w-full max-w-sm p-6 text-center animate-slide-up">
-            <div id="sc-icon-wrap" class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center">
-                <i id="sc-icon" class="text-2xl"></i>
+            <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200">
+                <p class="text-[11px] font-bold text-amber-800 uppercase tracking-wider mb-3"><i class="fas fa-tag mr-1"></i>Adjustments</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-600 mb-1 block">Discount (৳)</label>
+                        <input type="number" id="oe-discount" placeholder="0" min="0" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-sm font-medium bg-white" oninput="recalcOrderEdit()">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-600 mb-1 block">Delivery Charge (৳)</label>
+                        <input type="number" id="oe-delivery" placeholder="0" min="0" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-sm font-medium bg-white" oninput="recalcOrderEdit()">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-600 mb-1 block">Advance Paid (৳)</label>
+                        <input type="number" id="oe-advance" placeholder="0" min="0" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-sm font-medium bg-white" oninput="recalcOrderEdit()">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-600 mb-1 block">Admin Note (Internal)</label>
+                        <textarea id="oe-note" rows="2" placeholder="কাস্টমারের সাথে কথা হয়েছে..." maxlength="500" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-xs font-medium resize-none bg-white"></textarea>
+                    </div>
+                </div>
             </div>
-            <h3 id="sc-title" class="font-display text-xl font-bold text-navy mb-2">Change Status?</h3>
-            <p id="sc-message" class="text-sm text-gray-600 mb-6 leading-relaxed"></p>
+            <div class="navy-gradient rounded-2xl p-4 space-y-2">
+                <div class="flex justify-between text-xs"><span class="text-white/70">Subtotal</span><span id="oe-subtotal" class="text-white font-semibold">৳0</span></div>
+                <div class="flex justify-between text-xs"><span class="text-white/70">Discount</span><span id="oe-discount-display" class="text-red-300 font-semibold">-৳0</span></div>
+                <div class="flex justify-between text-xs"><span class="text-white/70">Delivery</span><span id="oe-delivery-display" class="text-white font-semibold">৳0</span></div>
+                <div class="flex justify-between text-sm border-t border-white/20 pt-2 mt-2"><span class="text-white font-bold">Total</span><span id="oe-total" class="text-gold font-bold text-lg">৳0</span></div>
+                <div class="flex justify-between text-xs"><span class="text-white/70">Advance</span><span id="oe-advance-display" class="text-green-300 font-semibold">৳0</span></div>
+                <div class="flex justify-between text-xs"><span class="text-white/70">Due</span><span id="oe-due" class="text-red-300 font-bold">৳0</span></div>
+            </div>
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="closeStatusConfirm()" class="py-3 rounded-xl font-bold text-sm bg-gray-100 text-gray-700">Cancel</button>
-                <button onclick="confirmStatusChange()" id="sc-confirm-btn" class="py-3 rounded-xl font-bold text-sm btn-success">Confirm</button>
+                <button onclick="saveOrderEdit()" id="oe-save-btn" class="btn-success py-3.5 rounded-xl font-bold text-sm">
+                    <i class="fas fa-check mr-1"></i> SAVE
+                </button>
+                <button onclick="confirmDeleteOrder()" class="btn-danger py-3.5 rounded-xl font-bold text-sm">
+                    <i class="fas fa-trash mr-1"></i> DELETE
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- PRODUCT MODAL -->
-    <div id="product-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
-            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
-                <h3 id="modal-title" class="text-white font-bold text-lg">Add Product</h3>
-                <button onclick="closeModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="p-5 space-y-4">
-                <input type="hidden" id="edit-product-id">
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Product Name *</label><input type="text" id="p-name" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Price (৳) *</label><input type="number" id="p-price" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                    <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Old Price</label><input type="number" id="p-oldprice" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category *</label><select id="p-category" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white"></select></div>
-                    <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Stock Qty</label><input type="number" id="p-stock" value="10" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                </div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Brand</label><input type="text" id="p-brand" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Description</label><textarea id="p-description" rows="3" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium resize-none"></textarea></div>
-                <div>
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Images * (Max 5)</label>
-                    <div id="image-preview-grid" class="grid grid-cols-4 gap-2 my-3"></div>
-                    <div class="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center">
-                        <label for="p-image-file" class="cursor-pointer block">
-                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-2"></i>
-                            <p class="text-xs text-gray-500 font-semibold">Click to upload images</p>
-                        </label>
-                        <input type="file" id="p-image-file" accept="image/*" multiple class="hidden">
-                    </div>
-                </div>
-                <button onclick="saveProduct()" id="save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-check mr-2"></i> SAVE PRODUCT</button>
-            </div>
+<!-- PRODUCT PICKER MODAL -->
+<div id="product-picker-modal" class="hidden fixed inset-0 modal-bg z-[60] flex items-end md:items-center justify-center">
+    <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[85vh] overflow-y-auto animate-slide-up">
+        <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
+            <h3 class="text-white font-bold text-lg">Add Item</h3>
+            <button onclick="closeProductPicker()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-5">
+            <input type="text" id="picker-search" oninput="renderPickerProducts()" placeholder="Search products..." class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
+            <div id="picker-list" class="space-y-2 max-h-[50vh] overflow-y-auto"></div>
         </div>
     </div>
+</div>
 
-    <!-- CATEGORY MODAL -->
-    <div id="category-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
-            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
-                <h3 id="cat-modal-title" class="text-white font-bold text-lg">Category</h3>
-                <button onclick="closeCategoryModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
+<!-- STATUS PICKER MODAL -->
+<div id="status-picker-modal" class="hidden fixed inset-0 modal-bg z-[65] flex items-end md:items-center justify-center">
+    <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
+        <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
+            <div>
+                <h3 class="text-white font-bold text-lg">Change Status</h3>
+                <p id="sp-order-num" class="text-gold text-[11px] font-mono mt-0.5"></p>
             </div>
-            <div class="p-5 space-y-4">
-                <input type="hidden" id="edit-category-key">
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category Key *</label><input type="text" id="cat-key" placeholder="e.g. AC" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Display Name *</label><input type="text" id="cat-label" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Icon (Emoji)</label><input type="text" id="cat-icon-emoji" placeholder="❄️" maxlength="4" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium text-center text-2xl"></div>
-                <div class="text-center text-xs text-gray-400 font-bold uppercase tracking-wider py-1">— OR —</div>
-                <div>
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category Image</label>
-                    <div id="cat-image-preview" class="hidden mb-3 relative inline-block">
-                        <img id="cat-image-preview-img" class="w-20 h-20 object-contain bg-gray-50 rounded-xl border-2 border-gold">
-                        <button type="button" onclick="clearCategoryImage()" class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-lg"><i class="fas fa-times"></i></button>
-                    </div>
-                    <div class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center">
-                        <label for="cat-image-file" class="cursor-pointer block"><i class="fas fa-image text-2xl text-gray-300 mb-1"></i><p class="text-xs text-gray-500 font-semibold">Upload Image</p></label>
-                        <input type="file" id="cat-image-file" accept="image/*" class="hidden">
-                        <p id="cat-file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
-                    </div>
-                </div>
-                <button onclick="saveCategory()" id="cat-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-check mr-2"></i> SAVE</button>
-            </div>
+            <button onclick="closeStatusPicker()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-4 space-y-2" id="status-options-list"></div>
+    </div>
+</div>
+
+<!-- STATUS CONFIRM MODAL -->
+<div id="status-confirm-modal" class="hidden fixed inset-0 modal-bg z-[70] flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-6 text-center animate-slide-up">
+        <div id="sc-icon-wrap" class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center">
+            <i id="sc-icon" class="text-2xl"></i>
+        </div>
+        <h3 id="sc-title" class="font-display text-xl font-bold text-navy mb-2">Change Status?</h3>
+        <p id="sc-message" class="text-sm text-gray-600 mb-6 leading-relaxed"></p>
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="closeStatusConfirm()" class="py-3 rounded-xl font-bold text-sm bg-gray-100 text-gray-700">Cancel</button>
+            <button onclick="confirmStatusChange()" id="sc-confirm-btn" class="py-3 rounded-xl font-bold text-sm btn-success">Confirm</button>
         </div>
     </div>
+</div>
 
-    <!-- SECTION MODAL -->
-    <div id="section-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
-            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
-                <h3 id="section-modal-title" class="text-white font-bold text-lg">Add Section</h3>
-                <button onclick="closeSectionModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="p-5 space-y-4">
-                <input type="hidden" id="edit-section-idx">
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Section Title *</label><input type="text" id="section-title-input" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category *</label><select id="section-category" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white"></select></div>
-                <button onclick="saveSection()" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-check mr-2"></i> SAVE</button>
-            </div>
+<!-- PRODUCT MODAL -->
+<div id="product-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+    <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
+        <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
+            <h3 id="modal-title" class="text-white font-bold text-lg">Add Product</h3>
+            <button onclick="closeModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
         </div>
-    </div>
-
-    <!-- BANNER MODAL -->
-    <div id="banner-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
-            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
-                <h3 id="banner-modal-title" class="text-white font-bold text-lg">Banner</h3>
-                <button onclick="closeBannerModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
+        <div class="p-5 space-y-4">
+            <input type="hidden" id="edit-product-id">
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Product Name *</label><input type="text" id="p-name" maxlength="200" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Price (৳) *</label><input type="number" id="p-price" min="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Old Price</label><input type="number" id="p-oldprice" min="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
             </div>
-            <div class="p-5 space-y-4">
-                <input type="hidden" id="edit-banner-idx">
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Link (Optional)</label><input type="text" id="banner-link" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                <div id="banner-image-preview" class="hidden mb-2"><img id="banner-preview-img" class="w-full h-28 object-contain bg-gray-50 rounded-xl border-2 border-gold"></div>
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category *</label><select id="p-category" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white"></select></div>
+                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Stock Qty</label><input type="number" id="p-stock" value="10" min="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            </div>
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Brand</label><input type="text" id="p-brand" maxlength="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Description</label><textarea id="p-description" rows="3" maxlength="3000" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium resize-none"></textarea></div>
+            <div>
+                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Images * (Max 5)</label>
+                <div id="image-preview-grid" class="grid grid-cols-4 gap-2 my-3"></div>
                 <div class="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center">
-                    <label for="banner-image-file" class="cursor-pointer block"><i class="fas fa-image text-3xl text-gray-300 mb-2"></i><p class="text-xs text-gray-500 font-semibold" id="banner-upload-hint">Upload Banner</p></label>
-                    <input type="file" id="banner-image-file" accept="image/*" class="hidden">
-                    <p id="banner-file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
+                    <label for="p-image-file" class="cursor-pointer block">
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-2"></i>
+                        <p class="text-xs text-gray-500 font-semibold">Click to upload images</p>
+                    </label>
+                    <input type="file" id="p-image-file" accept="image/*" multiple class="hidden">
                 </div>
-                <button onclick="saveBanner()" id="banner-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-check mr-2"></i> SAVE</button>
             </div>
+            <button onclick="saveProduct()" id="save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-check mr-2"></i> SAVE PRODUCT</button>
         </div>
     </div>
+</div>
 
-    <!-- TESTIMONIAL MODAL -->
-    <div id="testimonial-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
-            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
-                <h3 id="testimonial-modal-title" class="text-white font-bold text-lg">Review</h3>
-                <button onclick="closeTestimonialModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
+<!-- CATEGORY MODAL -->
+<div id="category-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+    <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
+        <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
+            <h3 id="cat-modal-title" class="text-white font-bold text-lg">Category</h3>
+            <button onclick="closeCategoryModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-5 space-y-4">
+            <input type="hidden" id="edit-category-key">
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category Key *</label><input type="text" id="cat-key" placeholder="e.g. AC" maxlength="30" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Display Name *</label><input type="text" id="cat-label" maxlength="60" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Icon (Emoji)</label><input type="text" id="cat-icon-emoji" placeholder="❄️" maxlength="4" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium text-center text-2xl"></div>
+            <div class="text-center text-xs text-gray-400 font-bold uppercase tracking-wider py-1">— OR —</div>
+            <div>
+                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category Image</label>
+                <div id="cat-image-preview" class="hidden mb-3 relative inline-block">
+                    <img id="cat-image-preview-img" class="w-20 h-20 object-contain bg-gray-50 rounded-xl border-2 border-gold">
+                    <button type="button" onclick="clearCategoryImage()" class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-lg"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center">
+                    <label for="cat-image-file" class="cursor-pointer block"><i class="fas fa-image text-2xl text-gray-300 mb-1"></i><p class="text-xs text-gray-500 font-semibold">Upload Image</p></label>
+                    <input type="file" id="cat-image-file" accept="image/*" class="hidden">
+                    <p id="cat-file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
+                </div>
             </div>
-            <div class="p-5 space-y-4">
-                <input type="hidden" id="edit-testimonial-idx">
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Customer Name *</label><input type="text" id="test-name" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Role</label><input type="text" id="test-role" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Review *</label><textarea id="test-text" rows="3" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium resize-none"></textarea></div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Rating</label><select id="test-rating" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white"><option value="5">★★★★★</option><option value="4">★★★★☆</option><option value="3">★★★☆☆</option><option value="2">★★☆☆☆</option><option value="1">★☆☆☆☆</option></select></div>
-                <div id="test-image-preview" class="hidden mb-2"><img id="test-preview-img" class="w-20 h-20 object-cover rounded-full border-2 border-gold"></div>
+            <button onclick="saveCategory()" id="cat-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-check mr-2"></i> SAVE</button>
+        </div>
+    </div>
+</div>
+
+<!-- COUPON MODAL -->
+<div id="coupon-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+    <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
+        <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
+            <h3 id="coupon-modal-title" class="text-white font-bold text-lg">Coupon</h3>
+            <button onclick="closeCouponModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-5 space-y-4">
+            <input type="hidden" id="edit-coupon-code">
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Coupon Code *</label><input type="text" id="cp-code" placeholder="SAVE10" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-bold uppercase tracking-wider"></div>
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Description (Optional)</label><input type="text" id="cp-desc" placeholder="10% off on all orders" maxlength="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            <div>
+                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Discount Type *</label>
+                <select id="cp-type" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white" onchange="updateCouponValueLabel()">
+                    <option value="percentage">Percentage (%)</option>
+                    <option value="fixed">Fixed Amount (৳)</option>
+                </select>
+            </div>
+            <div>
+                <label id="cp-value-label" class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Discount Value (%) *</label>
+                <input type="number" id="cp-value" min="1" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Min Order (৳)</label><input type="number" id="cp-min" min="0" value="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Max Uses</label><input type="number" id="cp-maxuses" min="0" value="0" placeholder="0 = unlimited" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            </div>
+            <div>
+                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Expiry Date (Optional)</label>
+                <input type="date" id="cp-expiry" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
+            </div>
+            <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer">
+                <input type="checkbox" id="cp-active" checked class="w-5 h-5 accent-[#D4A84B]">
+                <span class="text-sm font-semibold text-navy">Active (গ্রাহক ব্যবহার করতে পারবে)</span>
+            </label>
+            <button onclick="saveCoupon()" id="coupon-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-check mr-2"></i> SAVE COUPON</button>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION MODAL -->
+<div id="section-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+    <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
+        <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
+            <h3 id="section-modal-title" class="text-white font-bold text-lg">Add Section</h3>
+            <button onclick="closeSectionModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-5 space-y-4">
+            <input type="hidden" id="edit-section-idx">
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Section Title *</label><input type="text" id="section-title-input" maxlength="80" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category *</label><select id="section-category" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white"></select></div>
+            <button onclick="saveSection()" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-check mr-2"></i> SAVE</button>
+        </div>
+    </div>
+</div>
+
+<!-- BANNER MODAL -->
+<div id="banner-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+    <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
+        <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
+            <h3 id="banner-modal-title" class="text-white font-bold text-lg">Banner</h3>
+            <button onclick="closeBannerModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-5 space-y-4">
+            <input type="hidden" id="edit-banner-idx">
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Link (Optional)</label><input type="text" id="banner-link" maxlength="300" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            <div id="banner-image-preview" class="hidden mb-2"><img id="banner-preview-img" class="w-full h-28 object-contain bg-gray-50 rounded-xl border-2 border-gold"></div>
+            <div class="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center">
+                <label for="banner-image-file" class="cursor-pointer block"><i class="fas fa-image text-3xl text-gray-300 mb-2"></i><p class="text-xs text-gray-500 font-semibold" id="banner-upload-hint">Upload Banner</p></label>
+                <input type="file" id="banner-image-file" accept="image/*" class="hidden">
+                <p id="banner-file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
+            </div>
+            <button onclick="saveBanner()" id="banner-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-check mr-2"></i> SAVE</button>
+        </div>
+    </div>
+</div>
+
+<!-- TESTIMONIAL MODAL -->
+<div id="testimonial-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+    <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
+        <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
+            <h3 id="testimonial-modal-title" class="text-white font-bold text-lg">Review</h3>
+            <button onclick="closeTestimonialModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-5 space-y-4">
+            <input type="hidden" id="edit-testimonial-idx">
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Customer Name *</label><input type="text" id="test-name" maxlength="50" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Role</label><input type="text" id="test-role" maxlength="50" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Review *</label><textarea id="test-text" rows="3" maxlength="300" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium resize-none"></textarea></div>
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Rating</label><select id="test-rating" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white"><option value="5">★★★★★</option><option value="4">★★★★☆</option><option value="3">★★★☆☆</option><option value="2">★★☆☆☆</option><option value="1">★☆☆☆☆</option></select></div>
+            <div id="test-image-preview" class="hidden mb-2"><img id="test-preview-img" class="w-20 h-20 object-cover rounded-full border-2 border-gold"></div>
+            <div class="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center">
+                <label for="test-image-file" class="cursor-pointer block"><i class="fas fa-user-circle text-3xl text-gray-300 mb-2"></i><p class="text-xs text-gray-500 font-semibold">Customer Photo</p></label>
+                <input type="file" id="test-image-file" accept="image/*" class="hidden">
+                <p id="test-file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
+            </div>
+            <button onclick="saveTestimonial()" id="test-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-check mr-2"></i> SAVE</button>
+        </div>
+    </div>
+</div>
+
+<!-- HERO MODAL -->
+<div id="hero-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
+    <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
+        <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
+            <h3 id="hero-modal-title" class="text-white font-bold text-lg">Hero Banner</h3>
+            <button onclick="closeHeroModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-5 space-y-4">
+            <input type="hidden" id="edit-hero-idx">
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Badge</label><input type="text" id="hero-badge" maxlength="40" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Title *</label><input type="text" id="hero-title-input" maxlength="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"><p class="text-[10px] text-gray-400 mt-1">লাইন ভাঙতে &lt;br&gt; লিখুন (শুধু এটাই allowed)</p></div>
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Subtitle</label><input type="text" id="hero-subtitle-input" maxlength="150" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Background Color</label><select id="hero-bg" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white"><option value="navy">Navy</option><option value="gold">Gold</option><option value="teal">Teal</option></select></div>
+            <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Link (Optional)</label><input type="text" id="hero-link" maxlength="300" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+            <div>
+                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Background Image (Optional)</label>
+                <div id="hero-image-preview" class="hidden mb-3 relative">
+                    <img id="hero-preview-img" class="w-full h-28 object-cover rounded-xl border-2 border-gold">
+                    <button type="button" onclick="clearHeroImage()" class="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-lg"><i class="fas fa-times"></i></button>
+                </div>
                 <div class="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center">
-                    <label for="test-image-file" class="cursor-pointer block"><i class="fas fa-user-circle text-3xl text-gray-300 mb-2"></i><p class="text-xs text-gray-500 font-semibold">Customer Photo</p></label>
-                    <input type="file" id="test-image-file" accept="image/*" class="hidden">
-                    <p id="test-file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
+                    <label for="hero-image-file" class="cursor-pointer block"><i class="fas fa-image text-3xl text-gray-300 mb-2"></i><p class="text-xs text-gray-500 font-semibold">Upload Banner</p></label>
+                    <input type="file" id="hero-image-file" accept="image/*" class="hidden">
+                    <p id="hero-file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
                 </div>
-                <button onclick="saveTestimonial()" id="test-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-check mr-2"></i> SAVE</button>
             </div>
+            <button onclick="saveHeroBanner()" id="hero-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-check mr-2"></i> SAVE</button>
         </div>
     </div>
-
-    <!-- HERO MODAL -->
-    <div id="hero-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
-            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
-                <h3 id="hero-modal-title" class="text-white font-bold text-lg">Hero Banner</h3>
-                <button onclick="closeHeroModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="p-5 space-y-4">
-                <input type="hidden" id="edit-hero-idx">
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Badge</label><input type="text" id="hero-badge" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Title *</label><input type="text" id="hero-title-input" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"><p class="text-[10px] text-gray-400 mt-1">লাইন ভাঙতে &lt;br&gt;</p></div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Subtitle</label><input type="text" id="hero-subtitle-input" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Background Color</label><select id="hero-bg" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white"><option value="navy">Navy</option><option value="gold">Gold</option><option value="teal">Teal</option></select></div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Link (Optional)</label><input type="text" id="hero-link" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                <div>
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Background Image (Optional)</label>
-                    <div id="hero-image-preview" class="hidden mb-3 relative">
-                        <img id="hero-preview-img" class="w-full h-28 object-cover rounded-xl border-2 border-gold">
-                        <button type="button" onclick="clearHeroImage()" class="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-lg"><i class="fas fa-times"></i></button>
-                    </div>
-                    <div class="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center">
-                        <label for="hero-image-file" class="cursor-pointer block"><i class="fas fa-image text-3xl text-gray-300 mb-2"></i><p class="text-xs text-gray-500 font-semibold">Upload Banner</p></label>
-                        <input type="file" id="hero-image-file" accept="image/*" class="hidden">
-                        <p id="hero-file-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
-                    </div>
-                </div>
-                <button onclick="saveHeroBanner()" id="hero-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-check mr-2"></i> SAVE</button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
+</div>
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, query, orderBy, increment, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -721,6 +787,7 @@
         let allProductsList = [];
         let allOrdersList = [];
         let allReviewsList = [];
+        let allCouponsList = [];
         let allCategories = [...DEFAULT_CATEGORIES];
         let customSections = [];
         let middleBanners = [];
@@ -732,7 +799,6 @@
         let editingOrderItems = [];
         let pendingStatusChange = null;
         let statusPickerOrderId = null;
-
         let pendingImages = [];
         let existingImages = [];
         let pendingCategoryImage = null;
@@ -743,8 +809,13 @@
         let pendingHeroImage = null;
         let removeHeroImage = false;
 
-        function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+        function escapeHtml(t) { if (t === null || t === undefined) return ''; const d = document.createElement('div'); d.textContent = String(t); return d.innerHTML; }
         function fmt(n) { return Number(n || 0).toLocaleString('en-IN'); }
+
+        function safeHeroTitle(t) {
+            if (!t) return '';
+            return escapeHtml(t).replace(/&lt;br\s*\/?&gt;/gi, '<br>');
+        }
 
         function toast(msg, type = 'success') {
             const c = document.getElementById('toast-container');
@@ -844,6 +915,7 @@
             await loadProducts();
             await loadOrders();
             await loadReviews();
+            await loadCoupons();
             updateStats();
         }
 
@@ -882,6 +954,175 @@
             });
         }
 
+        async function uploadToImgBB(file) {
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
+            const result = await res.json();
+            if (!result.secure_url) throw new Error(result.error?.message || "Upload failed");
+            return result.secure_url;
+        }
+
+        // ====== COUPONS ======
+        async function loadCoupons() {
+            try {
+                const snap = await getDocs(collection(db, "coupons"));
+                allCouponsList = [];
+                snap.forEach(d => allCouponsList.push({ code: d.id, ...d.data() }));
+                renderAdminCoupons();
+            } catch (e) { console.error('Coupons:', e); }
+        }
+
+        window.renderAdminCoupons = function() {
+            const list = document.getElementById('coupon-list-admin');
+            if (!list) return;
+            if (allCouponsList.length === 0) {
+                list.innerHTML = `<div class="bg-white rounded-2xl p-12 text-center premium-shadow">
+                    <i class="fas fa-ticket-alt text-4xl text-gray-200 mb-3"></i>
+                    <p class="text-sm text-gray-500 mb-2">কোনো coupon নেই</p>
+                    <p class="text-xs text-gray-400">"New Coupon" ক্লিক করে প্রথম coupon তৈরি করুন</p>
+                </div>`;
+                return;
+            }
+            let html = '';
+            allCouponsList.forEach(c => {
+                const isExpired = c.expiry && new Date(c.expiry) < new Date();
+                const isExhausted = c.maxUses > 0 && (c.usedCount || 0) >= c.maxUses;
+                const isInactive = c.active === false;
+                const statusBadge = isExpired ? '<span class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold">EXPIRED</span>'
+                    : isExhausted ? '<span class="text-[10px] bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-bold">EXHAUSTED</span>'
+                    : isInactive ? '<span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-bold">INACTIVE</span>'
+                    : '<span class="text-[10px] bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold">ACTIVE</span>';
+                const discount = c.type === 'percentage' ? `${c.value}%` : `৳${fmt(c.value)}`;
+                html += `<div class="coupon-card bg-white rounded-2xl p-4 premium-shadow border-l-4 border-gold">
+                    <div class="flex justify-between items-start mb-2 gap-2">
+                        <div class="min-w-0 flex-1">
+                            <p class="font-bold text-navy text-lg tracking-wider">${escapeHtml(c.code)}</p>
+                            ${c.description ? `<p class="text-xs text-gray-500 mt-0.5">${escapeHtml(c.description)}</p>` : ''}
+                        </div>
+                        <div class="text-right flex-shrink-0">${statusBadge}</div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center mb-3">
+                        <div class="bg-gray-50 rounded-lg p-2">
+                            <p class="text-[9px] text-gray-500 font-bold uppercase">Discount</p>
+                            <p class="text-sm font-bold text-gold mt-0.5">${discount}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-2">
+                            <p class="text-[9px] text-gray-500 font-bold uppercase">Min Order</p>
+                            <p class="text-sm font-bold text-navy mt-0.5">${c.minOrder > 0 ? '৳' + fmt(c.minOrder) : '—'}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-2">
+                            <p class="text-[9px] text-gray-500 font-bold uppercase">Used</p>
+                            <p class="text-sm font-bold text-navy mt-0.5">${c.usedCount || 0}${c.maxUses > 0 ? ' / ' + c.maxUses : ''}</p>
+                        </div>
+                    </div>
+                    ${c.expiry ? `<p class="text-[11px] text-gray-500 mb-2"><i class="fas fa-calendar mr-1"></i>Expires: ${c.expiry}</p>` : ''}
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="editCoupon('${escapeHtml(c.code)}')" class="py-2.5 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center gap-2 text-xs font-bold">
+                            <i class="fas fa-pen"></i> Edit
+                        </button>
+                        <button onclick="deleteCoupon('${escapeHtml(c.code)}')" class="py-2.5 bg-red-50 text-red-600 rounded-xl flex items-center justify-center gap-2 text-xs font-bold">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        window.openCouponModal = function() {
+            document.getElementById('coupon-modal-title').innerText = 'Add Coupon';
+            document.getElementById('edit-coupon-code').value = '';
+            ['cp-code','cp-desc','cp-value','cp-expiry'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('cp-type').value = 'percentage';
+            document.getElementById('cp-min').value = '0';
+            document.getElementById('cp-maxuses').value = '0';
+            document.getElementById('cp-active').checked = true;
+            document.getElementById('cp-code').disabled = false;
+            updateCouponValueLabel();
+            document.getElementById('coupon-modal').classList.remove('hidden');
+        }
+        window.closeCouponModal = function() { document.getElementById('coupon-modal').classList.add('hidden'); }
+
+        window.updateCouponValueLabel = function() {
+            const type = document.getElementById('cp-type').value;
+            const label = document.getElementById('cp-value-label');
+            if (label) label.textContent = type === 'percentage' ? 'Discount Value (%) *' : 'Discount Value (৳) *';
+            const input = document.getElementById('cp-value');
+            if (input) {
+                if (type === 'percentage') { input.max = 90; input.min = 1; }
+                else { input.max = ''; input.min = 1; }
+            }
+        }
+
+        window.editCoupon = function(code) {
+            const c = allCouponsList.find(x => x.code === code);
+            if (!c) return;
+            document.getElementById('coupon-modal-title').innerText = 'Edit Coupon';
+            document.getElementById('edit-coupon-code').value = c.code;
+            document.getElementById('cp-code').value = c.code;
+            document.getElementById('cp-code').disabled = true;
+            document.getElementById('cp-desc').value = c.description || '';
+            document.getElementById('cp-type').value = c.type || 'percentage';
+            document.getElementById('cp-value').value = c.value || '';
+            document.getElementById('cp-min').value = c.minOrder || 0;
+            document.getElementById('cp-maxuses').value = c.maxUses || 0;
+            document.getElementById('cp-expiry').value = c.expiry || '';
+            document.getElementById('cp-active').checked = c.active !== false;
+            updateCouponValueLabel();
+            document.getElementById('coupon-modal').classList.remove('hidden');
+        }
+
+        window.saveCoupon = async function() {
+            const oldCode = document.getElementById('edit-coupon-code').value;
+            const codeInput = document.getElementById('cp-code').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const code = oldCode || codeInput;
+            const description = document.getElementById('cp-desc').value.trim();
+            const type = document.getElementById('cp-type').value;
+            const value = parseFloat(document.getElementById('cp-value').value);
+            const minOrder = parseFloat(document.getElementById('cp-min').value) || 0;
+            const maxUses = parseInt(document.getElementById('cp-maxuses').value) || 0;
+            const expiry = document.getElementById('cp-expiry').value || '';
+            const active = document.getElementById('cp-active').checked;
+
+            if (!code || code.length < 3) return toast('Code কমপক্ষে ৩ অক্ষর', 'error');
+            if (!value || value <= 0) return toast('Discount value দিন', 'error');
+            if (type === 'percentage' && value > 90) return toast('Percentage ৯০% এর বেশি হতে পারবে না', 'error');
+            if (!oldCode && allCouponsList.some(c => c.code === code)) return toast('এই code আগে থেকেই আছে', 'error');
+
+            const btn = document.getElementById('coupon-save-btn');
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+
+            try {
+                const existing = allCouponsList.find(c => c.code === code);
+                const data = {
+                    description, type, value, minOrder,
+                    maxUses, expiry, active,
+                    usedCount: existing?.usedCount || 0,
+                    updatedAt: new Date().toISOString()
+                };
+                if (!existing) data.createdAt = new Date().toISOString();
+                await setDoc(doc(db, "coupons", code), data, { merge: true });
+                toast('Coupon saved!');
+                closeCouponModal();
+                await loadCoupons();
+            } catch (e) {
+                toast("Error: " + e.message, 'error');
+            } finally {
+                btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE COUPON';
+            }
+        }
+
+        window.deleteCoupon = async function(code) {
+            if (!confirm(`"${code}" coupon ডিলিট করবেন?`)) return;
+            try {
+                await deleteDoc(doc(db, "coupons", code));
+                toast('Coupon deleted', 'warn');
+                await loadCoupons();
+            } catch (e) { toast("Error: " + e.message, 'error'); }
+        }
+
         // ====== HERO BANNERS ======
         function renderHeroBannersList() {
             const list = document.getElementById('hero-banners-list-admin');
@@ -896,7 +1137,7 @@
                 else bg = 'background:linear-gradient(135deg,#0A1628,#152238);';
                 html += `<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                     <div class="w-16 h-12 rounded-lg flex-shrink-0" style="${bg}"></div>
-                    <div class="flex-1 min-w-0"><p class="text-sm font-semibold text-navy truncate">${escapeHtml((b.title || '').replace(/<br>/g, ' '))}</p><p class="text-[11px] text-gray-500 truncate">${escapeHtml(b.badge || '')}</p></div>
+                    <div class="flex-1 min-w-0"><p class="text-sm font-semibold text-navy truncate">${safeHeroTitle(b.title)}</p><p class="text-[11px] text-gray-500 truncate">${escapeHtml(b.badge || '')}</p></div>
                     <button onclick="editHeroBanner(${i})" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-xs"></i></button>
                     <button onclick="deleteHeroBanner(${i})" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
                 </div>`;
@@ -1056,16 +1297,6 @@
             r.readAsDataURL(f);
         });
 
-        async function uploadToImgBB(file) {
-            const fd = new FormData();
-            fd.append('file', file);
-            fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
-            const result = await res.json();
-            if (!result.secure_url) throw new Error(result.error?.message || "Upload failed");
-            return result.secure_url;
-        }
-
         async function updateProductsCategory(oldKey, newKey) {
             const snap = await getDocs(collection(db, "products"));
             const batch = writeBatch(db);
@@ -1105,9 +1336,14 @@
         window.deleteCategory = async function(index) {
             const cat = allCategories[index]; if (!cat) return;
             let productCount = 0;
-            try { const snap = await getDocs(collection(db, "products")); snap.forEach(d => { if (d.data().category === cat.key) productCount++; }); } catch (e) {}
-            let msg = `"${cat.label}" ডিলিট করবেন?`;
-            if (productCount > 0) msg = `⚠️ এই ক্যাটেগরিতে ${productCount} টি প্রোডাক্ট আছে!\n\nডিলিট করবেন?`;
+            try {
+                const snap = await getDocs(collection(db, "products"));
+                snap.forEach(d => { if (d.data().category === cat.key) productCount++; });
+            } catch (e) {}
+            let msg = `"${cat.label}" ক্যাটেগরি ডিলিট করবেন?`;
+            if (productCount > 0) {
+                msg = `⚠️ "${cat.label}" ক্যাটেগরিতে ${productCount} টি প্রোডাক্ট আছে।\n\nডিলিট করলে ওই প্রোডাক্টগুলো "Uncategorized" হবে।\n\nডিলিট করবেন?`;
+            }
             if (!confirm(msg)) return;
             allCategories.splice(index, 1);
             await setDoc(doc(db, "settings", "main"), { categories: allCategories }, { merge: true });
@@ -1117,7 +1353,7 @@
                     const batch = writeBatch(db);
                     snap.forEach(d => { if (d.data().category === cat.key) batch.update(d.ref, { category: '' }); });
                     await batch.commit();
-                } catch (e) {}
+                } catch (e) { console.warn('Bulk update failed:', e); }
             }
             renderAdminCategories(); populateCategoryDropdown(); await loadProducts();
             toast('Deleted', 'warn');
@@ -1363,7 +1599,7 @@
                 const badge = stock <= 0 ? '<span class="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">OUT</span>' :
                     (stock < 5 ? `<span class="text-[10px] font-bold bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">${stock} left</span>` : `<span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">${stock} in stock</span>`);
                 html += `<div class="bg-white rounded-2xl p-3 premium-shadow flex items-center gap-3">
-                    <img src="${p.image}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl flex-shrink-0" onerror="this.src='https://via.placeholder.com/100x100?text=?'">
+                    <img src="${p.image || 'https://via.placeholder.com/100x100?text=?'}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl flex-shrink-0" onerror="this.src='https://via.placeholder.com/100x100?text=?'">
                     <div class="flex-1 min-w-0">
                         <p class="font-semibold text-sm text-navy truncate">${escapeHtml(p.name)}</p>
                         <div class="flex items-center gap-2 mt-1 flex-wrap"><p class="text-[11px] text-gray-500 font-medium">${escapeHtml(p.category || '')}</p>${badge}</div>
@@ -1395,15 +1631,18 @@
             const p = allProductsList.find(x => x.id === id); if (!p) return;
             document.getElementById('modal-title').innerText = 'Edit Product';
             document.getElementById('edit-product-id').value = id;
-            document.getElementById('p-name').value = p.name;
-            document.getElementById('p-price').value = p.price;
+            document.getElementById('p-name').value = p.name || '';
+            document.getElementById('p-price').value = p.price || '';
             document.getElementById('p-oldprice').value = p.oldPrice || '';
             document.getElementById('p-category').value = p.category || (allCategories[0]?.key || 'TV');
             document.getElementById('p-stock').value = p.stock || 0;
             document.getElementById('p-brand').value = p.brand || '';
             document.getElementById('p-description').value = p.description || '';
             pendingImages = [];
-            existingImages = p.images && p.images.length ? [...p.images] : [p.image];
+            const imgs = Array.isArray(p.images) ? p.images.filter(u => typeof u === 'string' && u.length > 0) : [];
+            if (imgs.length > 0) existingImages = [...imgs];
+            else if (p.image && typeof p.image === 'string') existingImages = [p.image];
+            else existingImages = [];
             renderImagePreview();
             document.getElementById('product-modal').classList.remove('hidden');
         }
@@ -1437,14 +1676,22 @@
         window.saveProduct = async function() {
             const id = document.getElementById('edit-product-id').value;
             const name = document.getElementById('p-name').value.trim();
-            const price = parseFloat(document.getElementById('p-price').value);
-            const oldPrice = parseFloat(document.getElementById('p-oldprice').value) || 0;
+            const priceRaw = document.getElementById('p-price').value;
+            const oldPriceRaw = document.getElementById('p-oldprice').value;
             const category = document.getElementById('p-category').value;
-            const stock = parseInt(document.getElementById('p-stock').value) || 0;
+            const stockRaw = document.getElementById('p-stock').value;
             const brand = document.getElementById('p-brand').value.trim();
             const description = document.getElementById('p-description').value.trim();
-            if (!name || !price) return toast("Name and Price required!", 'error');
-            if (existingImages.length === 0 && pendingImages.length === 0) return toast("Select at least one image!", 'error');
+            const price = parseFloat(priceRaw);
+            const oldPrice = oldPriceRaw ? parseFloat(oldPriceRaw) : 0;
+            const stock = stockRaw ? parseInt(stockRaw) : 0;
+            if (!name || name.length < 2) return toast("সঠিক নাম দিন", 'error');
+            if (!priceRaw || isNaN(price) || price < 0) return toast("সঠিক দাম দিন", 'error');
+            if (price > 10000000) return toast("দাম অনেক বেশি", 'error');
+            if (oldPriceRaw && (isNaN(oldPrice) || oldPrice < 0)) return toast("Old price সঠিক নয়", 'error');
+            if (oldPrice > 0 && oldPrice < price) return toast("Old price, price এর চেয়ে কম হতে পারে না", 'error');
+            if (isNaN(stock) || stock < 0) return toast("Stock সঠিক নয়", 'error');
+            if (existingImages.length === 0 && pendingImages.length === 0) return toast("কমপক্ষে একটা image দিন", 'error');
             const btn = document.getElementById('save-btn');
             btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading...';
             try {
@@ -1453,9 +1700,11 @@
                     btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Uploading ${i + 1}/${pendingImages.length}...`;
                     newUrls.push(await uploadToImgBB(pendingImages[i].file));
                 }
-                const allImages = [...existingImages, ...newUrls];
+                const allImages = [...existingImages, ...newUrls].filter(u => typeof u === 'string' && u.length > 0);
+                if (allImages.length === 0) throw new Error('No valid images');
                 const data = { name, price, oldPrice, category, stock, brand, description, image: allImages[0], images: allImages };
-                if (id) await updateDoc(doc(db, "products", id), data); else await addDoc(collection(db, "products"), data);
+                if (id) await updateDoc(doc(db, "products", id), data);
+                else await addDoc(collection(db, "products"), data);
                 toast('Saved!'); closeModal(); await loadProducts(); updateStats();
             } catch (e) { toast("Error: " + e.message, 'error'); }
             finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE PRODUCT'; }
@@ -1499,10 +1748,37 @@
             renderAdminOrders();
         }
 
+        window.exportOrdersCSV = function() {
+            if (allOrdersList.length === 0) return toast('কোনো order নেই', 'warn');
+            let csv = 'Order Number,Date,Customer,Phone,District,Thana,Items,Subtotal,Delivery,Total,Paid,Due,Status,Payment\n';
+            allOrdersList.forEach(o => {
+                const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString('en-GB') : '';
+                const items = (o.items || []).map(i => `${i.name} x${i.quantity}`).join(' | ');
+                const row = [o.orderNumber || o.id, date, o.customer?.name || '', o.customer?.phone || '', o.customer?.district || '', o.customer?.thana || '', items, o.subtotal || 0, o.deliveryCharge || 0, o.total || 0, o.advancePaid || 0, o.dueAmount || 0, o.status || 'pending', o.paymentMethod || ''].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+                csv += row + '\n';
+            });
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `heartix-orders-${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast('CSV downloaded!');
+        }
+
         function renderAdminOrders() {
             const list = document.getElementById('order-list-admin'); if (!list) return;
+            const search = (document.getElementById('order-search')?.value || '').toLowerCase().trim();
             let filtered = allOrdersList;
             if (currentOrderFilter !== 'all') filtered = filtered.filter(o => o.status === currentOrderFilter);
+            if (search) {
+                filtered = filtered.filter(o =>
+                    (o.orderNumber || '').toLowerCase().includes(search) ||
+                    (o.customer?.name || '').toLowerCase().includes(search) ||
+                    (o.customer?.phone || '').toLowerCase().includes(search)
+                );
+            }
             if (filtered.length === 0) {
                 list.innerHTML = '<div class="bg-white rounded-2xl p-12 text-center premium-shadow"><i class="fas fa-receipt text-4xl text-gray-200 mb-3"></i><p class="text-sm text-gray-500">No orders</p></div>';
                 return;
@@ -1512,16 +1788,8 @@
                 const itemsHtml = (o.items || []).map(i => `<li class="flex justify-between gap-2"><span class="truncate">${escapeHtml(i.name)} <span class="text-gray-400">× ${i.quantity}</span></span><span class="font-semibold flex-shrink-0">৳${fmt(i.price * i.quantity)}</span></li>`).join('');
                 const statusClass = 'status-' + (o.status || 'pending');
                 const orderDate = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '';
-
-                const statusMeta = {
-                    pending: { icon: 'hourglass-half', label: 'Pending' },
-                    confirmed: { icon: 'circle-check', label: 'Confirmed' },
-                    shipped: { icon: 'truck-fast', label: 'Shipped' },
-                    delivered: { icon: 'box-open', label: 'Delivered' },
-                    cancelled: { icon: 'circle-xmark', label: 'Cancelled' }
-                };
+                const statusMeta = { pending: { icon: 'hourglass-half', label: 'Pending' }, confirmed: { icon: 'circle-check', label: 'Confirmed' }, shipped: { icon: 'truck-fast', label: 'Shipped' }, delivered: { icon: 'box-open', label: 'Delivered' }, cancelled: { icon: 'circle-xmark', label: 'Cancelled' } };
                 const current = statusMeta[o.status] || statusMeta.pending;
-
                 html += `<div class="bg-white rounded-2xl p-4 premium-shadow border-l-4 border-gold">
                     <div class="flex justify-between items-start mb-3 gap-2">
                         <div class="min-w-0 flex-1">
@@ -1529,7 +1797,7 @@
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">${escapeHtml(o.customer?.name || '')} • ${escapeHtml(o.customer?.phone || '')}</p>
                         </div>
                         <div class="text-right flex-shrink-0">
-                            <span class="order-status ${statusClass}">${o.status}</span>
+                            <span class="order-status ${statusClass}">${o.status || 'pending'}</span>
                             ${orderDate ? `<p class="text-[10px] text-gray-400 mt-1">${orderDate}</p>` : ''}
                         </div>
                     </div>
@@ -1540,9 +1808,8 @@
                         <div class="bg-green-50 rounded-xl p-2.5"><p class="text-[9px] text-green-700 font-bold uppercase tracking-wider">Paid</p><p class="text-sm font-bold text-green-700 mt-0.5">৳${fmt(o.advancePaid)}</p></div>
                         <div class="bg-red-50 rounded-xl p-2.5"><p class="text-[9px] text-red-700 font-bold uppercase tracking-wider">Due</p><p class="text-sm font-bold text-red-700 mt-0.5">৳${fmt(o.dueAmount)}</p></div>
                     </div>
-                    ${o.discount > 0 ? `<p class="text-[11px] text-amber-600 bg-amber-50 rounded-lg p-2 mb-2"><i class="fas fa-tag mr-1"></i>Discount: ৳${fmt(o.discount)}</p>` : ''}
+                    ${o.discount > 0 ? `<p class="text-[11px] text-amber-600 bg-amber-50 rounded-lg p-2 mb-2"><i class="fas fa-tag mr-1"></i>Discount: ৳${fmt(o.discount)}${o.couponCode ? ` (${escapeHtml(o.couponCode)})` : ''}</p>` : ''}
                     ${o.adminNote ? `<p class="text-[11px] text-gray-500 bg-gray-50 rounded-lg p-2 mb-2"><i class="fas fa-sticky-note mr-1"></i>${escapeHtml(o.adminNote)}</p>` : ''}
-
                     <div class="space-y-2">
                         <button onclick="openOrderEdit('${o.id}')" class="w-full bg-navy text-white px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2">
                             <i class="fas fa-pen"></i> EDIT ORDER
@@ -1554,10 +1821,10 @@
                             <span class="text-gray-400 text-[10px] font-semibold uppercase tracking-wider">Change <i class="fas fa-chevron-down ml-1"></i></span>
                         </button>
                         <div class="grid grid-cols-2 gap-2">
-                            <a href="tel:${o.customer?.phone || ''}" class="py-2.5 bg-green-50 text-green-700 rounded-xl flex items-center justify-center gap-2 text-xs font-bold">
+                            <a href="tel:${escapeHtml(o.customer?.phone || '')}" class="py-2.5 bg-green-50 text-green-700 rounded-xl flex items-center justify-center gap-2 text-xs font-bold">
                                 <i class="fas fa-phone"></i> Call
                             </a>
-                            <a href="https://wa.me/88${(o.customer?.phone || '').replace(/^0/, '')}?text=${encodeURIComponent('Order ' + (o.orderNumber || '') + ' — Heartix')}" target="_blank" class="py-2.5 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center gap-2 text-xs font-bold">
+                            <a href="https://wa.me/88${(o.customer?.phone || '').replace(/^0/, '')}?text=${encodeURIComponent('Order ' + (o.orderNumber || '') + ' — Heartix')}" target="_blank" rel="noopener" class="py-2.5 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center gap-2 text-xs font-bold">
                                 <i class="fab fa-whatsapp"></i> WhatsApp
                             </a>
                         </div>
@@ -1567,7 +1834,6 @@
             list.innerHTML = html;
         }
 
-        // ====== ORDER EDIT ======
         window.openOrderEdit = function(id) {
             const o = allOrdersList.find(x => x.id === id); if (!o) return;
             editingOrderId = id;
@@ -1639,16 +1905,13 @@
             document.getElementById('oe-due').textContent = '৳' + fmt(due);
         }
 
-        // ⚡ FIX: Stock delta calculation যোগ করা হয়েছে
         window.saveOrderEdit = async function() {
             if (!editingOrderId) return;
             if (editingOrderItems.length === 0) {
                 return toast('কমপক্ষে একটা item থাকতে হবে!', 'error');
             }
-            
             const order = allOrdersList.find(x => x.id === editingOrderId);
             if (!order) return;
-            
             const discount = parseFloat(document.getElementById('oe-discount').value) || 0;
             const delivery = parseFloat(document.getElementById('oe-delivery').value) || 0;
             const advance = parseFloat(document.getElementById('oe-advance').value) || 0;
@@ -1656,60 +1919,47 @@
             const subtotal = editingOrderItems.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0);
             const total = Math.max(0, subtotal - discount + delivery);
             const dueAmount = Math.max(0, total - advance);
-
-            // ⚡ Stock delta হিসাব
             const shouldAdjustStock = order.status !== 'cancelled' && order.stockDeducted !== false;
             const productDeltas = {};
-            
-            // পুরোনো items → negative delta
             (order.items || []).forEach(it => {
                 if (!it.id) return;
                 productDeltas[it.id] = (productDeltas[it.id] || 0) - (Number(it.quantity) || 0);
             });
-            
-            // নতুন items → positive delta
             editingOrderItems.forEach(it => {
                 if (!it.id) return;
                 productDeltas[it.id] = (productDeltas[it.id] || 0) + (Number(it.quantity) || 0);
             });
-
             const btn = document.getElementById('oe-save-btn');
-            btn.disabled = true; 
+            btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
-            
             try {
-                // Stock delta apply
                 if (shouldAdjustStock) {
                     for (const [pid, delta] of Object.entries(productDeltas)) {
                         if (delta === 0) continue;
                         try {
                             await updateDoc(doc(db, "products", pid), { stock: increment(-delta) });
-                        } catch (e) { 
-                            console.warn('Stock adjust failed:', pid, e); 
+                        } catch (e) {
+                            console.warn('Stock adjust failed:', pid, e);
                         }
                     }
                 }
-                
-                // Order update
                 await updateDoc(doc(db, "orders", editingOrderId), {
                     items: editingOrderItems,
-                    subtotal, discount, 
+                    subtotal, discount,
                     deliveryCharge: delivery,
-                    total, advancePaid: advance, 
+                    total, advancePaid: advance,
                     dueAmount, adminNote
                 });
-                
                 toast('Order updated!');
                 closeOrderEdit();
                 await loadOrders();
-                await loadProducts(); // Stock UI refresh
+                await loadProducts();
                 updateStats();
-            } catch (e) { 
-                toast("Error: " + e.message, 'error'); 
-            }
-            finally { 
-                btn.disabled = false; 
-                btn.innerHTML = '<i class="fas fa-check mr-1"></i> SAVE'; 
+            } catch (e) {
+                toast("Error: " + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check mr-1"></i> SAVE';
             }
         }
 
@@ -1725,7 +1975,6 @@
             } catch (e) { toast("Error: " + e.message, 'error'); }
         }
 
-        // ====== PRODUCT PICKER ======
         window.openProductPicker = function() {
             document.getElementById('picker-search').value = '';
             renderPickerProducts();
@@ -1744,7 +1993,7 @@
                 const stock = Number(p.stock) || 0;
                 const outOfStock = stock <= 0;
                 html += `<div ${outOfStock ? '' : `onclick="addItemToOrder('${p.id}')"`} class="flex items-center gap-3 p-3 rounded-xl cursor-pointer ${outOfStock ? 'bg-red-50 opacity-60 cursor-not-allowed' : 'bg-gray-50 active:bg-gray-100'}">
-                    <img src="${p.image}" class="w-12 h-12 object-contain bg-white rounded-lg flex-shrink-0" onerror="this.src='https://via.placeholder.com/50x50?text=?'">
+                    <img src="${p.image || 'https://via.placeholder.com/50x50?text=?'}" class="w-12 h-12 object-contain bg-white rounded-lg flex-shrink-0" onerror="this.src='https://via.placeholder.com/50x50?text=?'">
                     <div class="flex-1 min-w-0">
                         <p class="text-xs font-semibold text-navy truncate">${escapeHtml(p.name)}</p>
                         <p class="text-[11px] text-gold font-bold">৳${fmt(p.price)} ${outOfStock ? '<span class="text-red-500 ml-1">• OUT OF STOCK</span>' : `• Stock: ${stock}`}</p>
@@ -1771,13 +2020,11 @@
             toast('Item added!');
         }
 
-        // ====== PREMIUM STATUS PICKER ======
         window.openStatusPicker = function(orderId) {
             const o = allOrdersList.find(x => x.id === orderId);
             if (!o) return;
             statusPickerOrderId = orderId;
             document.getElementById('sp-order-num').textContent = o.orderNumber || orderId.slice(0, 10);
-
             const statuses = [
                 { key: 'pending', icon: 'hourglass-half', label: 'Pending', desc: 'অর্ডার অপেক্ষায় আছে', color: 'yellow' },
                 { key: 'confirmed', icon: 'circle-check', label: 'Confirmed', desc: 'গ্রাহককে কনফার্ম করা হয়েছে', color: 'blue' },
@@ -1785,23 +2032,13 @@
                 { key: 'delivered', icon: 'box-open', label: 'Delivered', desc: 'সফলভাবে ডেলিভারি হয়েছে', color: 'green' },
                 { key: 'cancelled', icon: 'circle-xmark', label: 'Cancelled', desc: 'অর্ডার বাতিল করা হয়েছে', color: 'red' }
             ];
-
             const current = o.status;
-            const colorMap = {
-                yellow: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-300' },
-                blue: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-300' },
-                purple: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-300' },
-                green: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-300' },
-                red: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-300' }
-            };
-
+            const colorMap = { yellow: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-300' }, blue: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-300' }, purple: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-300' }, green: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-300' }, red: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-300' } };
             let html = '';
             statuses.forEach(s => {
                 const isActive = s.key === current;
                 const c = colorMap[s.color];
-                html += `<button onclick="selectStatus('${s.key}')" class="w-full flex items-center gap-3 p-4 rounded-2xl border-2 transition text-left ${
-                    isActive ? `${c.bg} ${c.border}` : 'bg-white border-gray-100 hover:border-gray-200'
-                }">
+                html += `<button onclick="selectStatus('${s.key}')" class="w-full flex items-center gap-3 p-4 rounded-2xl border-2 transition text-left ${isActive ? `${c.bg} ${c.border}` : 'bg-white border-gray-100 hover:border-gray-200'}">
                     <div class="w-11 h-11 rounded-xl ${c.bg} flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-${s.icon} ${c.text}"></i>
                     </div>
@@ -1827,15 +2064,13 @@
             const o = allOrdersList.find(x => x.id === orderId);
             if (!o) { closeStatusPicker(); return; }
             if (o.status === newStatus) { closeStatusPicker(); return toast('Already ' + newStatus, 'warn'); }
-
             pendingStatusChange = { orderId, newStatus };
             closeStatusPicker();
-
             const statusInfo = {
                 pending: { icon: 'hourglass-half', color: 'text-yellow-600', bg: 'bg-yellow-50', title: 'Set to Pending?', msg: 'এই order টি আবার Pending status-এ ফিরে যাবে।' },
                 confirmed: { icon: 'circle-check', color: 'text-blue-600', bg: 'bg-blue-50', title: 'Confirm Order?', msg: 'গ্রাহককে জানান যে অর্ডার কনফার্ম হয়েছে।' },
                 shipped: { icon: 'truck-fast', color: 'text-purple-600', bg: 'bg-purple-50', title: 'Mark as Shipped?', msg: 'অর্ডারটি ডেলিভারির জন্য পাঠানো হচ্ছে।' },
-                delivered: { icon: 'box-open', color: 'text-green-600', bg: 'bg-green-50', title: 'Mark as Delivered?', msg: 'ডেলিভারি সম্পন্ন হয়েছে? Stock deduct হয়েছে এবং Revenue-তে যুক্ত হবে।' },
+                delivered: { icon: 'box-open', color: 'text-green-600', bg: 'bg-green-50', title: 'Mark as Delivered?', msg: 'ডেলিভারি সম্পন্ন হয়েছে? Revenue-তে যুক্ত হবে।' },
                 cancelled: { icon: 'circle-xmark', color: 'text-red-600', bg: 'bg-red-50', title: 'Cancel Order?', msg: 'অর্ডার বাতিল হবে এবং Stock ফিরে যাবে।' }
             };
             const info = statusInfo[newStatus];
@@ -1859,7 +2094,6 @@
             try {
                 const order = allOrdersList.find(x => x.id === orderId);
                 const oldStatus = order?.status;
-
                 if (newStatus === 'cancelled' && oldStatus !== 'cancelled' && order?.items && order.stockDeducted !== false) {
                     for (const item of order.items) {
                         if (!item.id) continue;
@@ -1867,7 +2101,6 @@
                     }
                     await updateDoc(doc(db, "orders", orderId), { stockDeducted: false });
                 }
-
                 if (oldStatus === 'cancelled' && newStatus !== 'cancelled' && order?.items) {
                     for (const item of order.items) {
                         if (!item.id) continue;
@@ -1875,7 +2108,6 @@
                     }
                     await updateDoc(doc(db, "orders", orderId), { stockDeducted: true });
                 }
-
                 await updateDoc(doc(db, "orders", orderId), { status: newStatus });
                 toast('Status: ' + newStatus);
                 closeStatusConfirm();
@@ -1894,7 +2126,7 @@
                 const sc = 'status-' + (o.status || 'pending');
                 html += `<div class="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
                     <div class="min-w-0 flex-1"><p class="text-sm font-semibold text-navy truncate">${escapeHtml(o.customer?.name || '')}</p><p class="text-[11px] text-gray-500">${(o.items || []).length} item(s) • ৳${fmt(o.total)}</p></div>
-                    <span class="order-status ${sc} ml-2">${o.status}</span>
+                    <span class="order-status ${sc} ml-2">${o.status || 'pending'}</span>
                 </div>`;
             });
             list.innerHTML = html;
@@ -1947,7 +2179,6 @@
             }
         }
 
-        // ====== SETTINGS ======
         async function loadSettings() {
             try {
                 const snap = await getDoc(doc(db, "settings", "main"));
@@ -1967,15 +2198,19 @@
 
         window.saveSettings = async function() {
             try {
+                const dc = parseFloat(document.getElementById('setting-delivery-charge').value);
+                const fda = parseFloat(document.getElementById('setting-free-delivery').value);
+                if (isNaN(dc) || dc < 0) return toast('Delivery charge সঠিক নয়', 'error');
+                if (document.getElementById('setting-free-delivery').value && (isNaN(fda) || fda < 0)) return toast('Free delivery amount সঠিক নয়', 'error');
                 const settings = {
-                    deliveryCharge: parseFloat(document.getElementById('setting-delivery-charge').value) || 100,
-                    freeDeliveryAbove: parseFloat(document.getElementById('setting-free-delivery').value) || 0,
-                    contactAddress: document.getElementById('setting-address').value,
-                    contactPhone: document.getElementById('setting-phone').value,
-                    contactEmail: document.getElementById('setting-email').value,
-                    whatsapp: document.getElementById('setting-whatsapp').value,
-                    bkashNumber: document.getElementById('setting-bkash').value,
-                    nagadNumber: document.getElementById('setting-nagad').value
+                    deliveryCharge: dc || 100,
+                    freeDeliveryAbove: fda || 0,
+                    contactAddress: document.getElementById('setting-address').value.trim(),
+                    contactPhone: document.getElementById('setting-phone').value.trim(),
+                    contactEmail: document.getElementById('setting-email').value.trim(),
+                    whatsapp: document.getElementById('setting-whatsapp').value.trim(),
+                    bkashNumber: document.getElementById('setting-bkash').value.trim(),
+                    nagadNumber: document.getElementById('setting-nagad').value.trim()
                 };
                 await setDoc(doc(db, "settings", "main"), settings, { merge: true });
                 toast('Settings saved!');
