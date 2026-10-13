@@ -179,6 +179,7 @@
                     <button onclick="filterOrders('confirmed', this)" class="order-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Confirmed</button>
                     <button onclick="filterOrders('shipped', this)" class="order-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Shipped</button>
                     <button onclick="filterOrders('delivered', this)" class="order-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Delivered</button>
+                    <button onclick="filterOrders('cancelled', this)" class="order-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Cancelled</button>
                 </div>
                 <div id="order-list-admin" class="space-y-3"><p class="text-center text-gray-400 py-8">Loading...</p></div>
             </div>
@@ -471,7 +472,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, query, orderBy, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const IMGBB_API_KEY = "df6ee25bc91b9b7200070d5328644463";
         const firebaseConfig = {
@@ -1107,11 +1108,20 @@
             let html = '';
             filtered.forEach(p => {
                 const imgCount = (p.images && p.images.length) || 1;
+                const stock = Number(p.stock) || 0;
+                const stockBadge = stock <= 0 
+                    ? '<span class="text-[10px] font-bold bg-red-100 text-red-600 px-1.5 py-0.5 rounded">Stock: 0</span>'
+                    : (stock < 5 
+                        ? `<span class="text-[10px] font-bold bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded">Stock: ${stock}</span>`
+                        : `<span class="text-[10px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded">Stock: ${stock}</span>`);
                 html += `<div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
                     <img src="${p.image}" class="w-16 h-16 object-contain bg-gray-50 rounded-lg flex-shrink-0">
                     <div class="flex-1 min-w-0">
                         <p class="font-semibold text-sm navy-text truncate">${escapeHtml(p.name)}</p>
-                        <p class="text-xs text-gray-500">${escapeHtml(p.category || '')}${p.brand ? ' • ' + escapeHtml(p.brand) : ''} • ${imgCount} img</p>
+                        <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                            <p class="text-xs text-gray-500">${escapeHtml(p.category || '')}${p.brand ? ' • ' + escapeHtml(p.brand) : ''}</p>
+                            ${stockBadge}
+                        </div>
                         <p class="text-sm font-bold gold-text">৳ ${p.price}</p>
                     </div>
                     <div class="flex flex-col gap-1 flex-shrink-0">
@@ -1149,7 +1159,7 @@
             document.getElementById('p-price').value = p.price;
             document.getElementById('p-oldprice').value = p.oldPrice || '';
             document.getElementById('p-category').value = p.category || (allCategories[0]?.key || 'TV');
-            document.getElementById('p-stock').value = p.stock || 10;
+            document.getElementById('p-stock').value = p.stock || 0;
             document.getElementById('p-brand').value = p.brand || '';
             document.getElementById('p-description').value = p.description || '';
             pendingImages = [];
@@ -1288,14 +1298,53 @@
             list.innerHTML = html;
         }
 
+        // ====== UPDATE ORDER STATUS WITH STOCK HANDLING ======
         window.updateOrderStatus = async function(id, status) {
+            const order = allOrdersList.find(x => x.id === id);
+            const oldStatus = order?.status;
+
+            if (oldStatus === status) return;
+
             try {
+                // If cancelling → restore stock
+                if (status === 'cancelled' && oldStatus !== 'cancelled' && order?.items && order.stockDeducted !== false) {
+                    for (const item of order.items) {
+                        if (!item.id) continue;
+                        try {
+                            await updateDoc(doc(db, "products", item.id), {
+                                stock: increment(item.quantity)
+                            });
+                        } catch (e) { console.warn('Stock restore failed:', item.id, e); }
+                    }
+                    await updateDoc(doc(db, "orders", id), { stockDeducted: false });
+                    if (order) order.stockDeducted = false;
+                }
+
+                // If un-cancelling → deduct stock again
+                if (oldStatus === 'cancelled' && status !== 'cancelled' && order?.items) {
+                    for (const item of order.items) {
+                        if (!item.id) continue;
+                        try {
+                            await updateDoc(doc(db, "products", item.id), {
+                                stock: increment(-item.quantity)
+                            });
+                        } catch (e) { console.warn('Stock re-deduct failed:', item.id, e); }
+                    }
+                    await updateDoc(doc(db, "orders", id), { stockDeducted: true });
+                    if (order) order.stockDeducted = true;
+                }
+
+                // Update status
                 await updateDoc(doc(db, "orders", id), { status });
-                const o = allOrdersList.find(x => x.id === id);
-                if (o) o.status = status;
+                if (order) order.status = status;
+
                 renderRecentOrders();
                 updateStats();
-            } catch (e) { alert("Error: " + e.message); }
+                renderAdminOrders();
+                await loadProducts();
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
         }
 
         function renderRecentOrders() {
