@@ -44,7 +44,6 @@
 
     <div id="toast-container"></div>
 
-    <!-- HEADER -->
     <header class="glass sticky top-0 z-30 px-3 py-2 flex justify-between items-center border-b border-gray-100">
         <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream">
             <i class="fas fa-arrow-left text-navy text-lg"></i>
@@ -64,7 +63,7 @@
             <p class="text-gray-400 text-sm">Loading...</p>
         </div>
 
-        <!-- AUTH (Login/Register) -->
+        <!-- AUTH SECTION -->
         <div id="auth-section" class="hidden">
 
             <div class="text-center mb-6">
@@ -75,7 +74,6 @@
                 <p class="text-xs text-gray-500">Login or create your account</p>
             </div>
 
-            <!-- Tab Switch -->
             <div class="bg-white rounded-2xl p-1 flex mb-4 premium-shadow">
                 <button id="tab-login" onclick="switchTab('login')" class="tab-btn active flex-1 py-2.5 rounded-xl text-xs font-bold text-gray-500">
                     Login
@@ -138,7 +136,6 @@
         <!-- LOGGED IN SECTION -->
         <div id="logged-section" class="hidden space-y-4">
 
-            <!-- PROFILE CARD -->
             <div class="navy-gradient rounded-3xl p-6 text-white relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
                 <div class="absolute bottom-0 left-0 w-24 h-24 bg-[#D4A84B]/10 rounded-full -ml-12 -mb-12"></div>
@@ -154,7 +151,6 @@
                 </div>
             </div>
 
-            <!-- QUICK LINKS -->
             <div class="bg-white rounded-2xl premium-shadow overflow-hidden">
                 <a href="wishlist.html" class="flex items-center gap-3 p-4 active:bg-gray-50 border-b border-gray-100">
                     <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
@@ -188,7 +184,6 @@
                 </a>
             </div>
 
-            <!-- MY ORDERS -->
             <div class="bg-white rounded-2xl premium-shadow p-5">
                 <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
                     <h3 class="font-display text-base navy-text font-bold flex items-center gap-2">
@@ -201,7 +196,6 @@
                 <div id="my-orders-list" class="space-y-3"></div>
             </div>
 
-            <!-- ACCOUNT INFO -->
             <div class="bg-white rounded-2xl premium-shadow p-5">
                 <h3 class="font-display text-base navy-text font-bold mb-4 pb-3 border-b border-gray-100 flex items-center gap-2">
                     <i class="fas fa-user-circle gold-text text-sm"></i> Account Info
@@ -221,7 +215,6 @@
                 </div>
             </div>
 
-            <!-- LOGOUT -->
             <button onclick="logoutUser()" class="w-full bg-red-50 text-red-500 py-3.5 rounded-2xl font-bold text-sm active:scale-[0.98] transition">
                 <i class="fas fa-sign-out-alt mr-1"></i> Logout
             </button>
@@ -232,7 +225,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = {
@@ -269,8 +262,9 @@
         // ====== TABS ======
         window.switchTab = function(tab) {
             ['login','register'].forEach(t => {
-                document.getElementById('tab-' + t).classList.toggle('active', t === tab);
-                document.getElementById('tab-' + t).classList.toggle('text-gray-500', t !== tab);
+                const btn = document.getElementById('tab-' + t);
+                btn.classList.toggle('active', t === tab);
+                btn.classList.toggle('text-gray-500', t !== tab);
             });
             document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
             document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
@@ -287,16 +281,32 @@
         })();
 
         // ====== AUTH STATE ======
+        let authResolved = false;
+
+        // Fallback: 5 seconds পর loading বন্ধ
+        setTimeout(() => {
+            if (!authResolved) {
+                console.warn('Auth timeout — showing login form');
+                const loadingEl = document.getElementById('loading');
+                const authEl = document.getElementById('auth-section');
+                if (loadingEl) loadingEl.classList.add('hidden');
+                if (!currentUser && authEl) authEl.classList.remove('hidden');
+            }
+        }, 5000);
+
         if (auth) {
             onAuthStateChanged(auth, async (user) => {
+                authResolved = true;
                 document.getElementById('loading').classList.add('hidden');
                 if (user) {
                     currentUser = user;
                     document.getElementById('auth-section').classList.add('hidden');
                     document.getElementById('logged-section').classList.remove('hidden');
-                    await loadProfile();
-                    loadMyOrders();
-                    updateBadges();
+                    try {
+                        await loadProfile();
+                        loadMyOrders();
+                        updateBadges();
+                    } catch (e) { console.error('Profile load error:', e); }
                 } else {
                     currentUser = null;
                     document.getElementById('auth-section').classList.remove('hidden');
@@ -304,6 +314,7 @@
                 }
             });
         } else {
+            authResolved = true;
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('auth-section').classList.remove('hidden');
             showToast('Authentication লোড হয়নি', 'error');
@@ -325,22 +336,24 @@
 
             const btn = document.getElementById('register-btn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creating account...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creating...';
 
             try {
                 const cred = await createUserWithEmailAndPassword(auth, email, password);
-                await updateProfile(cred.user, { displayName: name });
-
-                // Save profile in Firestore
-                await setDoc(doc(db, "customers", cred.user.uid), {
-                    uid: cred.user.uid,
-                    name, phone, email,
-                    createdAt: new Date().toISOString()
-                }, { merge: true });
+                try { await updateProfile(cred.user, { displayName: name }); } catch(e) {}
+                try {
+                    await setDoc(doc(db, "customers", cred.user.uid), {
+                        uid: cred.user.uid,
+                        name, phone, email,
+                        createdAt: new Date().toISOString()
+                    }, { merge: true });
+                } catch (e) { console.warn('Profile save failed:', e); }
 
                 showToast('Account তৈরি হয়েছে!', 'success');
-                // Clear form
-                ['reg-name','reg-phone','reg-email','reg-password','reg-confirm'].forEach(id => document.getElementById(id).value = '');
+                ['reg-name','reg-phone','reg-email','reg-password','reg-confirm'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
             } catch (e) {
                 let msg = 'রেজিস্ট্রেশন ব্যর্থ';
                 if (e.code === 'auth/email-already-in-use') msg = 'এই ইমেইল আগেই ব্যবহৃত';
@@ -435,7 +448,9 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
 
             try {
-                await setDoc(doc(db, "customers", currentUser.uid), { name, phone, email: currentUser.email }, { merge: true });
+                await setDoc(doc(db, "customers", currentUser.uid), {
+                    name, phone, email: currentUser.email
+                }, { merge: true });
                 try { await updateProfile(currentUser, { displayName: name }); } catch (e) {}
                 document.getElementById('user-display-name').textContent = name;
                 document.getElementById('user-avatar-letter').textContent = (name[0] || 'U').toUpperCase();
@@ -455,10 +470,12 @@
             list.innerHTML = '<p class="text-xs text-gray-400 text-center py-4"><i class="fas fa-spinner fa-spin mr-1"></i> Loading...</p>';
 
             try {
-                const q = query(collection(db, "orders"), where("customer.email", "==", currentUser.email));
-                const snap = await getDocs(q);
+                const allSnap = await getDocs(collection(db, "orders"));
                 let orders = [];
-                snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
+                allSnap.forEach(d => {
+                    const data = d.data();
+                    if (data.customer?.email === currentUser.email) orders.push({ id: d.id, ...data });
+                });
                 orders.sort((a, b) => {
                     const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
                     const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
@@ -495,44 +512,7 @@
                 list.innerHTML = html;
             } catch (e) {
                 console.error('Orders:', e);
-                // Fallback: fetch all and filter client-side (in case index missing)
-                try {
-                    const allSnap = await getDocs(collection(db, "orders"));
-                    let orders = [];
-                    allSnap.forEach(d => {
-                        const data = d.data();
-                        if (data.customer?.email === currentUser.email) orders.push({ id: d.id, ...data });
-                    });
-                    orders.sort((a, b) => {
-                        const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-                        const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-                        return tb - ta;
-                    });
-                    if (orders.length === 0) {
-                        list.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">এখনো কোনো অর্ডার নেই</p>';
-                        return;
-                    }
-                    let html = '';
-                    orders.slice(0, 10).forEach(o => {
-                        const statusClass = 'status-' + (o.status || 'pending');
-                        html += `<a href="track-order.html?order=${encodeURIComponent(o.orderNumber || '')}" class="block bg-gray-50 rounded-xl p-3 active:bg-gray-100">
-                            <div class="flex justify-between items-start mb-2">
-                                <div class="min-w-0">
-                                    <p class="font-bold text-navy text-xs">${escapeHtml(o.orderNumber || '')}</p>
-                                    <p class="text-[10px] text-gray-500 mt-0.5">${(o.items || []).length} item(s)</p>
-                                </div>
-                                <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${statusClass}">${o.status || 'pending'}</span>
-                            </div>
-                            <div class="flex justify-between items-baseline">
-                                <span class="text-[10px] text-gray-500">Total</span>
-                                <span class="font-bold text-navy text-sm">৳${formatPrice(o.total)}</span>
-                            </div>
-                        </a>`;
-                    });
-                    list.innerHTML = html;
-                } catch (e2) {
-                    list.innerHTML = '<p class="text-xs text-red-500 text-center py-4">লোড করা যায়নি</p>';
-                }
+                list.innerHTML = '<p class="text-xs text-red-500 text-center py-4">লোড করা যায়নি</p>';
             }
         };
 
