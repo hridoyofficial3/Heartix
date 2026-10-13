@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Heartix</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { theme: { extend: { colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' } }}}}</script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -24,6 +25,7 @@
         .cat-preview { width: 60px; height: 60px; background: #FFFDF7; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(10,22,40,0.06); overflow: hidden; flex-shrink: 0; }
         .cat-preview img { width: 48px; height: 48px; object-fit: contain; }
         .cat-preview .emoji { font-size: 32px; line-height: 1; }
+        .warn-banner { background: linear-gradient(135deg, #FEF3C7, #FDE68A); border: 1px solid #F59E0B; color: #92400E; }
     </style>
 </head>
 <body>
@@ -53,6 +55,12 @@
             </div>
             <button onclick="logout()" class="text-white/80 text-sm"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </header>
+
+        <!-- Default password warning -->
+        <div id="default-pass-warning" class="hidden warn-banner px-4 py-2.5 text-xs flex items-center gap-2 justify-center">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>আপনি ডিফল্ট পাসওয়ার্ড ব্যবহার করছেন! <button onclick="showTab('settings')" class="font-bold underline">এখনই পরিবর্তন করুন</button></span>
+        </div>
 
         <div class="bg-white shadow-sm overflow-x-auto hide-scrollbar sticky top-[68px] z-30">
             <div class="flex min-w-max">
@@ -299,6 +307,7 @@
                 <div>
                     <label class="text-xs text-gray-500 font-semibold">Category Key * (English)</label>
                     <input type="text" id="cat-key" placeholder="e.g. AC" class="w-full border rounded-lg px-3 py-2 outline-none">
+                    <p class="text-[10px] text-gray-400 mt-0.5">⚠️ Key পরিবর্তন করলে সব প্রোডাক্টে নতুন key update হবে</p>
                 </div>
                 <div>
                     <label class="text-xs text-gray-500 font-semibold">Display Name *</label>
@@ -311,7 +320,10 @@
                 <div class="text-center text-xs text-gray-400">— or —</div>
                 <div>
                     <label class="text-xs text-gray-500 font-semibold">Category Image</label>
-                    <div id="cat-image-preview" class="hidden mb-2"><img id="cat-image-preview-img" class="w-16 h-16 object-contain bg-gray-50 rounded-lg border"></div>
+                    <div id="cat-image-preview" class="hidden mb-2 relative">
+                        <img id="cat-image-preview-img" class="w-16 h-16 object-contain bg-gray-50 rounded-lg border">
+                        <button type="button" onclick="clearCategoryImage()" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow"><i class="fas fa-times"></i></button>
+                    </div>
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
                         <label for="cat-image-file" class="cursor-pointer block">
                             <i class="fas fa-image text-xl text-gray-400"></i>
@@ -352,10 +364,11 @@
     <div id="banner-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-md">
             <div class="navy-bg p-4 rounded-t-2xl flex justify-between">
-                <h3 class="text-white font-bold">Add Banner</h3>
+                <h3 id="banner-modal-title" class="text-white font-bold">Add Banner</h3>
                 <button onclick="closeBannerModal()" class="text-white/80"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-5 space-y-3">
+                <input type="hidden" id="edit-banner-idx">
                 <div>
                     <label class="text-xs text-gray-500 font-semibold">Link URL (Optional)</label>
                     <input type="text" id="banner-link" placeholder="https://..." class="w-full border rounded-lg px-3 py-2 outline-none">
@@ -364,7 +377,7 @@
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
                     <label for="banner-image-file" class="cursor-pointer block">
                         <i class="fas fa-image text-2xl text-gray-400"></i>
-                        <p class="text-xs text-gray-500 mt-1">Upload Banner Image</p>
+                        <p class="text-xs text-gray-500 mt-1" id="banner-upload-hint">Upload Banner Image</p>
                     </label>
                     <input type="file" id="banner-image-file" accept="image/*" class="hidden">
                     <p id="banner-file-name" class="text-xs text-green-600 mt-1"></p>
@@ -455,7 +468,10 @@
                 </div>
                 <div>
                     <label class="text-xs text-gray-500 font-semibold">Background Image (Optional)</label>
-                    <div id="hero-image-preview" class="hidden mb-2"><img id="hero-preview-img" class="w-full h-24 object-cover rounded-lg border"></div>
+                    <div id="hero-image-preview" class="hidden mb-2 relative">
+                        <img id="hero-preview-img" class="w-full h-24 object-cover rounded-lg border">
+                        <button type="button" onclick="clearHeroImage()" class="absolute top-1 right-1 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow"><i class="fas fa-times"></i></button>
+                    </div>
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
                         <label for="hero-image-file" class="cursor-pointer block">
                             <i class="fas fa-image text-2xl text-gray-400"></i>
@@ -472,8 +488,10 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, query, orderBy, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, query, orderBy, increment, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+        // ⚠️ SECURITY NOTE: ImgBB API key client-side exposed.
+        // Production-এ Cloud Function দিয়ে proxy করা উচিত।
         const IMGBB_API_KEY = "df6ee25bc91b9b7200070d5328644463";
         const firebaseConfig = {
             apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
@@ -504,21 +522,27 @@
         let heroBanners = [];
         let currentOrderFilter = 'all';
         let currentAdminPassword = DEFAULT_PASSWORD;
+        let passwordInFirestore = false;
 
         let pendingImages = [];
         let existingImages = [];
         let pendingCategoryImage = null;
         let existingCategoryImage = null;
+        let removeExistingCategoryImage = false;
         let pendingBannerImage = null;
         let pendingTestImage = null;
         let pendingHeroImage = null;
+        let removeHeroImage = false;
 
         function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
         async function loadAdminPassword() {
             try {
                 const snap = await getDoc(doc(db, "settings", "admin"));
-                if (snap.exists() && snap.data().password) currentAdminPassword = snap.data().password;
+                if (snap.exists() && snap.data().password) {
+                    currentAdminPassword = snap.data().password;
+                    passwordInFirestore = true;
+                }
             } catch (e) {}
         }
 
@@ -526,11 +550,17 @@
             await loadAdminPassword();
             if (localStorage.getItem('isAdmin') === 'true') showDashboard();
         }
+
         function showDashboard() {
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('dashboard-section').classList.remove('hidden');
+            // Show default password warning
+            if (!passwordInFirestore) {
+                document.getElementById('default-pass-warning').classList.remove('hidden');
+            }
             loadAllData();
         }
+
         window.login = async function() {
             await loadAdminPassword();
             if (document.getElementById('admin-password').value === currentAdminPassword) {
@@ -549,6 +579,8 @@
             if (np !== cp) return alert("❌ পাসওয়ার্ড মিলছে না!");
             await setDoc(doc(db, "settings", "admin"), { password: np }, { merge: true });
             currentAdminPassword = np;
+            passwordInFirestore = true;
+            document.getElementById('default-pass-warning').classList.add('hidden');
             alert("✅ পাসওয়ার্ড পরিবর্তন হয়েছে!");
             document.getElementById('current-password').value = '';
             document.getElementById('new-password').value = '';
@@ -600,21 +632,25 @@
         function populateCategoryDropdown() {
             const sel = document.getElementById('p-category');
             if (sel) {
+                const currentVal = sel.value;
                 sel.innerHTML = '';
                 allCategories.forEach(c => {
                     const opt = document.createElement('option');
                     opt.value = c.key; opt.textContent = c.label;
                     sel.appendChild(opt);
                 });
+                if (currentVal) sel.value = currentVal;
             }
             const sel2 = document.getElementById('section-category');
             if (sel2) {
+                const currentVal2 = sel2.value;
                 sel2.innerHTML = '';
                 allCategories.forEach(c => {
                     const opt = document.createElement('option');
                     opt.value = c.key; opt.textContent = c.label;
                     sel2.appendChild(opt);
                 });
+                if (currentVal2) sel2.value = currentVal2;
             }
         }
 
@@ -658,6 +694,7 @@
             document.getElementById('hero-file-name').innerText = '';
             document.getElementById('hero-image-preview').classList.add('hidden');
             pendingHeroImage = null;
+            removeHeroImage = false;
             document.getElementById('hero-modal').classList.remove('hidden');
         }
         window.closeHeroModal = function() { document.getElementById('hero-modal').classList.add('hidden'); }
@@ -672,6 +709,9 @@
             document.getElementById('hero-bg').value = b.bg || 'navy';
             document.getElementById('hero-link').value = b.link || '';
             pendingHeroImage = null;
+            removeHeroImage = false;
+            document.getElementById('hero-image-file').value = '';
+            document.getElementById('hero-file-name').innerText = '';
             if (b.image) {
                 document.getElementById('hero-preview-img').src = b.image;
                 document.getElementById('hero-image-preview').classList.remove('hidden');
@@ -681,6 +721,14 @@
             document.getElementById('hero-modal').classList.remove('hidden');
         }
 
+        window.clearHeroImage = function() {
+            pendingHeroImage = null;
+            removeHeroImage = true;
+            document.getElementById('hero-image-file').value = '';
+            document.getElementById('hero-file-name').innerText = '';
+            document.getElementById('hero-image-preview').classList.add('hidden');
+        }
+
         document.getElementById('hero-image-file').addEventListener('change', function(e) {
             const f = e.target.files[0];
             if (!f) return;
@@ -688,6 +736,7 @@
             const reader = new FileReader();
             reader.onload = evt => {
                 pendingHeroImage = { file: f, dataUrl: evt.target.result };
+                removeHeroImage = false;
                 document.getElementById('hero-preview-img').src = evt.target.result;
                 document.getElementById('hero-image-preview').classList.remove('hidden');
             };
@@ -710,7 +759,7 @@
                 if (pendingHeroImage) {
                     btn.innerText = 'Uploading...';
                     image = await uploadToImgBB(pendingHeroImage.file);
-                } else if (idx !== '' && heroBanners[parseInt(idx)].image) {
+                } else if (idx !== '' && heroBanners[parseInt(idx)].image && !removeHeroImage) {
                     image = heroBanners[parseInt(idx)].image;
                 }
                 const b = { badge, title, subtitle, bg, link, image };
@@ -768,6 +817,7 @@
             document.getElementById('cat-image-preview').classList.add('hidden');
             pendingCategoryImage = null;
             existingCategoryImage = null;
+            removeExistingCategoryImage = false;
             document.getElementById('category-modal').classList.remove('hidden');
         }
         window.closeCategoryModal = function() { document.getElementById('category-modal').classList.add('hidden'); }
@@ -782,6 +832,9 @@
             document.getElementById('cat-icon-emoji').value = isImg ? '' : (c.icon || '');
             pendingCategoryImage = null;
             existingCategoryImage = isImg ? c.icon : null;
+            removeExistingCategoryImage = false;
+            document.getElementById('cat-image-file').value = '';
+            document.getElementById('cat-file-name').innerText = '';
             if (isImg) {
                 document.getElementById('cat-image-preview-img').src = c.icon;
                 document.getElementById('cat-image-preview').classList.remove('hidden');
@@ -791,6 +844,15 @@
             document.getElementById('category-modal').classList.remove('hidden');
         }
 
+        window.clearCategoryImage = function() {
+            pendingCategoryImage = null;
+            existingCategoryImage = null;
+            removeExistingCategoryImage = true;
+            document.getElementById('cat-image-file').value = '';
+            document.getElementById('cat-file-name').innerText = '';
+            document.getElementById('cat-image-preview').classList.add('hidden');
+        }
+
         document.getElementById('cat-image-file').addEventListener('change', function(e) {
             const f = e.target.files[0];
             if (!f) return;
@@ -798,6 +860,7 @@
             const reader = new FileReader();
             reader.onload = evt => {
                 pendingCategoryImage = { file: f, dataUrl: evt.target.result };
+                removeExistingCategoryImage = false;
                 document.getElementById('cat-image-preview-img').src = evt.target.result;
                 document.getElementById('cat-image-preview').classList.remove('hidden');
             };
@@ -813,6 +876,21 @@
             return result.data.display_url;
         }
 
+        // ⚡ FIXED: batch update products on category key rename
+        async function updateProductsCategory(oldKey, newKey) {
+            const productsSnap = await getDocs(collection(db, "products"));
+            const batch = writeBatch(db);
+            let count = 0;
+            productsSnap.forEach(d => {
+                if (d.data().category === oldKey) {
+                    batch.update(d.ref, { category: newKey });
+                    count++;
+                }
+            });
+            if (count > 0) await batch.commit();
+            return count;
+        }
+
         window.saveCategory = async function() {
             const oldKey = document.getElementById('edit-category-key').value;
             const key = document.getElementById('cat-key').value.trim().replace(/\s+/g, '');
@@ -824,13 +902,17 @@
             const btn = document.getElementById('cat-save-btn');
             btn.disabled = true; btn.innerText = 'Saving...';
             try {
-                let finalIcon = emoji || '📦';
+                // ⚡ FIXED: Priority = new image > emoji > existing image > default
+                let finalIcon = '📦';
                 if (pendingCategoryImage) {
-                    btn.innerText = 'Uploading...';
+                    btn.innerText = 'Uploading image...';
                     finalIcon = await uploadToImgBB(pendingCategoryImage.file);
-                } else if (existingCategoryImage && !emoji) {
+                } else if (emoji) {
+                    finalIcon = emoji;
+                } else if (existingCategoryImage && !removeExistingCategoryImage) {
                     finalIcon = existingCategoryImage;
                 }
+
                 const newCategory = { key, label, icon: finalIcon };
                 if (oldKey) {
                     const idx = allCategories.findIndex(c => c.key === oldKey);
@@ -839,20 +921,65 @@
                     allCategories.push(newCategory);
                 }
                 await setDoc(doc(db, "settings", "main"), { categories: allCategories }, { merge: true });
-                alert("✅ Saved!");
+
+                // ⚡ FIXED: If key changed, update all products
+                if (oldKey && oldKey !== key) {
+                    btn.innerText = 'Updating products...';
+                    const updated = await updateProductsCategory(oldKey, key);
+                    alert(`✅ Category saved! ${updated} টি প্রোডাক্ট আপডেট হয়েছে।`);
+                } else {
+                    alert("✅ Saved!");
+                }
+
                 closeCategoryModal();
                 renderAdminCategories();
                 populateCategoryDropdown();
+                await loadProducts(); // Refresh products list
             } catch (e) { alert("Error: " + e.message); }
             finally { btn.disabled = false; btn.innerText = 'Save'; }
         }
 
+        // ⚡ FIXED: Warn about orphan products before delete
         window.deleteCategory = async function(index) {
-            if (!confirm("Delete this category?")) return;
+            const cat = allCategories[index];
+            if (!cat) return;
+
+            // Count products in this category
+            let productCount = 0;
+            try {
+                const productsSnap = await getDocs(collection(db, "products"));
+                productsSnap.forEach(d => {
+                    if (d.data().category === cat.key) productCount++;
+                });
+            } catch (e) {}
+
+            let msg = `"${cat.label}" ক্যাটেগরি ডিলিট করবেন?`;
+            if (productCount > 0) {
+                msg = `⚠️ এই ক্যাটেগরিতে ${productCount} টি প্রোডাক্ট আছে!\n\nডিলিট করলে প্রোডাক্টগুলো কোনো ক্যাটেগরিতে থাকবে না (All Products-এ দেখা যাবে, কিন্তু Featured Category-তে নয়)।\n\nতবুও ডিলিট করবেন?`;
+            }
+            if (!confirm(msg)) return;
+
+            // Remove category
             allCategories.splice(index, 1);
             await setDoc(doc(db, "settings", "main"), { categories: allCategories }, { merge: true });
+
+            // Clear category from orphaned products
+            if (productCount > 0) {
+                try {
+                    const productsSnap = await getDocs(collection(db, "products"));
+                    const batch = writeBatch(db);
+                    productsSnap.forEach(d => {
+                        if (d.data().category === cat.key) {
+                            batch.update(d.ref, { category: '' });
+                        }
+                    });
+                    await batch.commit();
+                } catch (e) { console.warn('Product cleanup failed:', e); }
+            }
+
             renderAdminCategories();
             populateCategoryDropdown();
+            await loadProducts();
         }
 
         // ====== SECTIONS ======
@@ -916,7 +1043,7 @@
             renderSectionsList();
         }
 
-        // ====== BANNERS ======
+        // ====== MIDDLE BANNERS ======
         function renderBannersList() {
             const list = document.getElementById('banners-list-admin');
             if (middleBanners.length === 0) {
@@ -930,6 +1057,7 @@
                     <div class="flex-1 min-w-0">
                         <p class="text-[11px] text-gray-500 truncate">${escapeHtml(b.link || 'No link')}</p>
                     </div>
+                    <button onclick="editBanner(${i})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-edit text-xs"></i></button>
                     <button onclick="deleteBanner(${i})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
                 </div>`;
             });
@@ -937,13 +1065,32 @@
         }
 
         window.openBannerModal = function() {
+            document.getElementById('banner-modal-title').innerText = 'Add Banner';
+            document.getElementById('edit-banner-idx').value = '';
             document.getElementById('banner-link').value = '';
             document.getElementById('banner-image-file').value = '';
             document.getElementById('banner-file-name').innerText = '';
             document.getElementById('banner-image-preview').classList.add('hidden');
+            document.getElementById('banner-upload-hint').innerText = 'Upload Banner Image';
             pendingBannerImage = null;
             document.getElementById('banner-modal').classList.remove('hidden');
         }
+
+        // ⚡ FIXED: Edit middle banner
+        window.editBanner = function(i) {
+            const b = middleBanners[i];
+            document.getElementById('banner-modal-title').innerText = 'Edit Banner';
+            document.getElementById('edit-banner-idx').value = i;
+            document.getElementById('banner-link').value = b.link || '';
+            document.getElementById('banner-image-file').value = '';
+            document.getElementById('banner-file-name').innerText = '';
+            document.getElementById('banner-preview-img').src = b.image;
+            document.getElementById('banner-image-preview').classList.remove('hidden');
+            document.getElementById('banner-upload-hint').innerText = 'নতুন ছবি দিলে পুরোনোটি replace হবে';
+            pendingBannerImage = null;
+            document.getElementById('banner-modal').classList.remove('hidden');
+        }
+
         window.closeBannerModal = function() { document.getElementById('banner-modal').classList.add('hidden'); }
 
         document.getElementById('banner-image-file').addEventListener('change', function(e) {
@@ -960,13 +1107,22 @@
         });
 
         window.saveBanner = async function() {
-            if (!pendingBannerImage) return alert("Please select a banner image!");
+            const idx = document.getElementById('edit-banner-idx').value;
+            const isEdit = idx !== '';
+            if (!isEdit && !pendingBannerImage) return alert("Please select a banner image!");
+
             const btn = document.getElementById('banner-save-btn');
-            btn.disabled = true; btn.innerText = 'Uploading...';
+            btn.disabled = true; btn.innerText = 'Saving...';
             try {
-                const image = await uploadToImgBB(pendingBannerImage.file);
+                let image = isEdit ? middleBanners[parseInt(idx)].image : null;
+                if (pendingBannerImage) {
+                    btn.innerText = 'Uploading...';
+                    image = await uploadToImgBB(pendingBannerImage.file);
+                }
                 const link = document.getElementById('banner-link').value.trim();
-                middleBanners.push({ image, link });
+                const banner = { image, link };
+                if (isEdit) middleBanners[parseInt(idx)] = banner;
+                else middleBanners.push(banner);
                 await setDoc(doc(db, "settings", "main"), { middleBanners }, { merge: true });
                 closeBannerModal();
                 renderBannersList();
@@ -1028,6 +1184,8 @@
             document.getElementById('test-text').value = t.text;
             document.getElementById('test-rating').value = t.rating;
             pendingTestImage = null;
+            document.getElementById('test-image-file').value = '';
+            document.getElementById('test-file-name').innerText = '';
             if (t.image) {
                 document.getElementById('test-preview-img').src = t.image;
                 document.getElementById('test-image-preview').classList.remove('hidden');
@@ -1107,11 +1265,10 @@
             }
             let html = '';
             filtered.forEach(p => {
-                const imgCount = (p.images && p.images.length) || 1;
                 const stock = Number(p.stock) || 0;
-                const stockBadge = stock <= 0 
+                const stockBadge = stock <= 0
                     ? '<span class="text-[10px] font-bold bg-red-100 text-red-600 px-1.5 py-0.5 rounded">Stock: 0</span>'
-                    : (stock < 5 
+                    : (stock < 5
                         ? `<span class="text-[10px] font-bold bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded">Stock: ${stock}</span>`
                         : `<span class="text-[10px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded">Stock: ${stock}</span>`);
                 html += `<div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
@@ -1298,11 +1455,9 @@
             list.innerHTML = html;
         }
 
-        // ====== UPDATE ORDER STATUS WITH STOCK HANDLING ======
         window.updateOrderStatus = async function(id, status) {
             const order = allOrdersList.find(x => x.id === id);
             const oldStatus = order?.status;
-
             if (oldStatus === status) return;
 
             try {
@@ -1311,9 +1466,7 @@
                     for (const item of order.items) {
                         if (!item.id) continue;
                         try {
-                            await updateDoc(doc(db, "products", item.id), {
-                                stock: increment(item.quantity)
-                            });
+                            await updateDoc(doc(db, "products", item.id), { stock: increment(item.quantity) });
                         } catch (e) { console.warn('Stock restore failed:', item.id, e); }
                     }
                     await updateDoc(doc(db, "orders", id), { stockDeducted: false });
@@ -1325,16 +1478,13 @@
                     for (const item of order.items) {
                         if (!item.id) continue;
                         try {
-                            await updateDoc(doc(db, "products", item.id), {
-                                stock: increment(-item.quantity)
-                            });
+                            await updateDoc(doc(db, "products", item.id), { stock: increment(-item.quantity) });
                         } catch (e) { console.warn('Stock re-deduct failed:', item.id, e); }
                     }
                     await updateDoc(doc(db, "orders", id), { stockDeducted: true });
                     if (order) order.stockDeducted = true;
                 }
 
-                // Update status
                 await updateDoc(doc(db, "orders", id), { status });
                 if (order) order.status = status;
 
