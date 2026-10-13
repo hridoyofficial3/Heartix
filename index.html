@@ -3,11 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Heartix — Premium Smart Appliances in Bangladesh">
+    <meta name="description" content="Heartix — Premium Smart Appliances">
     <title>Heartix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- IMMEDIATE CART RESTORE (before page renders) -->
+    <script>
+        (function() {
+            try {
+                const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
+                const count = cart.reduce((s, i) => s + (i.quantity || 0), 0);
+                window.__cartCount = count;
+            } catch(e) { window.__cartCount = 0; }
+        })();
+    </script>
+    
     <script>
         tailwind.config = { theme: { extend: {
             colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' }, cream: '#FBF8F3' },
@@ -45,7 +57,7 @@
         .category-icon { font-size: 34px; line-height: 1; }
         .category-img { width: 50px; height: 50px; object-fit: contain; }
         #category-scroll-container { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-        .slider-viewport { overflow: hidden; border-radius: 24px; box-shadow: 0 4px 20px rgba(10,22,40,0.08); height: 200px; }
+        .slider-viewport { overflow: hidden; border-radius: 24px; box-shadow: 0 4px 20px rgba(10,22,40,0.08); height: 200px; position: relative; }
         .slider-track { display: flex; height: 100%; transition: transform 0.55s cubic-bezier(0.4,0,0.2,1); }
         .slider-slide { min-width: 100%; height: 100%; overflow: hidden; }
         .slider-slide .hero-content { height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 24px 28px; box-sizing: border-box; }
@@ -67,72 +79,57 @@
 
     <div id="overlay" onclick="closeSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden"></div>
 
-    <!-- SIDEBAR (NO ADMIN LINK, WITH CONTACT/ABOUT/FAQ) -->
+    <!-- SIDEBAR -->
     <div id="sidebar" class="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl overflow-y-auto" style="transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);">
-        <div class="navy-gradient p-6 text-white relative overflow-hidden">
-            <div class="relative">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="bg-white rounded-xl p-2"><img src="logo.png" alt="Heartix" class="h-8"></div>
-                    <button onclick="closeSidebar()" class="text-white/80 text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <p class="text-xs text-gold tracking-widest uppercase">Welcome</p>
-                <p class="font-display text-2xl font-bold">Heartix</p>
-                <p class="text-xs text-white/60 mt-1">Premium Smart Appliances</p>
+        <div class="navy-gradient p-6 text-white">
+            <div class="flex justify-between items-center mb-4">
+                <div class="bg-white rounded-xl p-2"><img src="logo.png" alt="Heartix" class="h-8"></div>
+                <button onclick="closeSidebar()" class="text-white/80 text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10"><i class="fas fa-times"></i></button>
             </div>
+            <p class="text-xs text-gold tracking-widest uppercase">Welcome</p>
+            <p class="font-display text-2xl font-bold">Heartix</p>
+            <p class="text-xs text-white/60 mt-1">Premium Smart Appliances</p>
         </div>
         <nav class="p-5">
             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-3">Browse</p>
-            <a href="#" onclick="filterByCategory('all'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
+            <a href="#" onclick="filterByCategory('all'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
                 <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center text-lg">🛍️</span>
                 <span class="font-medium text-navy">All Products</span>
             </a>
             <div id="sidebar-categories"></div>
-
             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-6 mb-3">Quick Links</p>
-            <a href="cart.html" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
+            <a href="cart.html" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
                 <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-shopping-bag text-navy"></i></span>
                 <span class="font-medium text-navy">My Cart</span>
             </a>
-            <a href="track-order.html" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
+            <a href="track-order.html" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
                 <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-truck text-navy"></i></span>
                 <span class="font-medium text-navy">Track Order</span>
             </a>
-
             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-6 mb-3">Support</p>
-            <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
+            <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
                 <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-headset text-navy"></i></span>
                 <span class="font-medium text-navy">Contact Us</span>
             </a>
-            <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
+            <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
                 <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-info-circle text-navy"></i></span>
                 <span class="font-medium text-navy">About Heartix</span>
             </a>
-            <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
+            <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
                 <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-question-circle text-navy"></i></span>
                 <span class="font-medium text-navy">FAQ</span>
             </a>
-            <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
+            <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
                 <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center"><i class="fas fa-undo text-navy"></i></span>
                 <span class="font-medium text-navy">Return Policy</span>
             </a>
         </nav>
-        <div class="p-5 mt-4">
-            <div class="navy-gradient rounded-2xl p-4 text-white text-center">
-                <i class="fas fa-crown text-gold text-2xl mb-2"></i>
-                <p class="font-display text-lg mb-1">Premium Service</p>
-                <p class="text-xs text-white/70">100% Authentic Products</p>
-            </div>
-        </div>
     </div>
 
     <!-- HEADER -->
     <header class="glass sticky top-0 z-30 px-3 py-0 flex justify-between items-center border-b border-gray-100">
         <div class="flex items-center gap-1 flex-1 min-w-0">
-            <button onclick="openSidebar()" class="w-8 h-8 flex items-center justify-center flex-shrink-0 -ml-1">
-                <i class="fas fa-bars text-navy text-base"></i>
-            </button>
+            <button onclick="openSidebar()" class="w-8 h-8 flex items-center justify-center flex-shrink-0 -ml-1"><i class="fas fa-bars text-navy text-base"></i></button>
             <img src="logo.png" alt="Heartix" class="h-14 object-contain" style="mix-blend-mode: multiply;">
         </div>
         <a href="cart.html" class="relative w-9 h-9 flex items-center justify-center flex-shrink-0">
@@ -146,16 +143,19 @@
         <div class="relative pt-3 pb-1">
             <input type="text" id="search-input" oninput="searchProducts()" placeholder="Search products..." class="w-full bg-white rounded-2xl py-3.5 pl-12 pr-12 outline-none premium-shadow text-sm">
             <i class="fas fa-search absolute left-4 top-7 text-gold"></i>
-            <button onclick="closeSearch()" class="absolute right-4 top-7 text-gray-400 w-6 h-6 flex items-center justify-center">
-                <i class="fas fa-times"></i>
-            </button>
+            <button onclick="closeSearch()" class="absolute right-4 top-7 text-gray-400 w-6 h-6 flex items-center justify-center"><i class="fas fa-times"></i></button>
         </div>
     </div>
 
-    <!-- HERO SLIDER -->
+    <!-- HERO SLIDER (with LOADING SKELETON) -->
     <div class="px-5 pt-3">
         <div class="slider-viewport">
-            <div id="slider-track" class="slider-track"></div>
+            <!-- Skeleton (shown until hero loads) -->
+            <div id="slider-skeleton" class="absolute inset-0 z-20 p-0">
+                <div class="w-full h-full shimmer rounded-3xl"></div>
+            </div>
+            <!-- Track (hidden until loaded) -->
+            <div id="slider-track" class="slider-track opacity-0 transition-opacity duration-300"></div>
         </div>
         <div id="slider-dots" class="flex justify-center gap-1.5 mt-3"></div>
     </div>
@@ -163,78 +163,109 @@
     <!-- CATEGORIES -->
     <div class="mt-7">
         <h3 class="section-title px-5">Featured Categories</h3>
-        <div id="category-scroll-container" class="flex overflow-x-auto hide-scrollbar gap-1.5 pb-2 px-5"></div>
+        <div id="category-scroll-container" class="flex overflow-x-auto hide-scrollbar gap-1.5 pb-2 px-5">
+            <!-- Default skeleton (will be replaced by JS) -->
+            <div class="flex flex-col items-center" style="min-width:78px; flex-shrink:0;">
+                <div class="category-card"><div class="shimmer w-12 h-12 rounded-lg"></div></div>
+                <div class="shimmer h-3 w-12 rounded mt-2"></div>
+            </div>
+            <div class="flex flex-col items-center" style="min-width:78px; flex-shrink:0;">
+                <div class="category-card"><div class="shimmer w-12 h-12 rounded-lg"></div></div>
+                <div class="shimmer h-3 w-12 rounded mt-2"></div>
+            </div>
+            <div class="flex flex-col items-center" style="min-width:78px; flex-shrink:0;">
+                <div class="category-card"><div class="shimmer w-12 h-12 rounded-lg"></div></div>
+                <div class="shimmer h-3 w-12 rounded mt-2"></div>
+            </div>
+            <div class="flex flex-col items-center" style="min-width:78px; flex-shrink:0;">
+                <div class="category-card"><div class="shimmer w-12 h-12 rounded-lg"></div></div>
+                <div class="shimmer h-3 w-12 rounded mt-2"></div>
+            </div>
+        </div>
     </div>
 
     <!-- PRODUCTS -->
     <div class="mt-8 px-5">
         <h3 id="section-title" class="section-title">Top Selling Products</h3>
-        <div id="product-list" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+        <div id="product-list" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <!-- Default skeleton (will be replaced by JS) -->
+            <div class="bg-white rounded-2xl p-2.5 premium-shadow">
+                <div class="w-full h-28 shimmer rounded-lg mb-2"></div>
+                <div class="h-3.5 w-3/4 shimmer rounded mb-2"></div>
+                <div class="h-3.5 w-1/2 shimmer rounded mb-2"></div>
+                <div class="h-8 w-full shimmer rounded-lg"></div>
+            </div>
+            <div class="bg-white rounded-2xl p-2.5 premium-shadow">
+                <div class="w-full h-28 shimmer rounded-lg mb-2"></div>
+                <div class="h-3.5 w-3/4 shimmer rounded mb-2"></div>
+                <div class="h-3.5 w-1/2 shimmer rounded mb-2"></div>
+                <div class="h-8 w-full shimmer rounded-lg"></div>
+            </div>
+            <div class="bg-white rounded-2xl p-2.5 premium-shadow">
+                <div class="w-full h-28 shimmer rounded-lg mb-2"></div>
+                <div class="h-3.5 w-3/4 shimmer rounded mb-2"></div>
+                <div class="h-3.5 w-1/2 shimmer rounded mb-2"></div>
+                <div class="h-8 w-full shimmer rounded-lg"></div>
+            </div>
+            <div class="bg-white rounded-2xl p-2.5 premium-shadow">
+                <div class="w-full h-28 shimmer rounded-lg mb-2"></div>
+                <div class="h-3.5 w-3/4 shimmer rounded mb-2"></div>
+                <div class="h-3.5 w-1/2 shimmer rounded mb-2"></div>
+                <div class="h-8 w-full shimmer rounded-lg"></div>
+            </div>
+        </div>
         <p id="no-product-msg" class="hidden text-center text-gray-400 py-12">
             <i class="fas fa-box-open text-4xl mb-3 block"></i>
             কোনো প্রোডাক্ট পাওয়া যায়নি
         </p>
     </div>
 
-    <!-- DYNAMIC CONTENT -->
     <div id="dynamic-content"></div>
 
-    <!-- FOOTER (FULL CONTENT) -->
+    <!-- FOOTER -->
     <footer class="navy-gradient px-5 py-8 mt-6">
         <div class="flex items-center gap-3 mb-4">
             <div class="bg-white rounded-xl p-2"><img src="logo.png" alt="Heartix" class="h-12 object-contain"></div>
-            <div>
-                <p class="text-white font-display text-lg">Heartix</p>
-                <p class="text-gold text-[10px] tracking-widest uppercase">Smart Appliances</p>
-            </div>
+            <div><p class="text-white font-display text-lg">Heartix</p><p class="text-gold text-[10px] tracking-widest uppercase">Smart Appliances</p></div>
         </div>
-        <p class="text-white/60 text-xs leading-relaxed mb-5">Heartix is your trusted destination for premium smart appliances in Bangladesh. Quality products, honest prices, and reliable service.</p>
-
+        <p class="text-white/60 text-xs leading-relaxed mb-5">Heartix is your trusted destination for premium smart appliances in Bangladesh.</p>
         <div class="space-y-2 mb-5">
             <p class="text-white/80 text-xs"><i class="fas fa-phone gold-text mr-2 w-4"></i><span id="footer-phone">+880 1XXX-XXXXXX</span></p>
             <p class="text-white/80 text-xs"><i class="fas fa-envelope gold-text mr-2 w-4"></i><span id="footer-email">info@heartix.com</span></p>
             <p class="text-white/80 text-xs"><i class="fas fa-map-marker-alt gold-text mr-2 w-4"></i>Dhaka, Bangladesh</p>
         </div>
-
         <div class="flex gap-3 mb-6">
-            <a href="#" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-gold hover:text-navy transition"><i class="fab fa-facebook-f text-sm"></i></a>
-            <a href="#" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-gold hover:text-navy transition"><i class="fab fa-whatsapp text-sm"></i></a>
-            <a href="#" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-gold hover:text-navy transition"><i class="fab fa-instagram text-sm"></i></a>
-            <a href="#" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-gold hover:text-navy transition"><i class="fab fa-youtube text-sm"></i></a>
+            <a href="#" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white"><i class="fab fa-facebook-f text-sm"></i></a>
+            <a href="#" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white"><i class="fab fa-whatsapp text-sm"></i></a>
+            <a href="#" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white"><i class="fab fa-instagram text-sm"></i></a>
         </div>
-
         <div class="grid grid-cols-2 gap-4 mb-6">
             <div>
                 <p class="text-gold text-xs font-bold uppercase tracking-wider mb-3">Information</p>
-                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1 hover:text-gold">About Us</a>
-                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1 hover:text-gold">Contact Us</a>
-                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1 hover:text-gold">Terms & Conditions</a>
-                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1 hover:text-gold">Privacy Policy</a>
+                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1">About Us</a>
+                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1">Contact Us</a>
+                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1">Terms</a>
+                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1">Privacy</a>
             </div>
             <div>
                 <p class="text-gold text-xs font-bold uppercase tracking-wider mb-3">Support</p>
-                <a href="track-order.html" class="block text-white/70 text-xs py-1 hover:text-gold">Track Order</a>
-                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1 hover:text-gold">Return Policy</a>
-                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1 hover:text-gold">FAQ</a>
-                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1 hover:text-gold">Shipping Info</a>
+                <a href="track-order.html" class="block text-white/70 text-xs py-1">Track Order</a>
+                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1">Return Policy</a>
+                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1">FAQ</a>
+                <a href="#" onclick="showToast('শীঘ্রই আসছে','warn'); return false;" class="block text-white/70 text-xs py-1">Shipping</a>
             </div>
         </div>
-
-        <div class="border-t border-white/10 pt-4 text-center">
-            <p class="text-white/50 text-[10px]">© 2025 Heartix. All rights reserved.</p>
-        </div>
+        <div class="border-t border-white/10 pt-4 text-center"><p class="text-white/50 text-[10px]">© 2025 Heartix. All rights reserved.</p></div>
     </footer>
 
     <!-- FLOATING CART -->
     <a href="cart.html" id="floating-cart" class="hide fixed right-3 bottom-24 z-30">
         <div class="floating-cart-card pl-1.5 pr-2.5 py-1.5 flex items-center gap-2">
-            <div class="floating-cart-icon gold-gradient w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative">
-                <i class="fas fa-shopping-bag text-navy text-[13px]"></i>
-            </div>
+            <div class="floating-cart-icon gold-gradient w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative"><i class="fas fa-shopping-bag text-navy text-[13px]"></i></div>
             <div class="flex flex-col min-w-[50px]" style="position:relative;z-index:2;">
-                <span class="text-[7.5px] font-bold uppercase tracking-[0.12em] leading-none mb-0.5" style="color:rgba(255,255,255,0.55);">In Cart</span>
-                <span id="floating-cart-total" class="text-white text-[14px] font-extrabold leading-none" style="text-shadow:0 1px 4px rgba(0,0,0,0.4);">৳0</span>
-                <span id="floating-cart-count" class="text-[8.5px] font-medium leading-none mt-0.5" style="color:rgba(212,168,75,0.95);">0 items</span>
+                <span class="text-[7.5px] font-bold uppercase" style="color:rgba(255,255,255,0.55);">In Cart</span>
+                <span id="floating-cart-total" class="text-white text-[14px] font-extrabold" style="text-shadow:0 1px 4px rgba(0,0,0,0.4);">৳0</span>
+                <span id="floating-cart-count" class="text-[8.5px]" style="color:rgba(212,168,75,0.95);">0 items</span>
             </div>
             <i class="fas fa-chevron-right text-gold/60 text-[8px]"></i>
         </div>
@@ -274,6 +305,15 @@
         </div>
     </nav>
 
+    <!-- IMMEDIATE CART BADGE RESTORE (inline, before module) -->
+    <script>
+        (function() {
+            const count = window.__cartCount || 0;
+            document.getElementById('cart-count-header').textContent = count;
+            document.getElementById('cart-count-bottom').textContent = count;
+        })();
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -287,11 +327,11 @@
             appId: "1:551204402338:web:169555975c0bbb97f113fb"
         };
 
-        let app, db;
+        let db;
         try {
-            app = initializeApp(firebaseConfig);
+            const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
-        } catch (e) { console.error('Firebase init error:', e); }
+        } catch (e) { console.error('Firebase init:', e); }
 
         let allProducts = [];
         let allReviews = [];
@@ -419,7 +459,9 @@
             }
         }
 
+        // ============ HERO SLIDER (No Flash) ============
         let slideIndex = 0, totalSlides = 0, heroTimer = null;
+
         function getDefaultHeroBanners() {
             return [
                 { badge: '✨ Premium', title: 'Smart Living<br>Starts Here', subtitle: 'Premium appliances for modern homes', bg: 'navy' },
@@ -427,18 +469,23 @@
                 { badge: '🚚 Free Delivery', title: 'On Orders<br>Above ৳ 5,000', subtitle: 'Fast delivery all over Bangladesh', bg: 'teal' }
             ];
         }
+
         function getHeroBgStyle(b) {
             if (b.image) return `background-image: url('${b.image}'); background-size: cover; background-position: center;`;
             if (b.bg === 'gold') return 'background: linear-gradient(135deg, #B8860B, #D4A84B, #E8C77B);';
             if (b.bg === 'teal') return 'background: linear-gradient(135deg, #0F4C5C, #1A6B7C, #2C8B9E);';
             return 'background: linear-gradient(135deg, #0A1628, #152238);';
         }
+
         function renderHeroBanners() {
             const track = document.getElementById('slider-track');
+            const skeleton = document.getElementById('slider-skeleton');
             const dotsContainer = document.getElementById('slider-dots');
             if (!track || !dotsContainer) return;
-            let banners = (Array.isArray(heroBanners) && heroBanners.length > 0) ? heroBanners : getDefaultHeroBanners();
+
+            const banners = (Array.isArray(heroBanners) && heroBanners.length > 0) ? heroBanners : getDefaultHeroBanners();
             totalSlides = banners.length;
+
             let html = '';
             banners.forEach(b => {
                 const bgStyle = getHeroBgStyle(b);
@@ -455,26 +502,45 @@
                 html += `<div class="slider-slide" style="${bgStyle}">${wrapped}</div>`;
             });
             track.innerHTML = html;
+
             let dotsHtml = '';
-            banners.forEach((_, i) => { dotsHtml += `<button onclick="goSlide(${i})" class="slider-dot ${i === 0 ? 'active' : 'inactive'} h-1.5 rounded-full"></button>`; });
+            banners.forEach((_, i) => {
+                dotsHtml += `<button onclick="goSlide(${i})" class="slider-dot ${i === 0 ? 'active' : 'inactive'} h-1.5 rounded-full"></button>`;
+            });
             dotsContainer.innerHTML = dotsHtml;
+
             slideIndex = 0; updateSlide();
+
+            // Reveal slider (fade in)
+            skeleton.style.transition = 'opacity 0.3s';
+            skeleton.style.opacity = '0';
+            setTimeout(() => { skeleton.style.display = 'none'; }, 300);
+            track.classList.remove('opacity-0');
+
             if (heroTimer) clearInterval(heroTimer);
             if (totalSlides > 1) {
-                heroTimer = setInterval(() => { slideIndex = (slideIndex + 1) % totalSlides; updateSlide(); }, 4000);
+                heroTimer = setInterval(() => {
+                    slideIndex = (slideIndex + 1) % totalSlides;
+                    updateSlide();
+                }, 4000);
             }
         }
+
         window.goSlide = function(i) {
             slideIndex = i; updateSlide();
             if (heroTimer) { clearInterval(heroTimer); if (totalSlides > 1) heroTimer = setInterval(() => { slideIndex = (slideIndex + 1) % totalSlides; updateSlide(); }, 4000); }
         }
+
         function updateSlide() {
             const track = document.getElementById('slider-track');
             if (track) track.style.transform = `translateX(-${slideIndex * 100}%)`;
             const dots = document.querySelectorAll('.slider-dot');
-            dots.forEach((d, i) => { d.className = i === slideIndex ? 'slider-dot active h-1.5 rounded-full' : 'slider-dot inactive h-1.5 rounded-full'; });
+            dots.forEach((d, i) => {
+                d.className = i === slideIndex ? 'slider-dot active h-1.5 rounded-full' : 'slider-dot inactive h-1.5 rounded-full';
+            });
         }
 
+        // ============ CATEGORIES ============
         function renderCategories() {
             const list = document.getElementById('category-scroll-container');
             const sidebarList = document.getElementById('sidebar-categories');
@@ -485,7 +551,6 @@
                         <div class="category-card"><div class="shimmer w-12 h-12 rounded-lg"></div></div>
                         <div class="shimmer h-3 w-12 rounded mt-2"></div>
                     </div>`).join('');
-                if (sidebarList) sidebarList.innerHTML = '';
                 return;
             }
             if (categories.length === 0) {
@@ -501,7 +566,7 @@
                     <span class="text-[11px] mt-1.5 text-navy text-center font-medium" style="max-width:78px;line-height:1.2;">${escapeHtml(c.label)}</span>
                 </div>`;
                 const sideIcon = isImg ? '📦' : (c.icon || '📦');
-                sideHtml += `<a href="#" onclick="filterByCategory('${c.key}'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl transition">
+                sideHtml += `<a href="#" onclick="filterByCategory('${c.key}'); closeSidebar(); return false;" class="flex items-center gap-3 py-3 px-3 hover:bg-cream rounded-xl">
                     <span class="w-9 h-9 bg-cream rounded-lg flex items-center justify-center text-lg">${sideIcon}</span>
                     <span class="font-medium text-navy">${escapeHtml(c.label)}</span>
                 </a>`;
@@ -535,6 +600,7 @@
             }, 2000);
         }
 
+        // ============ PRODUCTS ============
         function renderProductCard(p) {
             const hasDiscount = p.oldPrice && p.oldPrice > p.price;
             const discountPct = hasDiscount ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 0;
@@ -643,16 +709,16 @@
             try {
                 if (s.contactPhone) { const el = document.getElementById('footer-phone'); if (el) el.textContent = s.contactPhone; }
                 if (s.contactEmail) { const el = document.getElementById('footer-email'); if (el) el.textContent = s.contactEmail; }
-            } catch (e) { console.warn(e); }
+            } catch (e) {}
         }
 
         async function loadAll() {
-            if (!db) { isDataLoaded = true; renderCategories(); renderProducts(); return; }
+            if (!db) { isDataLoaded = true; renderHeroBanners(); renderCategories(); renderProducts(); return; }
             try {
                 const promises = [
-                    getDocs(collection(db, "products")).catch(e => null),
-                    getDocs(collection(db, "reviews")).catch(e => null),
-                    getDoc(doc(db, "settings", "main")).catch(e => null)
+                    getDocs(collection(db, "products")).catch(() => null),
+                    getDocs(collection(db, "reviews")).catch(() => null),
+                    getDoc(doc(db, "settings", "main")).catch(() => null)
                 ];
                 const [prodSnap, revSnap, setSnap] = await Promise.all(promises);
                 if (prodSnap) { allProducts = []; prodSnap.forEach(d => allProducts.push({ id: d.id, ...d.data() })); }
@@ -663,7 +729,7 @@
                     if (Array.isArray(allSettings.customSections)) customSections = allSettings.customSections;
                     if (Array.isArray(allSettings.middleBanners)) middleBanners = allSettings.middleBanners;
                     if (Array.isArray(allSettings.testimonials)) testimonials = allSettings.testimonials;
-                    if (Array.isArray(allSettings.heroBanners)) heroBanners = allSettings.heroBanners;
+                    if (Array.isArray(allSettings.heroBanners) && allSettings.heroBanners.length > 0) heroBanners = allSettings.heroBanners;
                     applySettings();
                 }
                 isDataLoaded = true;
@@ -675,20 +741,15 @@
             } catch (e) {
                 console.error('Load error:', e);
                 isDataLoaded = true;
-                renderCategories(); renderProducts();
+                renderHeroBanners();
+                renderCategories();
+                renderProducts();
             }
         }
 
-        function init() {
-            renderHeroBanners();
-            isDataLoaded = false;
-            renderCategories();
-            renderProducts();
-            updateCartUI();
-            loadAll();
-        }
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-        else init();
+        // INIT — everything runs immediately
+        updateCartUI();
+        loadAll();
     </script>
 </body>
 </html>
