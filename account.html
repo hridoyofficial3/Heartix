@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Account - Heartix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: {
+            colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' }, cream: '#FBF8F3' },
+            fontFamily: { 'display': ['Playfair Display', 'serif'] }
+        }}}
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: #FBF8F3; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
+        .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
+        .gold-text { color: #D4A84B; }
+        .navy-text { color: #0A1628; }
+        .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); }
+        .premium-shadow { box-shadow: 0 4px 20px rgba(10,22,40,0.08); }
+        .tab-btn { transition: all 0.2s ease; }
+        .tab-btn.active { background: linear-gradient(135deg, #0A1628, #152238); color: white; }
+        #toast-container { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; pointer-events: none; }
+        .toast-bar { padding: 14px 20px; color: white; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s ease; justify-content: center; }
+        .toast-bar.success { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .toast-bar.error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        .toast-bar.warn { background: linear-gradient(135deg, #ea580c, #f97316); }
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+        input:focus, select:focus { border-color: #D4A84B !important; }
+        .field-error { border-color: #dc2626 !important; }
+        .status-pending { background: #FEF3C7; color: #92400E; }
+        .status-confirmed { background: #DBEAFE; color: #1E40AF; }
+        .status-shipped { background: #E9D5FF; color: #6B21A8; }
+        .status-delivered { background: #D1FAE5; color: #065F46; }
+        .status-cancelled { background: #FEE2E2; color: #991B1B; }
+    </style>
+</head>
+<body class="pb-8">
+
+    <div id="toast-container"></div>
+
+    <!-- HEADER -->
+    <header class="glass sticky top-0 z-30 px-3 py-2 flex justify-between items-center border-b border-gray-100">
+        <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream">
+            <i class="fas fa-arrow-left text-navy text-lg"></i>
+        </a>
+        <h1 class="font-display text-xl navy-text font-bold">My Account</h1>
+        <a href="cart.html" class="relative w-10 h-10 flex items-center justify-center">
+            <i class="fas fa-shopping-bag text-navy text-lg"></i>
+            <span id="cart-count-header" class="absolute -top-1 -right-1 gold-gradient text-navy text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+        </a>
+    </header>
+
+    <div class="p-4 max-w-md mx-auto">
+
+        <!-- LOADING -->
+        <div id="loading" class="text-center py-16">
+            <i class="fas fa-spinner fa-spin text-3xl gold-text mb-3"></i>
+            <p class="text-gray-400 text-sm">Loading...</p>
+        </div>
+
+        <!-- AUTH (Login/Register) -->
+        <div id="auth-section" class="hidden">
+
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 mx-auto mb-3 gold-gradient rounded-3xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-user text-navy text-3xl"></i>
+                </div>
+                <h2 class="font-display text-2xl navy-text font-bold mb-1">Welcome to Heartix</h2>
+                <p class="text-xs text-gray-500">Login or create your account</p>
+            </div>
+
+            <!-- Tab Switch -->
+            <div class="bg-white rounded-2xl p-1 flex mb-4 premium-shadow">
+                <button id="tab-login" onclick="switchTab('login')" class="tab-btn active flex-1 py-2.5 rounded-xl text-xs font-bold text-gray-500">
+                    Login
+                </button>
+                <button id="tab-register" onclick="switchTab('register')" class="tab-btn flex-1 py-2.5 rounded-xl text-xs font-bold text-gray-500">
+                    Register
+                </button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <div id="login-form" class="bg-white rounded-2xl premium-shadow p-5">
+                <div class="mb-3">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Email</label>
+                    <input type="email" id="login-email" placeholder="you@example.com" maxlength="120" autocomplete="email" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+                </div>
+                <div class="mb-4">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" maxlength="60" autocomplete="current-password" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+                </div>
+                <button onclick="loginUser()" id="login-btn" class="navy-gradient text-white w-full py-3.5 rounded-xl font-bold text-sm">
+                    <i class="fas fa-sign-in-alt mr-2"></i> LOGIN
+                </button>
+                <button onclick="forgotPassword()" class="w-full text-xs text-gray-500 mt-3 py-2 font-semibold">
+                    পাসওয়ার্ড ভুলে গেছেন?
+                </button>
+            </div>
+
+            <!-- REGISTER FORM -->
+            <div id="register-form" class="bg-white rounded-2xl premium-shadow p-5 hidden">
+                <div class="mb-3">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Full Name *</label>
+                    <input type="text" id="reg-name" placeholder="আপনার নাম" maxlength="60" autocomplete="name" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+                </div>
+                <div class="mb-3">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Phone *</label>
+                    <input type="tel" id="reg-phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+                </div>
+                <div class="mb-3">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Email *</label>
+                    <input type="email" id="reg-email" placeholder="you@example.com" maxlength="120" autocomplete="email" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+                </div>
+                <div class="mb-3">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Password * (min 6)</label>
+                    <input type="password" id="reg-password" placeholder="••••••••" maxlength="60" autocomplete="new-password" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+                </div>
+                <div class="mb-4">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Confirm Password *</label>
+                    <input type="password" id="reg-confirm" placeholder="••••••••" maxlength="60" autocomplete="new-password" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+                </div>
+                <button onclick="registerUser()" id="register-btn" class="navy-gradient text-white w-full py-3.5 rounded-xl font-bold text-sm">
+                    <i class="fas fa-user-plus mr-2"></i> REGISTER
+                </button>
+                <p class="text-[10px] text-gray-400 text-center mt-3 leading-relaxed">
+                    রেজিস্টার করলে আপনি আমাদের <a href="terms.html" class="text-gold font-semibold">Terms</a> এবং <a href="privacy.html" class="text-gold font-semibold">Privacy Policy</a> মেনে নিচ্ছেন।
+                </p>
+            </div>
+
+        </div>
+
+        <!-- LOGGED IN SECTION -->
+        <div id="logged-section" class="hidden space-y-4">
+
+            <!-- PROFILE CARD -->
+            <div class="navy-gradient rounded-3xl p-6 text-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
+                <div class="absolute bottom-0 left-0 w-24 h-24 bg-[#D4A84B]/10 rounded-full -ml-12 -mb-12"></div>
+                <div class="relative flex items-center gap-4">
+                    <div class="w-16 h-16 gold-gradient rounded-2xl flex items-center justify-center flex-shrink-0">
+                        <span id="user-avatar-letter" class="text-navy text-2xl font-bold">U</span>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-[10px] text-gold tracking-widest uppercase font-bold mb-1">Welcome back</p>
+                        <p id="user-display-name" class="font-display text-xl font-bold truncate">User</p>
+                        <p id="user-display-email" class="text-white/60 text-xs truncate mt-0.5">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUICK LINKS -->
+            <div class="bg-white rounded-2xl premium-shadow overflow-hidden">
+                <a href="wishlist.html" class="flex items-center gap-3 p-4 active:bg-gray-50 border-b border-gray-100">
+                    <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-heart text-red-500"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold navy-text">My Wishlist</p>
+                        <p class="text-[11px] text-gray-500"><span id="wishlist-count">0</span> items</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300"></i>
+                </a>
+                <a href="cart.html" class="flex items-center gap-3 p-4 active:bg-gray-50 border-b border-gray-100">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-shopping-bag text-blue-500"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold navy-text">My Cart</p>
+                        <p class="text-[11px] text-gray-500"><span id="cart-count-text">0</span> items</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300"></i>
+                </a>
+                <a href="track-order.html" class="flex items-center gap-3 p-4 active:bg-gray-50">
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-truck-fast text-purple-500"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold navy-text">Track Order</p>
+                        <p class="text-[11px] text-gray-500">অর্ডার ট্র্যাক করুন</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300"></i>
+                </a>
+            </div>
+
+            <!-- MY ORDERS -->
+            <div class="bg-white rounded-2xl premium-shadow p-5">
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+                    <h3 class="font-display text-base navy-text font-bold flex items-center gap-2">
+                        <i class="fas fa-receipt gold-text text-sm"></i> My Orders
+                    </h3>
+                    <button onclick="loadMyOrders()" class="text-gold text-xs font-bold">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div id="my-orders-list" class="space-y-3"></div>
+            </div>
+
+            <!-- ACCOUNT INFO -->
+            <div class="bg-white rounded-2xl premium-shadow p-5">
+                <h3 class="font-display text-base navy-text font-bold mb-4 pb-3 border-b border-gray-100 flex items-center gap-2">
+                    <i class="fas fa-user-circle gold-text text-sm"></i> Account Info
+                </h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Name</label>
+                        <input type="text" id="profile-name" maxlength="60" class="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Phone</label>
+                        <input type="tel" id="profile-phone" maxlength="11" inputmode="numeric" class="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 outline-none text-sm">
+                    </div>
+                    <button onclick="saveProfile()" id="save-profile-btn" class="navy-gradient text-white w-full py-3 rounded-xl text-xs font-bold">
+                        <i class="fas fa-save mr-1"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+
+            <!-- LOGOUT -->
+            <button onclick="logoutUser()" class="w-full bg-red-50 text-red-500 py-3.5 rounded-2xl font-bold text-sm active:scale-[0.98] transition">
+                <i class="fas fa-sign-out-alt mr-1"></i> Logout
+            </button>
+
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
+            authDomain: "heartix.firebaseapp.com",
+            projectId: "heartix",
+            storageBucket: "heartix.firebasestorage.app",
+            messagingSenderId: "551204402338",
+            appId: "1:551204402338:web:169555975c0bbb97f113fb"
+        };
+
+        let db = null, auth = null, currentUser = null;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+        } catch (e) { console.error('Firebase init:', e); }
+
+        function showToast(msg, type = 'success') {
+            const c = document.getElementById('toast-container');
+            if (!c) return;
+            const t = document.createElement('div');
+            t.className = 'toast-bar ' + type;
+            const icon = type === 'success' ? 'check-circle' : (type === 'warn' ? 'exclamation-circle' : 'times-circle');
+            t.innerHTML = `<i class="fas fa-${icon}"></i><span>${msg}</span>`;
+            c.appendChild(t);
+            setTimeout(() => { t.style.transition='opacity 0.3s'; t.style.opacity='0'; setTimeout(() => t.remove(), 300); }, 3000);
+        }
+
+        function escapeHtml(t) { if (t === null || t === undefined) return ''; const d = document.createElement('div'); d.textContent = String(t); return d.innerHTML; }
+        function formatPrice(n) { return Number(n || 0).toLocaleString('en-IN'); }
+        function validatePhone(p) { return /^01[3-9]\d{8}$/.test(p); }
+
+        // ====== TABS ======
+        window.switchTab = function(tab) {
+            ['login','register'].forEach(t => {
+                document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+                document.getElementById('tab-' + t).classList.toggle('text-gray-500', t !== tab);
+            });
+            document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+            document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+        }
+
+        // ====== INITIAL BADGE ======
+        (function() {
+            try {
+                const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
+                const count = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
+                const h = document.getElementById('cart-count-header');
+                if (h) h.textContent = count;
+            } catch(e) {}
+        })();
+
+        // ====== AUTH STATE ======
+        if (auth) {
+            onAuthStateChanged(auth, async (user) => {
+                document.getElementById('loading').classList.add('hidden');
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('auth-section').classList.add('hidden');
+                    document.getElementById('logged-section').classList.remove('hidden');
+                    await loadProfile();
+                    loadMyOrders();
+                    updateBadges();
+                } else {
+                    currentUser = null;
+                    document.getElementById('auth-section').classList.remove('hidden');
+                    document.getElementById('logged-section').classList.add('hidden');
+                }
+            });
+        } else {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('auth-section').classList.remove('hidden');
+            showToast('Authentication লোড হয়নি', 'error');
+        }
+
+        // ====== REGISTER ======
+        window.registerUser = async function() {
+            const name = (document.getElementById('reg-name').value || '').trim();
+            const phone = (document.getElementById('reg-phone').value || '').trim();
+            const email = (document.getElementById('reg-email').value || '').trim();
+            const password = document.getElementById('reg-password').value || '';
+            const confirm = document.getElementById('reg-confirm').value || '';
+
+            if (!name || name.length < 2) return showToast('সঠিক নাম দিন', 'error');
+            if (!validatePhone(phone)) return showToast('সঠিক ফোন নাম্বার (01XXXXXXXXX)', 'error');
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('সঠিক ইমেইল দিন', 'error');
+            if (!password || password.length < 6) return showToast('পাসওয়ার্ড কমপক্ষে ৬ অক্ষর', 'error');
+            if (password !== confirm) return showToast('পাসওয়ার্ড দুইটা মিলছে না', 'error');
+
+            const btn = document.getElementById('register-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creating account...';
+
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, email, password);
+                await updateProfile(cred.user, { displayName: name });
+
+                // Save profile in Firestore
+                await setDoc(doc(db, "customers", cred.user.uid), {
+                    uid: cred.user.uid,
+                    name, phone, email,
+                    createdAt: new Date().toISOString()
+                }, { merge: true });
+
+                showToast('Account তৈরি হয়েছে!', 'success');
+                // Clear form
+                ['reg-name','reg-phone','reg-email','reg-password','reg-confirm'].forEach(id => document.getElementById(id).value = '');
+            } catch (e) {
+                let msg = 'রেজিস্ট্রেশন ব্যর্থ';
+                if (e.code === 'auth/email-already-in-use') msg = 'এই ইমেইল আগেই ব্যবহৃত';
+                else if (e.code === 'auth/weak-password') msg = 'পাসওয়ার্ড দুর্বল';
+                else if (e.code === 'auth/invalid-email') msg = 'সঠিক ইমেইল দিন';
+                else if (e.code === 'auth/network-request-failed') msg = 'ইন্টারনেট সমস্যা';
+                showToast(msg, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-user-plus mr-2"></i> REGISTER';
+            }
+        };
+
+        // ====== LOGIN ======
+        window.loginUser = async function() {
+            const email = (document.getElementById('login-email').value || '').trim();
+            const password = document.getElementById('login-password').value || '';
+            if (!email || !password) return showToast('ইমেইল ও পাসওয়ার্ড দিন', 'error');
+
+            const btn = document.getElementById('login-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Logging in...';
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                document.getElementById('login-password').value = '';
+                showToast('সফলভাবে লগইন হয়েছেন', 'success');
+            } catch (e) {
+                let msg = 'লগইন ব্যর্থ';
+                if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') msg = 'ইমেইল বা পাসওয়ার্ড ভুল';
+                else if (e.code === 'auth/user-not-found') msg = 'এই ইমেইলে account নেই';
+                else if (e.code === 'auth/invalid-email') msg = 'সঠিক ইমেইল দিন';
+                else if (e.code === 'auth/too-many-requests') msg = 'অনেকবার ভুল — কিছুক্ষণ পর চেষ্টা';
+                showToast(msg, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> LOGIN';
+            }
+        };
+
+        // ====== FORGOT ======
+        window.forgotPassword = async function() {
+            const email = (document.getElementById('login-email').value || '').trim();
+            if (!email) return showToast('প্রথমে ইমেইল লিখুন', 'warn');
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showToast('Reset link ইমেইলে পাঠানো হয়েছে', 'success');
+            } catch (e) {
+                showToast('পাঠানো যায়নি — ইমেইল চেক করুন', 'error');
+            }
+        };
+
+        // ====== LOGOUT ======
+        window.logoutUser = async function() {
+            if (!confirm('Logout করবেন?')) return;
+            try { await signOut(auth); showToast('Logout হয়েছে', 'warn'); } catch (e) {}
+        };
+
+        // ====== PROFILE ======
+        async function loadProfile() {
+            if (!currentUser) return;
+            const fallbackName = currentUser.displayName || (currentUser.email || '').split('@')[0] || 'User';
+            document.getElementById('user-display-name').textContent = fallbackName;
+            document.getElementById('user-display-email').textContent = currentUser.email || '-';
+            document.getElementById('user-avatar-letter').textContent = (fallbackName[0] || 'U').toUpperCase();
+            document.getElementById('profile-name').value = fallbackName;
+            document.getElementById('profile-phone').value = '';
+
+            try {
+                const snap = await getDoc(doc(db, "customers", currentUser.uid));
+                if (snap.exists()) {
+                    const d = snap.data();
+                    if (d.name) {
+                        document.getElementById('user-display-name').textContent = d.name;
+                        document.getElementById('profile-name').value = d.name;
+                        document.getElementById('user-avatar-letter').textContent = (d.name[0] || 'U').toUpperCase();
+                    }
+                    if (d.phone) document.getElementById('profile-phone').value = d.phone;
+                }
+            } catch (e) { console.warn('Profile load:', e); }
+        }
+
+        window.saveProfile = async function() {
+            if (!currentUser) return;
+            const name = (document.getElementById('profile-name').value || '').trim();
+            const phone = (document.getElementById('profile-phone').value || '').trim();
+            if (!name || name.length < 2) return showToast('সঠিক নাম দিন', 'error');
+            if (phone && !validatePhone(phone)) return showToast('সঠিক ফোন নাম্বার দিন', 'error');
+
+            const btn = document.getElementById('save-profile-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
+
+            try {
+                await setDoc(doc(db, "customers", currentUser.uid), { name, phone, email: currentUser.email }, { merge: true });
+                try { await updateProfile(currentUser, { displayName: name }); } catch (e) {}
+                document.getElementById('user-display-name').textContent = name;
+                document.getElementById('user-avatar-letter').textContent = (name[0] || 'U').toUpperCase();
+                showToast('প্রোফাইল সেভ হয়েছে', 'success');
+            } catch (e) {
+                showToast('সেভ করা যায়নি', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save mr-1"></i> Save Changes';
+            }
+        };
+
+        // ====== MY ORDERS ======
+        window.loadMyOrders = async function() {
+            const list = document.getElementById('my-orders-list');
+            if (!currentUser || !list) return;
+            list.innerHTML = '<p class="text-xs text-gray-400 text-center py-4"><i class="fas fa-spinner fa-spin mr-1"></i> Loading...</p>';
+
+            try {
+                const q = query(collection(db, "orders"), where("customer.email", "==", currentUser.email));
+                const snap = await getDocs(q);
+                let orders = [];
+                snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
+                orders.sort((a, b) => {
+                    const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+                    const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+                    return tb - ta;
+                });
+
+                if (orders.length === 0) {
+                    list.innerHTML = `<div class="text-center py-8">
+                        <i class="fas fa-receipt text-4xl text-gray-200 mb-3"></i>
+                        <p class="text-xs text-gray-500">এখনো কোনো অর্ডার নেই</p>
+                        <a href="index.html" class="inline-block mt-3 navy-gradient text-white px-5 py-2 rounded-lg text-[11px] font-semibold">শপিং করুন</a>
+                    </div>`;
+                    return;
+                }
+
+                let html = '';
+                orders.slice(0, 10).forEach(o => {
+                    const statusClass = 'status-' + (o.status || 'pending');
+                    const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+                    html += `<a href="track-order.html?order=${encodeURIComponent(o.orderNumber || '')}" class="block bg-gray-50 rounded-xl p-3 active:bg-gray-100">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="min-w-0">
+                                <p class="font-bold text-navy text-xs">${escapeHtml(o.orderNumber || '')}</p>
+                                <p class="text-[10px] text-gray-500 mt-0.5">${date} • ${(o.items || []).length} item(s)</p>
+                            </div>
+                            <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${statusClass}">${o.status || 'pending'}</span>
+                        </div>
+                        <div class="flex justify-between items-baseline">
+                            <span class="text-[10px] text-gray-500">Total</span>
+                            <span class="font-bold text-navy text-sm">৳${formatPrice(o.total)}</span>
+                        </div>
+                    </a>`;
+                });
+                list.innerHTML = html;
+            } catch (e) {
+                console.error('Orders:', e);
+                // Fallback: fetch all and filter client-side (in case index missing)
+                try {
+                    const allSnap = await getDocs(collection(db, "orders"));
+                    let orders = [];
+                    allSnap.forEach(d => {
+                        const data = d.data();
+                        if (data.customer?.email === currentUser.email) orders.push({ id: d.id, ...data });
+                    });
+                    orders.sort((a, b) => {
+                        const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+                        const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+                        return tb - ta;
+                    });
+                    if (orders.length === 0) {
+                        list.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">এখনো কোনো অর্ডার নেই</p>';
+                        return;
+                    }
+                    let html = '';
+                    orders.slice(0, 10).forEach(o => {
+                        const statusClass = 'status-' + (o.status || 'pending');
+                        html += `<a href="track-order.html?order=${encodeURIComponent(o.orderNumber || '')}" class="block bg-gray-50 rounded-xl p-3 active:bg-gray-100">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="min-w-0">
+                                    <p class="font-bold text-navy text-xs">${escapeHtml(o.orderNumber || '')}</p>
+                                    <p class="text-[10px] text-gray-500 mt-0.5">${(o.items || []).length} item(s)</p>
+                                </div>
+                                <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${statusClass}">${o.status || 'pending'}</span>
+                            </div>
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-[10px] text-gray-500">Total</span>
+                                <span class="font-bold text-navy text-sm">৳${formatPrice(o.total)}</span>
+                            </div>
+                        </a>`;
+                    });
+                    list.innerHTML = html;
+                } catch (e2) {
+                    list.innerHTML = '<p class="text-xs text-red-500 text-center py-4">লোড করা যায়নি</p>';
+                }
+            }
+        };
+
+        // ====== BADGES ======
+        function updateBadges() {
+            try {
+                const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
+                const cCount = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
+                const el = document.getElementById('cart-count-header');
+                if (el) el.textContent = cCount;
+                const ct = document.getElementById('cart-count-text');
+                if (ct) ct.textContent = cCount;
+
+                const wl = JSON.parse(localStorage.getItem('heartix_wishlist') || '[]');
+                const wCount = Array.isArray(wl) ? wl.length : 0;
+                const we = document.getElementById('wishlist-count');
+                if (we) we.textContent = wCount;
+            } catch (e) {}
+        }
+    </script>
+</body>
+</html>
