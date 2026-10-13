@@ -79,8 +79,8 @@
                 <i class="fas fa-search gold-text"></i> অর্ডার নাম্বার দিন
             </h2>
             <div class="flex gap-2">
-                <input type="text" id="order-input" placeholder="HX241013AB12" class="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#D4A84B] text-sm font-mono uppercase" maxlength="20">
-                <button onclick="trackOrder()" class="gold-gradient text-navy px-5 py-3 rounded-xl font-bold text-sm">
+                <input type="text" id="order-input" placeholder="HX241013AB12" class="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#D4A84B] text-sm font-mono uppercase tracking-wider" maxlength="20" autocomplete="off" autocapitalize="characters">
+                <button onclick="trackOrder()" id="track-btn" class="gold-gradient text-navy px-5 py-3 rounded-xl font-bold text-sm">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
@@ -97,7 +97,10 @@
         <div id="not-found" class="hidden bg-white rounded-2xl premium-shadow p-8 text-center">
             <i class="fas fa-search-minus text-5xl text-gray-300 mb-3"></i>
             <p class="text-gray-500 font-medium mb-2">কোনো অর্ডার পাওয়া যায়নি</p>
-            <p class="text-xs text-gray-400">অর্ডার নাম্বার সঠিকভাবে দিন</p>
+            <p class="text-xs text-gray-400 mb-4">অর্ডার নাম্বার সঠিকভাবে দিন</p>
+            <a href="contact.html" class="inline-block bg-blue-50 text-blue-700 px-5 py-2.5 rounded-xl text-xs font-semibold">
+                <i class="fas fa-headset mr-1"></i> সাহায্য নিন
+            </a>
         </div>
 
         <div id="result" class="hidden space-y-4">
@@ -106,7 +109,12 @@
                 <div class="flex justify-between items-start mb-3">
                     <div>
                         <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Order Number</p>
-                        <p id="res-order-num" class="font-display text-lg navy-text font-bold tracking-wider">-</p>
+                        <div class="flex items-center gap-2">
+                            <p id="res-order-num" class="font-display text-lg navy-text font-bold tracking-wider">-</p>
+                            <button onclick="copyOrderNumber()" class="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 text-xs">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
                     </div>
                     <span id="res-status-badge" class="text-[10px] px-2.5 py-1 rounded-full font-bold uppercase">PENDING</span>
                 </div>
@@ -123,6 +131,11 @@
                 <div class="mt-3 pt-3 border-t border-gray-100">
                     <p class="text-gray-500 mb-0.5 text-xs">Delivery Address</p>
                     <p id="res-address" class="text-xs navy-text">-</p>
+                </div>
+                <div id="res-date-line" class="mt-2 pt-2 border-t border-gray-100 hidden">
+                    <p class="text-[10px] text-gray-400">
+                        <i class="fas fa-clock mr-1"></i> Order placed: <span id="res-date"></span>
+                    </p>
                 </div>
             </div>
 
@@ -207,6 +220,7 @@
         } catch (e) { console.error('Firebase init:', e); }
 
         let settings = { whatsapp: '', contactPhone: '' };
+        let lastOrderNumber = '';
 
         function showToast(msg, type = 'success') {
             const c = document.getElementById('toast-container');
@@ -232,6 +246,14 @@
 
         function formatPrice(n) { return Number(n || 0).toLocaleString('en-IN'); }
 
+        function formatDate(ts) {
+            if (!ts) return '';
+            try {
+                const d = ts.toDate ? ts.toDate() : new Date(ts);
+                return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } catch (e) { return ''; }
+        }
+
         const STATUS_STEPS = [
             { key: 'pending', label: 'Pending', icon: 'clock', desc: 'আপনার অর্ডার পাওয়া গেছে' },
             { key: 'confirmed', label: 'Confirmed', icon: 'check', desc: 'অর্ডার কনফার্ম হয়েছে' },
@@ -247,47 +269,89 @@
             'cancelled': 'bg-red-100 text-red-700'
         };
 
+        // ============================================================
+        // ⚡ FIXED: Removed broken fallback getDoc(doc(db, "orders", input))
+        // কারণ input = orderNumber, doc ID ≠ orderNumber। fallback কখনোই match করবে না।
+        //
+        // 📌 NOTE: Firestore index দরকার হতে পারে:
+        //    Collection: orders
+        //    Fields: orderNumber (==), createdAt (desc)
+        //    https://console.firebase.google.com/project/heartix/firestore/indexes
+        // ============================================================
         window.trackOrder = async function() {
-            const input = document.getElementById('order-input').value.trim().toUpperCase();
+            const rawInput = (document.getElementById('order-input').value || '').trim();
+            const input = rawInput.toUpperCase();
+
+            // ⚡ FIXED: Input validation
             if (!input) {
                 showToast('অর্ডার নাম্বার দিন', 'error');
                 return;
             }
+            if (input.length < 6) {
+                showToast('অর্ডার নাম্বার খুব ছোট', 'warn');
+                return;
+            }
 
+            // ⚡ FIXED: Reset all states cleanly
             document.getElementById('result').classList.add('hidden');
             document.getElementById('not-found').classList.add('hidden');
             document.getElementById('loading').classList.remove('hidden');
 
+            const btn = document.getElementById('track-btn');
+            btn.disabled = true;
+
             if (!db) {
                 document.getElementById('loading').classList.add('hidden');
                 showToast('সার্ভার সংযোগ নেই', 'error');
+                btn.disabled = false;
                 return;
             }
 
             try {
-                let orderSnap = await getDocs(query(collection(db, "orders"), where("orderNumber", "==", input)));
+                const q = query(collection(db, "orders"), where("orderNumber", "==", input));
+                const orderSnap = await getDocs(q);
+
+                document.getElementById('loading').classList.add('hidden');
 
                 if (orderSnap.empty) {
-                    try {
-                        const docSnap = await getDoc(doc(db, "orders", input));
-                        if (docSnap.exists()) {
-                            document.getElementById('loading').classList.add('hidden');
-                            renderOrder({ id: docSnap.id, ...docSnap.data() });
-                            return;
-                        }
-                    } catch (e) {}
-                    document.getElementById('loading').classList.add('hidden');
                     document.getElementById('not-found').classList.remove('hidden');
                     return;
                 }
 
-                const orderData = orderSnap.docs[0].data();
-                document.getElementById('loading').classList.add('hidden');
-                renderOrder({ id: orderSnap.docs[0].id, ...orderData });
+                // ⚡ FIXED: Multiple matches হলে latest (createdAt desc) দেখাবে
+                let orders = [];
+                orderSnap.forEach(d => orders.push({ id: d.id, ...d.data() }));
+                orders.sort((a, b) => {
+                    const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+                    const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+                    return tb - ta;
+                });
+
+                lastOrderNumber = orders[0].orderNumber || input;
+                renderOrder(orders[0]);
             } catch (e) {
                 console.error('Track error:', e);
                 document.getElementById('loading').classList.add('hidden');
-                showToast('খুঁজতে সমস্যা হয়েছে', 'error');
+                // Better error for missing index
+                if ((e.message || '').toLowerCase().includes('index')) {
+                    showToast('সার্ভার index তৈরি হচ্ছে, কিছুক্ষণ পর চেষ্টা করুন', 'warn');
+                } else {
+                    showToast('খুঁজতে সমস্যা হয়েছে', 'error');
+                }
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        window.copyOrderNumber = function() {
+            const text = lastOrderNumber || document.getElementById('res-order-num').textContent;
+            if (!text || text === '-') return;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('অর্ডার নাম্বার কপি হয়েছে', 'success');
+                }).catch(() => {
+                    showToast('কপি করা যায়নি', 'error');
+                });
             }
         }
 
@@ -298,8 +362,17 @@
             document.getElementById('res-order-num').textContent = o.orderNumber || o.id.slice(0, 10);
             document.getElementById('res-name').textContent = customer.name || '-';
             document.getElementById('res-phone').textContent = customer.phone || '-';
-            document.getElementById('res-address').textContent = 
+            document.getElementById('res-address').textContent =
                 [customer.address, customer.thana, customer.district].filter(Boolean).join(', ') || '-';
+
+            // ⚡ FIXED: Show order date if available
+            const dateStr = formatDate(o.createdAt);
+            if (dateStr) {
+                document.getElementById('res-date').textContent = dateStr;
+                document.getElementById('res-date-line').classList.remove('hidden');
+            } else {
+                document.getElementById('res-date-line').classList.add('hidden');
+            }
 
             const badge = document.getElementById('res-status-badge');
             badge.textContent = (o.status || 'pending').toUpperCase();
@@ -351,16 +424,25 @@
             document.getElementById('res-total').textContent = '৳' + formatPrice(o.total);
             document.getElementById('res-advance').textContent = '৳' + formatPrice(o.advancePaid);
             document.getElementById('res-due').textContent = '৳' + formatPrice(o.dueAmount);
-            document.getElementById('res-method').textContent = o.paymentMethod === 'full-cod' ? 'Cash on Delivery' : 
-                                                                  o.paymentMethod === 'delivery-advance' ? 'Delivery Advance Paid' :
-                                                                  o.paymentMethod === 'full-online' ? 'Full Online Payment' : (o.paymentMethod || '-');
+            document.getElementById('res-method').textContent =
+                o.paymentMethod === 'full-cod' ? 'Cash on Delivery' :
+                o.paymentMethod === 'delivery-advance' ? 'Delivery Advance Paid' :
+                o.paymentMethod === 'full-online' ? 'Full Online Payment' : (o.paymentMethod || '-');
 
             const callBtn = document.getElementById('call-help');
             const waBtn = document.getElementById('wa-help');
-            if (settings.contactPhone) callBtn.href = `tel:${settings.contactPhone}`;
-            else callBtn.style.display = 'none';
-            if (settings.whatsapp) waBtn.href = `https://wa.me/${settings.whatsapp}?text=${encodeURIComponent('Order query: ' + (o.orderNumber || o.id))}`;
-            else waBtn.style.display = 'none';
+            if (settings.contactPhone) {
+                callBtn.href = `tel:${settings.contactPhone}`;
+                callBtn.style.display = '';
+            } else {
+                callBtn.style.display = 'none';
+            }
+            if (settings.whatsapp) {
+                waBtn.href = `https://wa.me/${settings.whatsapp}?text=${encodeURIComponent('Order query: ' + (o.orderNumber || o.id))}`;
+                waBtn.style.display = '';
+            } else {
+                waBtn.style.display = 'none';
+            }
 
             document.getElementById('result').classList.remove('hidden');
         }
@@ -380,15 +462,16 @@
             const params = new URLSearchParams(window.location.search);
             const orderNum = params.get('order');
             if (orderNum) {
-                document.getElementById('order-input').value = orderNum;
-                setTimeout(() => trackOrder(), 300);
+                document.getElementById('order-input').value = orderNum.toUpperCase();
+                // ⚡ FIXED: Small delay ensures DOM + settings ready
+                setTimeout(() => trackOrder(), 250);
             }
 
-            document.getElementById('order-input').addEventListener('input', function() {
+            const input = document.getElementById('order-input');
+            input.addEventListener('input', function() {
                 this.value = this.value.toUpperCase();
             });
-
-            document.getElementById('order-input').addEventListener('keypress', function(e) {
+            input.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     trackOrder();
