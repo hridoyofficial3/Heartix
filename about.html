@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>About Us - Heartix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>tailwind.config = { theme: { extend: { colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' } }, fontFamily: { 'display': ['Playfair Display', 'serif'] }}}}</script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #FBF8F3; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
+        .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
+        .gold-text { color: #D4A84B; }
+        .navy-text { color: #0A1628; }
+        .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); }
+        .premium-shadow { box-shadow: 0 4px 20px rgba(10,22,40,0.08); }
+    </style>
+</head>
+<body class="pb-6">
+
+    <header class="glass sticky top-0 z-30 px-3 py-0 flex justify-between items-center border-b border-gray-100">
+        <div class="flex items-center gap-1 flex-1 min-w-0">
+            <a href="index.html" class="w-8 h-8 flex items-center justify-center flex-shrink-0 -ml-1">
+                <i class="fas fa-arrow-left text-navy text-base"></i>
+            </a>
+            <img src="logo.png" alt="Heartix" class="h-14 object-contain" style="mix-blend-mode: multiply;">
+        </div>
+        <a href="cart.html" class="relative w-9 h-9 flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-shopping-bag text-navy text-lg"></i>
+            <span id="cart-count-header" class="absolute -top-1 -right-1 gold-gradient text-navy text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+        </a>
+    </header>
+
+    <!-- HERO -->
+    <div class="px-4 pt-4">
+        <div class="navy-gradient rounded-2xl p-6 text-center premium-shadow">
+            <i class="fas fa-store text-gold text-3xl mb-2"></i>
+            <h1 class="font-display text-2xl text-white font-bold">About Heartix</h1>
+            <p class="text-white/60 text-xs mt-1">Premium Smart Appliances</p>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="p-4 max-w-2xl mx-auto space-y-4">
+
+        <div class="bg-white rounded-2xl premium-shadow p-5">
+            <h2 class="font-display text-lg navy-text font-bold mb-3 flex items-center gap-2">
+                <i class="fas fa-quote-left gold-text text-sm"></i> আমাদের পরিচয়
+            </h2>
+            <p class="text-sm text-gray-700 leading-relaxed">
+                <strong class="navy-text">Heartix</strong> বাংলাদেশের একটি প্রিমিয়াম স্মার্ট অ্যাপ্লায়েন্স ব্র্যান্ড। আমরা বিশ্বস্ত ও মানসম্পন্ন ইলেকট্রনিকস ও স্মার্ট ডিভাইস সারা বাংলাদেশে সরবরাহ করি। আমাদের লক্ষ্য—প্রতিটি ঘরে আধুনিক প্রযুক্তি পৌঁছে দেওয়া।
+            </p>
+        </div>
+
+        <div class="bg-white rounded-2xl premium-shadow p-5">
+            <h2 class="font-display text-lg navy-text font-bold mb-3 flex items-center gap-2">
+                <i class="fas fa-bullseye gold-text text-sm"></i> আমাদের মিশন
+            </h2>
+            <ul class="space-y-2.5">
+                <li class="flex items-start gap-3">
+                    <span class="w-6 h-6 rounded-full gold-gradient flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fas fa-check text-navy text-[10px]"></i>
+                    </span>
+                    <span class="text-sm text-gray-700">১০০% অথেন্টিক ও অরিজিনাল পণ্য সরবরাহ করা</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="w-6 h-6 rounded-full gold-gradient flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fas fa-check text-navy text-[10px]"></i>
+                    </span>
+                    <span class="text-sm text-gray-700">সাশ্রয়ী দামে প্রিমিয়াম মান</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="w-6 h-6 rounded-full gold-gradient flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fas fa-check text-navy text-[10px]"></i>
+                    </span>
+                    <span class="text-sm text-gray-700">দ্রুত ডেলিভারি সারা বাংলাদেশে</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="w-6 h-6 rounded-full gold-gradient flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fas fa-check text-navy text-[10px]"></i>
+                    </span>
+                    <span class="text-sm text-gray-700">গ্রাহক সন্তুষ্টিই আমাদের প্রধান লক্ষ্য</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="bg-white rounded-2xl premium-shadow p-5">
+            <h2 class="font-display text-lg navy-text font-bold mb-3 flex items-center gap-2">
+                <i class="fas fa-star gold-text text-sm"></i> কেন Heartix?
+            </h2>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-gray-50 rounded-xl p-3 text-center">
+                    <i class="fas fa-shield-alt text-gold text-xl mb-1"></i>
+                    <p class="text-[11px] font-semibold navy-text">Authentic Products</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-3 text-center">
+                    <i class="fas fa-truck text-gold text-xl mb-1"></i>
+                    <p class="text-[11px] font-semibold navy-text">Fast Delivery</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-3 text-center">
+                    <i class="fas fa-undo text-gold text-xl mb-1"></i>
+                    <p class="text-[11px] font-semibold navy-text">Easy Return</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-3 text-center">
+                    <i class="fas fa-headset text-gold text-xl mb-1"></i>
+                    <p class="text-[11px] font-semibold navy-text">24/7 Support</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="navy-gradient rounded-2xl p-5 text-center">
+            <p class="text-white text-sm mb-3">কোনো প্রশ্ন বা পরামর্শ আছে?</p>
+            <a href="contact.html" class="inline-block gold-gradient text-navy font-bold px-6 py-2.5 rounded-xl text-sm">
+                <i class="fas fa-headset mr-1"></i> যোগাযোগ করুন
+            </a>
+        </div>
+
+    </div>
+
+    <footer class="navy-gradient px-5 py-6 mt-6 text-center">
+        <p class="text-white/50 text-[10px]">© 2025 Heartix. All rights reserved.</p>
+    </footer>
+
+    <script>
+        (function() {
+            try {
+                const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
+                const count = cart.reduce((s, i) => s + (i.quantity || 0), 0);
+                document.getElementById('cart-count-header').textContent = count;
+            } catch (e) {}
+        })();
+    </script>
+</body>
+</html>
