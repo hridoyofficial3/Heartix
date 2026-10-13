@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Heartix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>tailwind.config = { theme: { extend: { colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' } }, fontFamily: { 'display': ['Playfair Display', 'serif'] }}}}</script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #FBF8F3; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
+        .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
+        .gold-text { color: #D4A84B; }
+        .navy-text { color: #0A1628; }
+        .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); }
+        .premium-shadow { box-shadow: 0 4px 20px rgba(10,22,40,0.08); }
+        details[open] .faq-icon { transform: rotate(45deg); }
+        .faq-icon { transition: transform 0.2s; }
+        summary::-webkit-details-marker { display: none; }
+    </style>
+</head>
+<body class="pb-6">
+
+    <header class="glass sticky top-0 z-30 px-3 py-0 flex justify-between items-center border-b border-gray-100">
+        <div class="flex items-center gap-1 flex-1 min-w-0">
+            <a href="index.html" class="w-8 h-8 flex items-center justify-center flex-shrink-0 -ml-1">
+                <i class="fas fa-arrow-left text-navy text-base"></i>
+            </a>
+            <img src="logo.png" alt="Heartix" class="h-14 object-contain" style="mix-blend-mode: multiply;">
+        </div>
+        <a href="cart.html" class="relative w-9 h-9 flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-shopping-bag text-navy text-lg"></i>
+            <span id="cart-count-header" class="absolute -top-1 -right-1 gold-gradient text-navy text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+        </a>
+    </header>
+
+    <div class="px-4 pt-4">
+        <div class="navy-gradient rounded-2xl p-6 text-center premium-shadow">
+            <i class="fas fa-circle-question text-gold text-3xl mb-2"></i>
+            <h1 class="font-display text-2xl text-white font-bold">FAQ</h1>
+            <p class="text-white/60 text-xs mt-1">সাধারণ জিজ্ঞাসা</p>
+        </div>
+    </div>
+
+    <div class="p-4 max-w-2xl mx-auto space-y-2.5">
+
+        <details class="bg-white rounded-2xl premium-shadow overflow-hidden">
+            <summary class="flex items-center gap-3 p-4 cursor-pointer select-none">
+                <span class="w-7 h-7 rounded-full gold-gradient flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-shopping-bag text-navy text-[11px]"></i>
+                </span>
+                <span class="flex-1 text-sm font-semibold navy-text">কীভাবে অর্ডার করব?</span>
+                <i class="fas fa-plus gold-text faq-icon text-xs"></i>
+            </summary>
+            <div class="px-4 pb-4 pl-14">
+                <p class="text-sm text-gray-600 leading-relaxed">প্রোডাক্ট পেজে গিয়ে "Add to Cart" বা "Buy Now" বাটনে ক্লিক করুন। এরপর কার্টে যান → Checkout-এ আপনার নাম, ফোন, ঠিকানা দিন → পেমেন্ট মেথড সিলেক্ট করে Order Place করুন।</p>
+            </div>
+        </details>
+
+        <details class="bg-white rounded-2xl premium-shadow overflow-hidden">
+            <summary class="flex items-center gap-3 p-4 cursor-pointer select-none">
+                <span class="w-7 h-7 rounded-full gold-gradient flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-truck text-navy text-[11px]"></i>
+                </span>
+                <span class="flex-1 text-sm font-semibold navy-text">ডেলিভারিতে কত দিন লাগে?</span>
+                <i class="fas fa-plus gold-text faq-icon text-xs"></i>
+            </summary>
+            <div class="px-4 pb-4 pl-14">
+                <p class="text-sm text-gray-600 leading-relaxed">ঢাকার ভেতরে ১-২ দিন, ঢাকার বাইরে ২-৪ দিন। অর্ডার কনফার্ম করার পর আমাদের টিম আপনাকে সম্ভাব্য ডেলিভারি তারিখ জানিয়ে দেবে।</p>
+            </div>
+        </details>
+
+        <details class="bg-white rounded-2xl premium-shadow overflow-hidden">
+            <summary class="flex items-center gap-3 p-4 cursor-pointer select-none">
+                <span class="w-7 h-7 rounded-full gold-gradient flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-money-bill-wave text-navy text-[11px]"></i>
+                </span>
+                <span class="flex-1 text-sm font-semibold navy-text">পেমেন্ট কীভাবে করব?</span>
+                <i class="fas fa-plus gold-text faq-icon text-xs"></i>
+            </summary>
+            <div class="px-4 pb-4 pl-14">
+                <p class="text-sm text-gray-600 leading-relaxed mb-2">৩টি উপায়ে পেমেন্ট করতে পারেন:</p>
+                <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
+                    <li>ক্যাশ অন ডেলিভারি (সম্পূর্ণ)</li>
+                    <li>শুধু ডেলিভারি চার্জ অগ্রিম (বিকাশ/নগদ)</li>
+                    <li>সম্পূর্ণ অনলাইন পেমেন্ট (বিকাশ/নগদ)</li>
+                </ul>
+            </div>
+        </details>
+
+        <details class="bg-white rounded-2xl premium-shadow overflow-hidden">
+            <summary class="flex items-center gap-3 p-4 cursor-pointer select-none">
+                <span class="w-7 h-7 rounded-full gold-gradient flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-undo text-navy text-[11px]"></i>
+                </span>
+                <span class="flex-1 text-sm font-semibold navy-text">প্রোডাক্ট ফেরত দেওয়া যাবে?</span>
+                <i class="fas fa-plus gold-text faq-icon text-xs"></i>
+            </summary>
+            <div class="px-4 pb-4 pl-14">
+                <p class="text-sm text-gray-600 leading-relaxed">প্রোডাক্ট ডেলিভারির ২৪ ঘন্টার মধ্যে ফেরত দেওয়া যাবে যদি এটি ক্ষতিগ্রস্ত বা ভুল প্রোডাক্ট হয়। বিস্তারিত জানতে <a href="return-policy.html" class="text-gold font-semibold">Return Policy</a> দেখুন।</p>
+            </div>
+        </details>
+
+        <details class="bg-white rounded-2xl premium-shadow overflow-hidden">
+            <summary class="flex items-center gap-3 p-4 cursor-pointer select-none">
+                <span class="w-7 h-7 rounded-full gold-gradient flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-shield-alt text-navy text-[11px]"></i>
+                </span>
+                <span class="flex-1 text-sm font-semibold navy-text">প্রোডাক্ট অরিজিনাল?</span>
+                <i class="fas fa-plus gold-text faq-icon text-xs"></i>
+            </summary>
+            <div class="px-4 pb-4 pl-14">
+                <p class="text-sm text-gray-600 leading-relaxed">হ্যাঁ। Heartix-এ সব প্রোডাক্ট ১০০% অরিজিনাল ও অফিসিয়াল সোর্স থেকে সংগ্রহ করা হয়।</p>
+            </div>
+        </details>
+
+        <details class="bg-white rounded-2xl premium-shadow overflow-hidden">
+            <summary class="flex items-center gap-3 p-4 cursor-pointer select-none">
+                <span class="w-7 h-7 rounded-full gold-gradient flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-search text-navy text-[11px]"></i>
+                </span>
+                <span class="flex-1 text-sm font-semibold navy-text">অর্ডার ট্র্যাক করব কিভাবে?</span>
+                <i class="fas fa-plus gold-text faq-icon text-xs"></i>
+            </summary>
+            <div class="px-4 pb-4 pl-14">
+                <p class="text-sm text-gray-600 leading-relaxed">আপনার অর্ডার নাম্বার দিয়ে <a href="track-order.html" class="text-gold font-semibold">Track Order</a> পেজে গিয়ে স্ট্যাটাস দেখতে পারবেন।</p>
+            </div>
+        </details>
+
+        <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 mt-4">
+            <p class="text-xs text-blue-800 leading-relaxed">
+                <i class="fas fa-info-circle mr-1"></i> আরও প্রশ্ন থাকলে <a href="contact.html" class="font-bold underline">যোগাযোগ করুন</a>।
+            </p>
+        </div>
+
+    </div>
+
+    <footer class="navy-gradient px-5 py-6 mt-6 text-center">
+        <p class="text-white/50 text-[10px]">© 2025 Heartix. All rights reserved.</p>
+    </footer>
+
+    <script>
+        (function() {
+            const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
+            const count = cart.reduce((s, i) => s + (i.quantity || 0), 0);
+            document.getElementById('cart-count-header').textContent = count;
+        })();
+    </script>
+</body>
+</html>
