@@ -41,7 +41,6 @@
 
     <div id="toast-container"></div>
 
-    <!-- HEADER -->
     <header class="glass sticky top-0 z-30 px-3 py-2 flex justify-between items-center border-b border-gray-100">
         <a href="cart.html" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream">
             <i class="fas fa-arrow-left text-navy text-lg"></i>
@@ -50,7 +49,6 @@
         <div class="w-10"></div>
     </header>
 
-    <!-- LOADING -->
     <div id="loading-skeleton" class="p-4 max-w-2xl mx-auto space-y-3">
         <div class="bg-white rounded-2xl p-5 premium-shadow">
             <div class="h-5 w-32 shimmer rounded mb-4"></div>
@@ -60,15 +58,12 @@
         <div class="bg-white rounded-2xl p-5 premium-shadow">
             <div class="h-5 w-40 shimmer rounded mb-4"></div>
             <div class="h-10 w-full shimmer rounded-lg mb-2"></div>
-            <div class="h-10 w-full shimmer rounded-lg mb-2"></div>
             <div class="h-10 w-full shimmer rounded-lg"></div>
         </div>
     </div>
 
-    <!-- MAIN -->
     <div id="main-content" class="p-4 max-w-2xl mx-auto space-y-4 hidden">
 
-        <!-- EMPTY CART -->
         <div id="empty-cart" class="hidden text-center py-16">
             <i class="fas fa-shopping-bag text-6xl text-gray-300 mb-4"></i>
             <p class="text-gray-500 text-lg font-medium">আপনার কার্ট খালি!</p>
@@ -77,10 +72,8 @@
             </a>
         </div>
 
-        <!-- FORM -->
         <div id="checkout-form" class="space-y-4 hidden">
 
-            <!-- ORDER REVIEW -->
             <div class="bg-white rounded-2xl premium-shadow p-5">
                 <h3 class="font-display text-lg navy-text font-bold mb-3 pb-2 border-b border-gray-100 flex items-center gap-2">
                     <i class="fas fa-shopping-bag gold-text"></i> Order Review
@@ -88,7 +81,6 @@
                 <div id="order-review"></div>
             </div>
 
-            <!-- SHIPPING -->
             <div class="bg-white rounded-2xl premium-shadow p-5">
                 <h3 class="font-display text-lg navy-text font-bold mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
                     <i class="fas fa-map-marker-alt gold-text"></i> Shipping Address
@@ -125,7 +117,6 @@
                 </div>
             </div>
 
-            <!-- PAYMENT METHOD -->
             <div class="bg-white rounded-2xl premium-shadow p-5">
                 <h3 class="font-display text-lg navy-text font-bold mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
                     <i class="fas fa-credit-card gold-text"></i> Payment Method
@@ -159,7 +150,6 @@
                     </label>
                 </div>
 
-                <!-- PAYMENT INFO -->
                 <div id="payment-instructions" class="hidden mt-4 bg-cream border border-[#D4A84B]/30 rounded-xl p-4 text-sm">
                     <p class="font-semibold navy-text mb-2 flex items-center gap-1">
                         <i class="fas fa-info-circle gold-text"></i> পেমেন্ট তথ্য
@@ -172,7 +162,6 @@
                 </div>
             </div>
 
-            <!-- SUMMARY -->
             <div class="bg-white rounded-2xl premium-shadow p-5">
                 <div class="flex justify-between mb-3 text-sm">
                     <span class="text-gray-600">Subtotal</span>
@@ -199,7 +188,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
@@ -210,22 +199,20 @@
             appId: "1:551204402338:web:169555975c0bbb97f113fb"
         };
 
-        let app, db;
+        let db;
         try {
-            app = initializeApp(firebaseConfig);
+            const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
         } catch (e) { console.error('Firebase init:', e); }
 
-        // ============ STATE ============
         let settings = { deliveryCharge: 100, freeDeliveryAbove: 0, bkashNumber: '', nagadNumber: '', whatsapp: '' };
         let isLoading = true;
         let isPlacingOrder = false;
 
-        // ============ 64 DISTRICTS ============
         const DISTRICTS = [
             "Dhaka","Faridpur","Gazipur","Gopalganj","Kishoreganj","Madaripur","Manikganj","Munshiganj","Narayanganj","Narsingdi","Rajbari","Shariatpur","Tangail",
             "Chittagong","Bandarban","Brahmanbaria","Chandpur","Comilla","Cox's Bazar","Feni","Khagrachari","Lakshmipur","Noakhali","Rangamati",
-            "Rajshahi","Bogura","Chapainawabganj","Joypurhat","Naogaon","Natore","Nawabganj","Pabna","Sirajganj",
+            "Rajshahi","Bogura","Chapainawabganj","Joypurhat","Naogaon","Natore","Pabna","Sirajganj",
             "Khulna","Bagerhat","Chuadanga","Jessore","Jhenaidah","Kushtia","Magura","Meherpur","Narail","Satkhira",
             "Barishal","Barguna","Bhola","Jhalokati","Patuakhali","Pirojpur",
             "Sylhet","Habiganj","Moulvibazar","Sunamganj",
@@ -233,7 +220,6 @@
             "Mymensingh","Jamalpur","Netrokona","Sherpur"
         ];
 
-        // ============ UTILS ============
         function showToast(msg, type = 'success') {
             const c = document.getElementById('toast-container');
             if (!c) return;
@@ -242,41 +228,22 @@
             const icon = type === 'success' ? 'check-circle' : (type === 'warn' ? 'exclamation-circle' : 'times-circle');
             t.innerHTML = `<i class="fas fa-${icon}"></i><span>${msg}</span>`;
             c.appendChild(t);
-            setTimeout(() => {
-                t.style.transition = 'opacity 0.3s';
-                t.style.opacity = '0';
-                setTimeout(() => t.remove(), 300);
-            }, 3000);
+            setTimeout(() => { t.style.transition='opacity 0.3s'; t.style.opacity='0'; setTimeout(() => t.remove(), 300); }, 3000);
         }
 
-        function escapeHtml(t) {
-            if (t === null || t === undefined) return '';
-            const d = document.createElement('div');
-            d.textContent = String(t);
-            return d.innerHTML;
-        }
-
+        function escapeHtml(t) { if (t === null || t === undefined) return ''; const d = document.createElement('div'); d.textContent = String(t); return d.innerHTML; }
         function formatPrice(n) { return Number(n || 0).toLocaleString('en-IN'); }
-
-        function getCart() {
-            try { return JSON.parse(localStorage.getItem('heartix_cart') || '[]'); }
-            catch (e) { return []; }
-        }
-
-        function validatePhone(phone) {
-            return /^01[3-9]\d{8}$/.test(phone);
-        }
-
+        function getCart() { try { return JSON.parse(localStorage.getItem('heartix_cart') || '[]'); } catch (e) { return []; } }
+        function validatePhone(phone) { return /^01[3-9]\d{8}$/.test(phone); }
         function generateOrderNumber() {
-            const date = new Date();
-            const y = date.getFullYear().toString().slice(-2);
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
+            const d = new Date();
+            const y = d.getFullYear().toString().slice(-2);
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
             const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
-            return `HX${y}${m}${d}${rand}`;
+            return `HX${y}${m}${day}${rand}`;
         }
 
-        // ============ INIT DISTRICTS ============
         function initDistricts() {
             const sel = document.getElementById('customer-district');
             if (!sel) return;
@@ -290,7 +257,6 @@
             });
         }
 
-        // ============ LOAD SETTINGS ============
         async function loadSettings() {
             if (!db) { isLoading = false; afterLoad(); return; }
             try {
@@ -303,9 +269,7 @@
                     settings.nagadNumber = s.nagadNumber || '';
                     settings.whatsapp = s.whatsapp || '';
                 }
-            } catch (e) {
-                console.warn('Settings load error:', e);
-            }
+            } catch (e) { console.warn('Settings:', e); }
             isLoading = false;
             afterLoad();
         }
@@ -313,17 +277,14 @@
         function afterLoad() {
             document.getElementById('loading-skeleton').classList.add('hidden');
             document.getElementById('main-content').classList.remove('hidden');
-
             const cart = getCart();
             if (cart.length === 0) {
                 document.getElementById('empty-cart').classList.remove('hidden');
                 document.getElementById('checkout-form').classList.add('hidden');
                 return;
             }
-
             document.getElementById('empty-cart').classList.add('hidden');
             document.getElementById('checkout-form').classList.remove('hidden');
-
             renderOrderReview();
             initDistricts();
             attachPaymentListeners();
@@ -331,12 +292,10 @@
             updateSummary();
         }
 
-        // ============ ORDER REVIEW ============
         function renderOrderReview() {
             const cart = getCart();
             const reviewDiv = document.getElementById('order-review');
             if (!reviewDiv) return;
-
             let html = '';
             cart.forEach(item => {
                 const qty = Number(item.quantity) || 1;
@@ -354,24 +313,19 @@
             reviewDiv.innerHTML = html;
         }
 
-        // ============ SUMMARY ============
         function updateSummary() {
             const cart = getCart();
             const subtotal = cart.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0);
             const isFree = settings.freeDeliveryAbove > 0 && subtotal >= settings.freeDeliveryAbove;
-            const deliveryCharge = isFree ? 0 : settings.deliveryCharge;
-            const total = subtotal + deliveryCharge;
-
+            const dc = isFree ? 0 : settings.deliveryCharge;
             document.getElementById('checkout-subtotal').innerText = '৳ ' + formatPrice(subtotal);
-            document.getElementById('checkout-delivery').innerText = deliveryCharge === 0 ? 'ফ্রি' : '৳ ' + formatPrice(deliveryCharge);
-            document.getElementById('checkout-total').innerText = '৳ ' + formatPrice(total);
-
-            const freeNote = document.getElementById('checkout-free-note');
-            if (isFree) freeNote.classList.remove('hidden');
-            else freeNote.classList.add('hidden');
+            document.getElementById('checkout-delivery').innerText = dc === 0 ? 'ফ্রি' : '৳ ' + formatPrice(dc);
+            document.getElementById('checkout-total').innerText = '৳ ' + formatPrice(subtotal + dc);
+            const fn = document.getElementById('checkout-free-note');
+            if (isFree) fn.classList.remove('hidden');
+            else fn.classList.add('hidden');
         }
 
-        // ============ PAYMENT ============
         function attachPaymentListeners() {
             document.querySelectorAll('input[name="payment"]').forEach(radio => {
                 radio.addEventListener('change', function() {
@@ -380,60 +334,41 @@
                     updatePaymentInfo(this.value);
                 });
             });
-            // Initial selection
             const initial = document.querySelector('input[name="payment"]:checked');
-            if (initial) {
-                initial.closest('.payment-option').classList.add('selected');
-            }
+            if (initial) initial.closest('.payment-option').classList.add('selected');
         }
 
         function updatePaymentInfo(method) {
             const box = document.getElementById('payment-instructions');
             const content = document.getElementById('payment-info-content');
             if (!box || !content) return;
-
             const cart = getCart();
             const subtotal = cart.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0);
             const isFree = settings.freeDeliveryAbove > 0 && subtotal >= settings.freeDeliveryAbove;
             const dc = isFree ? 0 : settings.deliveryCharge;
             const total = subtotal + dc;
-
-            if (method === 'full-cod') {
-                box.classList.add('hidden');
-                return;
-            }
+            if (method === 'full-cod') { box.classList.add('hidden'); return; }
             box.classList.remove('hidden');
-
             let html = '';
             if (method === 'delivery-advance') {
                 html += `<p class="text-navy mb-2">ডেলিভারি চার্জ <strong class="gold-text">৳ ${formatPrice(dc)}</strong> পাঠাতে হবে:</p>`;
             } else {
                 html += `<p class="text-navy mb-2">সম্পূর্ণ <strong class="gold-text">৳ ${formatPrice(total)}</strong> পাঠাতে হবে:</p>`;
             }
-
-            if (settings.bkashNumber) {
-                html += `<p class="text-sm mb-1 flex items-center gap-2"><i class="fas fa-mobile-alt text-pink-500"></i><strong>bKash (Personal):</strong> <span class="font-mono">${escapeHtml(settings.bkashNumber)}</span></p>`;
-            }
-            if (settings.nagadNumber) {
-                html += `<p class="text-sm mb-1 flex items-center gap-2"><i class="fas fa-mobile-alt text-orange-500"></i><strong>Nagad (Personal):</strong> <span class="font-mono">${escapeHtml(settings.nagadNumber)}</span></p>`;
-            }
+            if (settings.bkashNumber) html += `<p class="text-sm mb-1 flex items-center gap-2"><i class="fas fa-mobile-alt text-pink-500"></i><strong>bKash:</strong> <span class="font-mono">${escapeHtml(settings.bkashNumber)}</span></p>`;
+            if (settings.nagadNumber) html += `<p class="text-sm mb-1 flex items-center gap-2"><i class="fas fa-mobile-alt text-orange-500"></i><strong>Nagad:</strong> <span class="font-mono">${escapeHtml(settings.nagadNumber)}</span></p>`;
             if (!settings.bkashNumber && !settings.nagadNumber) {
-                html += `<p class="text-red-500 text-sm"><i class="fas fa-exclamation-triangle mr-1"></i> অ্যাডমিন এখনো পেমেন্ট নম্বর সেট করেননি। দয়া করে COD বেছে নিন বা অ্যাডমিনের সাথে যোগাযোগ করুন।</p>`;
+                html += `<p class="text-red-500 text-sm"><i class="fas fa-exclamation-triangle mr-1"></i> অ্যাডমিন পেমেন্ট নম্বর সেট করেননি।</p>`;
             }
             content.innerHTML = html;
         }
 
-        // ============ PLACE ORDER ============
+        // ====== PLACE ORDER WITH STOCK UPDATE ======
         window.placeOrder = async function() {
             if (isPlacingOrder) return;
-            
             const cart = getCart();
-            if (cart.length === 0) {
-                showToast("আপনার কার্ট খালি!", 'error');
-                return;
-            }
+            if (cart.length === 0) return showToast("কার্ট খালি!", 'error');
 
-            // Get form values
             const name = (document.getElementById('customer-name').value || '').trim();
             const phone = (document.getElementById('customer-phone').value || '').trim();
             const email = (document.getElementById('customer-email').value || '').trim();
@@ -442,21 +377,17 @@
             const thana = (document.getElementById('customer-thana').value || '').trim();
             const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
 
-            // Validation
             if (!name || name.length < 2) return showToast("সঠিক নাম দিন", 'error');
-            if (!phone) return showToast("ফোন নাম্বার দিন", 'error');
-            if (!validatePhone(phone)) return showToast("সঠিক ফোন নাম্বার দিন (01XXXXXXXXX)", 'error');
+            if (!validatePhone(phone)) return showToast("সঠিক ফোন নাম্বার (01XXXXXXXXX)", 'error');
             if (!address || address.length < 5) return showToast("সম্পূর্ণ ঠিকানা দিন", 'error');
             if (!district) return showToast("জেলা সিলেক্ট করুন", 'error');
-            if (!thana) return showToast("থানার নাম দিন", 'error');
-            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast("সঠিক ইমেইল দিন", 'error');
+            if (!thana) return showToast("থানা দিন", 'error');
+            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast("সঠিক ইমেইল", 'error');
 
-            // Calculate totals
             const subtotal = cart.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0);
             const isFree = settings.freeDeliveryAbove > 0 && subtotal >= settings.freeDeliveryAbove;
             const deliveryCharge = isFree ? 0 : settings.deliveryCharge;
             const total = subtotal + deliveryCharge;
-
             let advancePaid = 0;
             if (paymentMethod === 'full-online') advancePaid = total;
             else if (paymentMethod === 'delivery-advance') advancePaid = deliveryCharge;
@@ -471,6 +402,36 @@
             try {
                 if (!db) throw new Error("Database connection failed");
 
+                // ⚡ STEP 1: Update stock FIRST (before creating order)
+                // If stock insufficient, abort order
+                for (const item of cart) {
+                    if (!item.id) continue;
+                    try {
+                        const pSnap = await getDoc(doc(db, "products", item.id));
+                        if (pSnap.exists()) {
+                            const currentStock = Number(pSnap.data().stock) || 0;
+                            if (currentStock < item.quantity) {
+                                throw new Error(`${item.name} - স্টকে মাত্র ${currentStock} টি আছে`);
+                            }
+                        }
+                    } catch (e) {
+                        if (e.message.includes('স্টকে')) throw e;
+                    }
+                }
+
+                // ⚡ STEP 2: Decrement stock for each item
+                for (const item of cart) {
+                    if (!item.id) continue;
+                    try {
+                        await updateDoc(doc(db, "products", item.id), {
+                            stock: increment(-item.quantity)
+                        });
+                    } catch (e) {
+                        console.warn('Stock decrement failed for', item.id, e);
+                    }
+                }
+
+                // ⚡ STEP 3: Create order
                 await addDoc(collection(db, "orders"), {
                     orderNumber,
                     customer: { name, phone, email, address, district, thana },
@@ -488,6 +449,7 @@
                     advancePaid,
                     dueAmount: total - advancePaid,
                     status: 'pending',
+                    stockDeducted: true,
                     createdAt: serverTimestamp()
                 });
 
@@ -495,19 +457,15 @@
                 window.location.href = 'order-success.html?order=' + encodeURIComponent(orderNumber);
             } catch (e) {
                 console.error('Order error:', e);
-                showToast("অর্ডার প্লেস করা যায়নি। আবার চেষ্টা করুন।", 'error');
+                showToast(e.message || "অর্ডার প্লেস করা যায়নি", 'error');
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i> PLACE ORDER';
                 isPlacingOrder = false;
             }
         }
 
-        // ============ INIT ============
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', loadSettings);
-        } else {
-            loadSettings();
-        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadSettings);
+        else loadSettings();
     </script>
 </body>
 </html>
