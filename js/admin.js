@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX ADMIN — JavaScript (Complete + Compact Orders)
+// HEARTIX ADMIN — JavaScript (Complete + Featured + Pin to Top)
 // ============================================================
 import { db, auth } from './firebase.js';
 import { escapeHtml, formatPrice as fmt } from './common.js';
@@ -923,13 +923,24 @@ window.renderAdminProducts = function() {
         const stock = Number(p.stock) || 0;
         const badge = stock <= 0 ? '<span class="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">OUT</span>' :
             (stock < 5 ? `<span class="text-[10px] font-bold bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">${stock} left</span>` : `<span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">${stock} in stock</span>`);
+
+        // Featured + Pinned badges
+        let badges = badge;
+        if (p.featured === true) {
+            badges += ' <span class="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full"><i class="fas fa-star text-[8px] mr-0.5"></i>Featured</span>';
+        }
+        if (p.pinned === true) {
+            badges += ' <span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full"><i class="fas fa-thumbtack text-[8px] mr-0.5"></i>Pinned</span>';
+        }
+
         const cats = getProductCategories(p);
         const catText = cats.length > 0 ? cats.join(', ') : 'Uncategorized';
         html += `<div class="bg-white rounded-2xl p-3 premium-shadow flex items-center gap-3">
             <img src="${p.image || 'https://via.placeholder.com/100x100?text=?'}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl flex-shrink-0" onerror="this.src='https://via.placeholder.com/100x100?text=?'">
             <div class="flex-1 min-w-0">
                 <p class="font-semibold text-sm text-navy truncate">${escapeHtml(p.name)}</p>
-                <div class="flex items-center gap-2 mt-1 flex-wrap"><p class="text-[11px] text-gray-500 font-medium truncate">${escapeHtml(catText)}</p>${badge}</div>
+                <div class="flex items-center gap-2 mt-1 flex-wrap"><p class="text-[11px] text-gray-500 font-medium truncate">${escapeHtml(catText)}</p></div>
+                <div class="flex items-center gap-1 mt-1 flex-wrap">${badges}</div>
                 <p class="text-sm font-bold gold-text mt-0.5">৳ ${fmt(p.price)}</p>
             </div>
             <div class="flex flex-col gap-1.5 flex-shrink-0">
@@ -947,6 +958,8 @@ window.openAddModal = function() {
     ['p-name','p-price','p-oldprice','p-brand','p-description'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('p-stock').value = '10';
     document.getElementById('p-image-file').value = '';
+    document.getElementById('p-featured').checked = false;
+    document.getElementById('p-pinned').checked = false;
     pendingImages = []; existingImages = [];
     populateCategoryCheckboxes();
     renderImagePreview();
@@ -964,6 +977,8 @@ window.editProduct = function(id) {
     document.getElementById('p-stock').value = p.stock || 0;
     document.getElementById('p-brand').value = p.brand || '';
     document.getElementById('p-description').value = p.description || '';
+    document.getElementById('p-featured').checked = p.featured === true;
+    document.getElementById('p-pinned').checked = p.pinned === true;
     pendingImages = [];
     const imgs = Array.isArray(p.images) ? p.images.filter(u => typeof u === 'string' && u.length > 0) : [];
     if (imgs.length > 0) existingImages = [...imgs];
@@ -1014,6 +1029,8 @@ window.saveProduct = async function() {
     const stockRaw = document.getElementById('p-stock').value;
     const brand = document.getElementById('p-brand').value.trim();
     const description = document.getElementById('p-description').value.trim();
+    const featured = document.getElementById('p-featured').checked;
+    const pinned = document.getElementById('p-pinned').checked;
     const price = parseFloat(priceRaw);
     const oldPrice = oldPriceRaw ? parseFloat(oldPriceRaw) : 0;
     const stock = stockRaw ? parseInt(stockRaw) : 0;
@@ -1045,10 +1062,34 @@ window.saveProduct = async function() {
             category: categories[0],
             categories: categories,
             stock, brand, description,
+            featured, pinned,
             image: allImages[0], images: allImages
         };
-        if (id) await updateDoc(doc(db, "products", id), data);
-        else await addDoc(collection(db, "products"), data);
+
+        if (id) {
+            // Preserve existing sortOrder
+            const existing = allProductsList.find(x => x.id === id);
+            if (existing && typeof existing.sortOrder === 'number') {
+                data.sortOrder = existing.sortOrder;
+            }
+            await updateDoc(doc(db, "products", id), data);
+        } else {
+            // New product: assign sortOrder at end of its first category
+            try {
+                const snap = await getDocs(collection(db, "products"));
+                let maxOrder = -1;
+                snap.forEach(d => {
+                    const pd = d.data();
+                    const cats = Array.isArray(pd.categories) ? pd.categories : (pd.category ? [pd.category] : []);
+                    if (cats.includes(categories[0])) {
+                        const so = Number(pd.sortOrder);
+                        if (!isNaN(so) && so > maxOrder) maxOrder = so;
+                    }
+                });
+                data.sortOrder = maxOrder + 1;
+            } catch (e) { data.sortOrder = 0; }
+            await addDoc(collection(db, "products"), data);
+        }
         toast('Saved!'); closeModal(); await loadProducts(); updateStats();
     } catch (e) { toast("Error: " + e.message, 'error'); }
     finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE PRODUCT'; }
@@ -1150,7 +1191,6 @@ function renderAdminOrders() {
         };
         const current = statusMeta[o.status] || statusMeta.pending;
 
-        // Customer badges
         let badges = '';
         if (o.customer?.isRepeat) {
             badges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-repeat text-[8px]"></i> Repeat (${o.customer.orderCount || '?'})</span>`;
@@ -1186,7 +1226,6 @@ function renderAdminOrders() {
             </summary>
 
             <div class="px-3.5 pb-3.5 pt-3 border-t border-gray-100 space-y-3">
-                <!-- Address -->
                 ${fullAddress ? `
                 <div class="flex items-start gap-2 text-xs text-gray-600">
                     <i class="fas fa-map-marker-alt text-gray-400 mt-0.5 flex-shrink-0"></i>
@@ -1194,7 +1233,6 @@ function renderAdminOrders() {
                 </div>
                 ` : ''}
 
-                <!-- Items with images -->
                 <div class="bg-gray-50 rounded-xl p-2.5 space-y-2">
                     ${(o.items || []).map(item => `
                         <div class="flex items-center gap-2.5">
@@ -1208,7 +1246,6 @@ function renderAdminOrders() {
                     `).join('')}
                 </div>
 
-                <!-- Payment breakdown -->
                 <div class="grid grid-cols-3 gap-2">
                     <div class="bg-gray-50 rounded-xl p-2.5 text-center">
                         <p class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Total</p>
@@ -1227,7 +1264,6 @@ function renderAdminOrders() {
                 ${o.discount > 0 ? `<p class="text-[11px] text-amber-600 bg-amber-50 rounded-lg p-2"><i class="fas fa-tag mr-1"></i>Discount: ৳${fmt(o.discount)}${o.couponCode ? ` (${escapeHtml(o.couponCode)})` : ''}</p>` : ''}
                 ${o.adminNote ? `<p class="text-[11px] text-gray-500 bg-gray-50 rounded-lg p-2"><i class="fas fa-sticky-note mr-1"></i>${escapeHtml(o.adminNote)}</p>` : ''}
 
-                <!-- Actions -->
                 <div class="space-y-2">
                     <button onclick="openOrderEdit('${o.id}')" class="w-full bg-navy text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2">
                         <i class="fas fa-pen"></i> EDIT ORDER
@@ -1689,4 +1725,4 @@ document.getElementById('test-image-file')?.addEventListener('change', function(
     r.readAsDataURL(f);
 });
 
-console.log('✅ admin.js loaded with compact orders');
+console.log('✅ admin.js loaded (with featured + pinned)');
