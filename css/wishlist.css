@@ -1,0 +1,53 @@
+/* ========== WISHLIST PAGE STYLES ========== */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #FBF8F3;
+    overflow-x: hidden;
+}
+
+.prod-img {
+    object-fit: contain;
+    background: #f9fafb;
+}
+
+.add-cart-btn {
+    height: 34px;
+    background: white;
+    border: 1.5px solid #D4A84B;
+    color: #0A1628;
+    border-radius: 9px;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+.add-cart-btn:active { background: #FBF8F3; }
+
+.qty-control {
+    display: flex;
+    align-items: center;
+    background: #0A1628;
+    border-radius: 9px;
+    overflow: hidden;
+    height: 34px;
+}
+.qty-control button {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    user-select: none;
+}
+.qty-control .qty-num {
+    color: white;
+    font-weight: 700;
+    min-width: 34px;
+    text-align: center;
+    font-size: 13px;
+}
