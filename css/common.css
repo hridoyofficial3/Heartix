@@ -1,0 +1,60 @@
+* { -webkit-tap-highlight-color: transparent; }
+body {
+    font-family: 'Inter', sans-serif;
+    background: #FBF8F3;
+    overflow-x: hidden;
+}
+.font-display { font-family: 'Playfair Display', serif; }
+.navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
+.gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
+.gold-text { color: #D4A84B; }
+.navy-text { color: #0A1628; }
+.glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.premium-shadow { box-shadow: 0 4px 20px rgba(10,22,40,0.08); }
+.premium-shadow-lg { box-shadow: 0 12px 40px rgba(10,22,40,0.12); }
+
+/* Scrollbar hide */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Toast */
+#toast-container {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+    pointer-events: none;
+}
+.toast-bar {
+    padding: 14px 20px; color: white; font-size: 14px; font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+    animation: slideDown 0.3s ease; justify-content: center;
+}
+.toast-bar.success { background: linear-gradient(135deg, #16a34a, #22c55e); }
+.toast-bar.error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+.toast-bar.warn { background: linear-gradient(135deg, #ea580c, #f97316); }
+.toast-bar.info { background: linear-gradient(135deg, #0A1628, #152238); }
+
+@keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+.shimmer {
+    background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 1.5s infinite;
+}
+.spin { animation: spin 1s linear infinite; }
+
+/* Modal animation */
+.animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.4,0,0.2,1); }
+.animate-fade-in { animation: fadeIn 0.3s ease; }
+
+/* Input focus */
+input:focus, select:focus, textarea:focus {
+    border-color: #D4A84B !important;
+    box-shadow: 0 0 0 3px rgba(212,168,75,0.12);
+}
+.field-error { border-color: #dc2626 !important; background: #FEF2F2; }
