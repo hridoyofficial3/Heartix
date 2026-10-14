@@ -13,31 +13,8 @@
             fontFamily: { 'display': ['Playfair Display', 'serif'] }
         }}}
     </script>
-    <style>
-        * { -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; background: #FBF8F3; overflow-x: hidden; }
-        .font-display { font-family: 'Playfair Display', serif; }
-        .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
-        .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
-        .gold-text { color: #D4A84B; }
-        .navy-text { color: #0A1628; }
-        .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        .premium-shadow { box-shadow: 0 4px 20px rgba(10,22,40,0.08); }
-        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
-        .shimmer { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size: 1000px 100%; animation: shimmer 1.5s infinite; }
-        #toast-container { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; pointer-events: none; }
-        .toast-bar { padding: 14px 20px; color: white; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s ease; justify-content: center; }
-        .toast-bar.success { background: linear-gradient(135deg, #16a34a, #22c55e); }
-        .toast-bar.error { background: linear-gradient(135deg, #dc2626, #ef4444); }
-        .toast-bar.warn { background: linear-gradient(135deg, #ea580c, #f97316); }
-        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-        .prod-img { object-fit: contain; background: #f9fafb; }
-        .add-cart-btn { height: 34px; background: white; border: 1.5px solid #D4A84B; color: #0A1628; border-radius: 9px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .add-cart-btn:active { background: #FBF8F3; }
-        .qty-control { display: flex; align-items: center; background: #0A1628; border-radius: 9px; overflow: hidden; height: 34px; }
-        .qty-control button { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; user-select: none; }
-        .qty-control .qty-num { color: white; font-weight: 700; min-width: 34px; text-align: center; font-size: 13px; }
-    </style>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/wishlist.css">
 </head>
 <body class="pb-16">
 
@@ -58,7 +35,7 @@
     <!-- MAIN -->
     <div class="p-4 max-w-2xl mx-auto">
 
-        <!-- LOADING -->
+        <!-- LOADING SKELETON -->
         <div id="loading-skeleton" class="grid grid-cols-2 gap-3">
             <div class="bg-white rounded-2xl p-2.5 premium-shadow">
                 <div class="w-full h-28 shimmer rounded-lg mb-2"></div>
@@ -89,179 +66,6 @@
 
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDMJMggVKtyP6c9qtb7rYE_3jh01l4me4w",
-            authDomain: "heartix.firebaseapp.com",
-            projectId: "heartix",
-            storageBucket: "heartix.firebasestorage.app",
-            messagingSenderId: "551204402338",
-            appId: "1:551204402338:web:169555975c0bbb97f113fb"
-        };
-
-        let db = null;
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-        } catch (e) { console.error('Firebase init:', e); }
-
-        let allProducts = [];
-        let isLoading = true;
-
-        function showToast(msg, type = 'success') {
-            const c = document.getElementById('toast-container');
-            if (!c) return;
-            const t = document.createElement('div');
-            t.className = 'toast-bar ' + type;
-            const icon = type === 'success' ? 'check-circle' : (type === 'warn' ? 'exclamation-circle' : 'times-circle');
-            t.innerHTML = `<i class="fas fa-${icon}"></i><span>${msg}</span>`;
-            c.appendChild(t);
-            setTimeout(() => { t.style.transition='opacity 0.3s'; t.style.opacity='0'; setTimeout(() => t.remove(), 300); }, 2500);
-        }
-
-        function escapeHtml(t) { if (t === null || t === undefined) return ''; const d = document.createElement('div'); d.textContent = String(t); return d.innerHTML; }
-        function formatPrice(n) { return Number(n || 0).toLocaleString('en-IN'); }
-
-        function getCart() { try { return JSON.parse(localStorage.getItem('heartix_cart') || '[]'); } catch (e) { return []; } }
-        function saveCart(c) { try { localStorage.setItem('heartix_cart', JSON.stringify(c)); } catch(e) {} }
-        function getQtyInCart(id) { const i = getCart().find(x => x.id === id); return i ? i.quantity : 0; }
-
-        function getWishlist() {
-            try {
-                const w = JSON.parse(localStorage.getItem('heartix_wishlist') || '[]');
-                return Array.isArray(w) ? w : [];
-            } catch (e) { return []; }
-        }
-        function saveWishlist(w) { try { localStorage.setItem('heartix_wishlist', JSON.stringify(w)); } catch(e) {} }
-
-        function updateCartUI() {
-            const cart = getCart();
-            const items = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
-            const h = document.getElementById('cart-count-header');
-            if (h) h.innerText = items;
-        }
-
-        // Initial badge
-        (function() {
-            try {
-                const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
-                const count = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
-                const h = document.getElementById('cart-count-header');
-                if (h) h.textContent = count;
-            } catch(e) {}
-        })();
-
-        window.addToCart = function(id) {
-            const p = allProducts.find(x => x.id === id);
-            if (!p) return;
-            const stock = p.stock !== undefined ? Number(p.stock) : 999;
-            if (stock <= 0) { showToast('প্রোডাক্ট স্টকে নেই', 'error'); return; }
-            let cart = getCart();
-            const idx = cart.findIndex(i => i.id === id);
-            const currentQty = idx > -1 ? (Number(cart[idx].quantity) || 0) : 0;
-            if (stock !== 999 && currentQty + 1 > stock) {
-                showToast(`স্টকে মাত্র ${stock} টি আছে`, 'error');
-                return;
-            }
-            if (idx > -1) cart[idx].quantity = currentQty + 1;
-            else cart.push({ id, name: p.name, price: Number(p.price) || 0, image: p.image, quantity: 1 });
-            saveCart(cart);
-            updateCartUI();
-            showToast((p.name || '').substring(0, 25) + ' কার্টে যোগ', 'success');
-            renderWishlist();
-        }
-
-        window.removeFromCart = function(id) {
-            let cart = getCart();
-            const idx = cart.findIndex(i => i.id === id);
-            if (idx > -1) {
-                if (cart[idx].quantity > 1) cart[idx].quantity--;
-                else cart.splice(idx, 1);
-                saveCart(cart); updateCartUI(); renderWishlist();
-            }
-        }
-
-        window.removeFromWishlist = function(id, e) {
-            if (e) { e.preventDefault(); e.stopPropagation(); }
-            let w = getWishlist();
-            const idx = w.indexOf(id);
-            if (idx > -1) {
-                w.splice(idx, 1);
-                saveWishlist(w);
-                showToast('Wishlist থেকে সরানো হয়েছে', 'warn');
-                renderWishlist();
-            }
-        }
-
-        function renderWishlist() {
-            const skeleton = document.getElementById('loading-skeleton');
-            const emptyEl = document.getElementById('empty-wishlist');
-            const listEl = document.getElementById('wishlist-list');
-
-            if (isLoading) return;
-            skeleton.classList.add('hidden');
-
-            const wishlistIds = getWishlist();
-            const wishlistProducts = wishlistIds.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
-
-            if (wishlistProducts.length === 0) {
-                emptyEl.classList.remove('hidden');
-                listEl.classList.add('hidden');
-                return;
-            }
-
-            emptyEl.classList.add('hidden');
-            listEl.classList.remove('hidden');
-
-            let html = '';
-            wishlistProducts.forEach(p => {
-                const hasDiscount = p.oldPrice && p.oldPrice > p.price;
-                const discountPct = hasDiscount ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 0;
-                const isOut = p.stock !== undefined && Number(p.stock) <= 0;
-                const qty = getQtyInCart(p.id);
-
-                let actionHtml = '';
-                if (isOut) actionHtml = `<button disabled class="w-full mt-2 add-cart-btn opacity-50">Out of Stock</button>`;
-                else if (qty === 0) actionHtml = `<button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')" class="w-full mt-2 add-cart-btn"><i class="fas fa-shopping-bag"></i> Add To Cart</button>`;
-                else actionHtml = `<div class="mt-2 qty-control w-full"><button onclick="event.preventDefault(); event.stopPropagation(); removeFromCart('${p.id}')">−</button><span class="qty-num flex-1">${qty}</span><button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')">+</button></div>`;
-
-                html += `<div class="bg-white rounded-2xl p-2.5 premium-shadow relative flex flex-col">
-                    <button onclick="removeFromWishlist('${p.id}', event)" class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md z-10" aria-label="Remove from wishlist">
-                        <i class="fas fa-heart text-red-500 text-sm"></i>
-                    </button>
-                    <a href="product.html?id=${p.id}" class="block flex-1">
-                        <div class="relative mb-2">
-                            <img src="${p.image || 'https://via.placeholder.com/200x200?text=No+Image'}" alt="${escapeHtml(p.name)}" loading="lazy" class="prod-img w-full h-28 rounded-lg" onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
-                            ${hasDiscount ? `<span class="absolute top-1.5 left-1.5 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">-${discountPct}%</span>` : ''}
-                        </div>
-                        <h4 class="text-[12px] font-semibold text-navy leading-tight mb-1 line-clamp-2" style="min-height:32px;">${escapeHtml(p.name)}</h4>
-                        <div class="flex items-center gap-1.5 mb-1 flex-wrap">
-                            <p class="font-display text-base font-bold text-navy">৳${formatPrice(p.price)}</p>
-                            ${hasDiscount ? `<p class="text-[9px] text-gray-400 line-through">৳${formatPrice(p.oldPrice)}</p>` : ''}
-                        </div>
-                    </a>
-                    ${actionHtml}
-                </div>`;
-            });
-            listEl.innerHTML = html;
-        }
-
-        async function loadProducts() {
-            if (!db) { isLoading = false; renderWishlist(); return; }
-            try {
-                const snap = await getDocs(collection(db, "products"));
-                allProducts = [];
-                snap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
-            } catch (e) { console.error('Load error:', e); }
-            isLoading = false;
-            renderWishlist();
-        }
-
-        updateCartUI();
-        loadProducts();
-    </script>
+    <script type="module" src="js/wishlist.js"></script>
 </body>
 </html>
