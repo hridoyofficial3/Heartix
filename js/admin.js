@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX ADMIN — JavaScript (Complete + Featured + Pin + Smart Delete)
+// HEARTIX ADMIN — JavaScript (Complete + Custom Delete Modal)
 // ============================================================
 import { db, auth } from './firebase.js';
 import { escapeHtml, formatPrice as fmt } from './common.js';
@@ -12,7 +12,7 @@ import {
     signInWithEmailAndPassword, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// ============ CSS INJECTION FOR DETAILS/SUMMARY ============
+// ============ CSS INJECTION ============
 (function() {
     const css = document.createElement('style');
     css.textContent = `
@@ -21,6 +21,10 @@ import {
         summary.order-summary::-moz-list-bullet { list-style: none; }
         details.order-details[open] .order-chevron { transform: rotate(180deg); }
         .order-chevron { transition: transform 0.25s ease; }
+        @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalScaleIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .del-modal-overlay { animation: modalFadeIn 0.2s ease; }
+        .del-modal-card { animation: modalScaleIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
     `;
     document.head.appendChild(css);
 })();
@@ -98,12 +102,8 @@ async function verifyAdmin(uid) {
 }
 
 // ============ MORE MENU ============
-window.openMoreMenu = function() {
-    document.getElementById('more-menu-modal').classList.remove('hidden');
-}
-window.closeMoreMenu = function() {
-    document.getElementById('more-menu-modal').classList.add('hidden');
-}
+window.openMoreMenu = function() { document.getElementById('more-menu-modal').classList.remove('hidden'); }
+window.closeMoreMenu = function() { document.getElementById('more-menu-modal').classList.add('hidden'); }
 
 // ============ AUTH ============
 onAuthStateChanged(auth, async (user) => {
@@ -269,9 +269,7 @@ window.openInlineCategoryModal = function() {
     document.getElementById('inline-cat-icon').value = '';
     document.getElementById('inline-cat-modal').classList.remove('hidden');
 }
-window.closeInlineCategoryModal = function() {
-    document.getElementById('inline-cat-modal').classList.add('hidden');
-}
+window.closeInlineCategoryModal = function() { document.getElementById('inline-cat-modal').classList.add('hidden'); }
 
 window.saveInlineCategory = async function() {
     const key = document.getElementById('inline-cat-key').value.trim().replace(/\s+/g, '');
@@ -291,11 +289,8 @@ window.saveInlineCategory = async function() {
         renderAdminCategories();
         closeInlineCategoryModal();
         toast('Category যোগ হয়েছে!');
-    } catch (e) {
-        toast('Error: ' + e.message, 'error');
-    } finally {
-        btn.disabled = false; btn.textContent = 'SAVE';
-    }
+    } catch (e) { toast('Error: ' + e.message, 'error'); }
+    finally { btn.disabled = false; btn.textContent = 'SAVE'; }
 }
 
 // ============ COUPONS ============
@@ -353,12 +348,8 @@ window.renderAdminCoupons = function() {
             </div>
             ${c.expiry ? `<p class="text-[11px] text-gray-500 mb-2"><i class="fas fa-calendar mr-1"></i>Expires: ${c.expiry}</p>` : ''}
             <div class="grid grid-cols-2 gap-2">
-                <button onclick="editCoupon('${escapeHtml(c.code)}')" class="py-2.5 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center gap-2 text-xs font-bold">
-                    <i class="fas fa-pen"></i> Edit
-                </button>
-                <button onclick="deleteCoupon('${escapeHtml(c.code)}')" class="py-2.5 bg-red-50 text-red-600 rounded-xl flex items-center justify-center gap-2 text-xs font-bold">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
+                <button onclick="editCoupon('${escapeHtml(c.code)}')" class="py-2.5 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center gap-2 text-xs font-bold"><i class="fas fa-pen"></i> Edit</button>
+                <button onclick="deleteCoupon('${escapeHtml(c.code)}')" class="py-2.5 bg-red-50 text-red-600 rounded-xl flex items-center justify-center gap-2 text-xs font-bold"><i class="fas fa-trash"></i> Delete</button>
             </div>
         </div>`;
     });
@@ -431,8 +422,7 @@ window.saveCoupon = async function() {
     try {
         const existing = allCouponsList.find(c => c.code === code);
         const data = {
-            description, type, value, minOrder,
-            maxUses, expiry, active,
+            description, type, value, minOrder, maxUses, expiry, active,
             usedCount: existing?.usedCount || 0,
             updatedAt: new Date().toISOString()
         };
@@ -441,11 +431,8 @@ window.saveCoupon = async function() {
         toast('Coupon saved!');
         closeCouponModal();
         await loadCoupons();
-    } catch (e) {
-        toast("Error: " + e.message, 'error');
-    } finally {
-        btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE COUPON';
-    }
+    } catch (e) { toast("Error: " + e.message, 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE COUPON'; }
 }
 
 window.deleteCoupon = async function(code) {
@@ -663,9 +650,7 @@ window.deleteCategory = async function(index) {
         });
     } catch (e) {}
     let msg = `"${cat.label}" ক্যাটেগরি ডিলিট করবেন?`;
-    if (productCount > 0) {
-        msg = `⚠️ "${cat.label}" ক্যাটেগরিতে ${productCount} টি প্রোডাক্ট আছে।\n\nডিলিট করলে ওই প্রোডাক্ট থেকে এটা সরিয়ে দেওয়া হবে।\n\nডিলিট করবেন?`;
-    }
+    if (productCount > 0) msg = `⚠️ "${cat.label}" ক্যাটেগরিতে ${productCount} টি প্রোডাক্ট আছে।\n\nডিলিট করলে ওই প্রোডাক্ট থেকে এটা সরিয়ে দেওয়া হবে।\n\nডিলিট করবেন?`;
     if (!confirm(msg)) return;
     allCategories.splice(index, 1);
     await setDoc(doc(db, "settings", "main"), { categories: allCategories }, { merge: true });
@@ -684,9 +669,7 @@ window.deleteCategory = async function(index) {
                     update.category = newCats[0] || '';
                     changed = true;
                 }
-                if (data.category === cat.key && (!data.categories || data.categories.length === 0)) {
-                    update.category = '';
-                }
+                if (data.category === cat.key && (!data.categories || data.categories.length === 0)) update.category = '';
                 if (changed) batch.update(d.ref, update);
             });
             await batch.commit();
@@ -918,12 +901,8 @@ window.renderAdminProducts = function() {
         const badge = stock <= 0 ? '<span class="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">OUT</span>' :
             (stock < 5 ? `<span class="text-[10px] font-bold bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">${stock} left</span>` : `<span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">${stock} in stock</span>`);
         let badges = badge;
-        if (p.featured === true) {
-            badges += ' <span class="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full"><i class="fas fa-star text-[8px] mr-0.5"></i>Featured</span>';
-        }
-        if (p.pinned === true) {
-            badges += ' <span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full"><i class="fas fa-thumbtack text-[8px] mr-0.5"></i>Pinned</span>';
-        }
+        if (p.featured === true) badges += ' <span class="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full"><i class="fas fa-star text-[8px] mr-0.5"></i>Featured</span>';
+        if (p.pinned === true) badges += ' <span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full"><i class="fas fa-thumbtack text-[8px] mr-0.5"></i>Pinned</span>';
         const cats = getProductCategories(p);
         const catText = cats.length > 0 ? cats.join(', ') : 'Uncategorized';
         html += `<div class="bg-white rounded-2xl p-3 premium-shadow flex items-center gap-3">
@@ -975,13 +954,9 @@ window.editProduct = function(id) {
     if (imgs.length > 0) existingImages = [...imgs];
     else if (p.image && typeof p.image === 'string') existingImages = [p.image];
     else existingImages = [];
-
     populateCategoryCheckboxes();
     const productCats = getProductCategories(p);
-    document.querySelectorAll('#p-categories-list .cat-checkbox').forEach(cb => {
-        cb.checked = productCats.includes(cb.value);
-    });
-
+    document.querySelectorAll('#p-categories-list .cat-checkbox').forEach(cb => { cb.checked = productCats.includes(cb.value); });
     renderImagePreview();
     document.getElementById('product-modal').classList.remove('hidden');
 }
@@ -1025,7 +1000,6 @@ window.saveProduct = async function() {
     const price = parseFloat(priceRaw);
     const oldPrice = oldPriceRaw ? parseFloat(oldPriceRaw) : 0;
     const stock = stockRaw ? parseInt(stockRaw) : 0;
-
     const categories = Array.from(document.querySelectorAll('#p-categories-list .cat-checkbox:checked')).map(cb => cb.value);
 
     if (!name || name.length < 2) return toast("সঠিক নাম দিন", 'error');
@@ -1047,21 +1021,10 @@ window.saveProduct = async function() {
         }
         const allImages = [...existingImages, ...newUrls].filter(u => typeof u === 'string' && u.length > 0);
         if (allImages.length === 0) throw new Error('No valid images');
-
-        const data = {
-            name, price, oldPrice,
-            category: categories[0],
-            categories: categories,
-            stock, brand, description,
-            featured, pinned,
-            image: allImages[0], images: allImages
-        };
-
+        const data = { name, price, oldPrice, category: categories[0], categories, stock, brand, description, featured, pinned, image: allImages[0], images: allImages };
         if (id) {
             const existing = allProductsList.find(x => x.id === id);
-            if (existing && typeof existing.sortOrder === 'number') {
-                data.sortOrder = existing.sortOrder;
-            }
+            if (existing && typeof existing.sortOrder === 'number') data.sortOrder = existing.sortOrder;
             await updateDoc(doc(db, "products", id), data);
         } else {
             try {
@@ -1129,13 +1092,7 @@ window.exportOrdersCSV = function() {
         const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString('en-GB') : '';
         const items = (o.items || []).map(i => `${i.name} x${i.quantity}`).join(' | ');
         const c = o.customer || {};
-        const row = [
-            o.orderNumber || o.id, date, c.name || '', c.phone || '', c.district || '', c.thana || '',
-            items, o.subtotal || 0, o.deliveryCharge || 0, o.total || 0, o.advancePaid || 0, o.dueAmount || 0,
-            o.status || 'pending', o.paymentMethod || '',
-            c.isRepeat ? 'Yes' : 'No', c.orderCount || 1,
-            c.ipAddress || '', c.flagged ? 'SameIP' : ''
-        ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+        const row = [o.orderNumber || o.id, date, c.name || '', c.phone || '', c.district || '', c.thana || '', items, o.subtotal || 0, o.deliveryCharge || 0, o.total || 0, o.advancePaid || 0, o.dueAmount || 0, o.status || 'pending', o.paymentMethod || '', c.isRepeat ? 'Yes' : 'No', c.orderCount || 1, c.ipAddress || '', c.flagged ? 'SameIP' : ''].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
         csv += row + '\n';
     });
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -1148,7 +1105,6 @@ window.exportOrdersCSV = function() {
     toast('CSV downloaded!');
 }
 
-// ====== COMPACT COLLAPSIBLE ORDER CARDS ======
 function renderAdminOrders() {
     const list = document.getElementById('order-list-admin'); if (!list) return;
     const search = (document.getElementById('order-search')?.value || '').toLowerCase().trim();
@@ -1165,33 +1121,18 @@ function renderAdminOrders() {
         list.innerHTML = '<div class="bg-white rounded-2xl p-12 text-center premium-shadow"><i class="fas fa-receipt text-4xl text-gray-200 mb-3"></i><p class="text-sm text-gray-500">No orders</p></div>';
         return;
     }
-
     let html = '';
     filtered.forEach(o => {
         const itemsCount = (o.items || []).reduce((s, i) => s + (Number(i.quantity) || 1), 0);
         const statusClass = 'status-' + (o.status || 'pending');
         const orderDate = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '';
-        const statusMeta = {
-            pending: { icon: 'hourglass-half', label: 'Pending' },
-            confirmed: { icon: 'circle-check', label: 'Confirmed' },
-            shipped: { icon: 'truck-fast', label: 'Shipped' },
-            delivered: { icon: 'box-open', label: 'Delivered' },
-            cancelled: { icon: 'circle-xmark', label: 'Cancelled' }
-        };
+        const statusMeta = { pending: { icon: 'hourglass-half', label: 'Pending' }, confirmed: { icon: 'circle-check', label: 'Confirmed' }, shipped: { icon: 'truck-fast', label: 'Shipped' }, delivered: { icon: 'box-open', label: 'Delivered' }, cancelled: { icon: 'circle-xmark', label: 'Cancelled' } };
         const current = statusMeta[o.status] || statusMeta.pending;
-
         let badges = '';
-        if (o.customer?.isRepeat) {
-            badges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-repeat text-[8px]"></i> Repeat (${o.customer.orderCount || '?'})</span>`;
-        } else {
-            badges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-star text-[8px]"></i> New</span>`;
-        }
-        if (o.customer?.flagged) {
-            badges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-exclamation-triangle text-[8px]"></i> Same IP</span>`;
-        }
-
+        if (o.customer?.isRepeat) badges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-repeat text-[8px]"></i> Repeat (${o.customer.orderCount || '?'})</span>`;
+        else badges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-star text-[8px]"></i> New</span>`;
+        if (o.customer?.flagged) badges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-exclamation-triangle text-[8px]"></i> Same IP</span>`;
         const fullAddress = [o.customer?.address, o.customer?.thana, o.customer?.district].filter(Boolean).join(', ');
-
         html += `
         <details class="order-details bg-white rounded-2xl premium-shadow border-l-4 border-gold overflow-hidden">
             <summary class="order-summary p-3.5 cursor-pointer select-none active:bg-gray-50 transition-colors">
@@ -1213,63 +1154,24 @@ function renderAdminOrders() {
                     </div>
                 </div>
             </summary>
-
             <div class="px-3.5 pb-3.5 pt-3 border-t border-gray-100 space-y-3">
-                ${fullAddress ? `
-                <div class="flex items-start gap-2 text-xs text-gray-600">
-                    <i class="fas fa-map-marker-alt text-gray-400 mt-0.5 flex-shrink-0"></i>
-                    <span class="leading-relaxed">${escapeHtml(fullAddress)}</span>
-                </div>
-                ` : ''}
-
+                ${fullAddress ? `<div class="flex items-start gap-2 text-xs text-gray-600"><i class="fas fa-map-marker-alt text-gray-400 mt-0.5 flex-shrink-0"></i><span class="leading-relaxed">${escapeHtml(fullAddress)}</span></div>` : ''}
                 <div class="bg-gray-50 rounded-xl p-2.5 space-y-2">
-                    ${(o.items || []).map(item => `
-                        <div class="flex items-center gap-2.5">
-                            <img src="${item.image || 'https://via.placeholder.com/48x48?text=?'}" class="w-11 h-11 object-contain bg-white rounded-lg flex-shrink-0 border border-gray-100" onerror="this.src='https://via.placeholder.com/48x48?text=?'">
-                            <div class="flex-1 min-w-0">
-                                <p class="text-xs font-semibold text-navy line-clamp-1">${escapeHtml(item.name)}</p>
-                                <p class="text-[10px] text-gray-500">৳${fmt(item.price)} × ${item.quantity}</p>
-                            </div>
-                            <p class="text-xs font-bold text-navy flex-shrink-0">৳${fmt((item.price || 0) * (item.quantity || 1))}</p>
-                        </div>
-                    `).join('')}
+                    ${(o.items || []).map(item => `<div class="flex items-center gap-2.5"><img src="${item.image || 'https://via.placeholder.com/48x48?text=?'}" class="w-11 h-11 object-contain bg-white rounded-lg flex-shrink-0 border border-gray-100" onerror="this.src='https://via.placeholder.com/48x48?text=?'"><div class="flex-1 min-w-0"><p class="text-xs font-semibold text-navy line-clamp-1">${escapeHtml(item.name)}</p><p class="text-[10px] text-gray-500">৳${fmt(item.price)} × ${item.quantity}</p></div><p class="text-xs font-bold text-navy flex-shrink-0">৳${fmt((item.price || 0) * (item.quantity || 1))}</p></div>`).join('')}
                 </div>
-
                 <div class="grid grid-cols-3 gap-2">
-                    <div class="bg-gray-50 rounded-xl p-2.5 text-center">
-                        <p class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Total</p>
-                        <p class="text-sm font-bold text-navy mt-0.5">৳${fmt(o.total)}</p>
-                    </div>
-                    <div class="bg-green-50 rounded-xl p-2.5 text-center">
-                        <p class="text-[9px] text-green-700 font-bold uppercase tracking-wider">Paid</p>
-                        <p class="text-sm font-bold text-green-700 mt-0.5">৳${fmt(o.advancePaid)}</p>
-                    </div>
-                    <div class="bg-red-50 rounded-xl p-2.5 text-center">
-                        <p class="text-[9px] text-red-700 font-bold uppercase tracking-wider">Due</p>
-                        <p class="text-sm font-bold text-red-700 mt-0.5">৳${fmt(o.dueAmount)}</p>
-                    </div>
+                    <div class="bg-gray-50 rounded-xl p-2.5 text-center"><p class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Total</p><p class="text-sm font-bold text-navy mt-0.5">৳${fmt(o.total)}</p></div>
+                    <div class="bg-green-50 rounded-xl p-2.5 text-center"><p class="text-[9px] text-green-700 font-bold uppercase tracking-wider">Paid</p><p class="text-sm font-bold text-green-700 mt-0.5">৳${fmt(o.advancePaid)}</p></div>
+                    <div class="bg-red-50 rounded-xl p-2.5 text-center"><p class="text-[9px] text-red-700 font-bold uppercase tracking-wider">Due</p><p class="text-sm font-bold text-red-700 mt-0.5">৳${fmt(o.dueAmount)}</p></div>
                 </div>
-
                 ${o.discount > 0 ? `<p class="text-[11px] text-amber-600 bg-amber-50 rounded-lg p-2"><i class="fas fa-tag mr-1"></i>Discount: ৳${fmt(o.discount)}${o.couponCode ? ` (${escapeHtml(o.couponCode)})` : ''}</p>` : ''}
                 ${o.adminNote ? `<p class="text-[11px] text-gray-500 bg-gray-50 rounded-lg p-2"><i class="fas fa-sticky-note mr-1"></i>${escapeHtml(o.adminNote)}</p>` : ''}
-
                 <div class="space-y-2">
-                    <button onclick="openOrderEdit('${o.id}')" class="w-full bg-navy text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2">
-                        <i class="fas fa-pen"></i> EDIT ORDER
-                    </button>
-                    <button onclick="openStatusPicker('${o.id}')" class="w-full border-2 border-gray-100 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between hover:border-gold transition">
-                        <span class="flex items-center gap-2 text-gray-700">
-                            <i class="fas fa-${current.icon}"></i> ${current.label}
-                        </span>
-                        <span class="text-gray-400 text-[10px] font-semibold uppercase tracking-wider">Change <i class="fas fa-chevron-down ml-1"></i></span>
-                    </button>
+                    <button onclick="openOrderEdit('${o.id}')" class="w-full bg-navy text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i class="fas fa-pen"></i> EDIT ORDER</button>
+                    <button onclick="openStatusPicker('${o.id}')" class="w-full border-2 border-gray-100 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between hover:border-gold transition"><span class="flex items-center gap-2 text-gray-700"><i class="fas fa-${current.icon}"></i> ${current.label}</span><span class="text-gray-400 text-[10px] font-semibold uppercase tracking-wider">Change <i class="fas fa-chevron-down ml-1"></i></span></button>
                     <div class="grid grid-cols-2 gap-2">
-                        <a href="tel:${escapeHtml(o.customer?.phone || '')}" class="py-2.5 bg-green-50 text-green-700 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold" onclick="event.stopPropagation()">
-                            <i class="fas fa-phone text-[11px]"></i> Call
-                        </a>
-                        <a href="https://wa.me/88${(o.customer?.phone || '').replace(/^0/, '')}?text=${encodeURIComponent('Order ' + (o.orderNumber || '') + ' — Heartix')}" target="_blank" rel="noopener" class="py-2.5 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold" onclick="event.stopPropagation()">
-                            <i class="fab fa-whatsapp text-[11px]"></i> WhatsApp
-                        </a>
+                        <a href="tel:${escapeHtml(o.customer?.phone || '')}" class="py-2.5 bg-green-50 text-green-700 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold" onclick="event.stopPropagation()"><i class="fas fa-phone text-[11px]"></i> Call</a>
+                        <a href="https://wa.me/88${(o.customer?.phone || '').replace(/^0/, '')}?text=${encodeURIComponent('Order ' + (o.orderNumber || '') + ' — Heartix')}" target="_blank" rel="noopener" class="py-2.5 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold" onclick="event.stopPropagation()"><i class="fab fa-whatsapp text-[11px]"></i> WhatsApp</a>
                     </div>
                 </div>
             </div>
@@ -1305,18 +1207,7 @@ function renderOrderEditItems() {
     if (editingOrderItems.length === 0) { wrap.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No items — click "Add Item"</p>'; return; }
     let html = '';
     editingOrderItems.forEach((it, i) => {
-        html += `<div class="order-item-row">
-            <div class="min-w-0">
-                <p class="text-xs font-semibold text-navy truncate">${escapeHtml(it.name)}</p>
-                <p class="text-[10px] text-gray-500">৳${fmt(it.price)} each</p>
-            </div>
-            <div class="flex items-center gap-1 bg-white rounded-lg px-1">
-                <button onclick="changeItemQty(${i}, -1)" class="w-7 h-7 flex items-center justify-center text-navy font-bold">−</button>
-                <span class="w-6 text-center text-xs font-bold">${it.quantity}</span>
-                <button onclick="changeItemQty(${i}, 1)" class="w-7 h-7 flex items-center justify-center text-navy font-bold">+</button>
-            </div>
-            <button onclick="removeEditItem(${i})" class="w-8 h-8 bg-red-50 text-red-500 rounded-lg flex items-center justify-center"><i class="fas fa-times text-xs"></i></button>
-        </div>`;
+        html += `<div class="order-item-row"><div class="min-w-0"><p class="text-xs font-semibold text-navy truncate">${escapeHtml(it.name)}</p><p class="text-[10px] text-gray-500">৳${fmt(it.price)} each</p></div><div class="flex items-center gap-1 bg-white rounded-lg px-1"><button onclick="changeItemQty(${i}, -1)" class="w-7 h-7 flex items-center justify-center text-navy font-bold">−</button><span class="w-6 text-center text-xs font-bold">${it.quantity}</span><button onclick="changeItemQty(${i}, 1)" class="w-7 h-7 flex items-center justify-center text-navy font-bold">+</button></div><button onclick="removeEditItem(${i})" class="w-8 h-8 bg-red-50 text-red-500 rounded-lg flex items-center justify-center"><i class="fas fa-times text-xs"></i></button></div>`;
     });
     wrap.innerHTML = html;
 }
@@ -1329,10 +1220,7 @@ window.changeItemQty = function(i, delta) {
     renderOrderEditItems(); recalcOrderEdit();
 }
 
-window.removeEditItem = function(i) {
-    editingOrderItems.splice(i, 1);
-    renderOrderEditItems(); recalcOrderEdit();
-}
+window.removeEditItem = function(i) { editingOrderItems.splice(i, 1); renderOrderEditItems(); recalcOrderEdit(); }
 
 function recalcOrderEdit() {
     const subtotal = editingOrderItems.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0);
@@ -1351,9 +1239,7 @@ function recalcOrderEdit() {
 
 window.saveOrderEdit = async function() {
     if (!editingOrderId) return;
-    if (editingOrderItems.length === 0) {
-        return toast('কমপক্ষে একটা item থাকতে হবে!', 'error');
-    }
+    if (editingOrderItems.length === 0) return toast('কমপক্ষে একটা item থাকতে হবে!', 'error');
     const order = allOrdersList.find(x => x.id === editingOrderId);
     if (!order) return;
     const discount = parseFloat(document.getElementById('oe-discount').value) || 0;
@@ -1365,14 +1251,8 @@ window.saveOrderEdit = async function() {
     const dueAmount = Math.max(0, total - advance);
     const shouldAdjustStock = order.status !== 'cancelled' && order.stockDeducted !== false;
     const productDeltas = {};
-    (order.items || []).forEach(it => {
-        if (!it.id) return;
-        productDeltas[it.id] = (productDeltas[it.id] || 0) - (Number(it.quantity) || 0);
-    });
-    editingOrderItems.forEach(it => {
-        if (!it.id) return;
-        productDeltas[it.id] = (productDeltas[it.id] || 0) + (Number(it.quantity) || 0);
-    });
+    (order.items || []).forEach(it => { if (!it.id) return; productDeltas[it.id] = (productDeltas[it.id] || 0) - (Number(it.quantity) || 0); });
+    editingOrderItems.forEach(it => { if (!it.id) return; productDeltas[it.id] = (productDeltas[it.id] || 0) + (Number(it.quantity) || 0); });
     const btn = document.getElementById('oe-save-btn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
@@ -1380,35 +1260,24 @@ window.saveOrderEdit = async function() {
         if (shouldAdjustStock) {
             for (const [pid, delta] of Object.entries(productDeltas)) {
                 if (delta === 0) continue;
-                try {
-                    await updateDoc(doc(db, "products", pid), { stock: increment(-delta) });
-                } catch (e) {
-                    console.warn('Stock adjust failed:', pid, e);
-                }
+                try { await updateDoc(doc(db, "products", pid), { stock: increment(-delta) }); }
+                catch (e) { console.warn('Stock adjust failed:', pid, e); }
             }
         }
-        await updateDoc(doc(db, "orders", editingOrderId), {
-            items: editingOrderItems,
-            subtotal, discount,
-            deliveryCharge: delivery,
-            total, advancePaid: advance,
-            dueAmount, adminNote
-        });
+        await updateDoc(doc(db, "orders", editingOrderId), { items: editingOrderItems, subtotal, discount, deliveryCharge: delivery, total, advancePaid: advance, dueAmount, adminNote });
         toast('Order updated!');
         closeOrderEdit();
         await loadOrders();
         await loadProducts();
         updateStats();
-    } catch (e) {
-        toast("Error: " + e.message, 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-check mr-1"></i> SAVE';
-    }
+    } catch (e) { toast("Error: " + e.message, 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-1"></i> SAVE'; }
 }
 
-// ============ SMART DELETE — Stock Restore by Status ============
-window.confirmDeleteOrder = async function() {
+// ============================================================
+// CUSTOM DELETE MODAL — Professional
+// ============================================================
+window.confirmDeleteOrder = function() {
     if (!editingOrderId) return;
     const order = allOrdersList.find(x => x.id === editingOrderId);
     if (!order) return;
@@ -1417,59 +1286,165 @@ window.confirmDeleteOrder = async function() {
     const itemsCount = (order.items || []).length;
     const stockDeducted = order.stockDeducted !== false;
 
-    // Decide restore based on status
+    // Compute restore logic
     let shouldRestore = false;
-    let confirmMsg = '';
+    let infoType = 'green'; // 'green' | 'red' | 'gray'
+    let infoTitle = '';
+    let infoDesc = '';
+    let infoIcon = '';
 
     if (status === 'pending' || status === 'confirmed' || status === 'shipped') {
-        shouldRestore = stockDeducted;
-        if (shouldRestore) {
-            confirmMsg = `এই order (${status}) permanently delete করবেন?\n\n✅ Stock ফেরত যাবে — ${itemsCount} টি product-এর stock restore হবে।\n\nকারণ: Order এখনো ডেলিভারি হয়নি।`;
+        if (stockDeducted) {
+            shouldRestore = true;
+            infoType = 'green';
+            infoIcon = 'check';
+            infoTitle = 'Stock ফেরত যাবে';
+            infoDesc = `${itemsCount}টি প্রোডাক্টের stock automatic restore হবে (order ডেলিভারি হয়নি)`;
         } else {
-            confirmMsg = `এই order (${status}) permanently delete করবেন?\n\n⚠️ Stock আগেই restore হয়েছে।\n\nDelete করলে order record মুছে যাবে।`;
+            shouldRestore = false;
+            infoType = 'gray';
+            infoIcon = 'info-circle';
+            infoTitle = 'Stock আগেই ফেরত';
+            infoDesc = 'এখন কোনো stock restore হবে না';
         }
     } else if (status === 'delivered') {
         shouldRestore = false;
-        confirmMsg = `এই order (delivered) permanently delete করবেন?\n\n❌ Stock restore হবে না।\n\nকারণ: Customer already product পেয়েছে।`;
+        infoType = 'red';
+        infoIcon = 'times';
+        infoTitle = 'Stock restore হবে না';
+        infoDesc = 'Customer already product পেয়েছে, তাই stock কম থাকবে';
     } else if (status === 'cancelled') {
         shouldRestore = false;
-        confirmMsg = `এই order (cancelled) permanently delete করবেন?\n\n❌ Stock restore হবে না।\n\nকারণ: Cancel করার সময় already stock ফেরত গেছে।`;
+        infoType = 'red';
+        infoIcon = 'times';
+        infoTitle = 'Stock restore হবে না';
+        infoDesc = 'Cancel করার সময় already stock ফেরত গেছে';
     } else {
         shouldRestore = false;
-        confirmMsg = `এই order টি permanently delete করবেন?\n\nStock restore হবে না।`;
+        infoType = 'gray';
+        infoIcon = 'info-circle';
+        infoTitle = 'Stock restore হবে না';
+        infoDesc = 'Unknown status';
     }
 
-    if (!confirm(confirmMsg)) return;
+    const colorMap = {
+        green: { bg: 'bg-green-50', border: 'border-green-200', icon: 'bg-green-500', text: 'text-green-700', desc: 'text-green-600' },
+        red: { bg: 'bg-red-50', border: 'border-red-200', icon: 'bg-red-500', text: 'text-red-700', desc: 'text-red-600' },
+        gray: { bg: 'bg-gray-50', border: 'border-gray-200', icon: 'bg-gray-500', text: 'text-gray-700', desc: 'text-gray-600' }
+    };
+    const c = colorMap[infoType];
 
-    const btn = document.getElementById('oe-save-btn');
+    const statusBadgeClass = 'status-' + status;
+
+    // Remove existing modal if any
+    const existing = document.getElementById('delete-order-modal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'delete-order-modal';
+    modal.className = 'fixed inset-0 modal-bg z-[90] flex items-center justify-center p-4 del-modal-overlay';
+    modal.innerHTML = `
+        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl del-modal-card">
+            <!-- HEADER -->
+            <div class="navy-gradient p-6 text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full -mr-16 -mt-16"></div>
+                <div class="absolute bottom-0 left-0 w-24 h-24 bg-red-500/10 rounded-full -ml-12 -mb-12"></div>
+                <div class="relative">
+                    <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/40">
+                        <i class="fas fa-trash-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="font-display text-xl text-white font-bold">Delete Order?</h3>
+                    <p class="text-gold text-xs font-mono tracking-wider mt-1.5">${escapeHtml(order.orderNumber || order.id.slice(0, 10))}</p>
+                </div>
+            </div>
+
+            <!-- BODY -->
+            <div class="p-5 space-y-4">
+                <!-- Status badge -->
+                <div class="flex justify-center">
+                    <span class="order-status ${statusBadgeClass} !text-xs">${escapeHtml(status)}</span>
+                </div>
+
+                <!-- Stock info card -->
+                <div class="${c.bg} border ${c.border} rounded-2xl p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-xl ${c.icon} flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <i class="fas fa-${infoIcon} text-white text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold ${c.text} text-sm">${infoTitle}</p>
+                            <p class="text-xs ${c.desc} mt-1 leading-relaxed">${infoDesc}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warning -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                    <p class="text-[11px] text-amber-800 leading-relaxed flex items-start gap-2">
+                        <i class="fas fa-exclamation-triangle text-amber-600 mt-0.5 flex-shrink-0"></i>
+                        <span><strong>Permanent action।</strong> Order record সম্পূর্ণ মুছে যাবে — পরে ফিরিয়ে আনা যাবে না।</span>
+                    </p>
+                </div>
+
+                <!-- Buttons -->
+                <div class="grid grid-cols-2 gap-3 pt-1">
+                    <button onclick="closeDeleteModal()" class="py-3.5 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-xl font-bold text-sm transition-all">
+                        <i class="fas fa-times mr-1"></i> বাতিল
+                    </button>
+                    <button onclick="executeDelete(${shouldRestore})" id="del-confirm-btn" class="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-red-500/30">
+                        <i class="fas fa-trash-alt mr-1"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Trap back button
+    try { history.pushState({ delModal: true }, '', location.href); } catch (e) {}
+    setTimeout(() => {
+        window._delModalPopHandler = function() {
+            const m = document.getElementById('delete-order-modal');
+            if (m) { m.remove(); window.removeEventListener('popstate', window._delModalPopHandler); }
+        };
+        window.addEventListener('popstate', window._delModalPopHandler);
+    }, 100);
+}
+
+window.closeDeleteModal = function() {
+    const m = document.getElementById('delete-order-modal');
+    if (m) {
+        m.style.opacity = '0';
+        m.style.transition = 'opacity 0.15s';
+        setTimeout(() => m.remove(), 150);
+    }
+    window.removeEventListener('popstate', window._delModalPopHandler);
+}
+
+window.executeDelete = async function(shouldRestore) {
+    if (!editingOrderId) return;
+    const order = allOrdersList.find(x => x.id === editingOrderId);
+    if (!order) { closeDeleteModal(); return; }
+
+    const btn = document.getElementById('del-confirm-btn');
     if (btn) {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Deleting...';
+        btn.classList.add('opacity-80');
     }
 
     try {
-        // Restore stock if applicable
         if (shouldRestore) {
             for (const item of (order.items || [])) {
                 if (!item.id) continue;
                 try {
-                    await updateDoc(doc(db, "products", item.id), {
-                        stock: increment(Number(item.quantity) || 1)
-                    });
-                } catch (e) {
-                    console.warn('Stock restore failed:', item.id, e);
-                }
+                    await updateDoc(doc(db, "products", item.id), { stock: increment(Number(item.quantity) || 1) });
+                } catch (e) { console.warn('Stock restore failed:', item.id, e); }
             }
         }
-
         await deleteDoc(doc(db, "orders", editingOrderId));
-
-        if (shouldRestore) {
-            toast('Order deleted + Stock restored ✅', 'success');
-        } else {
-            toast('Order deleted', 'warn');
-        }
-
+        toast(shouldRestore ? 'Order deleted + Stock restored ✅' : 'Order deleted', shouldRestore ? 'success' : 'warn');
+        closeDeleteModal();
         closeOrderEdit();
         await loadOrders();
         await loadProducts();
@@ -1478,7 +1453,8 @@ window.confirmDeleteOrder = async function() {
         toast("Error: " + e.message, 'error');
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-trash mr-1"></i> DELETE';
+            btn.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Delete';
+            btn.classList.remove('opacity-80');
         }
     }
 }
@@ -1500,14 +1476,7 @@ window.renderPickerProducts = function() {
     products.forEach(p => {
         const stock = Number(p.stock) || 0;
         const outOfStock = stock <= 0;
-        html += `<div ${outOfStock ? '' : `onclick="addItemToOrder('${p.id}')"`} class="flex items-center gap-3 p-3 rounded-xl cursor-pointer ${outOfStock ? 'bg-red-50 opacity-60 cursor-not-allowed' : 'bg-gray-50 active:bg-gray-100'}">
-            <img src="${p.image || 'https://via.placeholder.com/50x50?text=?'}" class="w-12 h-12 object-contain bg-white rounded-lg flex-shrink-0" onerror="this.src='https://via.placeholder.com/50x50?text=?'">
-            <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold text-navy truncate">${escapeHtml(p.name)}</p>
-                <p class="text-[11px] text-gold font-bold">৳${fmt(p.price)} ${outOfStock ? '<span class="text-red-500 ml-1">• OUT OF STOCK</span>' : `• Stock: ${stock}`}</p>
-            </div>
-            <i class="fas fa-${outOfStock ? 'ban text-red-500' : 'plus-circle text-gold'} text-lg"></i>
-        </div>`;
+        html += `<div ${outOfStock ? '' : `onclick="addItemToOrder('${p.id}')"`} class="flex items-center gap-3 p-3 rounded-xl cursor-pointer ${outOfStock ? 'bg-red-50 opacity-60 cursor-not-allowed' : 'bg-gray-50 active:bg-gray-100'}"><img src="${p.image || 'https://via.placeholder.com/50x50?text=?'}" class="w-12 h-12 object-contain bg-white rounded-lg flex-shrink-0" onerror="this.src='https://via.placeholder.com/50x50?text=?'"><div class="flex-1 min-w-0"><p class="text-xs font-semibold text-navy truncate">${escapeHtml(p.name)}</p><p class="text-[11px] text-gold font-bold">৳${fmt(p.price)} ${outOfStock ? '<span class="text-red-500 ml-1">• OUT OF STOCK</span>' : `• Stock: ${stock}`}</p></div><i class="fas fa-${outOfStock ? 'ban text-red-500' : 'plus-circle text-gold'} text-lg"></i></div>`;
     });
     list.innerHTML = html;
 }
@@ -1518,9 +1487,7 @@ window.addItemToOrder = function(pid) {
     if (stock <= 0) return toast('এই product স্টকে নেই!', 'error');
     const existing = editingOrderItems.find(i => i.id === pid);
     const currentQty = existing ? (existing.quantity || 1) : 0;
-    if (currentQty + 1 > stock) {
-        return toast(`স্টকে মাত্র ${stock} টি আছে`, 'warn');
-    }
+    if (currentQty + 1 > stock) return toast(`স্টকে মাত্র ${stock} টি আছে`, 'warn');
     if (existing) existing.quantity = currentQty + 1;
     else editingOrderItems.push({ id: p.id, name: p.name, price: Number(p.price) || 0, quantity: 1, image: p.image || '' });
     renderOrderEditItems(); recalcOrderEdit();
@@ -1546,16 +1513,7 @@ window.openStatusPicker = function(orderId) {
     statuses.forEach(s => {
         const isActive = s.key === current;
         const c = colorMap[s.color];
-        html += `<button onclick="selectStatus('${s.key}')" class="w-full flex items-center gap-3 p-4 rounded-2xl border-2 transition text-left ${isActive ? `${c.bg} ${c.border}` : 'bg-white border-gray-100 hover:border-gray-200'}">
-            <div class="w-11 h-11 rounded-xl ${c.bg} flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-${s.icon} ${c.text}"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="font-bold text-sm text-navy">${s.label}</p>
-                <p class="text-[11px] text-gray-500 mt-0.5">${s.desc}</p>
-            </div>
-            ${isActive ? `<i class="fas fa-circle-check ${c.text} text-lg"></i>` : `<i class="far fa-circle text-gray-300 text-lg"></i>`}
-        </button>`;
+        html += `<button onclick="selectStatus('${s.key}')" class="w-full flex items-center gap-3 p-4 rounded-2xl border-2 transition text-left ${isActive ? `${c.bg} ${c.border}` : 'bg-white border-gray-100 hover:border-gray-200'}"><div class="w-11 h-11 rounded-xl ${c.bg} flex items-center justify-center flex-shrink-0"><i class="fas fa-${s.icon} ${c.text}"></i></div><div class="flex-1 min-w-0"><p class="font-bold text-sm text-navy">${s.label}</p><p class="text-[11px] text-gray-500 mt-0.5">${s.desc}</p></div>${isActive ? `<i class="fas fa-circle-check ${c.text} text-lg"></i>` : `<i class="far fa-circle text-gray-300 text-lg"></i>`}</button>`;
     });
     document.getElementById('status-options-list').innerHTML = html;
     document.getElementById('status-picker-modal').classList.remove('hidden');
@@ -1632,10 +1590,7 @@ function renderRecentOrders() {
     let html = '';
     recent.forEach(o => {
         const sc = 'status-' + (o.status || 'pending');
-        html += `<div class="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
-            <div class="min-w-0 flex-1"><p class="text-sm font-semibold text-navy truncate">${escapeHtml(o.customer?.name || '')}</p><p class="text-[11px] text-gray-500">${(o.items || []).length} item(s) • ৳${fmt(o.total)}</p></div>
-            <span class="order-status ${sc} ml-2">${o.status || 'pending'}</span>
-        </div>`;
+        html += `<div class="flex justify-between items-center py-3 border-b border-gray-100 last:border-0"><div class="min-w-0 flex-1"><p class="text-sm font-semibold text-navy truncate">${escapeHtml(o.customer?.name || '')}</p><p class="text-[11px] text-gray-500">${(o.items || []).length} item(s) • ৳${fmt(o.total)}</p></div><span class="order-status ${sc} ml-2">${o.status || 'pending'}</span></div>`;
     });
     list.innerHTML = html;
 }
@@ -1657,11 +1612,7 @@ function renderAdminReviews() {
     let html = '';
     allReviewsList.forEach(r => {
         const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
-        html += `<div class="bg-white rounded-2xl p-4 premium-shadow">
-            <div class="flex justify-between items-center mb-2"><p class="font-semibold text-navy text-sm">${escapeHtml(r.name)}</p><span class="text-yellow-500 text-sm">${stars}</span></div>
-            <p class="text-xs text-gray-600 mb-3">${escapeHtml(r.text)}</p>
-            <button onclick="deleteReview('${r.id}')" class="text-red-500 text-xs font-semibold"><i class="fas fa-trash mr-1"></i> Delete</button>
-        </div>`;
+        html += `<div class="bg-white rounded-2xl p-4 premium-shadow"><div class="flex justify-between items-center mb-2"><p class="font-semibold text-navy text-sm">${escapeHtml(r.name)}</p><span class="text-yellow-500 text-sm">${stars}</span></div><p class="text-xs text-gray-600 mb-3">${escapeHtml(r.text)}</p><button onclick="deleteReview('${r.id}')" class="text-red-500 text-xs font-semibold"><i class="fas fa-trash mr-1"></i> Delete</button></div>`;
     });
     list.innerHTML = html;
 }
@@ -1732,12 +1683,7 @@ document.getElementById('hero-image-file')?.addEventListener('change', function(
     const f = e.target.files[0]; if (!f) return;
     document.getElementById('hero-file-name').innerText = '✔ ' + f.name;
     const r = new FileReader();
-    r.onload = evt => {
-        pendingHeroImage = { file: f, dataUrl: evt.target.result };
-        removeHeroImage = false;
-        document.getElementById('hero-preview-img').src = evt.target.result;
-        document.getElementById('hero-image-preview').classList.remove('hidden');
-    };
+    r.onload = evt => { pendingHeroImage = { file: f, dataUrl: evt.target.result }; removeHeroImage = false; document.getElementById('hero-preview-img').src = evt.target.result; document.getElementById('hero-image-preview').classList.remove('hidden'); };
     r.readAsDataURL(f);
 });
 
@@ -1745,12 +1691,7 @@ document.getElementById('cat-image-file')?.addEventListener('change', function(e
     const f = e.target.files[0]; if (!f) return;
     document.getElementById('cat-file-name').innerText = '✔ ' + f.name;
     const r = new FileReader();
-    r.onload = evt => {
-        pendingCategoryImage = { file: f, dataUrl: evt.target.result };
-        removeExistingCategoryImage = false;
-        document.getElementById('cat-image-preview-img').src = evt.target.result;
-        document.getElementById('cat-image-preview').classList.remove('hidden');
-    };
+    r.onload = evt => { pendingCategoryImage = { file: f, dataUrl: evt.target.result }; removeExistingCategoryImage = false; document.getElementById('cat-image-preview-img').src = evt.target.result; document.getElementById('cat-image-preview').classList.remove('hidden'); };
     r.readAsDataURL(f);
 });
 
@@ -1758,11 +1699,7 @@ document.getElementById('banner-image-file')?.addEventListener('change', functio
     const f = e.target.files[0]; if (!f) return;
     document.getElementById('banner-file-name').innerText = '✔ ' + f.name;
     const r = new FileReader();
-    r.onload = evt => {
-        pendingBannerImage = { file: f, dataUrl: evt.target.result };
-        document.getElementById('banner-preview-img').src = evt.target.result;
-        document.getElementById('banner-image-preview').classList.remove('hidden');
-    };
+    r.onload = evt => { pendingBannerImage = { file: f, dataUrl: evt.target.result }; document.getElementById('banner-preview-img').src = evt.target.result; document.getElementById('banner-image-preview').classList.remove('hidden'); };
     r.readAsDataURL(f);
 });
 
@@ -1770,12 +1707,8 @@ document.getElementById('test-image-file')?.addEventListener('change', function(
     const f = e.target.files[0]; if (!f) return;
     document.getElementById('test-file-name').innerText = '✔ ' + f.name;
     const r = new FileReader();
-    r.onload = evt => {
-        pendingTestImage = { file: f, dataUrl: evt.target.result };
-        document.getElementById('test-preview-img').src = evt.target.result;
-        document.getElementById('test-image-preview').classList.remove('hidden');
-    };
+    r.onload = evt => { pendingTestImage = { file: f, dataUrl: evt.target.result }; document.getElementById('test-preview-img').src = evt.target.result; document.getElementById('test-image-preview').classList.remove('hidden'); };
     r.readAsDataURL(f);
 });
 
-console.log('✅ admin.js loaded (with smart delete — stock restore by status)');
+console.log('✅ admin.js loaded (custom delete modal + smart stock restore)');
