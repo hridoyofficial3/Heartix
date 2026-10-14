@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX ADMIN — JavaScript (Complete with repeat customer & IP flag)
+// HEARTIX ADMIN — JavaScript (Complete + Compact Orders)
 // ============================================================
 import { db, auth } from './firebase.js';
 import { escapeHtml, formatPrice as fmt } from './common.js';
@@ -11,6 +11,19 @@ import {
 import {
     signInWithEmailAndPassword, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// ============ CSS INJECTION FOR DETAILS/SUMMARY ============
+(function() {
+    const css = document.createElement('style');
+    css.textContent = `
+        summary.order-summary { list-style: none; }
+        summary.order-summary::-webkit-details-marker { display: none; }
+        summary.order-summary::-moz-list-bullet { list-style: none; }
+        details.order-details[open] .order-chevron { transform: rotate(180deg); }
+        .order-chevron { transition: transform 0.25s ease; }
+    `;
+    document.head.appendChild(css);
+})();
 
 // ============ CONFIG ============
 const CLOUDINARY_CLOUD_NAME = "ju2w6e9r";
@@ -249,7 +262,7 @@ async function uploadToImgBB(file) {
     return result.secure_url;
 }
 
-// ============ INLINE CATEGORY (Quick Add from Product Modal) ============
+// ============ INLINE CATEGORY ============
 window.openInlineCategoryModal = function() {
     document.getElementById('inline-cat-key').value = '';
     document.getElementById('inline-cat-label').value = '';
@@ -1105,6 +1118,7 @@ window.exportOrdersCSV = function() {
     toast('CSV downloaded!');
 }
 
+// ====== COMPACT COLLAPSIBLE ORDER CARDS ======
 function renderAdminOrders() {
     const list = document.getElementById('order-list-admin'); if (!list) return;
     const search = (document.getElementById('order-search')?.value || '').toLowerCase().trim();
@@ -1121,72 +1135,120 @@ function renderAdminOrders() {
         list.innerHTML = '<div class="bg-white rounded-2xl p-12 text-center premium-shadow"><i class="fas fa-receipt text-4xl text-gray-200 mb-3"></i><p class="text-sm text-gray-500">No orders</p></div>';
         return;
     }
+
     let html = '';
     filtered.forEach(o => {
-        const itemsHtml = (o.items || []).map(i => `<li class="flex justify-between gap-2"><span class="truncate">${escapeHtml(i.name)} <span class="text-gray-400">× ${i.quantity}</span></span><span class="font-semibold flex-shrink-0">৳${fmt(i.price * i.quantity)}</span></li>`).join('');
+        const itemsCount = (o.items || []).reduce((s, i) => s + (Number(i.quantity) || 1), 0);
         const statusClass = 'status-' + (o.status || 'pending');
         const orderDate = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '';
-        const statusMeta = { pending: { icon: 'hourglass-half', label: 'Pending' }, confirmed: { icon: 'circle-check', label: 'Confirmed' }, shipped: { icon: 'truck-fast', label: 'Shipped' }, delivered: { icon: 'box-open', label: 'Delivered' }, cancelled: { icon: 'circle-xmark', label: 'Cancelled' } };
+        const statusMeta = {
+            pending: { icon: 'hourglass-half', label: 'Pending' },
+            confirmed: { icon: 'circle-check', label: 'Confirmed' },
+            shipped: { icon: 'truck-fast', label: 'Shipped' },
+            delivered: { icon: 'box-open', label: 'Delivered' },
+            cancelled: { icon: 'circle-xmark', label: 'Cancelled' }
+        };
         const current = statusMeta[o.status] || statusMeta.pending;
 
-        // Repeat customer + IP flag badges
-        let customerBadges = '';
+        // Customer badges
+        let badges = '';
         if (o.customer?.isRepeat) {
-            customerBadges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-repeat"></i> Repeat (${o.customer.orderCount || '?'})</span>`;
+            badges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-repeat text-[8px]"></i> Repeat (${o.customer.orderCount || '?'})</span>`;
         } else {
-            customerBadges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-star"></i> First-time</span>`;
+            badges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-star text-[8px]"></i> New</span>`;
         }
         if (o.customer?.flagged) {
-            customerBadges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-exclamation-triangle"></i> Same IP</span>`;
+            badges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-exclamation-triangle text-[8px]"></i> Same IP</span>`;
         }
 
-        const addressLine = [
-            o.customer?.address || '',
-            o.customer?.thana || '',
-            o.customer?.district || ''
-        ].filter(Boolean).join(', ');
+        const fullAddress = [o.customer?.address, o.customer?.thana, o.customer?.district].filter(Boolean).join(', ');
 
-        html += `<div class="bg-white rounded-2xl p-4 premium-shadow border-l-4 border-gold">
-            <div class="flex justify-between items-start mb-3 gap-2">
-                <div class="min-w-0 flex-1">
-                    <p class="font-bold text-navy text-sm">${escapeHtml(o.orderNumber || o.id.slice(0,8))}</p>
-                    <p class="text-[11px] text-gray-500 mt-0.5 truncate">${escapeHtml(o.customer?.name || '')} • ${escapeHtml(o.customer?.phone || '')}</p>
-                    <div class="flex gap-1 mt-1.5 flex-wrap">${customerBadges}</div>
+        html += `
+        <details class="order-details bg-white rounded-2xl premium-shadow border-l-4 border-gold overflow-hidden">
+            <summary class="order-summary p-3.5 cursor-pointer select-none active:bg-gray-50 transition-colors">
+                <div class="flex justify-between items-start gap-2 mb-1.5">
+                    <p class="font-bold text-navy text-sm flex-1 min-w-0 truncate">${escapeHtml(o.orderNumber || o.id.slice(0,8))}</p>
+                    <span class="order-status ${statusClass} flex-shrink-0">${o.status || 'pending'}</span>
                 </div>
-                <div class="text-right flex-shrink-0">
-                    <span class="order-status ${statusClass}">${o.status || 'pending'}</span>
-                    ${orderDate ? `<p class="text-[10px] text-gray-400 mt-1">${orderDate}</p>` : ''}
+                <div class="flex items-center justify-between gap-2 text-[11px] text-gray-500 mb-1.5">
+                    <span class="truncate min-w-0">${escapeHtml(o.customer?.name || '')}${o.customer?.phone ? ' • ' + escapeHtml(o.customer.phone) : ''}</span>
+                    <span class="flex-shrink-0">${orderDate}</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex gap-1 flex-wrap min-w-0">${badges}</div>
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                        <span class="text-[10px] text-gray-400">${itemsCount} item${itemsCount !== 1 ? 's' : ''}</span>
+                        <span class="text-[10px] text-gray-300">•</span>
+                        <span class="font-bold text-navy text-sm">৳${fmt(o.total)}</span>
+                        <i class="fas fa-chevron-down order-chevron text-gray-400 text-[10px] ml-0.5"></i>
+                    </div>
+                </div>
+            </summary>
+
+            <div class="px-3.5 pb-3.5 pt-3 border-t border-gray-100 space-y-3">
+                <!-- Address -->
+                ${fullAddress ? `
+                <div class="flex items-start gap-2 text-xs text-gray-600">
+                    <i class="fas fa-map-marker-alt text-gray-400 mt-0.5 flex-shrink-0"></i>
+                    <span class="leading-relaxed">${escapeHtml(fullAddress)}</span>
+                </div>
+                ` : ''}
+
+                <!-- Items with images -->
+                <div class="bg-gray-50 rounded-xl p-2.5 space-y-2">
+                    ${(o.items || []).map(item => `
+                        <div class="flex items-center gap-2.5">
+                            <img src="${item.image || 'https://via.placeholder.com/48x48?text=?'}" class="w-11 h-11 object-contain bg-white rounded-lg flex-shrink-0 border border-gray-100" onerror="this.src='https://via.placeholder.com/48x48?text=?'">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs font-semibold text-navy line-clamp-1">${escapeHtml(item.name)}</p>
+                                <p class="text-[10px] text-gray-500">৳${fmt(item.price)} × ${item.quantity}</p>
+                            </div>
+                            <p class="text-xs font-bold text-navy flex-shrink-0">৳${fmt((item.price || 0) * (item.quantity || 1))}</p>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <!-- Payment breakdown -->
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-gray-50 rounded-xl p-2.5 text-center">
+                        <p class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Total</p>
+                        <p class="text-sm font-bold text-navy mt-0.5">৳${fmt(o.total)}</p>
+                    </div>
+                    <div class="bg-green-50 rounded-xl p-2.5 text-center">
+                        <p class="text-[9px] text-green-700 font-bold uppercase tracking-wider">Paid</p>
+                        <p class="text-sm font-bold text-green-700 mt-0.5">৳${fmt(o.advancePaid)}</p>
+                    </div>
+                    <div class="bg-red-50 rounded-xl p-2.5 text-center">
+                        <p class="text-[9px] text-red-700 font-bold uppercase tracking-wider">Due</p>
+                        <p class="text-sm font-bold text-red-700 mt-0.5">৳${fmt(o.dueAmount)}</p>
+                    </div>
+                </div>
+
+                ${o.discount > 0 ? `<p class="text-[11px] text-amber-600 bg-amber-50 rounded-lg p-2"><i class="fas fa-tag mr-1"></i>Discount: ৳${fmt(o.discount)}${o.couponCode ? ` (${escapeHtml(o.couponCode)})` : ''}</p>` : ''}
+                ${o.adminNote ? `<p class="text-[11px] text-gray-500 bg-gray-50 rounded-lg p-2"><i class="fas fa-sticky-note mr-1"></i>${escapeHtml(o.adminNote)}</p>` : ''}
+
+                <!-- Actions -->
+                <div class="space-y-2">
+                    <button onclick="openOrderEdit('${o.id}')" class="w-full bg-navy text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2">
+                        <i class="fas fa-pen"></i> EDIT ORDER
+                    </button>
+                    <button onclick="openStatusPicker('${o.id}')" class="w-full border-2 border-gray-100 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between hover:border-gold transition">
+                        <span class="flex items-center gap-2 text-gray-700">
+                            <i class="fas fa-${current.icon}"></i> ${current.label}
+                        </span>
+                        <span class="text-gray-400 text-[10px] font-semibold uppercase tracking-wider">Change <i class="fas fa-chevron-down ml-1"></i></span>
+                    </button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="tel:${escapeHtml(o.customer?.phone || '')}" class="py-2.5 bg-green-50 text-green-700 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold" onclick="event.stopPropagation()">
+                            <i class="fas fa-phone text-[11px]"></i> Call
+                        </a>
+                        <a href="https://wa.me/88${(o.customer?.phone || '').replace(/^0/, '')}?text=${encodeURIComponent('Order ' + (o.orderNumber || '') + ' — Heartix')}" target="_blank" rel="noopener" class="py-2.5 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold" onclick="event.stopPropagation()">
+                            <i class="fab fa-whatsapp text-[11px]"></i> WhatsApp
+                        </a>
+                    </div>
                 </div>
             </div>
-            <p class="text-xs text-gray-600 mb-3"><i class="fas fa-map-marker-alt text-gray-300 mr-1"></i>${escapeHtml(addressLine)}</p>
-            <div class="bg-gray-50 rounded-xl p-3 mb-3"><ul class="text-xs text-gray-700 space-y-1.5">${itemsHtml}</ul></div>
-            <div class="grid grid-cols-3 gap-2 text-center mb-3">
-                <div class="bg-gray-50 rounded-xl p-2.5"><p class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Total</p><p class="text-sm font-bold text-navy mt-0.5">৳${fmt(o.total)}</p></div>
-                <div class="bg-green-50 rounded-xl p-2.5"><p class="text-[9px] text-green-700 font-bold uppercase tracking-wider">Paid</p><p class="text-sm font-bold text-green-700 mt-0.5">৳${fmt(o.advancePaid)}</p></div>
-                <div class="bg-red-50 rounded-xl p-2.5"><p class="text-[9px] text-red-700 font-bold uppercase tracking-wider">Due</p><p class="text-sm font-bold text-red-700 mt-0.5">৳${fmt(o.dueAmount)}</p></div>
-            </div>
-            ${o.discount > 0 ? `<p class="text-[11px] text-amber-600 bg-amber-50 rounded-lg p-2 mb-2"><i class="fas fa-tag mr-1"></i>Discount: ৳${fmt(o.discount)}${o.couponCode ? ` (${escapeHtml(o.couponCode)})` : ''}</p>` : ''}
-            ${o.adminNote ? `<p class="text-[11px] text-gray-500 bg-gray-50 rounded-lg p-2 mb-2"><i class="fas fa-sticky-note mr-1"></i>${escapeHtml(o.adminNote)}</p>` : ''}
-            <div class="space-y-2">
-                <button onclick="openOrderEdit('${o.id}')" class="w-full bg-navy text-white px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2">
-                    <i class="fas fa-pen"></i> EDIT ORDER
-                </button>
-                <button onclick="openStatusPicker('${o.id}')" class="w-full border-2 border-gray-100 px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between hover:border-gold transition">
-                    <span class="flex items-center gap-2 text-gray-700">
-                        <i class="fas fa-${current.icon}"></i> ${current.label}
-                    </span>
-                    <span class="text-gray-400 text-[10px] font-semibold uppercase tracking-wider">Change <i class="fas fa-chevron-down ml-1"></i></span>
-                </button>
-                <div class="grid grid-cols-2 gap-2">
-                    <a href="tel:${escapeHtml(o.customer?.phone || '')}" class="py-2.5 bg-green-50 text-green-700 rounded-xl flex items-center justify-center gap-2 text-xs font-bold">
-                        <i class="fas fa-phone"></i> Call
-                    </a>
-                    <a href="https://wa.me/88${(o.customer?.phone || '').replace(/^0/, '')}?text=${encodeURIComponent('Order ' + (o.orderNumber || '') + ' — Heartix')}" target="_blank" rel="noopener" class="py-2.5 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center gap-2 text-xs font-bold">
-                        <i class="fab fa-whatsapp"></i> WhatsApp
-                    </a>
-                </div>
-            </div>
-        </div>`;
+        </details>`;
     });
     list.innerHTML = html;
 }
@@ -1626,3 +1688,5 @@ document.getElementById('test-image-file')?.addEventListener('change', function(
     };
     r.readAsDataURL(f);
 });
+
+console.log('✅ admin.js loaded with compact orders');
