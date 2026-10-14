@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX WISHLIST PAGE
+// HEARTIX WISHLIST PAGE — with auto-cleanup of invalid IDs
 // ============================================================
 import { db } from './firebase.js';
 import {
@@ -68,8 +68,49 @@ window.removeFromWishlist = function(id, e) {
         w.splice(idx, 1);
         saveWishlist(w);
         showToast('Wishlist থেকে সরানো হয়েছে', 'warn');
+        updateWishlistBadge();
         renderWishlist();
     }
+}
+
+// ============ UPDATE WISHLIST BADGE (header) ============
+function updateWishlistBadge() {
+    try {
+        const w = getWishlist();
+        const count = Array.isArray(w) ? w.length : 0;
+        const h = document.getElementById('wishlist-count-header');
+        if (h) {
+            if (count > 0) {
+                h.textContent = count;
+                h.classList.remove('hidden');
+            } else {
+                h.classList.add('hidden');
+            }
+        }
+    } catch (e) {}
+}
+
+// ============ CLEAN UP INVALID WISHLIST IDs ============
+function cleanupInvalidWishlist() {
+    const rawWishlist = getWishlist();
+    if (rawWishlist.length === 0) return rawWishlist;
+
+    const validIds = [];
+    const invalidIds = [];
+
+    rawWishlist.forEach(id => {
+        const exists = allProducts.some(p => p.id === id);
+        if (exists) validIds.push(id);
+        else invalidIds.push(id);
+    });
+
+    if (invalidIds.length > 0) {
+        // Save cleaned list
+        saveWishlist(validIds);
+        console.log('Cleaned invalid wishlist IDs:', invalidIds);
+    }
+
+    return validIds;
 }
 
 // ============ RENDER ============
@@ -81,8 +122,13 @@ function renderWishlist() {
     if (isLoading) return;
     skeleton.classList.add('hidden');
 
-    const wishlistIds = getWishlist();
-    const wishlistProducts = wishlistIds.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
+    // Clean up invalid IDs first
+    const validIds = cleanupInvalidWishlist();
+
+    // Update badge based on cleaned list
+    updateWishlistBadge();
+
+    const wishlistProducts = validIds.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
 
     if (wishlistProducts.length === 0) {
         emptyEl.classList.remove('hidden');
