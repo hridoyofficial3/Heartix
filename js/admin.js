@@ -1,8 +1,9 @@
 // ============================================================
-// HEARTIX ADMIN — JavaScript (Complete + Custom Delete Modal)
+// HEARTIX ADMIN — JS (Editable Customer + Compact Order Edit)
 // ============================================================
 import { db, auth } from './firebase.js';
 import { escapeHtml, formatPrice as fmt } from './common.js';
+import { DISTRICTS } from './districts.js';
 
 import {
     collection, getDocs, addDoc, updateDoc, deleteDoc,
@@ -65,6 +66,7 @@ let pendingBannerImage = null;
 let pendingTestImage = null;
 let pendingHeroImage = null;
 let removeHeroImage = false;
+let oeHistoryPushed = false;
 
 // ============ HELPERS ============
 function safeHeroTitle(t) {
@@ -100,6 +102,8 @@ async function verifyAdmin(uid) {
     } catch (e) {}
     return false;
 }
+
+function validatePhone(p) { return /^01[3-9]\d{8}$/.test(p); }
 
 // ============ MORE MENU ============
 window.openMoreMenu = function() { document.getElementById('more-menu-modal').classList.remove('hidden'); }
@@ -216,6 +220,7 @@ async function loadSettingsData() {
     renderAdminCategories();
     populateSectionDropdown();
     populateCategoryCheckboxes();
+    populateOeDistrictDropdown();
     renderHeroBannersList();
     renderSectionsList();
     renderBannersList();
@@ -250,6 +255,21 @@ function populateCategoryCheckboxes() {
         </label>`;
     });
     container.innerHTML = html;
+}
+
+function populateOeDistrictDropdown() {
+    const sel = document.getElementById('oe-edit-district');
+    if (!sel) return;
+    const cv = sel.value;
+    sel.innerHTML = '<option value="">Select District</option>';
+    const sorted = [...new Set(DISTRICTS)].sort();
+    sorted.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        sel.appendChild(opt);
+    });
+    if (cv) sel.value = cv;
 }
 
 async function uploadToImgBB(file) {
@@ -421,11 +441,7 @@ window.saveCoupon = async function() {
 
     try {
         const existing = allCouponsList.find(c => c.code === code);
-        const data = {
-            description, type, value, minOrder, maxUses, expiry, active,
-            usedCount: existing?.usedCount || 0,
-            updatedAt: new Date().toISOString()
-        };
+        const data = { description, type, value, minOrder, maxUses, expiry, active, usedCount: existing?.usedCount || 0, updatedAt: new Date().toISOString() };
         if (!existing) data.createdAt = new Date().toISOString();
         await setDoc(doc(db, "coupons", code), data, { merge: true });
         toast('Coupon saved!');
@@ -1180,34 +1196,84 @@ function renderAdminOrders() {
     list.innerHTML = html;
 }
 
+// ============ ORDER EDIT ============
 window.openOrderEdit = function(id) {
     const o = allOrdersList.find(x => x.id === id); if (!o) return;
     editingOrderId = id;
     editingOrderItems = JSON.parse(JSON.stringify(o.items || []));
     document.getElementById('oe-order-num').textContent = o.orderNumber || id.slice(0, 10);
-    document.getElementById('oe-customer').textContent = o.customer?.name || '';
-    document.getElementById('oe-phone').textContent = o.customer?.phone || '';
-    document.getElementById('oe-address').textContent = [o.customer?.address, o.customer?.thana, o.customer?.district].filter(Boolean).join(', ');
+
+    // Customer editable fields
+    const c = o.customer || {};
+    document.getElementById('oe-edit-name').value = c.name || '';
+    document.getElementById('oe-edit-phone').value = c.phone || '';
+    document.getElementById('oe-edit-address').value = c.address || '';
+    populateOeDistrictDropdown();
+    document.getElementById('oe-edit-district').value = c.district || '';
+    document.getElementById('oe-edit-thana').value = c.thana || '';
+
+    // Original values
+    document.getElementById('oe-orig-discount').textContent = 'Orig: ৳' + fmt(o.discount || 0);
+    document.getElementById('oe-orig-delivery').textContent = 'Orig: ৳' + fmt(o.deliveryCharge || 0);
+    document.getElementById('oe-orig-advance').textContent = 'Orig: ৳' + fmt(o.advancePaid || 0);
+
+    // Amounts
     document.getElementById('oe-discount').value = o.discount || 0;
     document.getElementById('oe-delivery').value = o.deliveryCharge || 0;
     document.getElementById('oe-advance').value = o.advancePaid || 0;
     document.getElementById('oe-note').value = o.adminNote || '';
+
     renderOrderEditItems();
     recalcOrderEdit();
     document.getElementById('order-edit-modal').classList.remove('hidden');
+
+    // Back trap
+    if (!oeHistoryPushed) {
+        try { history.pushState({ oeModal: true }, '', location.href); oeHistoryPushed = true; } catch (e) {}
+    }
 }
 
 window.closeOrderEdit = function() {
     document.getElementById('order-edit-modal').classList.add('hidden');
-    editingOrderId = null; editingOrderItems = [];
+    editingOrderId = null;
+    editingOrderItems = [];
+    if (oeHistoryPushed) {
+        oeHistoryPushed = false;
+        try { history.back(); } catch (e) {}
+    }
 }
+
+// Back button trap
+window.addEventListener('popstate', function() {
+    const m = document.getElementById('order-edit-modal');
+    if (m && !m.classList.contains('hidden')) {
+        // Modal is open — close it and re-push to prevent navigation
+        m.classList.add('hidden');
+        editingOrderId = null;
+        editingOrderItems = [];
+        oeHistoryPushed = false;
+        try { history.pushState({ oeModal: true }, '', location.href); oeHistoryPushed = true; } catch (e) {}
+    }
+});
 
 function renderOrderEditItems() {
     const wrap = document.getElementById('oe-items-list');
-    if (editingOrderItems.length === 0) { wrap.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No items — click "Add Item"</p>'; return; }
+    if (editingOrderItems.length === 0) { wrap.innerHTML = '<p class="text-xs text-gray-400 text-center py-3">No items — Add Item</p>'; return; }
     let html = '';
     editingOrderItems.forEach((it, i) => {
-        html += `<div class="order-item-row"><div class="min-w-0"><p class="text-xs font-semibold text-navy truncate">${escapeHtml(it.name)}</p><p class="text-[10px] text-gray-500">৳${fmt(it.price)} each</p></div><div class="flex items-center gap-1 bg-white rounded-lg px-1"><button onclick="changeItemQty(${i}, -1)" class="w-7 h-7 flex items-center justify-center text-navy font-bold">−</button><span class="w-6 text-center text-xs font-bold">${it.quantity}</span><button onclick="changeItemQty(${i}, 1)" class="w-7 h-7 flex items-center justify-center text-navy font-bold">+</button></div><button onclick="removeEditItem(${i})" class="w-8 h-8 bg-red-50 text-red-500 rounded-lg flex items-center justify-center"><i class="fas fa-times text-xs"></i></button></div>`;
+        html += `<div class="flex items-center gap-2 bg-white rounded-lg p-2 border border-gray-100">
+            <img src="${it.image || 'https://via.placeholder.com/32x32?text=?'}" class="w-8 h-8 object-contain bg-gray-50 rounded flex-shrink-0" onerror="this.src='https://via.placeholder.com/32x32?text=?'">
+            <div class="flex-1 min-w-0">
+                <p class="text-[11px] font-semibold text-navy truncate">${escapeHtml(it.name)}</p>
+                <p class="text-[9px] text-gray-500">৳${fmt(it.price)} ×</p>
+            </div>
+            <div class="flex items-center gap-0.5 bg-gray-50 rounded-md">
+                <button onclick="changeItemQty(${i}, -1)" class="w-7 h-7 flex items-center justify-center text-navy font-bold text-sm">−</button>
+                <span class="w-5 text-center text-[11px] font-bold">${it.quantity}</span>
+                <button onclick="changeItemQty(${i}, 1)" class="w-7 h-7 flex items-center justify-center text-navy font-bold text-sm">+</button>
+            </div>
+            <button onclick="removeEditItem(${i})" class="w-7 h-7 bg-red-50 text-red-500 rounded-md flex items-center justify-center flex-shrink-0"><i class="fas fa-times text-[10px]"></i></button>
+        </div>`;
     });
     wrap.innerHTML = html;
 }
@@ -1222,7 +1288,8 @@ window.changeItemQty = function(i, delta) {
 
 window.removeEditItem = function(i) { editingOrderItems.splice(i, 1); renderOrderEditItems(); recalcOrderEdit(); }
 
-function recalcOrderEdit() {
+// === FIXED: Global export so oninput works ===
+window.recalcOrderEdit = function() {
     const subtotal = editingOrderItems.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0);
     const discount = parseFloat(document.getElementById('oe-discount').value) || 0;
     const delivery = parseFloat(document.getElementById('oe-delivery').value) || 0;
@@ -1235,13 +1302,31 @@ function recalcOrderEdit() {
     document.getElementById('oe-total').textContent = '৳' + fmt(total);
     document.getElementById('oe-advance-display').textContent = '৳' + fmt(advance);
     document.getElementById('oe-due').textContent = '৳' + fmt(due);
-}
+};
+
+// Add input listeners for real-time recalc
+['oe-discount', 'oe-delivery', 'oe-advance'].forEach(id => {
+    document.addEventListener('input', function(e) {
+        if (e.target && e.target.id === id) window.recalcOrderEdit();
+    });
+});
 
 window.saveOrderEdit = async function() {
     if (!editingOrderId) return;
     if (editingOrderItems.length === 0) return toast('কমপক্ষে একটা item থাকতে হবে!', 'error');
     const order = allOrdersList.find(x => x.id === editingOrderId);
     if (!order) return;
+
+    // Customer fields
+    const newName = (document.getElementById('oe-edit-name').value || '').trim();
+    const newPhone = (document.getElementById('oe-edit-phone').value || '').trim();
+    const newAddress = (document.getElementById('oe-edit-address').value || '').trim();
+    const newDistrict = document.getElementById('oe-edit-district').value || '';
+    const newThana = (document.getElementById('oe-edit-thana').value || '').trim();
+
+    if (!newName || newName.length < 2) return toast('সঠিক নাম দিন', 'error');
+    if (!validatePhone(newPhone)) return toast('সঠিক ফোন নাম্বার দিন', 'error');
+
     const discount = parseFloat(document.getElementById('oe-discount').value) || 0;
     const delivery = parseFloat(document.getElementById('oe-delivery').value) || 0;
     const advance = parseFloat(document.getElementById('oe-advance').value) || 0;
@@ -1253,9 +1338,11 @@ window.saveOrderEdit = async function() {
     const productDeltas = {};
     (order.items || []).forEach(it => { if (!it.id) return; productDeltas[it.id] = (productDeltas[it.id] || 0) - (Number(it.quantity) || 0); });
     editingOrderItems.forEach(it => { if (!it.id) return; productDeltas[it.id] = (productDeltas[it.id] || 0) + (Number(it.quantity) || 0); });
+
     const btn = document.getElementById('oe-save-btn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
+
     try {
         if (shouldAdjustStock) {
             for (const [pid, delta] of Object.entries(productDeltas)) {
@@ -1264,88 +1351,70 @@ window.saveOrderEdit = async function() {
                 catch (e) { console.warn('Stock adjust failed:', pid, e); }
             }
         }
-        await updateDoc(doc(db, "orders", editingOrderId), { items: editingOrderItems, subtotal, discount, deliveryCharge: delivery, total, advancePaid: advance, dueAmount, adminNote });
+        const updatedCustomer = { ...(order.customer || {}), name: newName, phone: newPhone, address: newAddress, district: newDistrict, thana: newThana };
+        await updateDoc(doc(db, "orders", editingOrderId), {
+            items: editingOrderItems,
+            customer: updatedCustomer,
+            subtotal, discount,
+            deliveryCharge: delivery,
+            total, advancePaid: advance,
+            dueAmount, adminNote
+        });
         toast('Order updated!');
         closeOrderEdit();
         await loadOrders();
         await loadProducts();
         updateStats();
     } catch (e) { toast("Error: " + e.message, 'error'); }
-    finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-1"></i> SAVE'; }
+    finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-1"></i> Save Changes'; }
 }
 
-// ============================================================
-// CUSTOM DELETE MODAL — Professional
-// ============================================================
+// ============ CUSTOM DELETE MODAL ============
 window.confirmDeleteOrder = function() {
     if (!editingOrderId) return;
     const order = allOrdersList.find(x => x.id === editingOrderId);
     if (!order) return;
-
     const status = order.status || 'pending';
     const itemsCount = (order.items || []).length;
     const stockDeducted = order.stockDeducted !== false;
-
-    // Compute restore logic
     let shouldRestore = false;
-    let infoType = 'green'; // 'green' | 'red' | 'gray'
+    let infoType = 'green';
     let infoTitle = '';
     let infoDesc = '';
     let infoIcon = '';
-
     if (status === 'pending' || status === 'confirmed' || status === 'shipped') {
         if (stockDeducted) {
-            shouldRestore = true;
-            infoType = 'green';
-            infoIcon = 'check';
+            shouldRestore = true; infoType = 'green'; infoIcon = 'check';
             infoTitle = 'Stock ফেরত যাবে';
             infoDesc = `${itemsCount}টি প্রোডাক্টের stock automatic restore হবে (order ডেলিভারি হয়নি)`;
         } else {
-            shouldRestore = false;
-            infoType = 'gray';
-            infoIcon = 'info-circle';
+            infoType = 'gray'; infoIcon = 'info-circle';
             infoTitle = 'Stock আগেই ফেরত';
             infoDesc = 'এখন কোনো stock restore হবে না';
         }
     } else if (status === 'delivered') {
-        shouldRestore = false;
-        infoType = 'red';
-        infoIcon = 'times';
+        infoType = 'red'; infoIcon = 'times';
         infoTitle = 'Stock restore হবে না';
         infoDesc = 'Customer already product পেয়েছে, তাই stock কম থাকবে';
     } else if (status === 'cancelled') {
-        shouldRestore = false;
-        infoType = 'red';
-        infoIcon = 'times';
+        infoType = 'red'; infoIcon = 'times';
         infoTitle = 'Stock restore হবে না';
         infoDesc = 'Cancel করার সময় already stock ফেরত গেছে';
-    } else {
-        shouldRestore = false;
-        infoType = 'gray';
-        infoIcon = 'info-circle';
-        infoTitle = 'Stock restore হবে না';
-        infoDesc = 'Unknown status';
     }
-
     const colorMap = {
         green: { bg: 'bg-green-50', border: 'border-green-200', icon: 'bg-green-500', text: 'text-green-700', desc: 'text-green-600' },
         red: { bg: 'bg-red-50', border: 'border-red-200', icon: 'bg-red-500', text: 'text-red-700', desc: 'text-red-600' },
         gray: { bg: 'bg-gray-50', border: 'border-gray-200', icon: 'bg-gray-500', text: 'text-gray-700', desc: 'text-gray-600' }
     };
     const c = colorMap[infoType];
-
     const statusBadgeClass = 'status-' + status;
-
-    // Remove existing modal if any
     const existing = document.getElementById('delete-order-modal');
     if (existing) existing.remove();
-
     const modal = document.createElement('div');
     modal.id = 'delete-order-modal';
     modal.className = 'fixed inset-0 modal-bg z-[90] flex items-center justify-center p-4 del-modal-overlay';
     modal.innerHTML = `
         <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl del-modal-card">
-            <!-- HEADER -->
             <div class="navy-gradient p-6 text-center relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full -mr-16 -mt-16"></div>
                 <div class="absolute bottom-0 left-0 w-24 h-24 bg-red-500/10 rounded-full -ml-12 -mb-12"></div>
@@ -1357,89 +1426,50 @@ window.confirmDeleteOrder = function() {
                     <p class="text-gold text-xs font-mono tracking-wider mt-1.5">${escapeHtml(order.orderNumber || order.id.slice(0, 10))}</p>
                 </div>
             </div>
-
-            <!-- BODY -->
             <div class="p-5 space-y-4">
-                <!-- Status badge -->
-                <div class="flex justify-center">
-                    <span class="order-status ${statusBadgeClass} !text-xs">${escapeHtml(status)}</span>
-                </div>
-
-                <!-- Stock info card -->
+                <div class="flex justify-center"><span class="order-status ${statusBadgeClass} !text-xs">${escapeHtml(status)}</span></div>
                 <div class="${c.bg} border ${c.border} rounded-2xl p-4">
                     <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 rounded-xl ${c.icon} flex items-center justify-center flex-shrink-0 shadow-sm">
-                            <i class="fas fa-${infoIcon} text-white text-sm"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="font-bold ${c.text} text-sm">${infoTitle}</p>
-                            <p class="text-xs ${c.desc} mt-1 leading-relaxed">${infoDesc}</p>
-                        </div>
+                        <div class="w-10 h-10 rounded-xl ${c.icon} flex items-center justify-center flex-shrink-0 shadow-sm"><i class="fas fa-${infoIcon} text-white text-sm"></i></div>
+                        <div class="flex-1 min-w-0"><p class="font-bold ${c.text} text-sm">${infoTitle}</p><p class="text-xs ${c.desc} mt-1 leading-relaxed">${infoDesc}</p></div>
                     </div>
                 </div>
-
-                <!-- Warning -->
                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
                     <p class="text-[11px] text-amber-800 leading-relaxed flex items-start gap-2">
                         <i class="fas fa-exclamation-triangle text-amber-600 mt-0.5 flex-shrink-0"></i>
                         <span><strong>Permanent action।</strong> Order record সম্পূর্ণ মুছে যাবে — পরে ফিরিয়ে আনা যাবে না।</span>
                     </p>
                 </div>
-
-                <!-- Buttons -->
                 <div class="grid grid-cols-2 gap-3 pt-1">
-                    <button onclick="closeDeleteModal()" class="py-3.5 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-xl font-bold text-sm transition-all">
-                        <i class="fas fa-times mr-1"></i> বাতিল
-                    </button>
-                    <button onclick="executeDelete(${shouldRestore})" id="del-confirm-btn" class="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-red-500/30">
-                        <i class="fas fa-trash-alt mr-1"></i> Delete
-                    </button>
+                    <button onclick="closeDeleteModal()" class="py-3.5 bg-gray-100 active:bg-gray-200 text-gray-700 rounded-xl font-bold text-sm"><i class="fas fa-times mr-1"></i> বাতিল</button>
+                    <button onclick="executeDelete(${shouldRestore})" id="del-confirm-btn" class="bg-gradient-to-br from-red-500 to-red-600 active:from-red-700 active:to-red-800 text-white py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-red-500/30"><i class="fas fa-trash-alt mr-1"></i> Delete</button>
                 </div>
             </div>
-        </div>
-    `;
+        </div>`;
     document.body.appendChild(modal);
-
-    // Trap back button
-    try { history.pushState({ delModal: true }, '', location.href); } catch (e) {}
-    setTimeout(() => {
-        window._delModalPopHandler = function() {
-            const m = document.getElementById('delete-order-modal');
-            if (m) { m.remove(); window.removeEventListener('popstate', window._delModalPopHandler); }
-        };
-        window.addEventListener('popstate', window._delModalPopHandler);
-    }, 100);
 }
 
 window.closeDeleteModal = function() {
     const m = document.getElementById('delete-order-modal');
-    if (m) {
-        m.style.opacity = '0';
-        m.style.transition = 'opacity 0.15s';
-        setTimeout(() => m.remove(), 150);
-    }
-    window.removeEventListener('popstate', window._delModalPopHandler);
+    if (m) { m.style.opacity = '0'; m.style.transition = 'opacity 0.15s'; setTimeout(() => m.remove(), 150); }
 }
 
 window.executeDelete = async function(shouldRestore) {
     if (!editingOrderId) return;
     const order = allOrdersList.find(x => x.id === editingOrderId);
     if (!order) { closeDeleteModal(); return; }
-
     const btn = document.getElementById('del-confirm-btn');
     if (btn) {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Deleting...';
         btn.classList.add('opacity-80');
     }
-
     try {
         if (shouldRestore) {
             for (const item of (order.items || [])) {
                 if (!item.id) continue;
-                try {
-                    await updateDoc(doc(db, "products", item.id), { stock: increment(Number(item.quantity) || 1) });
-                } catch (e) { console.warn('Stock restore failed:', item.id, e); }
+                try { await updateDoc(doc(db, "products", item.id), { stock: increment(Number(item.quantity) || 1) }); }
+                catch (e) { console.warn('Stock restore failed:', item.id, e); }
             }
         }
         await deleteDoc(doc(db, "orders", editingOrderId));
@@ -1711,4 +1741,4 @@ document.getElementById('test-image-file')?.addEventListener('change', function(
     r.readAsDataURL(f);
 });
 
-console.log('✅ admin.js loaded (custom delete modal + smart stock restore)');
+console.log('✅ admin.js loaded (compact order edit + editable customer + back trap)');
