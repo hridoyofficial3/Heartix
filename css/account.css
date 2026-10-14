@@ -1,0 +1,40 @@
+/* ========== ACCOUNT PAGE STYLES ========== */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #FBF8F3;
+    overflow-x: hidden;
+}
+
+/* Tab buttons (Login / Register) */
+.tab-btn {
+    transition: all 0.2s ease;
+}
+.tab-btn.active {
+    background: linear-gradient(135deg, #0A1628, #152238);
+    color: white;
+}
+
+/* Input focus */
+input:focus, select:focus {
+    border-color: #D4A84B !important;
+}
+.field-error {
+    border-color: #dc2626 !important;
+    background: #FEF2F2;
+}
+
+/* Order status badges */
+.status-pending { background: #FEF3C7; color: #92400E; }
+.status-confirmed { background: #DBEAFE; color: #1E40AF; }
+.status-shipped { background: #E9D5FF; color: #6B21A8; }
+.status-delivered { background: #D1FAE5; color: #065F46; }
+.status-cancelled { background: #FEE2E2; color: #991B1B; }
+
+/* Force Inter on all numbers */
+#wishlist-count,
+#cart-count-text,
+#cart-count-header {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important;
+}
