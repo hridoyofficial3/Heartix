@@ -1,0 +1,156 @@
+/* ========== INDEX (HOME) PAGE STYLES ========== */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #FBF8F3;
+    overflow-x: hidden;
+}
+
+/* ===== SEARCH BAR ===== */
+#search-bar-wrapper {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.35s ease;
+}
+#search-bar-wrapper.open {
+    max-height: 300px;
+    opacity: 1;
+    overflow: visible;
+}
+
+/* ===== QTY CONTROL ===== */
+.qty-control {
+    display: flex; align-items: center;
+    background: #0A1628; border-radius: 9px;
+    overflow: hidden; height: 34px;
+}
+.qty-control button {
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 16px; user-select: none;
+}
+.qty-control button:active { background: rgba(255,255,255,0.15); }
+.qty-control .qty-num {
+    color: white; font-weight: 700;
+    min-width: 34px; text-align: center; font-size: 13px;
+}
+
+/* ===== ADD TO CART ===== */
+.add-cart-btn {
+    height: 34px; background: white;
+    border: 1.5px solid #D4A84B; color: #0A1628;
+    border-radius: 9px; font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.add-cart-btn:active { background: #FBF8F3; }
+
+/* ===== SECTION TITLE ===== */
+.section-title {
+    text-align: center; font-size: 18px;
+    font-weight: 700; color: #0A1628; margin-bottom: 16px;
+}
+
+/* ===== CATEGORY CARD ===== */
+.category-card {
+    width: 76px; height: 76px;
+    background: #FFFDF7; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 10px rgba(10,22,40,0.06);
+    border: 1px solid rgba(212,168,75,0.08);
+    overflow: hidden;
+}
+.category-icon { font-size: 34px; line-height: 1; }
+.category-img { width: 50px; height: 50px; object-fit: contain; }
+#category-scroll-container {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ===== HERO SLIDER ===== */
+.slider-viewport {
+    overflow: hidden; border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(10,22,40,0.08);
+    height: 200px; position: relative;
+}
+.slider-track {
+    display: flex; height: 100%;
+    transition: transform 0.55s cubic-bezier(0.4,0,0.2,1);
+}
+.slider-slide {
+    min-width: 100%; height: 100%; overflow: hidden;
+}
+.slider-slide .hero-content {
+    height: 100%; display: flex; flex-direction: column;
+    justify-content: center; padding: 24px 28px; box-sizing: border-box;
+}
+.slider-dot { transition: all 0.3s ease; }
+.slider-dot.active { width: 24px; background: #0A1628; }
+.slider-dot.inactive { width: 6px; background: rgba(10,22,40,0.3); }
+
+/* ===== PRODUCT CARD ===== */
+.product-card:active { transform: scale(0.98); }
+.product-img { object-fit: contain; background: #f9fafb; }
+
+/* ===== FLOATING CART ===== */
+#floating-cart {
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+#floating-cart.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+#floating-cart.hide {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+    pointer-events: none;
+}
+.floating-cart-card {
+    position: relative; border-radius: 14px; overflow: hidden;
+    background: linear-gradient(145deg, #0F1B33 0%, #0A1628 50%, #131F3A 100%);
+    box-shadow: 0 12px 32px rgba(10,22,40,0.45), 0 0 0 1px rgba(212,168,75,0.25);
+}
+.floating-cart-icon {
+    box-shadow: 0 3px 12px rgba(212,168,75,0.5);
+    position: relative; z-index: 2;
+}
+
+/* ===== WISHLIST BTN (product card) ===== */
+.wishlist-btn {
+    position: absolute; top: 6px; right: 6px;
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.95); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(10,22,40,0.12);
+    z-index: 2; transition: all 0.2s;
+}
+.wishlist-btn:active { transform: scale(0.9); }
+.wishlist-btn i { color: #9ca3af; }
+.wishlist-btn.active i { color: #dc2626 !important; }
+
+/* ===== SEARCH SUGGESTIONS ===== */
+#search-suggestions {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.25s ease;
+    background: white; border-radius: 16px;
+    margin-top: 8px;
+    box-shadow: 0 8px 30px rgba(10,22,40,0.12);
+}
+#search-suggestions.show {
+    max-height: 350px; overflow-y: auto;
+}
+.suggestion-item {
+    padding: 10px 16px; cursor: pointer;
+    transition: background 0.15s;
+    display: flex; align-items: center; gap: 12px;
+}
+.suggestion-item:hover, .suggestion-item:active { background: #FBF8F3; }
+
+/* ===== ERROR BOX ===== */
+.error-box {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 16px;
+    padding: 40px 20px;
+    text-align: center;
+}
