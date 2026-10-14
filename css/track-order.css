@@ -1,0 +1,61 @@
+/* ========== TRACK ORDER PAGE STYLES ========== */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #FBF8F3;
+}
+
+/* Timeline steps */
+.timeline-step {
+    position: relative;
+    padding-left: 44px;
+}
+.timeline-step .dot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e5e7eb;
+    color: #9ca3af;
+    font-size: 13px;
+    z-index: 2;
+}
+.timeline-step.done .dot {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: white;
+}
+.timeline-step.active .dot {
+    background: linear-gradient(135deg, #D4A84B, #E8C77B);
+    color: #0A1628;
+    box-shadow: 0 0 0 4px rgba(212,168,75,0.25);
+}
+.timeline-step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    bottom: -8px;
+    width: 2px;
+    background: #e5e7eb;
+}
+.timeline-step.done:not(:last-child)::before {
+    background: linear-gradient(180deg, #16a34a, #22c55e);
+}
+
+/* Status badges */
+.status-pending { background: #FEF3C7; color: #92400E; }
+.status-confirmed { background: #DBEAFE; color: #1E40AF; }
+.status-shipped { background: #E9D5FF; color: #6B21A8; }
+.status-delivered { background: #D1FAE5; color: #065F46; }
+.status-cancelled { background: #FEE2E2; color: #991B1B; }
+
+/* Input focus */
+input:focus {
+    border-color: #D4A84B !important;
+    box-shadow: 0 0 0 3px rgba(212,168,75,0.12);
+}
