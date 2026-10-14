@@ -838,3 +838,644 @@ document.getElementById('test-image-file')?.addEventListener('change', function(
     };
     r.readAsDataURL(f);
 });
+// ============ PRODUCTS (Part 2) ============
+async function loadProducts() {
+    try {
+        const snap = await getDocs(collection(db, "products"));
+        allProductsList = [];
+        snap.forEach(d => allProductsList.push({ id: d.id, ...d.data() }));
+        renderAdminProducts();
+    } catch (e) {}
+}
+
+window.renderAdminProducts = function() {
+    const list = document.getElementById('product-list-admin'); if (!list) return;
+    const search = (document.getElementById('product-search')?.value || '').toLowerCase();
+    let filtered = allProductsList;
+    if (search) filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(search));
+    if (filtered.length === 0) { list.innerHTML = '<div class="bg-white rounded-2xl p-12 text-center premium-shadow"><i class="fas fa-box-open text-4xl text-gray-200 mb-3"></i><p class="text-sm text-gray-500">No products</p></div>'; return; }
+    let html = '';
+    filtered.forEach(p => {
+        const stock = Number(p.stock) || 0;
+        const badge = stock <= 0 ? '<span class="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">OUT</span>' :
+            (stock < 5 ? `<span class="text-[10px] font-bold bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">${stock} left</span>` : `<span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">${stock} in stock</span>`);
+        html += `<div class="bg-white rounded-2xl p-3 premium-shadow flex items-center gap-3">
+            <img src="${p.image || 'https://via.placeholder.com/100x100?text=?'}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl flex-shrink-0" onerror="this.src='https://via.placeholder.com/100x100?text=?'">
+            <div class="flex-1 min-w-0">
+                <p class="font-semibold text-sm text-navy truncate">${escapeHtml(p.name)}</p>
+                <div class="flex items-center gap-2 mt-1 flex-wrap"><p class="text-[11px] text-gray-500 font-medium">${escapeHtml(p.category || '')}</p>${badge}</div>
+                <p class="text-sm font-bold gold-text mt-0.5">৳ ${fmt(p.price)}</p>
+            </div>
+            <div class="flex flex-col gap-1.5 flex-shrink-0">
+                <button onclick="editProduct('${p.id}')" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-sm"></i></button>
+                <button onclick="deleteProduct('${p.id}')" class="w-9 h-9 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-sm"></i></button>
+            </div>
+        </div>`;
+    });
+    list.innerHTML = html;
+}
+
+window.openAddModal = function() {
+    document.getElementById('modal-title').innerText = 'Add Product';
+    document.getElementById('edit-product-id').value = '';
+    ['p-name','p-price','p-oldprice','p-brand','p-description'].forEach(id => document.getElementById(id).value = '');
+    if (allCategories.length > 0) document.getElementById('p-category').value = allCategories[0].key;
+    document.getElementById('p-stock').value = '10';
+    document.getElementById('p-image-file').value = '';
+    pendingImages = []; existingImages = [];
+    renderImagePreview();
+    document.getElementById('product-modal').classList.remove('hidden');
+}
+window.closeModal = function() { document.getElementById('product-modal').classList.add('hidden'); }
+
+window.editProduct = function(id) {
+    const p = allProductsList.find(x => x.id === id); if (!p) return;
+    document.getElementById('modal-title').innerText = 'Edit Product';
+    document.getElementById('edit-product-id').value = id;
+    document.getElementById('p-name').value = p.name || '';
+    document.getElementById('p-price').value = p.price || '';
+    document.getElementById('p-oldprice').value = p.oldPrice || '';
+    document.getElementById('p-category').value = p.category || (allCategories[0]?.key || 'TV');
+    document.getElementById('p-stock').value = p.stock || 0;
+    document.getElementById('p-brand').value = p.brand || '';
+    document.getElementById('p-description').value = p.description || '';
+    pendingImages = [];
+    const imgs = Array.isArray(p.images) ? p.images.filter(u => typeof u === 'string' && u.length > 0) : [];
+    if (imgs.length > 0) existingImages = [...imgs];
+    else if (p.image && typeof p.image === 'string') existingImages = [p.image];
+    else existingImages = [];
+    renderImagePreview();
+    document.getElementById('product-modal').classList.remove('hidden');
+}
+
+function renderImagePreview() {
+    const grid = document.getElementById('image-preview-grid');
+    let html = '';
+    existingImages.forEach((url, i) => {
+        html += `<div class="img-thumb"><img src="${url}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border-2 ${i === 0 && pendingImages.length === 0 ? 'border-gold' : 'border-gray-200'}"><button onclick="removeExistingImage(${i})" class="remove-btn">×</button></div>`;
+    });
+    pendingImages.forEach((item, i) => {
+        const isMain = existingImages.length === 0 && i === 0;
+        html += `<div class="img-thumb"><img src="${item.dataUrl}" class="w-full h-16 object-contain bg-gray-50 rounded-lg border-2 ${isMain ? 'border-gold' : 'border-gray-200'}"><button onclick="removePendingImage(${i})" class="remove-btn">×</button></div>`;
+    });
+    grid.innerHTML = html;
+}
+window.removeExistingImage = function(i) { existingImages.splice(i, 1); renderImagePreview(); }
+window.removePendingImage = function(i) { pendingImages.splice(i, 1); renderImagePreview(); }
+
+document.getElementById('p-image-file')?.addEventListener('change', function(e) {
+    const files = Array.from(e.target.files);
+    if (existingImages.length + pendingImages.length + files.length > 5) return toast("Max 5 images!", 'error');
+    files.forEach(file => {
+        const r = new FileReader();
+        r.onload = evt => { pendingImages.push({ file, dataUrl: evt.target.result }); renderImagePreview(); };
+        r.readAsDataURL(file);
+    });
+    e.target.value = '';
+});
+
+window.saveProduct = async function() {
+    const id = document.getElementById('edit-product-id').value;
+    const name = document.getElementById('p-name').value.trim();
+    const priceRaw = document.getElementById('p-price').value;
+    const oldPriceRaw = document.getElementById('p-oldprice').value;
+    const category = document.getElementById('p-category').value;
+    const stockRaw = document.getElementById('p-stock').value;
+    const brand = document.getElementById('p-brand').value.trim();
+    const description = document.getElementById('p-description').value.trim();
+    const price = parseFloat(priceRaw);
+    const oldPrice = oldPriceRaw ? parseFloat(oldPriceRaw) : 0;
+    const stock = stockRaw ? parseInt(stockRaw) : 0;
+    if (!name || name.length < 2) return toast("সঠিক নাম দিন", 'error');
+    if (!priceRaw || isNaN(price) || price < 0) return toast("সঠিক দাম দিন", 'error');
+    if (price > 10000000) return toast("দাম অনেক বেশি", 'error');
+    if (oldPriceRaw && (isNaN(oldPrice) || oldPrice < 0)) return toast("Old price সঠিক নয়", 'error');
+    if (oldPrice > 0 && oldPrice < price) return toast("Old price, price এর চেয়ে কম হতে পারে না", 'error');
+    if (isNaN(stock) || stock < 0) return toast("Stock সঠিক নয়", 'error');
+    if (existingImages.length === 0 && pendingImages.length === 0) return toast("কমপক্ষে একটা image দিন", 'error');
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading...';
+    try {
+        const newUrls = [];
+        for (let i = 0; i < pendingImages.length; i++) {
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Uploading ${i + 1}/${pendingImages.length}...`;
+            newUrls.push(await uploadToImgBB(pendingImages[i].file));
+        }
+        const allImages = [...existingImages, ...newUrls].filter(u => typeof u === 'string' && u.length > 0);
+        if (allImages.length === 0) throw new Error('No valid images');
+        const data = { name, price, oldPrice, category, stock, brand, description, image: allImages[0], images: allImages };
+        if (id) await updateDoc(doc(db, "products", id), data);
+        else await addDoc(collection(db, "products"), data);
+        toast('Saved!'); closeModal(); await loadProducts(); updateStats();
+    } catch (e) { toast("Error: " + e.message, 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE PRODUCT'; }
+}
+
+window.deleteProduct = async function(id) {
+    if (!confirm("Delete this product?")) return;
+    await deleteDoc(doc(db, "products", id));
+    await loadProducts(); updateStats(); toast('Deleted', 'warn');
+}
+
+// ============ ORDERS (Part 2) ============
+async function loadOrders() {
+    try {
+        const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        allOrdersList = [];
+        snap.forEach(d => allOrdersList.push({ id: d.id, ...d.data() }));
+        renderAdminOrders(); renderRecentOrders(); updateOrderBadge();
+    } catch (e) {}
+}
+
+function updateOrderBadge() {
+    const pending = allOrdersList.filter(o => o.status === 'pending').length;
+    const b1 = document.getElementById('orders-badge'), b2 = document.getElementById('orders-badge-mob');
+    if (pending > 0) {
+        if (b1) { b1.textContent = pending; b1.classList.remove('hidden'); }
+        if (b2) { b2.textContent = pending; b2.classList.remove('hidden'); }
+    } else {
+        if (b1) b1.classList.add('hidden');
+        if (b2) b2.classList.add('hidden');
+    }
+}
+
+window.filterOrders = function(filter, btn) {
+    currentOrderFilter = filter;
+    document.querySelectorAll('.order-filter-btn').forEach(b => {
+        b.classList.remove('bg-navy', 'text-white'); b.classList.add('bg-white', 'text-gray-600');
+    });
+    btn.classList.add('bg-navy', 'text-white'); btn.classList.remove('bg-white', 'text-gray-600');
+    renderAdminOrders();
+}
+
+window.exportOrdersCSV = function() {
+    if (allOrdersList.length === 0) return toast('কোনো order নেই', 'warn');
+    let csv = 'Order Number,Date,Customer,Phone,District,Thana,Items,Subtotal,Delivery,Total,Paid,Due,Status,Payment\n';
+    allOrdersList.forEach(o => {
+        const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString('en-GB') : '';
+        const items = (o.items || []).map(i => `${i.name} x${i.quantity}`).join(' | ');
+        const row = [o.orderNumber || o.id, date, o.customer?.name || '', o.customer?.phone || '', o.customer?.district || '', o.customer?.thana || '', items, o.subtotal || 0, o.deliveryCharge || 0, o.total || 0, o.advancePaid || 0, o.dueAmount || 0, o.status || 'pending', o.paymentMethod || ''].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+        csv += row + '\n';
+    });
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `heartix-orders-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('CSV downloaded!');
+}
+
+function renderAdminOrders() {
+    const list = document.getElementById('order-list-admin'); if (!list) return;
+    const search = (document.getElementById('order-search')?.value || '').toLowerCase().trim();
+    let filtered = allOrdersList;
+    if (currentOrderFilter !== 'all') filtered = filtered.filter(o => o.status === currentOrderFilter);
+    if (search) {
+        filtered = filtered.filter(o =>
+            (o.orderNumber || '').toLowerCase().includes(search) ||
+            (o.customer?.name || '').toLowerCase().includes(search) ||
+            (o.customer?.phone || '').toLowerCase().includes(search)
+        );
+    }
+    if (filtered.length === 0) {
+        list.innerHTML = '<div class="bg-white rounded-2xl p-12 text-center premium-shadow"><i class="fas fa-receipt text-4xl text-gray-200 mb-3"></i><p class="text-sm text-gray-500">No orders</p></div>';
+        return;
+    }
+    let html = '';
+    filtered.forEach(o => {
+        const itemsHtml = (o.items || []).map(i => `<li class="flex justify-between gap-2"><span class="truncate">${escapeHtml(i.name)} <span class="text-gray-400">× ${i.quantity}</span></span><span class="font-semibold flex-shrink-0">৳${fmt(i.price * i.quantity)}</span></li>`).join('');
+        const statusClass = 'status-' + (o.status || 'pending');
+        const orderDate = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '';
+        const statusMeta = { pending: { icon: 'hourglass-half', label: 'Pending' }, confirmed: { icon: 'circle-check', label: 'Confirmed' }, shipped: { icon: 'truck-fast', label: 'Shipped' }, delivered: { icon: 'box-open', label: 'Delivered' }, cancelled: { icon: 'circle-xmark', label: 'Cancelled' } };
+        const current = statusMeta[o.status] || statusMeta.pending;
+        html += `<div class="bg-white rounded-2xl p-4 premium-shadow border-l-4 border-gold">
+            <div class="flex justify-between items-start mb-3 gap-2">
+                <div class="min-w-0 flex-1">
+                    <p class="font-bold text-navy text-sm">${escapeHtml(o.orderNumber || o.id.slice(0,8))}</p>
+                    <p class="text-[11px] text-gray-500 mt-0.5 truncate">${escapeHtml(o.customer?.name || '')} • ${escapeHtml(o.customer?.phone || '')}</p>
+                </div>
+                <div class="text-right flex-shrink-0">
+                    <span class="order-status ${statusClass}">${o.status || 'pending'}</span>
+                    ${orderDate ? `<p class="text-[10px] text-gray-400 mt-1">${orderDate}</p>` : ''}
+                </div>
+            </div>
+            <p class="text-xs text-gray-600 mb-3"><i class="fas fa-map-marker-alt text-gray-300 mr-1"></i>${escapeHtml(o.customer?.address || '')}, ${escapeHtml(o.customer?.thana || '')}, ${escapeHtml(o.customer?.district || '')}</p>
+            <div class="bg-gray-50 rounded-xl p-3 mb-3"><ul class="text-xs text-gray-700 space-y-1.5">${itemsHtml}</ul></div>
+            <div class="grid grid-cols-3 gap-2 text-center mb-3">
+                <div class="bg-gray-50 rounded-xl p-2.5"><p class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Total</p><p class="text-sm font-bold text-navy mt-0.5">৳${fmt(o.total)}</p></div>
+                <div class="bg-green-50 rounded-xl p-2.5"><p class="text-[9px] text-green-700 font-bold uppercase tracking-wider">Paid</p><p class="text-sm font-bold text-green-700 mt-0.5">৳${fmt(o.advancePaid)}</p></div>
+                <div class="bg-red-50 rounded-xl p-2.5"><p class="text-[9px] text-red-700 font-bold uppercase tracking-wider">Due</p><p class="text-sm font-bold text-red-700 mt-0.5">৳${fmt(o.dueAmount)}</p></div>
+            </div>
+            ${o.discount > 0 ? `<p class="text-[11px] text-amber-600 bg-amber-50 rounded-lg p-2 mb-2"><i class="fas fa-tag mr-1"></i>Discount: ৳${fmt(o.discount)}${o.couponCode ? ` (${escapeHtml(o.couponCode)})` : ''}</p>` : ''}
+            ${o.adminNote ? `<p class="text-[11px] text-gray-500 bg-gray-50 rounded-lg p-2 mb-2"><i class="fas fa-sticky-note mr-1"></i>${escapeHtml(o.adminNote)}</p>` : ''}
+            <div class="space-y-2">
+                <button onclick="openOrderEdit('${o.id}')" class="w-full bg-navy text-white px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2">
+                    <i class="fas fa-pen"></i> EDIT ORDER
+                </button>
+                <button onclick="openStatusPicker('${o.id}')" class="w-full border-2 border-gray-100 px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between hover:border-gold transition">
+                    <span class="flex items-center gap-2 text-gray-700">
+                        <i class="fas fa-${current.icon}"></i> ${current.label}
+                    </span>
+                    <span class="text-gray-400 text-[10px] font-semibold uppercase tracking-wider">Change <i class="fas fa-chevron-down ml-1"></i></span>
+                </button>
+                <div class="grid grid-cols-2 gap-2">
+                    <a href="tel:${escapeHtml(o.customer?.phone || '')}" class="py-2.5 bg-green-50 text-green-700 rounded-xl flex items-center justify-center gap-2 text-xs font-bold">
+                        <i class="fas fa-phone"></i> Call
+                    </a>
+                    <a href="https://wa.me/88${(o.customer?.phone || '').replace(/^0/, '')}?text=${encodeURIComponent('Order ' + (o.orderNumber || '') + ' — Heartix')}" target="_blank" rel="noopener" class="py-2.5 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center gap-2 text-xs font-bold">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>`;
+    });
+    list.innerHTML = html;
+}
+
+window.openOrderEdit = function(id) {
+    const o = allOrdersList.find(x => x.id === id); if (!o) return;
+    editingOrderId = id;
+    editingOrderItems = JSON.parse(JSON.stringify(o.items || []));
+    document.getElementById('oe-order-num').textContent = o.orderNumber || id.slice(0, 10);
+    document.getElementById('oe-customer').textContent = o.customer?.name || '';
+    document.getElementById('oe-phone').textContent = o.customer?.phone || '';
+    document.getElementById('oe-address').textContent = [o.customer?.address, o.customer?.thana, o.customer?.district].filter(Boolean).join(', ');
+    document.getElementById('oe-discount').value = o.discount || 0;
+    document.getElementById('oe-delivery').value = o.deliveryCharge || 0;
+    document.getElementById('oe-advance').value = o.advancePaid || 0;
+    document.getElementById('oe-note').value = o.adminNote || '';
+    renderOrderEditItems();
+    recalcOrderEdit();
+    document.getElementById('order-edit-modal').classList.remove('hidden');
+}
+
+window.closeOrderEdit = function() {
+    document.getElementById('order-edit-modal').classList.add('hidden');
+    editingOrderId = null; editingOrderItems = [];
+}
+
+function renderOrderEditItems() {
+    const wrap = document.getElementById('oe-items-list');
+    if (editingOrderItems.length === 0) { wrap.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No items — click "Add Item"</p>'; return; }
+    let html = '';
+    editingOrderItems.forEach((it, i) => {
+        html += `<div class="order-item-row">
+            <div class="min-w-0">
+                <p class="text-xs font-semibold text-navy truncate">${escapeHtml(it.name)}</p>
+                <p class="text-[10px] text-gray-500">৳${fmt(it.price)} each</p>
+            </div>
+            <div class="flex items-center gap-1 bg-white rounded-lg px-1">
+                <button onclick="changeItemQty(${i}, -1)" class="w-7 h-7 flex items-center justify-center text-navy font-bold">−</button>
+                <span class="w-6 text-center text-xs font-bold">${it.quantity}</span>
+                <button onclick="changeItemQty(${i}, 1)" class="w-7 h-7 flex items-center justify-center text-navy font-bold">+</button>
+            </div>
+            <button onclick="removeEditItem(${i})" class="w-8 h-8 bg-red-50 text-red-500 rounded-lg flex items-center justify-center"><i class="fas fa-times text-xs"></i></button>
+        </div>`;
+    });
+    wrap.innerHTML = html;
+}
+
+window.changeItemQty = function(i, delta) {
+    if (!editingOrderItems[i]) return;
+    const newQty = (editingOrderItems[i].quantity || 1) + delta;
+    if (newQty <= 0) { editingOrderItems.splice(i, 1); }
+    else editingOrderItems[i].quantity = newQty;
+    renderOrderEditItems(); recalcOrderEdit();
+}
+
+window.removeEditItem = function(i) {
+    editingOrderItems.splice(i, 1);
+    renderOrderEditItems(); recalcOrderEdit();
+}
+
+function recalcOrderEdit() {
+    const subtotal = editingOrderItems.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0);
+    const discount = parseFloat(document.getElementById('oe-discount').value) || 0;
+    const delivery = parseFloat(document.getElementById('oe-delivery').value) || 0;
+    const advance = parseFloat(document.getElementById('oe-advance').value) || 0;
+    const total = Math.max(0, subtotal - discount + delivery);
+    const due = Math.max(0, total - advance);
+    document.getElementById('oe-subtotal').textContent = '৳' + fmt(subtotal);
+    document.getElementById('oe-discount-display').textContent = '-৳' + fmt(discount);
+    document.getElementById('oe-delivery-display').textContent = '৳' + fmt(delivery);
+    document.getElementById('oe-total').textContent = '৳' + fmt(total);
+    document.getElementById('oe-advance-display').textContent = '৳' + fmt(advance);
+    document.getElementById('oe-due').textContent = '৳' + fmt(due);
+}
+
+window.saveOrderEdit = async function() {
+    if (!editingOrderId) return;
+    if (editingOrderItems.length === 0) {
+        return toast('কমপক্ষে একটা item থাকতে হবে!', 'error');
+    }
+    const order = allOrdersList.find(x => x.id === editingOrderId);
+    if (!order) return;
+    const discount = parseFloat(document.getElementById('oe-discount').value) || 0;
+    const delivery = parseFloat(document.getElementById('oe-delivery').value) || 0;
+    const advance = parseFloat(document.getElementById('oe-advance').value) || 0;
+    const adminNote = document.getElementById('oe-note').value.trim();
+    const subtotal = editingOrderItems.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0);
+    const total = Math.max(0, subtotal - discount + delivery);
+    const dueAmount = Math.max(0, total - advance);
+    const shouldAdjustStock = order.status !== 'cancelled' && order.stockDeducted !== false;
+    const productDeltas = {};
+    (order.items || []).forEach(it => {
+        if (!it.id) return;
+        productDeltas[it.id] = (productDeltas[it.id] || 0) - (Number(it.quantity) || 0);
+    });
+    editingOrderItems.forEach(it => {
+        if (!it.id) return;
+        productDeltas[it.id] = (productDeltas[it.id] || 0) + (Number(it.quantity) || 0);
+    });
+    const btn = document.getElementById('oe-save-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
+    try {
+        if (shouldAdjustStock) {
+            for (const [pid, delta] of Object.entries(productDeltas)) {
+                if (delta === 0) continue;
+                try {
+                    await updateDoc(doc(db, "products", pid), { stock: increment(-delta) });
+                } catch (e) {
+                    console.warn('Stock adjust failed:', pid, e);
+                }
+            }
+        }
+        await updateDoc(doc(db, "orders", editingOrderId), {
+            items: editingOrderItems,
+            subtotal, discount,
+            deliveryCharge: delivery,
+            total, advancePaid: advance,
+            dueAmount, adminNote
+        });
+        toast('Order updated!');
+        closeOrderEdit();
+        await loadOrders();
+        await loadProducts();
+        updateStats();
+    } catch (e) {
+        toast("Error: " + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check mr-1"></i> SAVE';
+    }
+}
+
+window.confirmDeleteOrder = async function() {
+    if (!editingOrderId) return;
+    if (!confirm("এই order টি permanently delete করবেন?\n\nStock restore হবে না।")) return;
+    try {
+        await deleteDoc(doc(db, "orders", editingOrderId));
+        toast('Order deleted', 'warn');
+        closeOrderEdit();
+        await loadOrders();
+        updateStats();
+    } catch (e) { toast("Error: " + e.message, 'error'); }
+}
+
+window.openProductPicker = function() {
+    document.getElementById('picker-search').value = '';
+    renderPickerProducts();
+    document.getElementById('product-picker-modal').classList.remove('hidden');
+}
+window.closeProductPicker = function() { document.getElementById('product-picker-modal').classList.add('hidden'); }
+
+window.renderPickerProducts = function() {
+    const q = (document.getElementById('picker-search').value || '').toLowerCase();
+    const list = document.getElementById('picker-list');
+    let products = allProductsList;
+    if (q) products = products.filter(p => (p.name || '').toLowerCase().includes(q));
+    if (products.length === 0) { list.innerHTML = '<p class="text-center text-gray-400 text-xs py-6">No products</p>'; return; }
+    let html = '';
+    products.forEach(p => {
+        const stock = Number(p.stock) || 0;
+        const outOfStock = stock <= 0;
+        html += `<div ${outOfStock ? '' : `onclick="addItemToOrder('${p.id}')"`} class="flex items-center gap-3 p-3 rounded-xl cursor-pointer ${outOfStock ? 'bg-red-50 opacity-60 cursor-not-allowed' : 'bg-gray-50 active:bg-gray-100'}">
+            <img src="${p.image || 'https://via.placeholder.com/50x50?text=?'}" class="w-12 h-12 object-contain bg-white rounded-lg flex-shrink-0" onerror="this.src='https://via.placeholder.com/50x50?text=?'">
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-navy truncate">${escapeHtml(p.name)}</p>
+                <p class="text-[11px] text-gold font-bold">৳${fmt(p.price)} ${outOfStock ? '<span class="text-red-500 ml-1">• OUT OF STOCK</span>' : `• Stock: ${stock}`}</p>
+            </div>
+            <i class="fas fa-${outOfStock ? 'ban text-red-500' : 'plus-circle text-gold'} text-lg"></i>
+        </div>`;
+    });
+    list.innerHTML = html;
+}
+
+window.addItemToOrder = function(pid) {
+    const p = allProductsList.find(x => x.id === pid); if (!p) return;
+    const stock = Number(p.stock) || 0;
+    if (stock <= 0) return toast('এই product স্টকে নেই!', 'error');
+    const existing = editingOrderItems.find(i => i.id === pid);
+    const currentQty = existing ? (existing.quantity || 1) : 0;
+    if (currentQty + 1 > stock) {
+        return toast(`স্টকে মাত্র ${stock} টি আছে`, 'warn');
+    }
+    if (existing) existing.quantity = currentQty + 1;
+    else editingOrderItems.push({ id: p.id, name: p.name, price: Number(p.price) || 0, quantity: 1, image: p.image || '' });
+    renderOrderEditItems(); recalcOrderEdit();
+    closeProductPicker();
+    toast('Item added!');
+}
+
+window.openStatusPicker = function(orderId) {
+    const o = allOrdersList.find(x => x.id === orderId);
+    if (!o) return;
+    statusPickerOrderId = orderId;
+    document.getElementById('sp-order-num').textContent = o.orderNumber || orderId.slice(0, 10);
+    const statuses = [
+        { key: 'pending', icon: 'hourglass-half', label: 'Pending', desc: 'অর্ডার অপেক্ষায় আছে', color: 'yellow' },
+        { key: 'confirmed', icon: 'circle-check', label: 'Confirmed', desc: 'গ্রাহককে কনফার্ম করা হয়েছে', color: 'blue' },
+        { key: 'shipped', icon: 'truck-fast', label: 'Shipped', desc: 'ডেলিভারির জন্য পাঠানো হয়েছে', color: 'purple' },
+        { key: 'delivered', icon: 'box-open', label: 'Delivered', desc: 'সফলভাবে ডেলিভারি হয়েছে', color: 'green' },
+        { key: 'cancelled', icon: 'circle-xmark', label: 'Cancelled', desc: 'অর্ডার বাতিল করা হয়েছে', color: 'red' }
+    ];
+    const current = o.status;
+    const colorMap = { yellow: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-300' }, blue: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-300' }, purple: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-300' }, green: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-300' }, red: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-300' } };
+    let html = '';
+    statuses.forEach(s => {
+        const isActive = s.key === current;
+        const c = colorMap[s.color];
+        html += `<button onclick="selectStatus('${s.key}')" class="w-full flex items-center gap-3 p-4 rounded-2xl border-2 transition text-left ${isActive ? `${c.bg} ${c.border}` : 'bg-white border-gray-100 hover:border-gray-200'}">
+            <div class="w-11 h-11 rounded-xl ${c.bg} flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-${s.icon} ${c.text}"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-bold text-sm text-navy">${s.label}</p>
+                <p class="text-[11px] text-gray-500 mt-0.5">${s.desc}</p>
+            </div>
+            ${isActive ? `<i class="fas fa-circle-check ${c.text} text-lg"></i>` : `<i class="far fa-circle text-gray-300 text-lg"></i>`}
+        </button>`;
+    });
+    document.getElementById('status-options-list').innerHTML = html;
+    document.getElementById('status-picker-modal').classList.remove('hidden');
+}
+
+window.closeStatusPicker = function() {
+    document.getElementById('status-picker-modal').classList.add('hidden');
+    statusPickerOrderId = null;
+}
+
+window.selectStatus = function(newStatus) {
+    const orderId = statusPickerOrderId;
+    if (!orderId) return;
+    const o = allOrdersList.find(x => x.id === orderId);
+    if (!o) { closeStatusPicker(); return; }
+    if (o.status === newStatus) { closeStatusPicker(); return toast('Already ' + newStatus, 'warn'); }
+    pendingStatusChange = { orderId, newStatus };
+    closeStatusPicker();
+    const statusInfo = {
+        pending: { icon: 'hourglass-half', color: 'text-yellow-600', bg: 'bg-yellow-50', title: 'Set to Pending?', msg: 'এই order টি আবার Pending status-এ ফিরে যাবে।' },
+        confirmed: { icon: 'circle-check', color: 'text-blue-600', bg: 'bg-blue-50', title: 'Confirm Order?', msg: 'গ্রাহককে জানান যে অর্ডার কনফার্ম হয়েছে।' },
+        shipped: { icon: 'truck-fast', color: 'text-purple-600', bg: 'bg-purple-50', title: 'Mark as Shipped?', msg: 'অর্ডারটি ডেলিভারির জন্য পাঠানো হচ্ছে।' },
+        delivered: { icon: 'box-open', color: 'text-green-600', bg: 'bg-green-50', title: 'Mark as Delivered?', msg: 'ডেলিভারি সম্পন্ন হয়েছে? Revenue-তে যুক্ত হবে।' },
+        cancelled: { icon: 'circle-xmark', color: 'text-red-600', bg: 'bg-red-50', title: 'Cancel Order?', msg: 'অর্ডার বাতিল হবে এবং Stock ফিরে যাবে।' }
+    };
+    const info = statusInfo[newStatus];
+    document.getElementById('sc-icon-wrap').className = 'w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ' + info.bg;
+    document.getElementById('sc-icon').className = 'fas fa-' + info.icon + ' text-2xl ' + info.color;
+    document.getElementById('sc-title').textContent = info.title;
+    document.getElementById('sc-message').textContent = info.msg;
+    document.getElementById('status-confirm-modal').classList.remove('hidden');
+}
+
+window.closeStatusConfirm = function() {
+    document.getElementById('status-confirm-modal').classList.add('hidden');
+    pendingStatusChange = null;
+}
+
+window.confirmStatusChange = async function() {
+    if (!pendingStatusChange) return;
+    const { orderId, newStatus } = pendingStatusChange;
+    const btn = document.getElementById('sc-confirm-btn');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Updating...';
+    try {
+        const order = allOrdersList.find(x => x.id === orderId);
+        const oldStatus = order?.status;
+        if (newStatus === 'cancelled' && oldStatus !== 'cancelled' && order?.items && order.stockDeducted !== false) {
+            for (const item of order.items) {
+                if (!item.id) continue;
+                try { await updateDoc(doc(db, "products", item.id), { stock: increment(item.quantity) }); } catch (e) {}
+            }
+            await updateDoc(doc(db, "orders", orderId), { stockDeducted: false });
+        }
+        if (oldStatus === 'cancelled' && newStatus !== 'cancelled' && order?.items) {
+            for (const item of order.items) {
+                if (!item.id) continue;
+                try { await updateDoc(doc(db, "products", item.id), { stock: increment(-item.quantity) }); } catch (e) {}
+            }
+            await updateDoc(doc(db, "orders", orderId), { stockDeducted: true });
+        }
+        await updateDoc(doc(db, "orders", orderId), { status: newStatus });
+        toast('Status: ' + newStatus);
+        closeStatusConfirm();
+        await loadOrders();
+        updateStats();
+    } catch (e) { toast("Error: " + e.message, 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = 'Confirm'; }
+}
+
+function renderRecentOrders() {
+    const list = document.getElementById('recent-orders'); if (!list) return;
+    const recent = allOrdersList.slice(0, 3);
+    if (recent.length === 0) { list.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">No orders yet</p>'; return; }
+    let html = '';
+    recent.forEach(o => {
+        const sc = 'status-' + (o.status || 'pending');
+        html += `<div class="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
+            <div class="min-w-0 flex-1"><p class="text-sm font-semibold text-navy truncate">${escapeHtml(o.customer?.name || '')}</p><p class="text-[11px] text-gray-500">${(o.items || []).length} item(s) • ৳${fmt(o.total)}</p></div>
+            <span class="order-status ${sc} ml-2">${o.status || 'pending'}</span>
+        </div>`;
+    });
+    list.innerHTML = html;
+}
+
+// ============ REVIEWS (Part 2) ============
+async function loadReviews() {
+    try {
+        const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        allReviewsList = [];
+        snap.forEach(d => allReviewsList.push({ id: d.id, ...d.data() }));
+        renderAdminReviews();
+    } catch (e) {}
+}
+
+function renderAdminReviews() {
+    const list = document.getElementById('reviews-list-admin'); if (!list) return;
+    if (allReviewsList.length === 0) { list.innerHTML = '<div class="bg-white rounded-2xl p-12 text-center premium-shadow"><i class="fas fa-star text-4xl text-gray-200 mb-3"></i><p class="text-sm text-gray-500">No reviews</p></div>'; return; }
+    let html = '';
+    allReviewsList.forEach(r => {
+        const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
+        html += `<div class="bg-white rounded-2xl p-4 premium-shadow">
+            <div class="flex justify-between items-center mb-2"><p class="font-semibold text-navy text-sm">${escapeHtml(r.name)}</p><span class="text-yellow-500 text-sm">${stars}</span></div>
+            <p class="text-xs text-gray-600 mb-3">${escapeHtml(r.text)}</p>
+            <button onclick="deleteReview('${r.id}')" class="text-red-500 text-xs font-semibold"><i class="fas fa-trash mr-1"></i> Delete</button>
+        </div>`;
+    });
+    list.innerHTML = html;
+}
+
+window.deleteReview = async function(id) {
+    if (!confirm("Delete?")) return;
+    await deleteDoc(doc(db, "reviews", id));
+    await loadReviews();
+    toast('Review deleted', 'warn');
+}
+
+// ============ STATS (Part 2) ============
+function updateStats() {
+    const products = document.getElementById('stat-products');
+    const orders = document.getElementById('stat-orders');
+    const pending = document.getElementById('stat-pending');
+    const revenue = document.getElementById('stat-revenue');
+    if (products) products.innerText = allProductsList.length;
+    if (orders) orders.innerText = allOrdersList.length;
+    if (pending) pending.innerText = allOrdersList.filter(o => o.status === 'pending').length;
+    if (revenue) {
+        const rev = allOrdersList.filter(o => o.status === 'delivered').reduce((s, o) => s + (o.total || 0), 0);
+        revenue.innerText = '৳' + fmt(rev);
+    }
+}
+
+// ============ SETTINGS (Part 2) ============
+async function loadSettings() {
+    try {
+        const snap = await getDoc(doc(db, "settings", "main"));
+        if (snap.exists()) {
+            const s = snap.data();
+            document.getElementById('setting-delivery-charge').value = s.deliveryCharge || 100;
+            document.getElementById('setting-free-delivery').value = s.freeDeliveryAbove || '';
+            document.getElementById('setting-address').value = s.contactAddress || '';
+            document.getElementById('setting-phone').value = s.contactPhone || '';
+            document.getElementById('setting-email').value = s.contactEmail || '';
+            document.getElementById('setting-whatsapp').value = s.whatsapp || '';
+            document.getElementById('setting-bkash').value = s.bkashNumber || '';
+            document.getElementById('setting-nagad').value = s.nagadNumber || '';
+        }
+    } catch (e) {}
+}
+
+window.saveSettings = async function() {
+    try {
+        const dc = parseFloat(document.getElementById('setting-delivery-charge').value);
+        const fda = parseFloat(document.getElementById('setting-free-delivery').value);
+        if (isNaN(dc) || dc < 0) return toast('Delivery charge সঠিক নয়', 'error');
+        if (document.getElementById('setting-free-delivery').value && (isNaN(fda) || fda < 0)) return toast('Free delivery amount সঠিক নয়', 'error');
+        const settings = {
+            deliveryCharge: dc || 100,
+            freeDeliveryAbove: fda || 0,
+            contactAddress: document.getElementById('setting-address').value.trim(),
+            contactPhone: document.getElementById('setting-phone').value.trim(),
+            contactEmail: document.getElementById('setting-email').value.trim(),
+            whatsapp: document.getElementById('setting-whatsapp').value.trim(),
+            bkashNumber: document.getElementById('setting-bkash').value.trim(),
+            nagadNumber: document.getElementById('setting-nagad').value.trim()
+        };
+        await setDoc(doc(db, "settings", "main"), settings, { merge: true });
+        toast('Settings saved!');
+    } catch (e) { toast("Error: " + e.message, 'error'); }
+}
