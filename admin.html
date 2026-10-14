@@ -18,6 +18,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/admin.css">
+    <style>
+        details.oe-section[open] .oe-chevron { transform: rotate(180deg); }
+        .oe-chevron { transition: transform 0.2s ease; }
+    </style>
 </head>
 <body class="pb-20 md:pb-6">
 
@@ -444,67 +448,150 @@
         </div>
     </div>
 
-    <!-- ORDER EDIT MODAL -->
+    <!-- ============ NEW ORDER EDIT MODAL (Compact) ============ -->
     <div id="order-edit-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto animate-slide-up">
-            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
-                <div>
-                    <h3 class="text-white font-bold text-lg">Edit Order</h3>
-                    <p id="oe-order-num" class="text-gold text-[11px] font-mono"></p>
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-lg flex flex-col" style="max-height: 95vh; height: 95vh;">
+
+            <!-- STICKY HEADER -->
+            <div class="navy-gradient px-4 py-3 rounded-t-3xl flex justify-between items-center flex-shrink-0">
+                <div class="min-w-0">
+                    <h3 class="text-white font-bold text-base leading-none">Edit Order</h3>
+                    <p id="oe-order-num" class="text-gold text-[10px] font-mono mt-1"></p>
                 </div>
-                <button onclick="closeOrderEdit()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
-                    <i class="fas fa-times"></i>
+                <button onclick="closeOrderEdit()" class="w-8 h-8 rounded-full bg-white/10 active:bg-white/20 text-white flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-times text-xs"></i>
                 </button>
             </div>
-            <div class="p-5 space-y-4">
-                <div class="bg-gray-50 rounded-2xl p-4">
-                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Customer</p>
-                    <p id="oe-customer" class="text-sm font-bold text-navy"></p>
-                    <p id="oe-phone" class="text-xs text-gray-600 mt-0.5"></p>
-                    <p id="oe-address" class="text-xs text-gray-500 mt-1"></p>
-                </div>
-                <div>
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Items</label>
-                        <button onclick="openProductPicker()" class="text-gold text-xs font-bold"><i class="fas fa-plus mr-1"></i>Add Item</button>
-                    </div>
-                    <div id="oe-items-list"></div>
-                </div>
-                <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200">
-                    <p class="text-[11px] font-bold text-amber-800 uppercase tracking-wider mb-3"><i class="fas fa-tag mr-1"></i>Adjustments</p>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-600 mb-1 block">Discount (৳)</label>
-                            <input type="number" id="oe-discount" placeholder="0" min="0" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-sm font-medium bg-white" oninput="recalcOrderEdit()">
+
+            <!-- SCROLLABLE BODY -->
+            <div class="flex-1 overflow-y-auto p-3 space-y-2.5" style="min-height: 0;">
+
+                <!-- CUSTOMER SECTION -->
+                <details class="oe-section bg-gray-50 rounded-xl overflow-hidden" open>
+                    <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user text-blue-600 text-[11px]"></i>
+                            </div>
+                            <span class="text-xs font-bold text-navy">Customer Info</span>
+                            <span class="text-[9px] text-gray-400 font-medium">(editable)</span>
                         </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-600 mb-1 block">Delivery Charge (৳)</label>
-                            <input type="number" id="oe-delivery" placeholder="0" min="0" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-sm font-medium bg-white" oninput="recalcOrderEdit()">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-600 mb-1 block">Advance Paid (৳)</label>
-                            <input type="number" id="oe-advance" placeholder="0" min="0" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-sm font-medium bg-white" oninput="recalcOrderEdit()">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-600 mb-1 block">Admin Note (Internal)</label>
-                            <textarea id="oe-note" rows="2" placeholder="কাস্টমারের সাথে কথা হয়েছে..." maxlength="500" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-xs font-medium resize-none bg-white"></textarea>
+                        <i class="fas fa-chevron-down oe-chevron text-gray-400 text-[10px]"></i>
+                    </summary>
+                    <div class="px-3 pb-3 space-y-2">
+                        <input type="text" id="oe-edit-name" placeholder="Customer Name" maxlength="100" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                        <input type="tel" id="oe-edit-phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                        <textarea id="oe-edit-address" rows="2" placeholder="Full Address" maxlength="500" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white resize-none focus:border-gold"></textarea>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="oe-edit-district" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold"></select>
+                            <input type="text" id="oe-edit-thana" placeholder="Thana" maxlength="60" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
                         </div>
                     </div>
+                </details>
+
+                <!-- ITEMS SECTION -->
+                <div class="bg-gray-50 rounded-xl">
+                    <div class="flex items-center justify-between p-3 pb-1">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center">
+                                <i class="fas fa-box text-purple-600 text-[11px]"></i>
+                            </div>
+                            <span class="text-xs font-bold text-navy">Items</span>
+                        </div>
+                        <button onclick="openProductPicker()" class="text-gold text-[10px] font-bold flex items-center gap-1 active:opacity-70">
+                            <i class="fas fa-plus-circle"></i> Add Item
+                        </button>
+                    </div>
+                    <div id="oe-items-list" class="px-3 pb-3 space-y-1.5"></div>
                 </div>
-                <div class="navy-gradient rounded-2xl p-4 space-y-2">
-                    <div class="flex justify-between text-xs"><span class="text-white/70">Subtotal</span><span id="oe-subtotal" class="text-white font-semibold">৳0</span></div>
-                    <div class="flex justify-between text-xs"><span class="text-white/70">Discount</span><span id="oe-discount-display" class="text-red-300 font-semibold">-৳0</span></div>
-                    <div class="flex justify-between text-xs"><span class="text-white/70">Delivery</span><span id="oe-delivery-display" class="text-white font-semibold">৳0</span></div>
-                    <div class="flex justify-between text-sm border-t border-white/20 pt-2 mt-2"><span class="text-white font-bold">Total</span><span id="oe-total" class="text-gold font-bold text-lg">৳0</span></div>
-                    <div class="flex justify-between text-xs"><span class="text-white/70">Advance</span><span id="oe-advance-display" class="text-green-300 font-semibold">৳0</span></div>
-                    <div class="flex justify-between text-xs"><span class="text-white/70">Due</span><span id="oe-due" class="text-red-300 font-bold">৳0</span></div>
+
+                <!-- ADJUSTMENTS SECTION -->
+                <details class="oe-section bg-amber-50 rounded-xl overflow-hidden border border-amber-200" open>
+                    <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-tag text-amber-600 text-[11px]"></i>
+                            </div>
+                            <span class="text-xs font-bold text-amber-900">Adjustments</span>
+                        </div>
+                        <i class="fas fa-chevron-down oe-chevron text-amber-500 text-[10px]"></i>
+                    </summary>
+                    <div class="px-3 pb-3 space-y-2.5">
+
+                        <!-- DISCOUNT -->
+                        <div>
+                            <div class="flex justify-between items-baseline mb-1">
+                                <label class="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Discount (৳)</label>
+                                <span id="oe-orig-discount" class="text-[9px] text-gray-400 font-medium"></span>
+                            </div>
+                            <input type="number" id="oe-discount" placeholder="0" min="0" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-sm font-semibold bg-white focus:border-gold">
+                        </div>
+
+                        <!-- DELIVERY -->
+                        <div>
+                            <div class="flex justify-between items-baseline mb-1">
+                                <label class="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Delivery Charge (৳)</label>
+                                <span id="oe-orig-delivery" class="text-[9px] text-gray-400 font-medium"></span>
+                            </div>
+                            <input type="number" id="oe-delivery" placeholder="0" min="0" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-sm font-semibold bg-white focus:border-gold">
+                        </div>
+
+                        <!-- ADVANCE PAID -->
+                        <div>
+                            <div class="flex justify-between items-baseline mb-1">
+                                <label class="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Advance Paid (৳)</label>
+                                <span id="oe-orig-advance" class="text-[9px] text-gray-400 font-medium"></span>
+                            </div>
+                            <input type="number" id="oe-advance" placeholder="0" min="0" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-sm font-semibold bg-white focus:border-gold">
+                        </div>
+
+                        <!-- ADMIN NOTE -->
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-1 block">Admin Note (Internal)</label>
+                            <textarea id="oe-note" rows="2" placeholder="কাস্টমারের সাথে কথা হয়েছে..." maxlength="500" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium resize-none bg-white focus:border-gold"></textarea>
+                        </div>
+                    </div>
+                </details>
+
+            </div>
+
+            <!-- STICKY FOOTER -->
+            <div class="border-t border-gray-100 p-3 bg-white flex-shrink-0 space-y-2 rounded-b-3xl">
+                <!-- SUMMARY -->
+                <div class="navy-gradient rounded-xl p-3 space-y-1">
+                    <div class="flex justify-between text-[10px] items-baseline">
+                        <span class="text-white/60">Subtotal</span>
+                        <span id="oe-subtotal" class="text-white font-semibold">৳0</span>
+                    </div>
+                    <div class="flex justify-between text-[10px] items-baseline">
+                        <span class="text-white/60">Discount</span>
+                        <span id="oe-discount-display" class="text-red-300 font-semibold">-৳0</span>
+                    </div>
+                    <div class="flex justify-between text-[10px] items-baseline">
+                        <span class="text-white/60">Delivery</span>
+                        <span id="oe-delivery-display" class="text-white font-semibold">৳0</span>
+                    </div>
+                    <div class="flex justify-between items-baseline border-t border-white/20 pt-1.5 mt-1">
+                        <span class="text-white font-bold text-xs">Total</span>
+                        <span id="oe-total" class="text-gold font-bold text-base">৳0</span>
+                    </div>
+                    <div class="flex justify-between text-[10px] items-baseline">
+                        <span class="text-white/60">Advance</span>
+                        <span id="oe-advance-display" class="text-green-300 font-semibold">৳0</span>
+                    </div>
+                    <div class="flex justify-between text-[10px] items-baseline">
+                        <span class="text-white/60">Due</span>
+                        <span id="oe-due" class="text-red-300 font-bold">৳0</span>
+                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="saveOrderEdit()" id="oe-save-btn" class="btn-success py-3.5 rounded-xl font-bold text-sm">
-                        <i class="fas fa-check mr-1"></i> SAVE
+
+                <!-- BUTTONS -->
+                <div class="grid grid-cols-5 gap-2">
+                    <button onclick="confirmDeleteOrder()" class="col-span-2 bg-red-50 active:bg-red-100 text-red-600 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                        <i class="fas fa-trash text-[11px]"></i> Delete
                     </button>
-                    <button onclick="confirmDeleteOrder()" class="btn-danger py-3.5 rounded-xl font-bold text-sm">
-                        <i class="fas fa-trash mr-1"></i> DELETE
+                    <button onclick="saveOrderEdit()" id="oe-save-btn" class="col-span-3 btn-success py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5">
+                        <i class="fas fa-check text-[11px]"></i> Save Changes
                     </button>
                 </div>
             </div>
@@ -558,7 +645,7 @@
         </div>
     </div>
 
-    <!-- PRODUCT MODAL (with Featured + Pin toggles) -->
+    <!-- PRODUCT MODAL -->
     <div id="product-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -572,43 +659,29 @@
                     <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Price (৳) *</label><input type="number" id="p-price" min="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
                     <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Old Price</label><input type="number" id="p-oldprice" min="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
                 </div>
-
                 <div>
                     <div class="flex justify-between items-center mb-1.5">
-                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Categories * (একাধিক সিলেক্ট করা যাবে)</label>
-                        <button type="button" onclick="openInlineCategoryModal()" class="text-gold text-[11px] font-bold">
-                            <i class="fas fa-plus-circle mr-1"></i>New
-                        </button>
+                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Categories *</label>
+                        <button type="button" onclick="openInlineCategoryModal()" class="text-gold text-[11px] font-bold"><i class="fas fa-plus-circle mr-1"></i>New</button>
                     </div>
                     <div id="p-categories-list" class="grid grid-cols-2 gap-1 max-h-40 overflow-y-auto border-2 border-gray-100 rounded-xl p-3 bg-white"></div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Stock Qty</label><input type="number" id="p-stock" value="10" min="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
                     <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Brand</label><input type="text" id="p-brand" maxlength="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
                 </div>
-
                 <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Description</label><textarea id="p-description" rows="3" maxlength="3000" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium resize-none"></textarea></div>
-
-                <!-- FEATURED + PIN TOGGLES -->
                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 space-y-2">
                     <p class="text-[11px] font-bold text-amber-800 uppercase tracking-wider mb-1"><i class="fas fa-star mr-1"></i>Homepage Display</p>
                     <label class="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" id="p-featured" class="w-5 h-5 accent-[#D4A84B]">
-                        <div class="flex-1">
-                            <span class="text-sm font-semibold text-navy">Featured Product</span>
-                            <p class="text-[10px] text-gray-500 mt-0.5">Homepage-এর "Featured Products" section-এ দেখাবে</p>
-                        </div>
+                        <div class="flex-1"><span class="text-sm font-semibold text-navy">Featured Product</span><p class="text-[10px] text-gray-500 mt-0.5">Homepage-এর "Featured Products" section-এ দেখাবে</p></div>
                     </label>
                     <label class="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" id="p-pinned" class="w-5 h-5 accent-[#D4A84B]">
-                        <div class="flex-1">
-                            <span class="text-sm font-semibold text-navy">Pin to Top</span>
-                            <p class="text-[10px] text-gray-500 mt-0.5">Top Selling section-এ সবার আগে দেখাবে</p>
-                        </div>
+                        <div class="flex-1"><span class="text-sm font-semibold text-navy">Pin to Top</span><p class="text-[10px] text-gray-500 mt-0.5">Top Selling section-এ সবার আগে দেখাবে</p></div>
                     </label>
                 </div>
-
                 <div>
                     <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Images * (Max 5)</label>
                     <div id="image-preview-grid" class="grid grid-cols-4 gap-2 my-3"></div>
@@ -806,8 +879,6 @@
         </div>
     </div>
 
-    <!-- ========== REORDER MODALS ========== -->
-
     <!-- CATEGORY REORDER MODAL -->
     <div id="category-reorder-modal" class="hidden fixed inset-0 modal-bg z-[75] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-slide-up">
@@ -816,9 +887,7 @@
                     <h3 class="text-white font-bold text-lg">Reorder Categories</h3>
                     <p class="text-gold text-[11px] mt-0.5">↑↓ দিয়ে ক্রম পরিবর্তন করুন</p>
                 </div>
-                <button onclick="closeCategoryReorder()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button onclick="closeCategoryReorder()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-5" id="category-reorder-list"></div>
         </div>
@@ -832,9 +901,7 @@
                     <h3 class="text-white font-bold text-lg">Reorder Sections</h3>
                     <p class="text-gold text-[11px] mt-0.5">↑↓ দিয়ে ক্রম পরিবর্তন করুন</p>
                 </div>
-                <button onclick="closeSectionReorder()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button onclick="closeSectionReorder()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-5" id="section-reorder-list"></div>
         </div>
@@ -848,9 +915,7 @@
                     <h3 class="text-white font-bold text-lg">Reorder Products</h3>
                     <p class="text-gold text-[11px] mt-0.5">ক্যাটেগরি বেছে ↑↓ দিয়ে সাজান</p>
                 </div>
-                <button onclick="closeProductReorder()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button onclick="closeProductReorder()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-5">
                 <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category</label>
