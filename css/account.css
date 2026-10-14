@@ -1,4 +1,4 @@
-/* ========== ACCOUNT PAGE STYLES ========== */
+/* ========== ACCOUNT PAGE STYLES — Modern Card Design ========== */
 
 body {
     font-family: 'Inter', sans-serif;
@@ -6,22 +6,176 @@ body {
     overflow-x: hidden;
 }
 
-/* Tab buttons (Login / Register) */
-.tab-btn {
-    transition: all 0.2s ease;
-}
+/* Tab buttons */
+.tab-btn { transition: all 0.2s ease; }
 .tab-btn.active {
     background: linear-gradient(135deg, #0A1628, #152238);
     color: white;
 }
 
-/* Input focus */
-input:focus, select:focus {
-    border-color: #D4A84B !important;
+/* Form card */
+.auth-card {
+    background: #FAFAFA;
+    border-radius: 20px;
+    padding: 22px 20px;
 }
-.field-error {
+
+/* Input with icon */
+.input-wrap {
+    position: relative;
+    margin-bottom: 12px;
+}
+.input-wrap .input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #D4A84B;
+    font-size: 16px;
+    pointer-events: none;
+    z-index: 2;
+}
+.input-wrap input {
+    width: 100%;
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px 14px 46px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+}
+.input-wrap input:focus {
+    border-color: #D4A84B;
+    box-shadow: 0 0 0 3px rgba(212,168,75,0.12);
+}
+.input-wrap .eye-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    font-size: 15px;
+    z-index: 2;
+}
+.input-wrap .eye-btn:active { color: #D4A84B; }
+
+/* Field error */
+.field-error input {
     border-color: #dc2626 !important;
     background: #FEF2F2;
+}
+
+/* OR divider */
+.or-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 22px 0;
+    color: #9ca3af;
+    font-size: 13px;
+    font-weight: 600;
+}
+.or-divider::before,
+.or-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+}
+
+/* Primary button */
+.btn-primary-lg {
+    width: 100%;
+    background: linear-gradient(135deg, #0A1628, #152238);
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px;
+    border-radius: 12px;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+}
+.btn-primary-lg:active { transform: scale(0.98); }
+.btn-primary-lg:disabled { opacity: 0.6; }
+
+/* Gold button (for register) */
+.btn-gold-lg {
+    width: 100%;
+    background: linear-gradient(135deg, #D4A84B, #E8C77B);
+    color: #0A1628;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px;
+    border-radius: 12px;
+    transition: all 0.2s;
+}
+.btn-gold-lg:active { transform: scale(0.98); }
+.btn-gold-lg:disabled { opacity: 0.6; }
+
+/* Social login buttons */
+.social-btn {
+    width: 52px;
+    height: 52px;
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.social-btn:active { transform: scale(0.94); }
+.social-btn:hover { border-color: #D4A84B; }
+
+/* Remember me + Forgot */
+.remember-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 8px 0 14px;
+    font-size: 12.5px;
+}
+.remember-row label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #4b5563;
+    cursor: pointer;
+}
+.remember-row input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: #D4A84B;
+    cursor: pointer;
+}
+.remember-row a {
+    color: #D4A84B;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+/* Register prompt */
+.register-prompt {
+    text-align: center;
+    color: #6b7280;
+    font-size: 13px;
+    margin-top: 18px;
+}
+.register-prompt a {
+    color: #D4A84B;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 /* Order status badges */
@@ -31,7 +185,7 @@ input:focus, select:focus {
 .status-delivered { background: #D1FAE5; color: #065F46; }
 .status-cancelled { background: #FEE2E2; color: #991B1B; }
 
-/* Force Inter on all numbers */
+/* Numbers in Inter */
 #wishlist-count,
 #cart-count-text,
 #cart-count-header {
