@@ -1,0 +1,28 @@
+/* ========== MESSAGES PAGE STYLES ========== */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #F5F5F7;
+}
+
+/* Message card */
+.msg-card {
+    transition: all 0.15s ease;
+}
+.msg-card:active {
+    transform: scale(0.99);
+}
+
+/* Unread indicator dot */
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    background: #dc2626;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Inputs */
+input:focus {
+    border-color: #D4A84B !important;
+}
