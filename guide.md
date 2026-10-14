@@ -1,42 +1,60 @@
-# 📖 Heartix — Master Guide v3.0 (Complete Reference)
+# 📖 Heartix — Master Guide v4.0
 
-**Version:** 3.0
-**Last Updated:** 15 October 2025
+**Version:** 4.0
+**Last Updated:** 15 October 2025, 5:00 AM
 **Live Site:** heartix.vercel.app
-**Status:** Phase 0 ✅ + Phase 1 ✅ সম্পূর্ণ | Phase 2 পরবর্তী
+**Status:** Phase 0 ✅ + Phase 1 ✅ | Phase 2 পরবর্তী
 **Maintainer:** Developer + Claude AI
 **Purpose:** Single source of truth — যেকোনো AI সাথে সাথে কাজ বুঝতে পারবে
 
 ---
 
-# 🎯 PART 1: Project পরিচিতি
+# 📋 PART 1: এই Guide কীভাবে পড়বেন
+
+## এই Guide পড়ার Order
+1. **Part 2** — Project পরিচিতি (কী সাইট, tech stack)
+2. **Part 3** — বর্তমান অবস্থা (কী হয়েছে, কী বাকি)
+3. **Part 4** — File Structure + Identification (কোন file কোথায়)
+4. **Part 5** — Firebase Structure
+5. **Part 6** — বাকি কাজের Plan
+6. **Part 7-9** — Rules, Security, Recovery
+7. **Part 10** — Quick Reference
+
+## যদি আপনি নতুন AI হন
+- **File এলোমেলো হলে** → Part 4-এর "File Identification" দেখুন
+- **User কিছু চাইলে** → Part 6 দেখে priority বুঝুন
+- **Error হলে** → Part 9 দেখুন
+- **কোনো function খুঁজলে** → Part 10 দেখুন
+
+---
+
+# 🎯 PART 2: Project পরিচিতি
 
 ## Heartix কী?
-বাংলাদেশের প্রিমিয়াম স্মার্ট অ্যাপ্লায়েন্স ই-কমার্স সাইট। Full stack: HTML + Tailwind CSS + Vanilla JS + Firebase (Firestore + Auth) + Cloudinary (images) + Vercel (hosting)।
+বাংলাদেশের প্রিমিয়াম স্মার্ট অ্যাপ্লায়েন্স ই-কমার্স সাইট।
 
-## Core Stack
-| Component | Technology | Cost |
-|-----------|-----------|------|
-| Frontend | HTML5, Tailwind CSS (CDN), Vanilla JS (ES Modules) | ফ্রি |
-| Backend | Firebase Firestore + Auth | ফ্রি (Spark) |
-| Images | Cloudinary (unsigned upload) | ফ্রি |
-| Hosting | Vercel | ফ্রি |
-| Icons | Font Awesome 6 (CDN) | ফ্রি |
-| Fonts | Inter + Playfair Display (Google) | ফ্রি |
+## Tech Stack (সব ফ্রি)
+| Component | Tech |
+|-----------|------|
+| Frontend | HTML5 + Tailwind CSS (CDN) + Vanilla JS (ES Modules) |
+| Backend | Firebase Firestore + Auth |
+| Images | Cloudinary (unsigned upload) |
+| Hosting | Vercel |
+| Icons | Font Awesome 6 (CDN) |
+| Fonts | Inter + Playfair Display (Google) |
 
-## Brand Colors
-```
-Navy:  #0A1628 (primary dark)
-Gold:  #D4A84B (accent)
-Cream: #FBF8F3 (background)
-Green: #16a34a (success)
-Red:   #dc2626 (danger)
-```
+## Colors
+- Navy: `#0A1628` (primary)
+- Gold: `#D4A84B` (accent)
+- Cream: `#FBF8F3` (background)
+- Green: `#16a34a` (success)
+- Red: `#dc2626` (danger)
 
 ## Font Rules (গুরুত্বপূর্ণ!)
 - **Body/UI:** Inter
-- **Headings/Titles:** Playfair Display (font-display class)
-- **Numbers (Price/Total):** **Inter Bold (কখনো Playfair নয়!)** — এটা critical। `css/cart.css`, `css/checkout.css`-এ `#subtotal`, `#total`, `.price-per-item` ইত্যাদিতে `font-family: 'Inter' !important` দেওয়া আছে।
+- **Headings:** Playfair Display (`font-display` class)
+- **Numbers (Price/Total):** **Inter Bold** — **Playfair NEVER!**
+  - এই rule `css/cart.css`, `css/checkout.css`, `css/account.css`-এ force করা আছে `!important` দিয়ে
 
 ## Firebase Config
 - Project ID: `heartix`
@@ -47,179 +65,180 @@ Red:   #dc2626 (danger)
 
 ---
 
-# 📊 PART 2: বর্তমান অবস্থা
+# 📊 PART 3: বর্তমান অবস্থা
 
-## ✅ Phase 0: Modular File Structure — সম্পূর্ণ
-সব page-এর inline CSS/JS সরিয়ে আলাদা ফাইলে। **৪৩টা ফাইল** (১৭ HTML, ১২ CSS, ১৪ JS)।
+## ✅ সম্পূর্ণ ফেজ
 
-## ✅ Phase 1: Reorder System — সম্পূর্ণ
-- Category Reorder (↑↓ buttons, modal)
-- Section Reorder (↑↓ buttons, modal)
+### Phase 0: Modular File Structure — সম্পূর্ণ ✅
+সব page-এর inline CSS/JS সরিয়ে আলাদা ফাইলে নেওয়া। **৪৮টা ফাইল** (১৮ HTML, ১২ CSS, ১৬ JS, 2 MD)।
+
+### Phase 1: Reorder System — সম্পূর্ণ ✅
+- Category Reorder (↑↓ modal)
+- Section Reorder (↑↓ modal)
 - Product Reorder within category
-- Featured Selection (toggle in product modal)
-- Pin to Top (toggle in product modal)
+- Featured Selection (product modal-এ toggle)
+- Pin to Top (product modal-এ toggle)
 
-## 🆕 নতুন Features (Phase 0-এ যোগ হয়েছে)
+---
 
-### 1. Multi-Category Support
-- Product-এ একাধিক category: `categories: ["TV", "Gadget"]`
-- Backward compatible: পুরনো `category: "TV"` ও কাজ করে
-- Admin checkbox list, home filter multi-cat অনুযায়ী
+## 🆕 নতুন Features (সবচেয়ে সাম্প্রতিক)
 
-### 2. Inline Category Creation
-Product modal-এ **"+ New"** → quick add, auto-checked হয়ে যায়
+### ১. Multi-Category Products
+- একটি প্রোডাক্টে একাধিক category
+- `categories: ["TV", "Gadget"]` array
+- Backward compatible: পুরনো `category: "TV"` string-ও কাজ করে
+- Admin checkbox list, Home filter multi-cat
 
-### 3. Repeat Customer System
+### ২. Inline Category Creation
+Product modal-এ **"+ New"** → popup → save → auto-checked
+
+### ৩. Repeat Customer System
 - ২য় order-এ profile থেকে auto-fill popup
-- Popup: last order info + tracking link + history link
+- Popup: last order + tracking + history link
 - Admin-এ **"Repeat (N)"** badge
-- `customer.isRepeat`, `customer.orderCount`, `customer.previousOrderNumbers`
 
-### 4. IP Tracking (Flag only — block না)
-- Order-এ `customer.ipAddress` save
-- Same IP different phone → `customer.flagged: true`, `flagReason: "same_ip_recent"`
+### ৪. IP Tracking (Flag only)
+- `customer.ipAddress` save
+- Same IP + different phone → `flagged: true`
 - Admin-এ **"Same IP"** (কমলা) badge
-- CG-NAT সমস্যা এড়াতে block করা হয় না
 
-### 5. 10-Minute Warning
-- ১০ মিনিটের ভেতরে ২য় order → warning popup
-- Customer Continue করতে পারে (hard block না)
-- **Back button trap**: modal খোলা থাকলে back চাপলে re-push state → bypass impossible
-- "বাতিল" চাপলে phone field clear → আবার লিখতে হয়
+### ৫. ১০ মিনিট Warning + Back Trap
+- ১০ মিনিটে ২য় order → popup (block না)
+- **Back button trap** — modal খোলা থাকলে back কাজ করে না
 
-### 6. Account Address Save
-- Name, Phone, Address, District, Thana save
-- View/Edit mode toggle (professional card design)
-- Empty field: "Add your address" (italic ধূসর)
-- Filled: bold text
+### ৬. Account Address Save
+- Name, Phone, Address, District, Thana
+- View/Edit toggle (professional card design)
 
-### 7. Checkout Auto-fill
-- Logged-in customer checkout-এ গেলে profile থেকে সব field auto-fill
-- Toast: "আপনার saved তথ্য অটো-ফিল করা হয়েছে ✅"
+### ৭. Checkout Auto-fill
+- Logged-in user checkout-এ গেলে profile থেকে auto-fill
 
-### 8. Google Sign-in
+### ৮. Google Sign-in
 - Firebase Console-এ enabled
-- Account page-এ ৪-রঙের G logo button
-- First-time user: Firestore `customers/{uid}` auto-create
+- ৪-রঙের Google logo
 
-### 9. Remember Me + Password Eye
-- Login-এ Remember me checkbox → localStorage
-- Password field-এ eye toggle
+### ৯. Remember Me + Password Eye
+- localStorage-এ identifier
+- Password দেখার toggle
 
-### 10. Phone-based Login
+### ১০. Phone-based Login
 - Email বা Phone দুটোই
-- Phone দিলে Firestore query করে email বের করে
+- Phone → Firestore lookup → email
 
-### 11. Wishlist Auto-Cleanup
-- Delete হওয়া product ID auto-remove
-- Badge সবসময় accurate
+### ১১. Wishlist Auto-Cleanup
+- Delete হওয়া product auto-remove
 
-### 12. District/Thana Optional
+### ১২. District/Thana Optional
 - Checkout-এ mandatory না
-- Account-এ save করলে auto-fill হবে
 
-### 13. Atomic Order Transaction
-- Server-authoritative pricing
-- Stock check + deduct transaction-এ
-- Coupon double-validate
+### ১৩. Atomic Order Transaction
+- Server-side price validation
+- Stock check + deduct এক transaction-এ
 
-### 14. Compact Collapsible Order Cards (Admin)
-- `<details>`/`<summary>` দিয়ে expand/collapse
-- Compact view: Order# + Status + Customer + Date + Badges + Items + Total
-- Expanded: Address + Items with images + Payment breakdown + Actions
-- Chevron rotate animation
+### ১৪. Compact Collapsible Order Cards
+- `<details>`/`<summary>` দিয়ে
+- Compact view → expanded on tap
 
-### 15. Product Reorder + Featured + Pin
-- `sortOrder` field per product
+### ১৫. Custom Delete Modal + Smart Stock Restore
+- Navy/Red branded design
+- Status অনুযায়ী:
+  - `pending`/`confirmed`/`shipped` → **Stock restore** ✅
+  - `delivered`/`cancelled` → **No restore** ❌
+
+### ১৬. Editable Order Edit Panel
+- Customer info editable (Name, Phone, Address, District, Thana)
+- Discount/Delivery/Advance **real-time total update**
+- Original values দেখা যায় ("Orig: ৳X")
+- Collapsible sections (Compact design)
+- Sticky footer summary
+- Back button trap
+
+### ১৭. Featured + Pin to Top
 - `featured: bool` → Home-এ Featured section
 - `pinned: bool` → Top Selling-এ সবার আগে
-- Home sort: pinned → sortOrder → name
+- Sort order: `pinned → sortOrder → name`
 
 ---
 
-## 🐛 Bug Fixes (Phase 0-এ)
-1. Image undefined issue
-2. Star rating half-star logic
-3. Copy order number (clipboard fallback)
-4. Cart tampering (server pricing)
-5. XSS in hero banners (`safeHeroTitle`)
-6. Category scroll pause on touch
-7. Status badge override
-8. Cart price exploit
-9. Google logo broken SVG
-10. Font mix (Playfair on numbers → Inter force)
-11. Apply button overflow in cart
-12. Google sign-in enabled + domain authorized
+## 🐛 Bug Fixes (Phase 0-তে)
+1-12 (আগের guide থেকে)
+13. Google logo broken SVG (fixed)
+14. Playfair font on numbers → Inter force
+15. Apply button overflow in cart
+16. Cart badge wrong count (wishlist cleanup)
+17. Delete stock restore issue → Smart restore
+18. Order edit real-time total update
+19. Back button → Messages navigation trap
 
 ---
 
-# 📁 PART 3: সম্পূর্ণ File Structure
+# 📁 PART 4: সম্পূর্ণ File Structure
 
-## Root Level HTML Files
-```
-/index.html               → Home (hero, categories, products, featured, dynamic sections)
-/product.html             → Product detail (gallery, reviews, related, cart)
-/cart.html                → Cart (items, coupon, summary)
-/checkout.html            → Checkout (address, payment, order, repeat popups)
-/account.html             → Auth + Profile (login, register, google, view/edit)
-/wishlist.html            → Saved products
-/contact.html             → Contact form + settings cards
-/order-success.html       → Post-order (copy, whatsapp)
-/track-order.html         → Order tracking (timeline, payment breakdown)
-/admin.html               → Admin panel (8 tabs)
-/messages.html            → Admin inbox
-/about.html               → Static
-/faq.html                 → Static
-/terms.html               → Static
-/privacy.html             → Static
-/return-policy.html       → Static
-/landing.html             → ⏳ TODO
-/moderator.html           → ⏳ TODO
-/logo.png                 → Logo
-/README.md                → Summary
-/guide.md                 → এই ফাইল
-```
+## Root HTML Files
 
-## CSS Files (`css/` folder)
+| File | Purpose | CSS | JS |
+|------|---------|-----|-----|
+| `index.html` | Home — hero, categories, products, featured | common.css, index.css | index.js |
+| `product.html` | Product detail — gallery, reviews, related | common.css, product.css | product.js |
+| `cart.html` | Cart — items, coupon, summary | common.css, cart.css | cart.js |
+| `checkout.html` | Checkout — address, payment, order | common.css, checkout.css | checkout.js |
+| `account.html` | Auth + Profile + Orders | common.css, account.css | account.js |
+| `wishlist.html` | Saved products | common.css, wishlist.css | wishlist.js |
+| `contact.html` | Contact form | common.css, contact.css | contact.js |
+| `order-success.html` | Post-order | common.css, order-success.css | order-success.js |
+| `track-order.html` | Order tracking | common.css, track-order.css | track-order.js |
+| `admin.html` | Admin panel (8 tabs) | common.css, admin.css | admin-reorder.js + admin.js |
+| `messages.html` | Admin inbox | common.css, messages.css | messages.js |
+| `about.html` | Static | common.css | inline |
+| `faq.html` | Static | common.css | inline |
+| `terms.html` | Static | common.css | inline |
+| `privacy.html` | Static | common.css | inline |
+| `return-policy.html` | Static | common.css | inline |
+| `landing.html` | ⏳ TODO | — | — |
+| `moderator.html` | ⏳ TODO | — | — |
 
-| File | Loaded by | Contains |
-|------|-----------|----------|
-| `common.css` | **সব page** | body, navy-gradient, gold-gradient, gold-text, navy-text, glass, premium-shadow, hide-scrollbar, toast (slideDown animation), shimmer, spin, animate-slide-up, animate-fade-in, input focus |
-| `index.css` | index.html | #search-bar-wrapper, .qty-control, .add-cart-btn, .category-card, .slider-viewport, .slider-track, .product-card, #floating-cart, .wishlist-btn, #search-suggestions, .suggestion-item, .error-box |
-| `product.css` | product.html | .thumb-item, .qty-control, .action-btn, .prod-img, .wishlist-btn-lg |
-| `cart.css` | cart.html | .prod-img, .coupon-input, **number fonts force Inter** (price-per-item, price-line-total, #subtotal, #discount-amount, #delivery-charge, #total, #free-delivery-amount) |
-| `checkout.css` | checkout.html | .payment-option, .payment-option.selected, .check-circle, .field-error, number fonts force Inter |
-| `account.css` | account.html | .tab-btn, .input-wrap, .input-icon, .eye-btn, .or-divider, .btn-primary-lg, .btn-gold-lg, .social-btn, .remember-row, .register-prompt, .status-* badges, **.info-view-item, .info-view-item.empty, .info-view-item .info-icon, .info-edit-input, .info-edit-label** |
-| `wishlist.css` | wishlist.html | .prod-img, .add-cart-btn, .qty-control |
-| `contact.css` | contact.html | .contact-item, input focus |
-| `order-success.css` | order-success.html | .pop, .fade-up, .delay-1/2/3/4 |
-| `track-order.css` | track-order.html | .timeline-step, .timeline-step.done, .timeline-step.active, .dot, status badges |
-| `admin.css` | admin.html | .modal-bg, .img-thumb, .cat-preview, .nav-item, .nav-item.active, .toast variants (success/error/warn/info), .order-status, .status-* badges, .btn-primary, .btn-gold, .btn-danger, .btn-success, .cat-card, .order-item-row, .coupon-card, @media (desktop sidebar/mobile bottom) |
-| `messages.css` | messages.html | .msg-card, .unread-dot |
+## CSS Files (`css/`)
 
-## JS Files (`js/` folder)
+| File | Used by | Unique Classes |
+|------|---------|----------------|
+| `common.css` | **সব page** | `.navy-gradient`, `.gold-gradient`, `.glass`, `.premium-shadow`, `.toast-bar`, `.shimmer`, `#toast-container` |
+| `index.css` | index.html | `#search-bar-wrapper`, `.slider-viewport`, `.category-card`, `.product-card`, `#floating-cart`, `.wishlist-btn`, `#search-suggestions`, `.qty-control`, `.add-cart-btn` |
+| `product.css` | product.html | `.thumb-item`, `.wishlist-btn-lg`, `.action-btn`, `.prod-img` |
+| `cart.css` | cart.html | `.price-per-item`, `.price-line-total`, `.coupon-input` + number font forces |
+| `checkout.css` | checkout.html | `.payment-option`, `.check-circle`, `.field-error` |
+| `account.css` | account.html | `.tab-btn`, `.input-wrap`, `.input-icon`, `.eye-btn`, `.or-divider`, `.social-btn`, `.info-view-item`, `.info-edit-input` |
+| `wishlist.css` | wishlist.html | `.add-cart-btn`, `.qty-control` |
+| `contact.css` | contact.html | `.contact-item` |
+| `order-success.css` | order-success.html | `.pop`, `.fade-up`, `.delay-1/2/3/4` |
+| `track-order.css` | track-order.html | `.timeline-step`, `.timeline-step.done`, `.timeline-step.active`, `.dot` |
+| `admin.css` | admin.html | `.modal-bg`, `.img-thumb`, `.cat-preview`, `.nav-item`, `.order-status`, `.cat-card`, `.order-item-row`, `.coupon-card`, `.btn-primary/gold/danger/success`, `.toast` variants |
+| `messages.css` | messages.html | `.msg-card`, `.unread-dot` |
 
-| File | Type | Contains |
-|------|------|----------|
-| `firebase.js` | module | firebaseConfig, initializeApp, `db`, `auth` export |
-| `common.js` | module | showToast, escapeHtml, formatPrice, getCart, saveCart, getQtyInCart, getWishlist, saveWishlist, isInWishlist, getRecentlyViewed, addToRecentlyViewed, updateCartBadges, updateWishlistBadges, validatePhone, generateOrderNumber |
-| `districts.js` | module | `DISTRICTS` array (64 জেলা) |
-| `index.js` | module | Home logic: hero slider, categories, products, search, wishlist, cart, recently viewed, **dynamic sections (Featured + Custom + Testimonials)** |
-| `product.js` | module | Product detail, image gallery, reviews, related, cart/wishlist |
-| `cart.js` | module | Cart render, coupon apply/remove, stock validation, qty change, clear, move to wishlist |
-| `checkout.js` | module | Order place (transaction), **repeat customer popup**, **IP tracking**, **auto-fill from profile**, **back trap**, payment info, district dropdown |
-| `account.js` | module | Login, register, Google Sign-in, forgot password, profile view/edit (address), My Orders, district dropdown |
-| `wishlist.js` | module | Wishlist render, cart integration, **auto-cleanup of invalid IDs**, wishlist badge sync |
-| `contact.js` | module | Contact form submit, settings load, char counter |
-| `order-success.js` | module | Copy order number, WhatsApp link from settings |
-| `track-order.js` | module | Order lookup, timeline, item list, payment breakdown, copy |
-| `admin.js` | module | Auth, Products (CRUD + featured + pinned + sortOrder), Orders (compact cards + edit + status), Coupons, Categories, Content (Hero/Sections/Banners/Testimonials), Settings, Messages badge, CSV export, **CSS injection for `<details>` cleanup** |
-| `admin-reorder.js` | module | Category Reorder, Section Reorder, **Product Reorder** (all with ↑↓ + Firestore save) |
-| `messages.js` | module | Admin auth, message list, filters, detail modal, mark read, delete, reply links |
+## JS Files (`js/`)
 
-## File Identification Guide (এলোমেলো হলে)
+| File | Used by | Unique Functions |
+|------|---------|------------------|
+| `firebase.js` | সব JS (import) | exports: `db`, `auth` |
+| `common.js` | সব JS (import) | `showToast`, `escapeHtml`, `formatPrice`, `getCart`, `saveCart`, `getWishlist`, `saveWishlist`, `updateCartBadges`, `updateWishlistBadges`, `validatePhone`, `generateOrderNumber` |
+| `districts.js` | checkout.js, account.js, admin.js | exports: `DISTRICTS` (64) |
+| `index.js` | index.html | `renderHeroBanners`, `renderCategories`, `renderProducts`, `renderDynamicContent`, `renderRecentlyViewed`, `filterByCategory`, `toggleSearch`, `addToCart`, `toggleWishlist`, `goSlide` |
+| `product.js` | product.html | `renderProduct`, `renderReviews`, `submitReview`, `renderRelated`, `setMainImage`, `nextImage`, `prevImage`, `buyNow`, `shareProduct` |
+| `cart.js` | cart.html | `renderCart`, `applyCoupon`, `removeCoupon`, `changeQty`, `removeItem`, `clearCart`, `moveToWishlist`, `proceedToCheckout` |
+| `checkout.js` | checkout.html | `placeOrder`, `showRepeatModal`, `showWarningModal`, `showHistoryModal`, `cancelFromWarning`, `continueFromWarning`, `autoFillFromOrder`, `handlePopState` |
+| `account.js` | account.html | `loginUser`, `registerUser`, `googleSignIn`, `forgotPassword`, `logoutUser`, `saveProfile`, `loadMyOrders`, `openAddressEdit`, `cancelAddressEdit`, `togglePassword` |
+| `wishlist.js` | wishlist.html | `renderWishlist`, `cleanupInvalidWishlist`, `addToCart`, `removeFromWishlist` |
+| `contact.js` | contact.html | `submitContactForm`, `loadSettings`, `applySettings` |
+| `order-success.js` | order-success.html | `copyOrderNumber`, `loadSettings` |
+| `track-order.js` | track-order.html | `trackOrder`, `renderOrder`, `copyOrderNumber` |
+| `admin.js` | admin.html | `renderAdminOrders`, `renderAdminProducts`, `openAddModal`, `saveProduct`, `openOrderEdit`, `saveOrderEdit`, `confirmDeleteOrder`, `executeDelete`, `openCategoryModal`, `saveCategory`, `openInlineCategoryModal`, `openCouponModal`, `saveCoupon`, `openHeroModal`, `openSectionModal`, `openBannerModal`, `openTestimonialModal`, `saveSettings`, `exportOrdersCSV`, `filterOrders`, `openStatusPicker`, `selectStatus`, `confirmStatusChange`, `recalcOrderEdit`, `validatePhone`, `populateOeDistrictDropdown` |
+| `admin-reorder.js` | admin.html | `openCategoryReorder`, `moveCategoryUp`, `moveCategoryDown`, `openSectionReorder`, `moveSectionUp`, `moveSectionDown`, `openProductReorder`, `changeReorderCategory`, `moveProductUp`, `moveProductDown`, `saveProductSortOrder` |
+| `messages.js` | messages.html | `loadMessages`, `filterMessages`, `openDetail`, `closeDetail`, `deleteCurrentMessage` |
 
-### HTML চেনার উপায় (`<title>` tag)
+## File Identification Guide ⭐ (সবচেয়ে গুরুত্বপূর্ণ!)
+
+### HTML চেনার সহজ নিয়ম
+
+**১. Title tag দেখুন:**
 | Title | File |
 |-------|------|
 | Heartix — Premium Smart Appliances | index.html |
@@ -239,157 +258,133 @@ Product modal-এ **"+ New"** → quick add, auto-checked হয়ে যায
 | Privacy Policy - Heartix | privacy.html |
 | Return Policy - Heartix | return-policy.html |
 
-### HTML-এর শেষ লাইন (script src)
-```
-<script type="module" src="js/index.js"></script>           → index.html
-<script type="module" src="js/product.js"></script>         → product.html
-<script type="module" src="js/cart.js"></script>            → cart.html
-<script type="module" src="js/checkout.js"></script>        → checkout.html
-<script type="module" src="js/account.js"></script>         → account.html
-<script type="module" src="js/wishlist.js"></script>        → wishlist.html
-<script type="module" src="js/contact.js"></script>         → contact.html
-<script type="module" src="js/order-success.js"></script>   → order-success.html
-<script type="module" src="js/track-order.js"></script>     → track-order.html
-<script type="module" src="js/admin-reorder.js"></script>   → admin.html (first)
-<script type="module" src="js/admin.js"></script>           → admin.html (second)
-<script type="module" src="js/messages.js"></script>        → messages.html
-```
+**২. শেষের `<script>` দেখুন:**
+- `<script type="module" src="js/admin-reorder.js">` + `js/admin.js` → **admin.html**
+- `<script type="module" src="js/index.js">` → **index.html**
+- `<script type="module" src="js/checkout.js">` → **checkout.html**
+- ইত্যাদি
 
-### JS চেনার উপায় (প্রথম import দেখুন)
-```js
-import { db, auth } from './firebase.js'  → Firebase ব্যবহার করে
-import { ... } from './common.js'         → common helpers
-import { DISTRICTS } from './districts.js' → district list
-```
+**৩. Unique HTML element দেখুন:**
+- `id="order-number"` → order-success.html
+- `id="timeline"` → track-order.html
+- `id="category-reorder-modal"` → admin.html
+- `id="my-orders-list"` → account.html
+- `id="cart-items"` → cart.html
+- `id="search-bar-wrapper"` → index.html
 
-### JS চেনার সহজ উপায় (unique function)
+### CSS চেনার সহজ নিয়ম
+
+**Unique class/id:**
+| Class/ID | CSS file |
+|----------|----------|
+| `#search-bar-wrapper`, `.slider-viewport` | index.css |
+| `.wishlist-btn-lg`, `.thumb-item` | product.css |
+| `.price-per-item`, `.price-line-total` | cart.css |
+| `.payment-option`, `.check-circle` | checkout.css |
+| `.info-view-item`, `.input-wrap` | account.css |
+| `.timeline-step` | track-order.css |
+| `.nav-item`, `.modal-bg`, `.cat-preview` | admin.css |
+| `.msg-card`, `.unread-dot` | messages.css |
+| `.contact-item` | contact.css |
+| `.pop`, `.fade-up` | order-success.css |
+| `.navy-gradient`, `.gold-gradient`, `.toast-bar` | **common.css** |
+
+### JS চেনার সহজ নিয়ম
+
+**First import দেখুন:**
+- `import { db, auth } from './firebase.js'` → Firebase use করে
+- `import { DISTRICTS } from './districts.js'` → district list দরকার
+- `import { getCart, saveCart } from './common.js'` → common helpers
+
+**Unique function নাম:**
 | Function | JS file |
 |----------|---------|
-| `renderAdminOrders`, `renderAdminProducts`, `openAddModal` | admin.js |
-| `openCategoryReorder`, `openProductReorder` | admin-reorder.js |
-| `addToCart` + `renderHeroBanners` + `renderDynamicContent` | index.js |
+| `renderHeroBanners` + `renderDynamicContent` | index.js |
 | `renderProduct` + `submitReview` | product.js |
 | `applyCoupon` + `proceedToCheckout` | cart.js |
 | `placeOrder` + `showWarningModal` | checkout.js |
-| `loginUser` + `googleSignIn` + `saveProfile` + `openAddressEdit` | account.js |
+| `loginUser` + `googleSignIn` + `openAddressEdit` | account.js |
 | `trackOrder` + `renderOrder` | track-order.js |
 | `copyOrderNumber` | order-success.js |
+| `openCategoryReorder` + `moveCategoryUp` | admin-reorder.js |
+| `renderAdminOrders` + `executeDelete` | admin.js |
 | `loadMessages` + `openDetail` | messages.js |
 | `submitContactForm` | contact.js |
+| `cleanupInvalidWishlist` | wishlist.js |
 
-### CSS চেনার উপায় (unique class)
-| Class/ID | CSS file |
-|----------|----------|
-| `#search-bar-wrapper`, `.slider-viewport`, `#floating-cart` | index.css |
-| `.thumb-item`, `.wishlist-btn-lg` | product.css |
-| `#total`, `.price-per-item` (Inter force) | cart.css |
-| `.payment-option`, `#checkout-subtotal` | checkout.css |
-| `.info-view-item`, `.input-wrap`, `.social-btn` | account.css |
-| `.timeline-step` | track-order.css |
-| `.nav-item`, `.modal-bg`, `.order-status`, `.cat-preview` | admin.css |
-| `.msg-card` | messages.css |
-| `.contact-item` | contact.css |
-| `.pop`, `.fade-up` | order-success.css |
-| `.tab-btn` (in account) | account.css |
+### User Confused হলে কী জিজ্ঞেস করবেন
+1. "File-এর প্রথম লাইন কী?" (title/import)
+2. "File-এর শেষে কোন script tag আছে?"
+3. "কোনো unique button/function-এর নাম দেখতে পাচ্ছেন?"
+4. "File-টা কী কাজ করে বলে মনে হচ্ছে?"
 
 ---
 
-# 🗄️ PART 4: Firebase Structure
+# 🗄️ PART 5: Firebase Structure
 
-## Firestore Collections
+## Collections
 
 ### `products`
 ```js
 {
-  id: auto,
-  name: string,
-  price: number,
-  oldPrice: number | 0,
-  category: string,           // legacy — first category
-  categories: string[],       // new — multi-category
-  stock: number,
-  brand: string,
-  description: string,
-  image: string,              // main image
-  images: string[],           // all images (max 5)
-  sortOrder: number,          // NEW — for reorder
-  featured: boolean,          // NEW — Featured on home
-  pinned: boolean,            // NEW — Pin to top
-  createdAt: timestamp
+  id, name, price, oldPrice,
+  category: string,          // legacy
+  categories: string[],      // new multi
+  stock, brand, description,
+  image, images: string[],
+  sortOrder: number,         // reorder
+  featured: boolean,         // home-এ দেখাবে
+  pinned: boolean,           // top-এ দেখাবে
+  createdAt
 }
 ```
 
 ### `orders`
 ```js
 {
-  id: auto,
-  orderNumber: string,        // "HX261015ABCD12"
+  id, orderNumber,           // "HX261015ABCD12"
   customer: {
     name, phone, email, address, district, thana,
-    ipAddress: string,             // NEW
-    isRepeat: boolean,             // NEW
-    orderCount: number,            // NEW (1 = first time)
-    previousOrderNumbers: string[],// NEW (max 5)
-    flagged: boolean,              // NEW — same IP detected
-    flagReason: string             // "same_ip_recent" | ""
+    ipAddress, isRepeat, orderCount,
+    previousOrderNumbers, flagged, flagReason
   },
   items: [{ id, name, price, quantity, image }],
   subtotal, discount, couponCode,
   deliveryCharge, total,
-  paymentMethod,              // 'full-cod' | 'delivery-advance' | 'full-online'
+  paymentMethod,             // 'full-cod'|'delivery-advance'|'full-online'
   advancePaid, dueAmount,
-  status,                     // 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled'
-  stockDeducted: boolean,
-  adminNote: string,
-  createdAt: timestamp
+  status,                    // 'pending'|'confirmed'|'shipped'|'delivered'|'cancelled'
+  stockDeducted, adminNote,
+  createdAt
 }
 ```
 
 ### `coupons`
 ```js
-{
-  code: string (doc ID — uppercase),
-  description, type,          // 'percentage' | 'fixed'
-  value, minOrder, maxUses,
-  usedCount, expiry, active,
-  createdAt, updatedAt
-}
+{ code (docID), description, type, value, minOrder, maxUses, usedCount, expiry, active, createdAt, updatedAt }
 ```
 
 ### `customers`
 ```js
-{
-  uid, name, phone, email,
-  address, district, thana,   // NEW — for checkout auto-fill
-  photoURL, provider,         // 'email' | 'google'
-  createdAt, updatedAt
-}
+{ uid, name, phone, email, address, district, thana, photoURL, provider, createdAt, updatedAt }
 ```
 
-### `messages` (Contact form)
+### `messages`
 ```js
-{
-  name, contact, subject, message,
-  read: boolean, createdAt: timestamp
-}
+{ name, contact, subject, message, read, createdAt }
 ```
 
 ### `reviews`
 ```js
-{
-  productId, name, rating (1-5), text,
-  createdAt: timestamp
-}
+{ productId, name, rating, text, createdAt }
 ```
 
-### `settings/main` (single doc)
+### `settings/main`
 ```js
 {
-  deliveryCharge: number,
-  freeDeliveryAbove: number,
+  deliveryCharge, freeDeliveryAbove,
   contactAddress, contactPhone, contactEmail, whatsapp,
-  bkashNumber, nagadNumber,
-  facebook, instagram,
+  bkashNumber, nagadNumber, facebook, instagram,
   categories: [{ key, label, icon }],
   customSections: [{ title, categoryKey }],
   middleBanners: [{ image, link }],
@@ -398,552 +393,395 @@ import { DISTRICTS } from './districts.js' → district list
 }
 ```
 
-### `settings/admins` (single doc)
+### `settings/admins`
 ```js
-{ uids: string[] }   // Admin Firebase Auth UIDs
+{ uids: string[] }
 ```
 
 ## Firestore Indexes (Required)
-- `orders`: `orderNumber` ASC — for track-order query
-- `orders`: `customer.phone` ASC + `createdAt` DESC — for repeat customer lookup
-- `orders`: `customer.ipAddress` ASC + `createdAt` DESC — for IP flag check
-- `reviews`: `createdAt` DESC — for review list
-- `orders`: `createdAt` DESC — for admin order list (default query)
+- `orders`: `orderNumber` ASC
+- `orders`: `customer.phone` ASC + `createdAt` DESC
+- `orders`: `customer.ipAddress` ASC + `createdAt` DESC
+- `orders`: `createdAt` DESC
+- `reviews`: `createdAt` DESC
 
-**Index তৈরি:** Firebase Console → Firestore → Indexes → Composite → এগুলো create করুন। অথবা first query-তে error link আসবে → click → auto-create।
-
-## Firebase Console Setup (সম্পন্ন)
-- ✅ Email/Password Auth enabled
-- ✅ Google Sign-in enabled (public: Heartix, support: twhob71122@gmail.com)
-- ✅ Authorized domain: `heartix.vercel.app`
-- ✅ Firestore rules deployed
-
-## Firestore Rules (public read products, admin write)
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    function isAdmin() {
-      return request.auth != null &&
-        get(/databases/$(database)/documents/settings/admins).data.uids.hasAny([request.auth.uid]);
-    }
-    match /products/{doc} { allow read: if true; allow write: if isAdmin(); }
-    match /reviews/{doc} { allow read: if true; allow create: if true; allow delete: if isAdmin(); }
-    match /orders/{doc} { allow read: if true; allow create: if true; allow update, delete: if isAdmin(); }
-    match /coupons/{doc} { allow read: if true; allow write: if isAdmin(); }
-    match /messages/{doc} { allow create: if true; allow read, update, delete: if isAdmin(); }
-    match /customers/{uid} { allow read, write: if request.auth != null && request.auth.uid == uid; }
-    match /settings/{doc} { allow read: if true; allow write: if isAdmin(); }
-  }
-}
-```
+## Rules Summary
+- Products: public read, admin write
+- Reviews: public read, anyone create, admin delete
+- Orders: public read, anyone create, admin update/delete
+- Coupons: public read, admin write
+- Messages: anyone create, admin read/update/delete
+- Customers: owner read/write, admin read
+- Settings: public read, admin write
 
 ---
 
-# ⬜ PART 5: বাকি কাজ (Priority Order)
+# ⬜ PART 6: বাকি কাজ (Priority Order)
 
-## 🥇 Phase 2: Plug & Play Settings — পরবর্তী (~৪-৫ ঘণ্টা)
-**কেন:** Admin-এর জন্য external integrations সহজে on/off করা
+## 🥇 Phase 2: Plug & Play Settings — পরবর্তী ⏭
+**সময়:** ~৪-৫ ঘণ্টা
+**কেন আগে:** Admin চাইবে সহজে on/off করতে
 
 ### Integration List (সব OFF default)
-1. **SMS (BulkSMSBD)** — Order notification
-2. **Email (SendGrid)** — Order confirmation
-3. **Facebook Pixel** — Ad tracking
-4. **bKash Payment Gateway** — Auto payment
-5. **Nagad Payment Gateway** — Auto payment
-6. **WhatsApp API** — Auto messaging
-7. **Google Analytics** — Site stats
+1. **Google Analytics** — সবচেয়ে সহজ
+2. **Facebook Pixel**
+3. **SMS (BulkSMSBD)** — Vercel serverless
+4. **Email (SendGrid)** — Vercel serverless
+5. **WhatsApp API**
+6. **bKash Payment Gateway**
+7. **Nagad Payment Gateway**
 
-### ⚠️ সতর্কতা
-- **API keys কখনো client-side-এ রাখবেন না** — Vercel Environment Variables ব্যবহার করুন
-- **Serverless functions লাগবে** — Vercel-এ `/api/` folder
-- **প্রতিটা integration-এর জন্য আলাদা file** — `js/integrations/sms.js` ইত্যাদি
-- **Toggle structure:** `settings/main.integrations = { sms: false, email: false, ... }`
+### Pre-work
+- Vercel Environment Variables (API keys)
+- `/api/` folder (serverless functions)
+- `verifyAdmin(uid)` check in serverless
 
-### Estimated Files
-- `admin.html` — Settings tab-এ new section
-- `js/admin.js` — toggle handling
-- `js/integrations/*.js` — 7টা নতুন file
-- `/api/*.js` — Vercel serverless (SMS, Email, Payment)
+### Files to Create
+- `js/integrations/google-analytics.js`
+- `js/integrations/facebook-pixel.js`
+- `js/integrations/sms.js`
+- `js/integrations/email.js`
+- `js/integrations/whatsapp.js`
+- `js/integrations/bkash.js`
+- `js/integrations/nagad.js`
+- `/api/send-sms.js`, `/api/send-email.js`, etc.
 
----
-
-## 🥈 Phase 3: Admin Tools — (~৩-৪ ঘণ্টা)
-
-### Features
-1. **Bulk CSV Upload** — Products একসাথে (PapaParse library)
-2. **Moderator Tab** — Read-only admin access
-3. **Landing Pages Tab** — landing.html track
-4. **Landing Stats** — Facebook campaign tracking
-5. **Bulk Order Update** — multiple orders status
-6. **Inventory Alert** — stock < 5 হলে notification
+## 🥈 Phase 3: Admin Tools — ~৩-৪ ঘণ্টা
+1. Bulk CSV Upload (PapaParse)
+2. Moderator Tab
+3. Landing Pages Tab
+4. Landing Stats
+5. Bulk Order Update
+6. Inventory Alert (stock < 5)
 
 ### Files to Create
 - `moderator.html` + `js/moderator.js`
 - `landing.html` + `js/landing.js`
-- `admin.html`-এ নতুন tab যোগ
+- `js/csv-parser.js`
 
-### ⚠️ সতর্কতা
-- CSV parse-এ encoding issue (UTF-8 BOM)
-- Cloudinary bulk upload-এ rate limit (১ সেকেন্ড delay)
+## 🥉 Phase 4: Analytics — ~৪-৫ ঘণ্টা
+1. Sales Dashboard (Chart.js)
+2. Customer Segmentation
+3. Profit Calculator
+4. Return Rate Tracking
+5. Top Products Report
+6. Monthly Report
 
----
+## 📱 Phase 5: Customer UX — ~৫-৬ ঘণ্টা
+1. PWA Setup
+2. Push Notification
+3. Dark Mode
+4. Reviews with Images
+5. Pre-order System
+6. Product Variants
+7. Product Comparison
 
-## 🥉 Phase 4: Analytics — (~৪-৫ ঘণ্টা)
-
-### Features
-1. **Sales Dashboard** — Chart.js graph (daily/monthly)
-2. **Customer Segmentation** — Repeat vs New
-3. **Profit Calculator** — product-এ `cost` field যোগ
-4. **Return Rate Tracking** — cancelled/total ratio
-5. **Top Products Report** — best sellers
-6. **Monthly Report** — auto email
-
-### ⚠️ সতর্কতা
-- Chart.js CDN যোগ করতে হবে
-- বড় dataset-এ Firestore query slow → aggregation use করুন
-
----
-
-## 📱 Phase 5: Customer UX — (~৫-৬ ঘণ্টা)
-
-### Features
-1. **PWA Setup** — manifest.json + service worker
-2. **Push Notification** — Firebase Cloud Messaging
-3. **Dark Mode** — CSS variables
-4. **Reviews with Images** — Cloudinary upload
-5. **Pre-order System** — out of stock-এও order
-6. **Product Variants** — color, size
-7. **Product Comparison** — side-by-side
-
-### ⚠️ সতর্কতা
-- Dark mode-এ সব hardcoded color পরিবর্তন করতে হবে (সবচেয়ে কষ্টের কাজ!)
-- PWA install prompt সব browser-এ কাজ করে না
+## 🎯 Phase 6: Marketing — ~৫-৬ ঘণ্টা
+1. Abandoned Cart Recovery
+2. Refer & Earn
+3. Loyalty Points
+4. Wishlist Cloud Sync
+5. Spin Wheel
+6. Product Bundle
 
 ---
 
-## 🎯 Phase 6: Marketing — (~৫-৬ ঘণ্টা)
-
-### Features
-1. **Facebook Pixel** (Phase 2-এ করা থাকবে)
-2. **Abandoned Cart Recovery** — email automation
-3. **Refer & Earn** — referral code system
-4. **Loyalty Points** — point earn/redeem
-5. **Wishlist Cloud Sync** — logged-in user
-6. **Spin Wheel** — discount game
-7. **Product Bundle** — multi-product discount
-
-### ⚠️ সতর্কতা
-- Referral code uniqueness (Firestore transaction)
-- Loyalty points calculation server-side হবে
+## Priority: কেন এই order?
+1. **Phase 2** → Admin-এর daily কাজ সহজ, business-critical
+2. **Phase 3** → Bulk operations, moderator
+3. **Phase 4** → Data-driven decision
+4. **Phase 5** → UX improve
+5. **Phase 6** → Marketing (business বাড়লে)
 
 ---
 
-# 🚨 PART 6: ভুল এড়ানোর Rules
+# 🚨 PART 7: Rules (কী করবেন, কী করবেন না)
 
-## General Rules
-1. **কখনো `css/common.css` direct edit করবেন না** — সব page affect করবে
-2. **কখনো `js/firebase.js`-এ config ছাড়া কিছু রাখবেন না**
-3. **সব number-এ `font-family: Inter` force করবেন** — Playfair নয়
-4. **সব user input-এ `escapeHtml()`** — XSS prevention
-5. **Firestore-এ `serverTimestamp()`** — `new Date()` নয়
-6. **Price calculation server-side transaction-এ** — client বিশ্বাস করবেন না
-7. **File paths relative রাখবেন** — `./common.js`, `css/index.css`
-8. **`type="module"` script tag always** — ES6 import-এর জন্য
-9. **Import order:** Firebase → common → districts → other
-10. **প্রতিটা file শেষে `console.log('✅ ...')`** — debug সহজ
+## ✅ সবসময় করুন
+1. `escapeHtml()` — সব user input render-এ
+2. `serverTimestamp()` — Firestore-এ (new Date() নয়)
+3. Transaction — price calculation-এ
+4. Relative paths — `./firebase.js`
+5. `type="module"` — script tag-এ
+6. Cache bypass — test-এ `?v=2`
+7. Console.log — file শেষে (`✅ filename loaded`)
+8. বাংলা message — user-facing error
+9. Number font → **Inter Bold** (Playfair নয়!)
 
-## File Edit করার আগে
-1. GitHub commit history check করুন — rollback সহজ
-2. একবারে একটাই file edit
-3. Local test না করে push না (Vercel preview deploy আগে)
-4. `console.log()` debug শেষে সরান
+## ❌ কখনো করবেন না
+1. `common.css` direct edit (সব page affect)
+2. `firebase.js`-এ config ছাড়া কিছু
+3. API keys client-side-এ
+4. `escapeHtml()` ছাড়া user data render
+5. `eval()` ব্যবহার
+6. Firestore rules-এ `allow if true`
+7. Admin UID manual সরানো
+8. `common.css`/`firebase.js` delete
+9. ৫+ images / product
+10. Stock 0-এ order allow
 
-## Firestore-এ যা করবেন না
-- ❌ Rules-এ `allow read, write: if true`
-- ❌ Admin UID manual সরানো
-- ❌ Test mode production-এ
-- ❌ API keys GitHub-এ commit
-
-## Browser Cache
-- **Test-এর আগে hard refresh** (`Ctrl+Shift+R`)
-- **Vercel deploy-এর পর ২ মিনিট wait**
-- **Mobile-এ cache clear** — Settings → Site data
-- **URL-এ `?v=2` যোগ করুন** — cache bypass
+## File Edit Rules
+- একবারে **একটাই file**
+- **Commit history** check আগে
+- **Local test** না করে push না
+- **Full file content** দিন (patch নয়) — User মোবাইলে খোঁজে না
 
 ---
 
-# 🔐 PART 7: Security Checklist
+# 🔐 PART 8: Security
 
 ## ✅ যা আছে
-- [x] Firestore rules deployed
-- [x] Admin UID verify on login
-- [x] Email/Password Auth
-- [x] Google Sign-in
-- [x] Server-side pricing (transaction)
+- [x] Firestore rules
+- [x] Admin UID verify
+- [x] Email/Password + Google Auth
+- [x] Server-side price (transaction)
 - [x] XSS protection (`escapeHtml`)
-- [x] Back button trap (checkout modal)
-- [x] IP flagging (not blocking)
+- [x] Back button trap
+- [x] IP flagging
 - [x] Cart tampering prevention
-- [x] Vercel domain authorized
-- [x] HTTPS (Vercel auto)
+- [x] HTTPS (Vercel)
 - [x] Coupon double-validation
-- [x] Wishlist auto-cleanup (invalid IDs)
-- [x] Phone-based login safe (Firestore lookup)
+- [x] Wishlist auto-cleanup
 
-## ⚠️ যা যোগ করা উচিত (Phase 2-3-এ)
-- [ ] Rate limiting (Vercel serverless)
-- [ ] reCAPTCHA on register form
-- [ ] Email verification on register
-- [ ] Admin 2FA (optional)
-- [ ] API key rotation policy
-- [ ] Audit log for admin actions
-- [ ] Firestore export backup (weekly)
-- [ ] Order duplicate prevention (server-side)
+## ⚠️ যা যোগ করা উচিত
+- [ ] Rate limiting (serverless)
+- [ ] reCAPTCHA on register
+- [ ] Email verification
+- [ ] Admin 2FA
+- [ ] Audit log
+- [ ] Weekly Firestore export
+- [ ] Server-side duplicate order check
 
-## 🚫 যা কখনো করবেন না
-- `allow read, write: if true` rules-এ
+## 🚫 কখনো না
+- `allow read, write: if true`
 - Admin credentials hardcode
 - User input সরাসরি HTML-এ
-- `eval()` ব্যবহার
-- API keys client-side
-- Password plain text Firestore-এ
+- `eval()`
+- API keys client
+- Password plain text
 
 ---
 
-# 🎨 PART 8: UI/UX Patterns
+# 🛠️ PART 9: Recovery Guide
 
-## Page Structure (Standard)
-```html
-<!DOCTYPE html>
-<html lang="bn">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>[Page] - Heartix</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-    <script>tailwind.config = { theme: { extend: {
-        colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' }, cream: '#FBF8F3' },
-        fontFamily: { 'display': ['Playfair Display', 'serif'] }
-    }}}</script>
-    <link rel="stylesheet" href="css/common.css">
-    <link rel="stylesheet" href="css/[page].css">
-</head>
-<body>
-    <div id="toast-container"></div>
-    <!-- header, main, footer -->
-    <script type="module" src="js/[page].js"></script>
-</body>
-</html>
-```
+## Common Problems & Solutions
 
-## Common CSS Classes
-- `.navy-gradient` — ডার্ক নেভি background
-- `.gold-gradient` — গোল্ড gradient
-- `.gold-text`, `.navy-text` — text colors
-- `.glass` — frosted glass (header)
-- `.premium-shadow` — soft shadow
-- `.premium-shadow-lg` — larger shadow
-- `.hide-scrollbar` — scrollbar লুকানো
-- `.shimmer` — skeleton loading
-- `.animate-slide-up`, `.animate-fade-in`
+| সমস্যা | কারণ | সমাধান |
+|--------|------|--------|
+| White screen | JS import fail | Console → error দেখুন |
+| 404 on css/js | Wrong path | File path check |
+| Cart badge ভুল | `updateCartBadges()` কল হয়নি | common.js verify |
+| Permission denied | Rules ভুল | Firebase Console check |
+| Order place fail | Transaction error | Stock/permission check |
+| Google login fail | Domain authorized না | Firebase → Auth → Settings |
+| Index error | Composite index নেই | Error link → Create Index |
+| Deploy fail | Vercel issue | Logs দেখুন |
+| Firebase quota | Free limit | ২৪ ঘণ্টা wait |
+| Font wrong | Playfair on number | `css/[page].css`-এ force |
+| Back button bypass | Trap নেই | `history.pushState` |
+| Modal keyboard ঢাকে | CSS issue | `max-height: calc(100vh - 2rem)` + `overflow-y-auto` |
+| Stock wrong | Delete-এ restore হয়নি | Smart delete logic verify |
+| Reorder কাজ করে না | `sortOrder` নেই | saveProduct-এ assign verify |
+| Real-time total update না | `recalcOrderEdit` not exported | `window.recalcOrderEdit` verify |
 
-## Common IDs (সব page-এ)
-- `#toast-container` — সব page-এ
-- `#cart-count-header` — header cart badge
-- `#wishlist-count-header` — header wishlist badge
-- `#cart-count-bottom`, `#cart-count-sidebar` — index.html only
-
-## Toast Usage
-```js
-import { showToast } from './common.js';
-showToast('Message', 'success');  // green
-showToast('Message', 'error');    // red
-showToast('Message', 'warn');     // orange
-showToast('Message', 'info');     // navy
-```
-
-## LocalStorage Keys
-- `heartix_cart` — cart items array
-- `heartix_wishlist` — wishlist IDs array
-- `heartix_recent` — recently viewed IDs
-- `heartix_coupon` — applied coupon { code, type, value, minOrder }
-- `heartix_remember` — remembered login identifier
-
-## Status Values
-- **Order:** `pending`, `confirmed`, `shipped`, `delivered`, `cancelled`
-- **Payment:** `full-cod`, `delivery-advance`, `full-online`
-- **Coupon:** `percentage`, `fixed`
-- **Category icon:** Emoji OR image URL (http startsWith check)
+## Rollback Procedure
+1. GitHub → Commits → find last good commit
+2. "Revert" click → new commit
+3. Vercel auto-deploy → wait 2 min
+4. Hard refresh browser
 
 ---
 
-# 📋 PART 9: Quick Reference
+# 📋 PART 10: Quick Reference
 
 ## Global Functions (window.xxx)
-| Function | JS file |
-|----------|---------|
-| `login`, `logout` | admin.js, messages.js |
-| `loginUser`, `registerUser`, `googleSignIn`, `forgotPassword`, `logoutUser` | account.js |
-| `openAddressEdit`, `cancelAddressEdit`, `saveProfile` | account.js |
-| `loadMyOrders` | account.js |
-| `addToCart`, `removeFromCart`, `toggleWishlist` | index.js, product.js, wishlist.js |
-| `filterByCategory`, `toggleSearch`, `closeSearch`, `searchProducts`, `selectSuggestion` | index.js |
-| `goSlide`, `openSidebar`, `closeSidebar`, `loadMoreProducts` | index.js |
-| `applyCoupon`, `removeCoupon`, `proceedToCheckout`, `changeQty`, `removeItem`, `clearCart`, `moveToWishlist` | cart.js |
-| `placeOrder`, `showRepeatModal`, `showWarningModal`, `showHistoryModal`, `continueFromRepeat`, `cancelFromWarning`, `continueFromWarning` | checkout.js |
-| `trackOrder`, `copyOrderNumber` | track-order.js |
-| `submitContactForm` | contact.js |
-| `showTab`, `openMoreMenu`, `closeMoreMenu` | admin.js |
-| `openAddModal`, `editProduct`, `saveProduct`, `deleteProduct`, `renderAdminProducts` | admin.js |
-| `openOrderEdit`, `saveOrderEdit`, `openStatusPicker`, `confirmStatusChange`, `filterOrders`, `exportOrdersCSV` | admin.js |
-| `openCategoryModal`, `saveCategory`, `editCategory`, `deleteCategory`, `openInlineCategoryModal`, `saveInlineCategory` | admin.js |
-| `openCouponModal`, `saveCoupon`, `editCoupon`, `deleteCoupon`, `updateCouponValueLabel` | admin.js |
-| `openHeroModal`, `saveHeroBanner`, `editHeroBanner`, `deleteHeroBanner`, `clearHeroImage` | admin.js |
-| `openSectionModal`, `saveSection`, `editSection`, `deleteSection` | admin.js |
-| `openBannerModal`, `saveBanner`, `editBanner`, `deleteBanner` | admin.js |
-| `openTestimonialModal`, `saveTestimonial`, `editTestimonial`, `deleteTestimonial` | admin.js |
-| `deleteReview` | admin.js |
-| `saveSettings` | admin.js |
-| `openCategoryReorder`, `closeCategoryReorder`, `moveCategoryUp`, `moveCategoryDown` | admin-reorder.js |
-| `openSectionReorder`, `closeSectionReorder`, `moveSectionUp`, `moveSectionDown` | admin-reorder.js |
-| `openProductReorder`, `closeProductReorder`, `changeReorderCategory`, `moveProductUp`, `moveProductDown` | admin-reorder.js |
-| `loadMessages`, `filterMessages`, `openDetail`, `closeDetail`, `deleteCurrentMessage` | messages.js |
 
-## Key IDs (form fields)
+### Auth
+- `login()`, `logout()` — admin.js, messages.js
+- `loginUser()`, `registerUser()`, `googleSignIn()`, `forgotPassword()`, `logoutUser()` — account.js
+
+### Cart
+- `addToCart(id)`, `removeFromCart(id)` — index.js, product.js, wishlist.js
+- `applyCoupon()`, `removeCoupon()`, `changeQty()`, `removeItem()`, `clearCart()`, `moveToWishlist()`, `proceedToCheckout()` — cart.js
+
+### Checkout
+- `placeOrder()` — checkout.js
+- `showRepeatModal()`, `showWarningModal()`, `showHistoryModal()`, `continueFromRepeat()`, `cancelFromWarning()`, `continueFromWarning()` — checkout.js
+
+### Account
+- `saveProfile()`, `loadMyOrders()`, `openAddressEdit()`, `cancelAddressEdit()`, `togglePassword()` — account.js
+
+### Admin
+- `showTab(tab)`, `openMoreMenu()` — admin.js
+- `openAddModal()`, `editProduct()`, `saveProduct()`, `deleteProduct()`, `renderAdminProducts()` — admin.js
+- `openOrderEdit()`, `saveOrderEdit()`, `confirmDeleteOrder()`, `executeDelete()`, `openStatusPicker()`, `selectStatus()`, `confirmStatusChange()`, `filterOrders()`, `exportOrdersCSV()`, `recalcOrderEdit()` — admin.js
+- `openCategoryModal()`, `saveCategory()`, `editCategory()`, `deleteCategory()`, `openInlineCategoryModal()`, `saveInlineCategory()` — admin.js
+- `openCouponModal()`, `saveCoupon()`, `editCoupon()`, `deleteCoupon()` — admin.js
+- `openHeroModal()`, `saveHeroBanner()`, `openSectionModal()`, `saveSection()`, `openBannerModal()`, `saveBanner()`, `openTestimonialModal()`, `saveTestimonial()` — admin.js
+- `saveSettings()` — admin.js
+- `openCategoryReorder()`, `moveCategoryUp()`, `openSectionReorder()`, `moveSectionUp()`, `openProductReorder()`, `moveProductUp()`, `changeReorderCategory()` — admin-reorder.js
+- `loadMessages()`, `filterMessages()`, `openDetail()`, `closeDetail()`, `deleteCurrentMessage()` — messages.js
+
+## Key IDs
+
+### Form Fields
 - **Checkout:** `#customer-name`, `#customer-phone`, `#customer-email`, `#customer-address`, `#customer-district`, `#customer-thana`
-- **Account Login:** `#login-email`, `#login-password`, `#remember-me`
-- **Account Register:** `#reg-name`, `#reg-phone`, `#reg-email`, `#reg-password`, `#reg-confirm`
-- **Account Profile:** `#profile-name`, `#profile-phone`, `#profile-address`, `#profile-district`, `#profile-thana`
+- **Login:** `#login-email`, `#login-password`, `#remember-me`
+- **Register:** `#reg-name`, `#reg-phone`, `#reg-email`, `#reg-password`, `#reg-confirm`
+- **Profile:** `#profile-name`, `#profile-phone`, `#profile-address`, `#profile-district`, `#profile-thana`
 - **Product modal:** `#p-name`, `#p-price`, `#p-oldprice`, `#p-stock`, `#p-brand`, `#p-description`, `#p-featured`, `#p-pinned`, `#p-categories-list`, `#p-image-file`
+- **Order Edit:** `#oe-edit-name`, `#oe-edit-phone`, `#oe-edit-address`, `#oe-edit-district`, `#oe-edit-thana`, `#oe-discount`, `#oe-delivery`, `#oe-advance`, `#oe-note`
 - **Track:** `#order-input`, `#res-order-num`
-- **Order Success:** `#order-number`, `#track-btn`
+- **Success:** `#order-number`, `#track-btn`
 
----
+### Badge IDs (সব page-এ)
+- `#cart-count-header` — header cart badge
+- `#wishlist-count-header` — header wishlist badge
+- `#cart-count-bottom`, `#cart-count-sidebar` — index.html
+- `#orders-badge`, `#orders-badge-mob` — admin.html
 
-# 🚀 PART 10: পরের সেশনের Action Plan
+### Modal IDs
+- `#product-modal`, `#order-edit-modal`, `#category-modal`, `#coupon-modal`, `#hero-modal`, `#section-modal`, `#banner-modal`, `#testimonial-modal`
+- `#category-reorder-modal`, `#section-reorder-modal`, `#product-reorder-modal`
+- `#more-menu-modal`, `#status-picker-modal`, `#status-confirm-modal`, `#product-picker-modal`
+- `#delete-order-modal` (dynamic)
 
-## Immediate Next (Priority Order)
+## LocalStorage Keys
+- `heartix_cart` — cart items
+- `heartix_wishlist` — IDs array
+- `heartix_recent` — recently viewed IDs
+- `heartix_coupon` — { code, type, value, minOrder }
+- `heartix_remember` — login identifier
 
-### Step 1: Test Current State (~৩০ মিনিট)
-**কেন:** Phase 0 + 1 deploy হয়েছে — সব verify করুন
-
-**Checklist:**
-- [ ] Home → সব section load হচ্ছে (hero, categories, products, featured)
-- [ ] Product → add to cart → wishlist → related products
-- [ ] Cart → coupon apply → qty → remove → save for later
-- [ ] Checkout → logged-in auto-fill → repeat popup → place order
-- [ ] Order Success → track → WhatsApp
-- [ ] Account → register → login → Google → profile edit → address save
-- [ ] Wishlist → cart integration
-- [ ] Contact → messages (admin-এ check)
-- [ ] Admin → Products CRUD → Featured/Pinned → Reorder
-- [ ] Admin → Orders compact cards → Edit → Status change
-- [ ] Admin → Categories reorder → Sections reorder
-- [ ] Admin → Coupons → Content → Settings
-- [ ] Mobile + Desktop দুই view
-
-### Step 2: Phase 2 — Plug & Play Settings (~৪-৫ ঘণ্টা)
-**কেন আগে:** Admin-এর daily কাজ সহজ হবে
-
-**Order:**
-1. Settings structure + toggle UI
-2. Google Analytics (সহজest)
-3. Facebook Pixel
-4. SMS (BulkSMSBD) — serverless function
-5. Email (SendGrid) — serverless function
-6. WhatsApp API
-7. bKash Payment
-8. Nagad Payment
-
-**⚠️ Pre-work:**
-- Vercel-এ Environment Variables সেট করুন (API keys)
-- `/api/` folder তৈরি করুন
-- Serverless functions-এ `verifyAdmin(uid)` check
-
-### Step 3: Phase 3 — Admin Tools (~৩-৪ ঘণ্টা)
-
-### Step 4: Phase 4-6 — Analytics + UX + Marketing
-
----
-
-## যা আগে করলে ভালো (Pre-work)
-1. **Firestore backup নিন** — Console → Firestore → Export → GCS Bucket
-2. **Vercel GitHub integration verify** — push করলেই auto-deploy
-3. **Cloudinary limit check** — ২৫ credit/মাস
-4. **Firebase billing** — Spark plan limit-এ আছি কিনা
-5. **Domain কিনুন** — `heartix.com` (~১২০০ টাকা/বছর) → professional email
-
----
-
-## যা ভুল হলে করবেন (Recovery)
-
-| সমস্যা | সমাধান |
-|--------|--------|
-| White screen | Console error → JS import চেক |
-| 404 on css/js | File path check |
-| Cart badge ভুল | `updateCartBadges()` কল হচ্ছে কিনা |
-| Firestore permission denied | Rules check |
-| Order place fail | Transaction error — stock/permission |
-| Google login fail | Firebase authorized domain |
-| Index error | Error link → Create Index |
-| Deploy fail | Vercel Deployments → Logs |
-| Firebase quota exceeded | ২৪ ঘণ্টা wait বা billing upgrade |
-| Font wrong | `css/[page].css`-এ `font-family: Inter !important` |
-| Google logo broken | সঠিক SVG (4 paths, viewBox 0 0 24 24) |
-| Modal keyboard ঢেকে | `max-height: calc(100vh - 2rem)` + `overflow-y-auto` |
-| Back button bypass | `history.pushState({trap:true})` + `popstate` listener |
-| Reorder কাজ করে না | Firestore save check + reload |
+## Status Values
+- **Order:** pending, confirmed, shipped, delivered, cancelled
+- **Payment:** full-cod, delivery-advance, full-online
+- **Coupon:** percentage, fixed
 
 ---
 
 # 📊 PART 11: Statistics
 
-## Phase Progress
+## Progress
 | Phase | Status | Progress |
 |-------|--------|----------|
-| Phase 0 — Modular Structure | ✅ সম্পূর্ণ | 100% |
-| Phase 1 — Reorder System | ✅ সম্পূর্ণ | 100% |
-| Phase 2 — Plug & Play Settings | ⏳ পরবর্তী | 0% |
-| Phase 3 — Admin Tools | ⏳ | 0% |
-| Phase 4 — Analytics | ⏳ | 0% |
-| Phase 5 — Customer UX | ⏳ | 0% |
-| Phase 6 — Marketing | ⏳ | 0% |
+| Phase 0 | ✅ | 100% |
+| Phase 1 | ✅ | 100% |
+| Phase 2 | ⏳ | 0% |
+| Phase 3-6 | ⏳ | 0% |
 
-**Overall: ~30% সম্পূর্ণ**
+**Overall: ~30%**
 
 ## File Counts
 | Type | Count |
 |------|-------|
 | HTML | 18 (2 TODO) |
 | CSS | 12 |
-| JS | 15 |
-| Markdown | 2 |
-| Image | 1 |
-| **Total** | **48** |
+| JS | 16 |
+| MD | 2 |
+| PNG | 1 |
+| **Total** | **49** |
 
-## Lines of Code (approx)
-- HTML: ~5,000
-- CSS: ~2,000
-- JS: ~5,000
-- **Total:** ~12,000 lines
-
-## Cost Analysis (Monthly)
-| Service | Free Tier | Current Usage |
-|---------|-----------|---------------|
-| Firebase Firestore reads | 50K/day | <2K/day |
-| Firebase Firestore writes | 20K/day | <200/day |
-| Firebase Auth | Unlimited | <20 users |
-| Cloudinary | 25 credits/month | <10 credits |
-| Vercel bandwidth | 100 GB/month | <2 GB |
-| **Total cost** | **৳0/month** | Well within limits |
+## Cost (Monthly)
+| Service | Free Tier | Usage |
+|---------|-----------|-------|
+| Firebase reads | 50K/day | <2K |
+| Firebase writes | 20K/day | <200 |
+| Cloudinary | 25 credits | <10 |
+| Vercel | 100GB | <2GB |
+| **Total** | **৳0** | — |
 
 ---
 
-# 🎓 PART 12: অন্যান্য AI-এর জন্য নির্দেশনা
+# 🎓 PART 12: অন্যান্য AI-এর জন্য
 
-## এই Project-এ কাজ করার নিয়ম
-1. **সবসময় এই guide.md আগে পড়ুন** — যেকোনো কাজের আগে
-2. **File edit-এর আগে commit history check** করুন
-3. **একবারে একটাই file edit** করুন
-4. **User-কে step-by-step নির্দেশনা দিন** (মোবাইলে কাজ করে)
-5. **পূর্ণ file content দিন** — শুধু patch নয় (User মোবাইলে খুঁজে পায় না)
-6. **User confused হলে জিজ্ঞেস করুন** — "কোন file-এ কাজ করছেন?"
-7. **Deploy-এর পর ২ মিনিট wait** বলুন
-8. **Cache bypass** বলুন (`?v=2`)
+## Golden Rules
+1. **এই guide.md আগে পড়ুন** — কাজের আগে
+2. **একবারে একটাই file** edit
+3. **Full file content** দিন (মোবাইলে patch কষ্ট)
+4. **Step-by-step** বলুন (commit → deploy → test)
+5. **Cache bypass** mention করুন (`?v=2`)
+6. **Deploy wait** বলুন (2 min)
+7. **User confused হলে** — file identify করুন
 
-## যদি User File Confused হয়
-- File name ভুলে গেলে → **title/content দেখে identify**
-- HTML-এর শেষে `<script src="js/X.js">` → **X.html-এর জন্য**
-- CSS-এ class name → **page identify**
-- JS-এ unique function → **page identify**
-- User-কে বলুন: "এই file-টা যদি XX নাম দিয়ে সেভ করেন, ঠিক হবে"
+## File Confused হলে জিজ্ঞেস করুন
+- Title tag কী?
+- শেষে কোন script?
+- Unique function কী?
+- Content-এ কী দেখা যাচ্ছে?
 
-## Critical Rules
-- **কখনো `common.css` delete করবেন না**
-- **কখনো `firebase.js` edit করবেন না** (শুধু config)
-- **সব file-এ `import` verify** — relative paths (`./firebase.js`)
-- **`escapeHtml()` ছাড়া user data render করবেন না**
-- **Firestore-এ `setDoc` vs `updateDoc` vs `addDoc` সঠিক**:
-  - `addDoc` — new doc (auto ID)
-  - `setDoc(doc, data, {merge:true})` — create or update
-  - `updateDoc(doc, data)` — update existing
-- **Transaction-এ read আগে, write পরে** — সব read শেষে write
-- **Server Timestamp ব্যবহার** করুন — `new Date()` নয়
+## Critical
+- কখনো `common.css`/`firebase.js` delete না
+- কখনো `escapeHtml()` skip না
+- কখনো API key client-side না
+- সবসময় `serverTimestamp()`
 
-## Contact Points
-- Firebase Project: `heartix`
-- Firebase Auth domain: `heartix.firebaseapp.com`
-- Cloudinary cloud: `ju2w6e9r`
-- Support email: `twhob71122@gmail.com`
-- Admin UIDs: `settings/admins.uids[]` (Firestore)
+## Contact
+- Firebase: `heartix` project
+- Cloudinary: `ju2w6e9r`
+- Support: `twhob71122@gmail.com`
+- Admin UIDs: `settings/admins.uids[]`
 
-## Regular Expression Patterns
-- Phone: `/^01[3-9]\d{8}$/` (Bangladesh)
-- Email: `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
-- Order Number: `HX` + YYMMDD + 6 alphanumeric
-
-## Bangla Text Notes
-- সব error/UI message বাংলায়
-- কিছু label English (like "Login", "Featured")
-- `&lt;br&gt;` শুধু hero title-এ allowed (safeHeroTitle function handle করে)
+## Bangla Notes
+- User-facing message বাংলায়
+- Code comments বাংলা বা English — okay
+- `&lt;br&gt;` শুধু hero title-এ (safeHeroTitle handle করে)
 
 ---
 
 # 📝 PART 13: Changelog
 
-## v3.0 (15 Oct 2025) — Phase 1 Complete
-- ✅ Category Reorder (modal + ↑↓)
-- ✅ Section Reorder (modal + ↑↓)
-- ✅ Product Reorder (category dropdown + ↑↓)
-- ✅ Featured Selection (product modal toggle)
-- ✅ Pin to Top (product modal toggle)
-- ✅ Home-এ Featured Products section
-- ✅ Home sort: pinned → sortOrder → name
-- ✅ Compact collapsible order cards (admin)
-- ✅ Playfair font fix (numbers → Inter)
-- ✅ Google logo fixed (correct SVG)
-- ✅ Back button trap in warning modal
-- ✅ Apply button overflow fixed
-- ✅ Wishlist auto-cleanup
+## v4.0 (15 Oct 2025, 5 AM)
+- ✅ Editable order customer info
+- ✅ Real-time total update (bug fix)
+- ✅ Compact collapsible order edit
+- ✅ Custom delete modal
+- ✅ Smart stock restore
+- ✅ Back button trap (order edit)
+- ✅ Original values display
 
-## v2.0 (14 Oct 2025) — Phase 0 Complete
-- ✅ Modular file structure (17 HTML, 12 CSS, 14 JS)
-- ✅ Multi-category products
-- ✅ Repeat customer detection
-- ✅ IP flagging
-- ✅ Google Sign-in
-- ✅ Phone-based login
+## v3.0 (15 Oct 2025)
+- ✅ Phase 1 complete (Reorder)
+- ✅ Featured + Pin
+- ✅ Compact order cards
+- ✅ Custom delete modal
+- ✅ Google logo fix
+- ✅ Number fonts fix
+
+## v2.0 (14 Oct 2025)
+- ✅ Phase 0 complete (Modular)
+- ✅ Multi-category
+- ✅ Repeat customer
+- ✅ IP tracking
 - ✅ Account address save
-- ✅ Checkout auto-fill
-- ✅ Atomic order transaction
 
-## v1.0 (Initial) — Early development
+## v1.0
 - Basic e-commerce
-- Single-category products
-- Email/Password auth
-- COD payment
 
 ---
 
-# 🎯 FINAL WORD
+# 🎯 FINAL NOTES
 
-**এই guide.md যেকোনো AI-এর জন্য complete reference।**
-- File edit করার আগে এই guide পড়ুন
-- নতুন feature যোগ করলে এই file update করুন
-- Commit history-তে রেফারেন্স রাখুন
+## এই Guide যেকোনো AI-কে দিলে
+1. Project বুঝবে সাথে সাথে
+2. File identify করতে পারবে (এলোমেলো হলেও)
+3. Priority order জানবে
+4. Security maintain করবে
+5. Error recovery করতে পারবে
 
-**Project Status:** ~30% সম্পূর্ণ
-**Phase 0 + Phase 1 শেষ** — foundation + reorder system complete
-**Next Session:** Phase 2 — Plug & Play Settings
+## Next Session
+**Start with:** `guide.md` খুলে "Phase 2" বলুন
 
-**Priority:** Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6
+**Priority:** Phase 2 → 3 → 4 → 5 → 6
+
+**Estimated total:** ~২৫-৩০ ঘণ্টা বাকি
 
 ---
 
-**Last Updated:** 15 October 2025
+**Last Updated:** 15 October 2025, 5:00 AM
 **Total Sections:** 13
-**Purpose:** Single source of truth for entire project
+**Purpose:** Single source of truth
 **Maintainer:** Developer + Claude AI
+**Version:** 4.0
+
+*এই guide প্রতিটা commit-এ update করা উচিত।*
