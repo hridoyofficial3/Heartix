@@ -42,14 +42,16 @@
         <!-- AUTH SECTION -->
         <div id="auth-section" class="hidden">
 
-            <div class="text-center mb-6">
-                <div class="w-20 h-20 mx-auto mb-3 gold-gradient rounded-3xl flex items-center justify-center shadow-lg">
-                    <i class="fas fa-user text-navy text-3xl"></i>
+            <!-- HEADER -->
+            <div class="text-center mb-6 mt-2">
+                <div class="w-16 h-16 mx-auto mb-3 rounded-2xl gold-gradient flex items-center justify-center shadow-lg">
+                    <i class="fas fa-user text-navy text-2xl"></i>
                 </div>
-                <h2 class="font-display text-2xl navy-text font-bold mb-1">Welcome to Heartix</h2>
-                <p class="text-xs text-gray-500">Login or create your account</p>
+                <h2 class="font-display text-2xl navy-text font-bold mb-1">Welcome Back</h2>
+                <p class="text-xs text-gray-500">Sign in to continue shopping</p>
             </div>
 
+            <!-- TABS -->
             <div class="bg-white rounded-2xl p-1 flex mb-4 premium-shadow">
                 <button id="tab-login" onclick="switchTab('login')" class="tab-btn active flex-1 py-2.5 rounded-xl text-xs font-bold text-gray-500">
                     Login
@@ -59,57 +61,110 @@
                 </button>
             </div>
 
-            <!-- LOGIN FORM -->
+            <!-- ===== LOGIN FORM ===== -->
             <div id="login-form" class="bg-white rounded-2xl premium-shadow p-5">
-                <div class="mb-3">
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Email</label>
-                    <input type="email" id="login-email" placeholder="you@example.com" maxlength="120" autocomplete="email" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+
+                <h3 class="font-bold navy-text text-base mb-4">Login</h3>
+
+                <div class="input-wrap" id="wrap-login-email">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" id="login-email" placeholder="Email or phone number" autocomplete="username" inputmode="email">
                 </div>
-                <div class="mb-4">
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Password</label>
-                    <input type="password" id="login-password" placeholder="••••••••" maxlength="60" autocomplete="current-password" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+
+                <div class="input-wrap" id="wrap-login-password">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+                    <button type="button" class="eye-btn" onclick="togglePassword('login-password', this)">
+                        <i class="fas fa-eye"></i>
+                    </button>
                 </div>
-                <button onclick="loginUser()" id="login-btn" class="navy-gradient text-white w-full py-3.5 rounded-xl font-bold text-sm">
-                    <i class="fas fa-sign-in-alt mr-2"></i> LOGIN
+
+                <div class="remember-row">
+                    <label>
+                        <input type="checkbox" id="remember-me">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" onclick="forgotPassword(); return false;">Forgot password?</a>
+                </div>
+
+                <button onclick="loginUser()" id="login-btn" class="btn-primary-lg">
+                    Login
                 </button>
-                <button onclick="forgotPassword()" class="w-full text-xs text-gray-500 mt-3 py-2 font-semibold">
-                    পাসওয়ার্ড ভুলে গেছেন?
-                </button>
+
+                <div class="or-divider">or signin with</div>
+
+                <div class="flex justify-center">
+                    <button type="button" onclick="googleSignIn()" class="social-btn" aria-label="Google Sign-in">
+                        <svg width="22" height="22" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="#FFC107" d="M43.611,20.083H42V20H24c0,2.761,0.239,5.471,0.699,8.099c2.236,2.317,5.386,3.901,9.301,3.901 c3.323,0,6.167-1.184,8.322-3.119l6.584,6.576C44.972,39.703,35.229,44,24,44C13.151,44,3.748,37.791,0.5,28.5l7.771-6.064 C10.089,29.868,16.522,36,24,36c2.181,0,4.243-0.392,6.156-1.094c1.99-1.229,3.594-2.921,4.66-4.913L43.611,20.083z"/>
+                            <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657 C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+                            <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36 c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+                            <path fill="#1976D2" d="M43.611,20.083H42V20H24c0,2.761,0.239,5.471,0.699,8.099c2.236,2.317,5.386,3.901,9.301,3.901 c3.323,0,6.167-1.184,8.322-3.119l6.584,6.576C44.972,39.703,35.229,44,24,44C13.151,44,3.748,37.791,0.5,28.5l7.771-6.064 C10.089,29.868,16.522,36,24,36c2.181,0,4.243-0.392,6.156-1.094c1.99-1.229,3.594-2.921,4.66-4.913L43.611,20.083z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <p class="register-prompt">
+                    Don't have any account?
+                    <a onclick="switchTab('register')">Register account</a>
+                </p>
+
             </div>
 
-            <!-- REGISTER FORM -->
+            <!-- ===== REGISTER FORM ===== -->
             <div id="register-form" class="bg-white rounded-2xl premium-shadow p-5 hidden">
-                <div class="mb-3">
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Full Name *</label>
-                    <input type="text" id="reg-name" placeholder="আপনার নাম" maxlength="60" autocomplete="name" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+
+                <h3 class="font-bold navy-text text-base mb-4">Create Account</h3>
+
+                <div class="input-wrap" id="wrap-reg-name">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" id="reg-name" placeholder="Full name" maxlength="60" autocomplete="name">
                 </div>
-                <div class="mb-3">
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Phone *</label>
-                    <input type="tel" id="reg-phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+
+                <div class="input-wrap" id="wrap-reg-phone">
+                    <i class="fas fa-phone input-icon"></i>
+                    <input type="tel" id="reg-phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric" autocomplete="tel">
                 </div>
-                <div class="mb-3">
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Email *</label>
-                    <input type="email" id="reg-email" placeholder="you@example.com" maxlength="120" autocomplete="email" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+
+                <div class="input-wrap" id="wrap-reg-email">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" id="reg-email" placeholder="Email" maxlength="120" autocomplete="email">
                 </div>
-                <div class="mb-3">
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Password * (min 6)</label>
-                    <input type="password" id="reg-password" placeholder="••••••••" maxlength="60" autocomplete="new-password" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+
+                <div class="input-wrap" id="wrap-reg-password">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="reg-password" placeholder="Password (min 6)" maxlength="60" autocomplete="new-password">
+                    <button type="button" class="eye-btn" onclick="togglePassword('reg-password', this)">
+                        <i class="fas fa-eye"></i>
+                    </button>
                 </div>
-                <div class="mb-4">
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Confirm Password *</label>
-                    <input type="password" id="reg-confirm" placeholder="••••••••" maxlength="60" autocomplete="new-password" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm">
+
+                <div class="input-wrap" id="wrap-reg-confirm">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="reg-confirm" placeholder="Confirm password" maxlength="60" autocomplete="new-password">
+                    <button type="button" class="eye-btn" onclick="togglePassword('reg-confirm', this)">
+                        <i class="fas fa-eye"></i>
+                    </button>
                 </div>
-                <button onclick="registerUser()" id="register-btn" class="navy-gradient text-white w-full py-3.5 rounded-xl font-bold text-sm">
-                    <i class="fas fa-user-plus mr-2"></i> REGISTER
+
+                <button onclick="registerUser()" id="register-btn" class="btn-gold-lg mt-1">
+                    Create Account
                 </button>
-                <p class="text-[10px] text-gray-400 text-center mt-3 leading-relaxed">
+
+                <p class="text-[10px] text-gray-400 text-center mt-4 leading-relaxed">
                     রেজিস্টার করলে আপনি আমাদের <a href="terms.html" class="text-gold font-semibold">Terms</a> এবং <a href="privacy.html" class="text-gold font-semibold">Privacy Policy</a> মেনে নিচ্ছেন।
                 </p>
+
+                <p class="register-prompt mt-2">
+                    Already have account?
+                    <a onclick="switchTab('login')">Login</a>
+                </p>
+
             </div>
 
         </div>
 
-        <!-- LOGGED IN SECTION -->
+        <!-- ===== LOGGED IN SECTION ===== -->
         <div id="logged-section" class="hidden space-y-4">
 
             <div class="navy-gradient rounded-3xl p-6 text-white relative overflow-hidden">
@@ -218,14 +273,25 @@
                 if (loginForm) loginForm.classList.add('hidden');
             }
         };
+        window.togglePassword = window.togglePassword || function(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (btn) btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                if (btn) btn.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        };
         window.loginUser = window.loginUser || function() { alert('Firebase লোড হচ্ছে...'); };
         window.registerUser = window.registerUser || function() { alert('Firebase লোড হচ্ছে...'); };
         window.forgotPassword = window.forgotPassword || function() { alert('Firebase লোড হচ্ছে...'); };
+        window.googleSignIn = window.googleSignIn || function() { alert('Firebase লোড হচ্ছে...'); };
         window.logoutUser = window.logoutUser || function() { location.reload(); };
         window.saveProfile = window.saveProfile || function() { alert('Firebase লোড হচ্ছে...'); };
         window.loadMyOrders = window.loadMyOrders || function() {};
 
-        // Initial cart badge
         (function() {
             try {
                 var cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
