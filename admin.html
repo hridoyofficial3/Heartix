@@ -387,12 +387,50 @@
                 <button onclick="showTab('products')" data-tab="products" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
                     <i class="fas fa-box text-lg"></i><span class="text-[9px] mt-1 font-semibold">Products</span>
                 </button>
-                <button onclick="showTab('settings')" data-tab="settings" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
-                    <i class="fas fa-cog text-lg"></i><span class="text-[9px] mt-1 font-semibold">More</span>
+                <button onclick="openMoreMenu()" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
+                    <i class="fas fa-ellipsis-h text-lg"></i><span class="text-[9px] mt-1 font-semibold">More</span>
                 </button>
             </div>
         </nav>
 
+    </div>
+
+    <!-- MORE MENU (Mobile) -->
+    <div id="more-menu-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end justify-center">
+        <div class="bg-white rounded-t-3xl w-full max-w-md animate-slide-up">
+            <div class="p-5">
+                <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+                <h3 class="font-bold text-navy text-lg mb-4">More Options</h3>
+                <div class="space-y-2">
+                    <button onclick="showTab('categories'); closeMoreMenu()" class="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl active:bg-gray-100">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><i class="fas fa-th-large text-blue-600"></i></div>
+                        <span class="font-semibold text-navy">Categories</span>
+                        <i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i>
+                    </button>
+                    <button onclick="showTab('coupons'); closeMoreMenu()" class="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl active:bg-gray-100">
+                        <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center"><i class="fas fa-ticket-alt text-green-600"></i></div>
+                        <span class="font-semibold text-navy">Coupons</span>
+                        <i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i>
+                    </button>
+                    <button onclick="showTab('content'); closeMoreMenu()" class="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl active:bg-gray-100">
+                        <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center"><i class="fas fa-layer-group text-purple-600"></i></div>
+                        <span class="font-semibold text-navy">Content</span>
+                        <i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i>
+                    </button>
+                    <button onclick="showTab('reviews'); closeMoreMenu()" class="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl active:bg-gray-100">
+                        <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center"><i class="fas fa-star text-yellow-600"></i></div>
+                        <span class="font-semibold text-navy">Reviews</span>
+                        <i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i>
+                    </button>
+                    <button onclick="showTab('settings'); closeMoreMenu()" class="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl active:bg-gray-100">
+                        <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center"><i class="fas fa-cog text-gray-600"></i></div>
+                        <span class="font-semibold text-navy">Settings</span>
+                        <i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i>
+                    </button>
+                </div>
+                <button onclick="closeMoreMenu()" class="w-full mt-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold">Close</button>
+            </div>
+        </div>
     </div>
 
     <!-- ORDER EDIT MODAL -->
@@ -523,11 +561,23 @@
                     <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Price (৳) *</label><input type="number" id="p-price" min="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
                     <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Old Price</label><input type="number" id="p-oldprice" min="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category *</label><select id="p-category" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white"></select></div>
-                    <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Stock Qty</label><input type="number" id="p-stock" value="10" min="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+
+                <!-- MULTI-CATEGORY CHECKBOX LIST -->
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Categories * (একাধিক সিলেক্ট করা যাবে)</label>
+                        <button type="button" onclick="openInlineCategoryModal()" class="text-gold text-[11px] font-bold">
+                            <i class="fas fa-plus-circle mr-1"></i>New
+                        </button>
+                    </div>
+                    <div id="p-categories-list" class="grid grid-cols-2 gap-1 max-h-40 overflow-y-auto border-2 border-gray-100 rounded-xl p-3 bg-white"></div>
                 </div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Brand</label><input type="text" id="p-brand" maxlength="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Stock Qty</label><input type="number" id="p-stock" value="10" min="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+                    <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Brand</label><input type="text" id="p-brand" maxlength="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+                </div>
+
                 <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Description</label><textarea id="p-description" rows="3" maxlength="3000" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium resize-none"></textarea></div>
                 <div>
                     <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Images * (Max 5)</label>
@@ -545,7 +595,27 @@
         </div>
     </div>
 
-    <!-- CATEGORY MODAL -->
+    <!-- INLINE CATEGORY MODAL (from Product modal) -->
+    <div id="inline-cat-modal" class="hidden fixed inset-0 modal-bg z-[80] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-5 animate-slide-up">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-navy text-lg">Quick Add Category</h3>
+                <button onclick="closeInlineCategoryModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><i class="fas fa-times text-xs text-gray-600"></i></button>
+            </div>
+            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Key * (ইংরেজি, স্পেস ছাড়া)</label>
+            <input type="text" id="inline-cat-key" placeholder="e.g. AC" maxlength="30" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm mb-3">
+            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Display Name *</label>
+            <input type="text" id="inline-cat-label" placeholder="e.g. Air Conditioner" maxlength="60" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm mb-3">
+            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Icon (Emoji)</label>
+            <input type="text" id="inline-cat-icon" placeholder="❄️" maxlength="4" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm mb-4 text-center text-2xl">
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="closeInlineCategoryModal()" class="py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm">Cancel</button>
+                <button onclick="saveInlineCategory()" id="inline-cat-save-btn" class="btn-gold py-3 rounded-xl font-bold text-sm">SAVE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CATEGORY MODAL (full) -->
     <div id="category-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
