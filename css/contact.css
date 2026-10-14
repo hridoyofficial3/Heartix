@@ -1,0 +1,20 @@
+/* ========== CONTACT PAGE STYLES ========== */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #FBF8F3;
+}
+
+.contact-item {
+    transition: all 0.2s;
+}
+.contact-item:active {
+    transform: scale(0.98);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: #D4A84B !important;
+    box-shadow: 0 0 0 3px rgba(212,168,75,0.12);
+}
