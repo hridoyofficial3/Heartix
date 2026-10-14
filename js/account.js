@@ -1,11 +1,12 @@
 // ============================================================
-// HEARTIX ACCOUNT — Email/Phone Login + Google Sign-in
+// HEARTIX ACCOUNT — Auth + Profile (view/edit) + Address
 // ============================================================
 import { db, auth } from './firebase.js';
 import {
     escapeHtml, formatPrice, showToast,
     getCart, getWishlist, updateCartBadges, updateWishlistBadges
 } from './common.js';
+import { DISTRICTS } from './districts.js';
 
 import {
     collection, getDocs, doc, getDoc, setDoc, query, where, limit
@@ -23,9 +24,10 @@ import {
 
 // ============ STATE ============
 let currentUser = null;
+let currentProfile = {};
 let activeTab = 'login';
 
-// ============ FALLBACK (before module loads) ============
+// ============ FALLBACK ============
 window.switchTab = function(tab) {
     activeTab = tab;
     const loginTab = document.getElementById('tab-login');
@@ -64,6 +66,8 @@ window.googleSignIn = window.googleSignIn || function() { alert('Firebase লো
 window.logoutUser = window.logoutUser || function() { location.reload(); };
 window.saveProfile = window.saveProfile || function() { alert('Firebase লোড হচ্ছে...'); };
 window.loadMyOrders = window.loadMyOrders || function() {};
+window.openAddressEdit = window.openAddressEdit || function() {};
+window.cancelAddressEdit = window.cancelAddressEdit || function() {};
 
 // ============ HELPERS ============
 function showSection(id) {
@@ -90,10 +94,23 @@ function setFieldError(id, hasError) {
     if (wrap) {
         if (hasError) wrap.classList.add('field-error');
         else wrap.classList.remove('field-error');
-    } else {
-        if (hasError) el.classList.add('field-error');
-        else el.classList.remove('field-error');
     }
+}
+
+// Populate district dropdown
+function populateDistrictDropdown() {
+    const sel = document.getElementById('profile-district');
+    if (!sel) return;
+    const currentVal = sel.value;
+    sel.innerHTML = '<option value="">Select District</option>';
+    const sorted = [...new Set(DISTRICTS)].sort();
+    sorted.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        sel.appendChild(opt);
+    });
+    if (currentVal) sel.value = currentVal;
 }
 
 // ============ AUTH STATE ============
@@ -101,6 +118,7 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
         showSection('logged');
+        populateDistrictDropdown();
         try {
             await loadProfile();
             loadMyOrders();
@@ -108,6 +126,7 @@ onAuthStateChanged(auth, async (user) => {
         } catch (e) { console.error('Profile load error:', e); }
     } else {
         currentUser = null;
+        currentProfile = {};
         showSection('auth');
     }
 });
@@ -136,7 +155,6 @@ window.loginUser = async function() {
     try {
         let email = identifier;
 
-        // If phone number, lookup email from customers collection
         if (validatePhone(identifier)) {
             const q = query(collection(db, "customers"), where("phone", "==", identifier), limit(1));
             const snap = await getDocs(q);
@@ -155,7 +173,6 @@ window.loginUser = async function() {
 
         await signInWithEmailAndPassword(auth, email, password);
 
-        // Remember me → save identifier for prefill next time
         try {
             if (remember) localStorage.setItem('heartix_remember', identifier);
             else localStorage.removeItem('heartix_remember');
@@ -184,7 +201,6 @@ window.googleSignIn = async function() {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
 
-        // Save to customers collection if first time
         try {
             const snap = await getDoc(doc(db, "customers", user.uid));
             if (!snap.exists()) {
@@ -193,6 +209,9 @@ window.googleSignIn = async function() {
                     name: user.displayName || '',
                     email: user.email || '',
                     phone: '',
+                    address: '',
+                    district: '',
+                    thana: '',
                     photoURL: user.photoURL || '',
                     provider: 'google',
                     createdAt: new Date().toISOString()
@@ -235,8 +254,10 @@ window.registerUser = async function() {
             await setDoc(doc(db, "customers", cred.user.uid), {
                 uid: cred.user.uid,
                 name, phone, email,
+                address: '', district: '', thana: '',
                 provider: 'email',
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
             }, { merge: true });
         } catch (e) { console.warn('Customer save failed:', e); }
 
@@ -254,7 +275,7 @@ window.registerUser = async function() {
         showToast(msg, 'error');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = 'Register';
+        btn.innerHTML = 'Create Account';
     }
 };
 
@@ -287,36 +308,115 @@ window.logoutUser = async function() {
     } catch (e) {}
 };
 
-// ============ PROFILE ============
+// ============ LOAD PROFILE ============
 async function loadProfile() {
     if (!currentUser) return;
     const fallbackName = currentUser.displayName || (currentUser.email || '').split('@')[0] || 'User';
+
+    // Set header
     document.getElementById('user-display-name').textContent = fallbackName;
     document.getElementById('user-display-email').textContent = currentUser.email || '-';
     document.getElementById('user-avatar-letter').textContent = (fallbackName[0] || 'U').toUpperCase();
-    document.getElementById('profile-name').value = fallbackName;
-    document.getElementById('profile-phone').value = '';
+
+    currentProfile = {
+        name: fallbackName,
+        phone: '',
+        email: currentUser.email || '',
+        address: '',
+        district: '',
+        thana: ''
+    };
 
     try {
         const snap = await getDoc(doc(db, "customers", currentUser.uid));
         if (snap.exists()) {
             const d = snap.data();
-            if (d.name) {
-                document.getElementById('user-display-name').textContent = d.name;
-                document.getElementById('profile-name').value = d.name;
-                document.getElementById('user-avatar-letter').textContent = (d.name[0] || 'U').toUpperCase();
-            }
-            if (d.phone) document.getElementById('profile-phone').value = d.phone;
+            currentProfile = {
+                name: d.name || fallbackName,
+                phone: d.phone || '',
+                email: d.email || currentUser.email || '',
+                address: d.address || '',
+                district: d.district || '',
+                thana: d.thana || ''
+            };
+            document.getElementById('user-display-name').textContent = currentProfile.name;
+            document.getElementById('user-avatar-letter').textContent = (currentProfile.name[0] || 'U').toUpperCase();
         }
     } catch (e) { console.warn('Profile load:', e); }
+
+    renderAccountInfoView();
 }
 
+// ============ VIEW MODE ============
+function renderAccountInfoView() {
+    const p = currentProfile;
+
+    const nameEl = document.getElementById('view-name');
+    const phoneEl = document.getElementById('view-phone');
+    const emailEl = document.getElementById('view-email');
+    const addrEl = document.getElementById('view-address');
+    const locEl = document.getElementById('view-district-thana');
+
+    if (!nameEl) return;
+
+    nameEl.textContent = p.name || 'Add your name';
+    nameEl.parentElement.parentElement.classList.toggle('empty', !p.name);
+
+    phoneEl.textContent = p.phone || 'Add phone number';
+    phoneEl.parentElement.parentElement.classList.toggle('empty', !p.phone);
+
+    emailEl.textContent = p.email || 'No email';
+    emailEl.parentElement.parentElement.classList.toggle('empty', !p.email);
+
+    addrEl.textContent = p.address || 'Add your full address';
+    addrEl.parentElement.parentElement.classList.toggle('empty', !p.address);
+
+    const locText = [p.thana, p.district].filter(Boolean).join(', ');
+    locEl.textContent = locText || 'Add district & thana';
+    locEl.parentElement.parentElement.classList.toggle('empty', !locText);
+}
+
+// ============ EDIT MODE TOGGLE ============
+window.openAddressEdit = function() {
+    const view = document.getElementById('account-info-view');
+    const edit = document.getElementById('account-info-edit');
+    if (!view || !edit) return;
+
+    // Populate form
+    document.getElementById('profile-name').value = currentProfile.name || '';
+    document.getElementById('profile-phone').value = currentProfile.phone || '';
+    document.getElementById('profile-address').value = currentProfile.address || '';
+    document.getElementById('profile-thana').value = currentProfile.thana || '';
+
+    populateDistrictDropdown();
+    document.getElementById('profile-district').value = currentProfile.district || '';
+
+    view.classList.add('hidden');
+    edit.classList.remove('hidden');
+    edit.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+window.cancelAddressEdit = function() {
+    const view = document.getElementById('account-info-view');
+    const edit = document.getElementById('account-info-edit');
+    if (view) view.classList.remove('hidden');
+    if (edit) edit.classList.add('hidden');
+};
+
+// ============ SAVE PROFILE ============
 window.saveProfile = async function() {
     if (!currentUser) return;
+
     const name = (document.getElementById('profile-name').value || '').trim();
     const phone = (document.getElementById('profile-phone').value || '').trim();
+    const address = (document.getElementById('profile-address').value || '').trim();
+    const district = document.getElementById('profile-district').value || '';
+    const thana = (document.getElementById('profile-thana').value || '').trim();
+
+    // Validation
     if (!name || name.length < 2) return showToast('সঠিক নাম দিন', 'error');
-    if (phone && !validatePhone(phone)) return showToast('সঠিক ফোন নাম্বার দিন', 'error');
+    if (!validatePhone(phone)) return showToast('সঠিক ফোন নাম্বার দিন (01XXXXXXXXX)', 'error');
+    if (!address || address.length < 5) return showToast('সম্পূর্ণ ঠিকানা দিন', 'error');
 
     const btn = document.getElementById('save-profile-btn');
     btn.disabled = true;
@@ -324,17 +424,30 @@ window.saveProfile = async function() {
 
     try {
         await setDoc(doc(db, "customers", currentUser.uid), {
-            name, phone, email: currentUser.email
+            name, phone,
+            email: currentUser.email,
+            address, district, thana,
+            updatedAt: new Date().toISOString()
         }, { merge: true });
+
         try { await updateProfile(currentUser, { displayName: name }); } catch (e) {}
+
+        // Update local state + header
+        currentProfile = { ...currentProfile, name, phone, address, district, thana };
         document.getElementById('user-display-name').textContent = name;
         document.getElementById('user-avatar-letter').textContent = (name[0] || 'U').toUpperCase();
-        showToast('প্রোফাইল সেভ হয়েছে ✅', 'success');
+
+        // Back to view mode
+        renderAccountInfoView();
+        window.cancelAddressEdit();
+
+        showToast('তথ্য সেভ হয়েছে ✅', 'success');
     } catch (e) {
+        console.error(e);
         showToast('সেভ করা যায়নি', 'error');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-save mr-1"></i> Save Changes';
+        btn.innerHTML = '<i class="fas fa-save mr-1"></i> Save';
     }
 };
 
@@ -412,7 +525,7 @@ function updateBadges() {
     } catch (e) {}
 }
 
-// ============ PREFILL REMEMBERED IDENTIFIER ============
+// ============ PREFILL REMEMBERED ============
 function prefillRemembered() {
     try {
         const saved = localStorage.getItem('heartix_remember');
@@ -442,3 +555,4 @@ setTimeout(function() {
 updateCartBadges();
 updateWishlistBadges();
 prefillRemembered();
+populateDistrictDropdown();
