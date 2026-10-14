@@ -213,7 +213,7 @@
                         <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Products</h2>
                         <p class="text-sm text-gray-500">Manage your product catalog</p>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 flex-wrap">
                         <button onclick="openProductReorder()" class="bg-blue-50 text-blue-700 border-2 border-blue-200 px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:bg-blue-100">
                             <i class="fas fa-sort"></i> Reorder
                         </button>
@@ -558,7 +558,7 @@
         </div>
     </div>
 
-    <!-- PRODUCT MODAL -->
+    <!-- PRODUCT MODAL (with Featured + Pin toggles) -->
     <div id="product-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -589,6 +589,26 @@
                 </div>
 
                 <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Description</label><textarea id="p-description" rows="3" maxlength="3000" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium resize-none"></textarea></div>
+
+                <!-- FEATURED + PIN TOGGLES -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 space-y-2">
+                    <p class="text-[11px] font-bold text-amber-800 uppercase tracking-wider mb-1"><i class="fas fa-star mr-1"></i>Homepage Display</p>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="p-featured" class="w-5 h-5 accent-[#D4A84B]">
+                        <div class="flex-1">
+                            <span class="text-sm font-semibold text-navy">Featured Product</span>
+                            <p class="text-[10px] text-gray-500 mt-0.5">Homepage-এর "Featured Products" section-এ দেখাবে</p>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="p-pinned" class="w-5 h-5 accent-[#D4A84B]">
+                        <div class="flex-1">
+                            <span class="text-sm font-semibold text-navy">Pin to Top</span>
+                            <p class="text-[10px] text-gray-500 mt-0.5">Top Selling section-এ সবার আগে দেখাবে</p>
+                        </div>
+                    </label>
+                </div>
+
                 <div>
                     <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Images * (Max 5)</label>
                     <div id="image-preview-grid" class="grid grid-cols-4 gap-2 my-3"></div>
@@ -820,7 +840,7 @@
         </div>
     </div>
 
-    <!-- PRODUCT REORDER MODAL (NEW) -->
+    <!-- PRODUCT REORDER MODAL -->
     <div id="product-reorder-modal" class="hidden fixed inset-0 modal-bg z-[75] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
