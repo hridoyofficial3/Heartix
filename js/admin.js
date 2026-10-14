@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX ADMIN — JavaScript (Complete)
+// HEARTIX ADMIN — JavaScript (Complete with repeat customer & IP flag)
 // ============================================================
 import { db, auth } from './firebase.js';
 import { escapeHtml, formatPrice as fmt } from './common.js';
@@ -275,12 +275,10 @@ window.saveInlineCategory = async function() {
         allCategories.push({ key, label, icon });
         await setDoc(doc(db, "settings", "main"), { categories: allCategories }, { merge: true });
 
-        // Refresh checkbox list, then check the newly added one
         populateCategoryCheckboxes();
         const newCb = document.querySelector(`#p-categories-list .cat-checkbox[value="${key}"]`);
         if (newCb) newCb.checked = true;
 
-        // Also refresh section dropdown + category list tab
         populateSectionDropdown();
         renderAdminCategories();
 
@@ -895,7 +893,6 @@ async function loadProducts() {
     } catch (e) {}
 }
 
-// Helper: get categories array from product (backward compatible)
 function getProductCategories(p) {
     if (Array.isArray(p.categories) && p.categories.length > 0) return p.categories;
     if (p.category) return [p.category];
@@ -938,7 +935,6 @@ window.openAddModal = function() {
     document.getElementById('p-stock').value = '10';
     document.getElementById('p-image-file').value = '';
     pendingImages = []; existingImages = [];
-    // Reset & repopulate checkboxes
     populateCategoryCheckboxes();
     renderImagePreview();
     document.getElementById('product-modal').classList.remove('hidden');
@@ -961,7 +957,6 @@ window.editProduct = function(id) {
     else if (p.image && typeof p.image === 'string') existingImages = [p.image];
     else existingImages = [];
 
-    // Set checkboxes based on product categories
     populateCategoryCheckboxes();
     const productCats = getProductCategories(p);
     document.querySelectorAll('#p-categories-list .cat-checkbox').forEach(cb => {
@@ -1010,7 +1005,6 @@ window.saveProduct = async function() {
     const oldPrice = oldPriceRaw ? parseFloat(oldPriceRaw) : 0;
     const stock = stockRaw ? parseInt(stockRaw) : 0;
 
-    // Read multi-categories from checkboxes
     const categories = Array.from(document.querySelectorAll('#p-categories-list .cat-checkbox:checked')).map(cb => cb.value);
 
     if (!name || name.length < 2) return toast("সঠিক নাম দিন", 'error');
@@ -1033,11 +1027,10 @@ window.saveProduct = async function() {
         const allImages = [...existingImages, ...newUrls].filter(u => typeof u === 'string' && u.length > 0);
         if (allImages.length === 0) throw new Error('No valid images');
 
-        // Save both: `categories` array (new) + `category` first value (backward compat)
         const data = {
             name, price, oldPrice,
-            category: categories[0],   // legacy — first category
-            categories: categories,     // new multi-category array
+            category: categories[0],
+            categories: categories,
             stock, brand, description,
             image: allImages[0], images: allImages
         };
@@ -1088,11 +1081,18 @@ window.filterOrders = function(filter, btn) {
 
 window.exportOrdersCSV = function() {
     if (allOrdersList.length === 0) return toast('কোনো order নেই', 'warn');
-    let csv = 'Order Number,Date,Customer,Phone,District,Thana,Items,Subtotal,Delivery,Total,Paid,Due,Status,Payment\n';
+    let csv = 'Order Number,Date,Customer,Phone,District,Thana,Items,Subtotal,Delivery,Total,Paid,Due,Status,Payment,Repeat,CustomerOrders,IP,Flagged\n';
     allOrdersList.forEach(o => {
         const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString('en-GB') : '';
         const items = (o.items || []).map(i => `${i.name} x${i.quantity}`).join(' | ');
-        const row = [o.orderNumber || o.id, date, o.customer?.name || '', o.customer?.phone || '', o.customer?.district || '', o.customer?.thana || '', items, o.subtotal || 0, o.deliveryCharge || 0, o.total || 0, o.advancePaid || 0, o.dueAmount || 0, o.status || 'pending', o.paymentMethod || ''].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+        const c = o.customer || {};
+        const row = [
+            o.orderNumber || o.id, date, c.name || '', c.phone || '', c.district || '', c.thana || '',
+            items, o.subtotal || 0, o.deliveryCharge || 0, o.total || 0, o.advancePaid || 0, o.dueAmount || 0,
+            o.status || 'pending', o.paymentMethod || '',
+            c.isRepeat ? 'Yes' : 'No', c.orderCount || 1,
+            c.ipAddress || '', c.flagged ? 'SameIP' : ''
+        ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
         csv += row + '\n';
     });
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -1128,18 +1128,37 @@ function renderAdminOrders() {
         const orderDate = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '';
         const statusMeta = { pending: { icon: 'hourglass-half', label: 'Pending' }, confirmed: { icon: 'circle-check', label: 'Confirmed' }, shipped: { icon: 'truck-fast', label: 'Shipped' }, delivered: { icon: 'box-open', label: 'Delivered' }, cancelled: { icon: 'circle-xmark', label: 'Cancelled' } };
         const current = statusMeta[o.status] || statusMeta.pending;
+
+        // Repeat customer + IP flag badges
+        let customerBadges = '';
+        if (o.customer?.isRepeat) {
+            customerBadges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-repeat"></i> Repeat (${o.customer.orderCount || '?'})</span>`;
+        } else {
+            customerBadges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-star"></i> First-time</span>`;
+        }
+        if (o.customer?.flagged) {
+            customerBadges += `<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full"><i class="fas fa-exclamation-triangle"></i> Same IP</span>`;
+        }
+
+        const addressLine = [
+            o.customer?.address || '',
+            o.customer?.thana || '',
+            o.customer?.district || ''
+        ].filter(Boolean).join(', ');
+
         html += `<div class="bg-white rounded-2xl p-4 premium-shadow border-l-4 border-gold">
             <div class="flex justify-between items-start mb-3 gap-2">
                 <div class="min-w-0 flex-1">
                     <p class="font-bold text-navy text-sm">${escapeHtml(o.orderNumber || o.id.slice(0,8))}</p>
                     <p class="text-[11px] text-gray-500 mt-0.5 truncate">${escapeHtml(o.customer?.name || '')} • ${escapeHtml(o.customer?.phone || '')}</p>
+                    <div class="flex gap-1 mt-1.5 flex-wrap">${customerBadges}</div>
                 </div>
                 <div class="text-right flex-shrink-0">
                     <span class="order-status ${statusClass}">${o.status || 'pending'}</span>
                     ${orderDate ? `<p class="text-[10px] text-gray-400 mt-1">${orderDate}</p>` : ''}
                 </div>
             </div>
-            <p class="text-xs text-gray-600 mb-3"><i class="fas fa-map-marker-alt text-gray-300 mr-1"></i>${escapeHtml(o.customer?.address || '')}, ${escapeHtml(o.customer?.thana || '')}, ${escapeHtml(o.customer?.district || '')}</p>
+            <p class="text-xs text-gray-600 mb-3"><i class="fas fa-map-marker-alt text-gray-300 mr-1"></i>${escapeHtml(addressLine)}</p>
             <div class="bg-gray-50 rounded-xl p-3 mb-3"><ul class="text-xs text-gray-700 space-y-1.5">${itemsHtml}</ul></div>
             <div class="grid grid-cols-3 gap-2 text-center mb-3">
                 <div class="bg-gray-50 rounded-xl p-2.5"><p class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Total</p><p class="text-sm font-bold text-navy mt-0.5">৳${fmt(o.total)}</p></div>
