@@ -7,17 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-    <script>tailwind.config = { theme: { extend: { colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' } }, fontFamily: { 'display': ['Playfair Display', 'serif'] }}}}</script>
-    <style>
-        body { font-family: 'Inter', sans-serif; background: #FBF8F3; }
-        .font-display { font-family: 'Playfair Display', serif; }
-        .navy-gradient { background: linear-gradient(135deg, #0A1628 0%, #152238 100%); }
-        .gold-gradient { background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 50%, #D4A84B 100%); }
-        .gold-text { color: #D4A84B; }
-        .navy-text { color: #0A1628; }
-        .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); }
-        .premium-shadow { box-shadow: 0 4px 20px rgba(10,22,40,0.08); }
-    </style>
+    <script>
+        tailwind.config = { theme: { extend: {
+            colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' } },
+            fontFamily: { 'display': ['Playfair Display', 'serif'] }
+        }}}
+    </script>
+    <link rel="stylesheet" href="css/common.css">
 </head>
 <body class="pb-6">
 
@@ -128,7 +124,7 @@
         (function() {
             try {
                 const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
-                const count = cart.reduce((s, i) => s + (i.quantity || 0), 0);
+                const count = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
                 document.getElementById('cart-count-header').textContent = count;
             } catch (e) {}
         })();
