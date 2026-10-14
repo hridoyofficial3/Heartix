@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX ACCOUNT PAGE — Firebase Auth + Profile + Orders
+// HEARTIX ACCOUNT — Email/Phone Login + Google Sign-in
 // ============================================================
 import { db, auth } from './firebase.js';
 import {
@@ -8,7 +8,7 @@ import {
 } from './common.js';
 
 import {
-    collection, getDocs, doc, getDoc, setDoc
+    collection, getDocs, doc, getDoc, setDoc, query, where, limit
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
     createUserWithEmailAndPassword,
@@ -16,14 +16,18 @@ import {
     signOut,
     onAuthStateChanged,
     sendPasswordResetEmail,
-    updateProfile
+    updateProfile,
+    GoogleAuthProvider,
+    signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // ============ STATE ============
 let currentUser = null;
+let activeTab = 'login';
 
-// ============ FALLBACK (in case module fails) ============
+// ============ FALLBACK (before module loads) ============
 window.switchTab = function(tab) {
+    activeTab = tab;
     const loginTab = document.getElementById('tab-login');
     const regTab = document.getElementById('tab-register');
     const loginForm = document.getElementById('login-form');
@@ -41,30 +45,55 @@ window.switchTab = function(tab) {
     }
 };
 
+window.togglePassword = function(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        if (btn) btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+    } else {
+        input.type = 'password';
+        if (btn) btn.innerHTML = '<i class="fas fa-eye"></i>';
+    }
+};
+
+window.loginUser = window.loginUser || function() { alert('Firebase লোড হচ্ছে...'); };
+window.registerUser = window.registerUser || function() { alert('Firebase লোড হচ্ছে...'); };
+window.forgotPassword = window.forgotPassword || function() { alert('Firebase লোড হচ্ছে...'); };
+window.googleSignIn = window.googleSignIn || function() { alert('Firebase লোড হচ্ছে...'); };
+window.logoutUser = window.logoutUser || function() { location.reload(); };
+window.saveProfile = window.saveProfile || function() { alert('Firebase লোড হচ্ছে...'); };
+window.loadMyOrders = window.loadMyOrders || function() {};
+
 // ============ HELPERS ============
 function showSection(id) {
     const loading = document.getElementById('loading');
-    const auth = document.getElementById('auth-section');
-    const logged = document.getElementById('logged-section');
+    const authSec = document.getElementById('auth-section');
+    const loggedSec = document.getElementById('logged-section');
     if (loading) loading.classList.add('hidden');
     if (id === 'auth') {
-        if (auth) auth.classList.remove('hidden');
-        if (logged) logged.classList.add('hidden');
+        if (authSec) authSec.classList.remove('hidden');
+        if (loggedSec) loggedSec.classList.add('hidden');
     } else {
-        if (logged) logged.classList.remove('hidden');
-        if (auth) auth.classList.add('hidden');
+        if (loggedSec) loggedSec.classList.remove('hidden');
+        if (authSec) authSec.classList.add('hidden');
     }
 }
 
-function validatePhone(p) {
-    return /^01[3-9]\d{8}$/.test(p);
-}
+function validatePhone(p) { return /^01[3-9]\d{8}$/.test(p); }
+function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
 function setFieldError(id, hasError) {
     const el = document.getElementById(id);
     if (!el) return;
-    if (hasError) el.classList.add('field-error');
-    else el.classList.remove('field-error');
+    const wrap = el.closest('.input-wrap');
+    if (wrap) {
+        if (hasError) wrap.classList.add('field-error');
+        else wrap.classList.remove('field-error');
+    } else {
+        if (hasError) el.classList.add('field-error');
+        else el.classList.remove('field-error');
+    }
 }
 
 // ============ AUTH STATE ============
@@ -85,28 +114,99 @@ onAuthStateChanged(auth, async (user) => {
 
 // ============ LOGIN ============
 window.loginUser = async function() {
-    const email = (document.getElementById('login-email').value || '').trim();
+    const identifier = (document.getElementById('login-email').value || '').trim();
     const password = document.getElementById('login-password').value || '';
-    if (!email || !password) return showToast('ইমেইল ও পাসওয়ার্ড দিন', 'error');
+    const remember = document.getElementById('remember-me')?.checked;
+
+    if (!identifier) {
+        setFieldError('login-email', true);
+        return showToast('ইমেইল বা ফোন নাম্বার দিন', 'error');
+    }
+    if (!password) {
+        setFieldError('login-password', true);
+        return showToast('পাসওয়ার্ড দিন', 'error');
+    }
+    setFieldError('login-email', false);
+    setFieldError('login-password', false);
 
     const btn = document.getElementById('login-btn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Logging in...';
 
     try {
+        let email = identifier;
+
+        // If phone number, lookup email from customers collection
+        if (validatePhone(identifier)) {
+            const q = query(collection(db, "customers"), where("phone", "==", identifier), limit(1));
+            const snap = await getDocs(q);
+            if (snap.empty) {
+                btn.disabled = false;
+                btn.innerHTML = 'Login';
+                return showToast('এই ফোন নাম্বারে কোনো account নেই', 'error');
+            }
+            email = snap.docs[0].data().email;
+            if (!email) {
+                btn.disabled = false;
+                btn.innerHTML = 'Login';
+                return showToast('এই account-এ email নেই, email দিয়ে login করুন', 'error');
+            }
+        }
+
         await signInWithEmailAndPassword(auth, email, password);
+
+        // Remember me → save identifier for prefill next time
+        try {
+            if (remember) localStorage.setItem('heartix_remember', identifier);
+            else localStorage.removeItem('heartix_remember');
+        } catch (e) {}
+
         document.getElementById('login-password').value = '';
-        showToast('সফলভাবে লগইন হয়েছেন', 'success');
+        showToast('সফলভাবে লগইন হয়েছেন ✅', 'success');
     } catch (e) {
         let msg = 'লগইন ব্যর্থ';
-        if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') msg = 'ইমেইল বা পাসওয়ার্ড ভুল';
-        else if (e.code === 'auth/user-not-found') msg = 'এই ইমেইলে account নেই';
+        if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') msg = 'পাসওয়ার্ড ভুল';
+        else if (e.code === 'auth/user-not-found') msg = 'এই account নেই';
         else if (e.code === 'auth/invalid-email') msg = 'সঠিক ইমেইল দিন';
         else if (e.code === 'auth/too-many-requests') msg = 'অনেকবার ভুল — কিছুক্ষণ পর চেষ্টা';
         showToast(msg, 'error');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> LOGIN';
+        btn.innerHTML = 'Login';
+    }
+};
+
+// ============ GOOGLE SIGN-IN ============
+window.googleSignIn = async function() {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        // Save to customers collection if first time
+        try {
+            const snap = await getDoc(doc(db, "customers", user.uid));
+            if (!snap.exists()) {
+                await setDoc(doc(db, "customers", user.uid), {
+                    uid: user.uid,
+                    name: user.displayName || '',
+                    email: user.email || '',
+                    phone: '',
+                    photoURL: user.photoURL || '',
+                    provider: 'google',
+                    createdAt: new Date().toISOString()
+                });
+            }
+        } catch (e) { console.warn('Customer save failed:', e); }
+
+        showToast('Google দিয়ে লগইন সফল ✅', 'success');
+    } catch (e) {
+        if (e.code === 'auth/popup-closed-by-user') return;
+        if (e.code === 'auth/popup-blocked') return showToast('Popup block হয়েছে — browser settings চেক করুন', 'error');
+        if (e.code === 'auth/operation-not-allowed') return showToast('Firebase Console-এ Google Sign-in enable করা হয়নি', 'error');
+        if (e.code === 'auth/unauthorized-domain') return showToast('এই domain Firebase-এ authorized নয়', 'error');
+        showToast('Google login ব্যর্থ: ' + (e.message || e.code), 'error');
     }
 };
 
@@ -120,7 +220,7 @@ window.registerUser = async function() {
 
     if (!name || name.length < 2) return showToast('সঠিক নাম দিন', 'error');
     if (!validatePhone(phone)) return showToast('সঠিক ফোন নাম্বার (01XXXXXXXXX)', 'error');
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('সঠিক ইমেইল দিন', 'error');
+    if (!validateEmail(email)) return showToast('সঠিক ইমেইল দিন', 'error');
     if (!password || password.length < 6) return showToast('পাসওয়ার্ড কমপক্ষে ৬ অক্ষর', 'error');
     if (password !== confirm) return showToast('পাসওয়ার্ড দুইটা মিলছে না', 'error');
 
@@ -134,12 +234,13 @@ window.registerUser = async function() {
         try {
             await setDoc(doc(db, "customers", cred.user.uid), {
                 uid: cred.user.uid,
-                name: name, phone: phone, email: email,
+                name, phone, email,
+                provider: 'email',
                 createdAt: new Date().toISOString()
             }, { merge: true });
-        } catch (e) { console.warn('Profile save failed:', e); }
+        } catch (e) { console.warn('Customer save failed:', e); }
 
-        showToast('Account তৈরি হয়েছে!', 'success');
+        showToast('Account তৈরি হয়েছে ✅', 'success');
         ['reg-name','reg-phone','reg-email','reg-password','reg-confirm'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.value = '';
@@ -153,17 +254,25 @@ window.registerUser = async function() {
         showToast(msg, 'error');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-user-plus mr-2"></i> REGISTER';
+        btn.innerHTML = 'Register';
     }
 };
 
 // ============ FORGOT PASSWORD ============
 window.forgotPassword = async function() {
-    const email = (document.getElementById('login-email').value || '').trim();
-    if (!email) return showToast('প্রথমে ইমেইল লিখুন', 'warn');
+    const identifier = (document.getElementById('login-email').value || '').trim();
+    if (!identifier) return showToast('প্রথমে ইমেইল বা ফোন লিখুন', 'warn');
+
+    let email = identifier;
     try {
+        if (validatePhone(identifier)) {
+            const q = query(collection(db, "customers"), where("phone", "==", identifier), limit(1));
+            const snap = await getDocs(q);
+            if (snap.empty) return showToast('এই ফোনে কোনো account নেই', 'error');
+            email = snap.docs[0].data().email;
+        }
         await sendPasswordResetEmail(auth, email);
-        showToast('Reset link ইমেইলে পাঠানো হয়েছে', 'success');
+        showToast('Reset link ' + email + '-এ পাঠানো হয়েছে ✅', 'success');
     } catch (e) {
         showToast('পাঠানো যায়নি — ইমেইল চেক করুন', 'error');
     }
@@ -215,12 +324,12 @@ window.saveProfile = async function() {
 
     try {
         await setDoc(doc(db, "customers", currentUser.uid), {
-            name: name, phone: phone, email: currentUser.email
+            name, phone, email: currentUser.email
         }, { merge: true });
         try { await updateProfile(currentUser, { displayName: name }); } catch (e) {}
         document.getElementById('user-display-name').textContent = name;
         document.getElementById('user-avatar-letter').textContent = (name[0] || 'U').toUpperCase();
-        showToast('প্রোফাইল সেভ হয়েছে', 'success');
+        showToast('প্রোফাইল সেভ হয়েছে ✅', 'success');
     } catch (e) {
         showToast('সেভ করা যায়নি', 'error');
     } finally {
@@ -245,8 +354,8 @@ window.loadMyOrders = async function() {
             }
         });
         orders.sort((a, b) => {
-            const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
-            const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+            const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+            const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
             return tb - ta;
         });
 
@@ -262,7 +371,7 @@ window.loadMyOrders = async function() {
         let html = '';
         orders.slice(0, 10).forEach(o => {
             const statusClass = 'status-' + (o.status || 'pending');
-            const date = o.createdAt && o.createdAt.toDate
+            const date = o.createdAt?.toDate
                 ? o.createdAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
                 : '';
             html += `<a href="track-order.html?order=${encodeURIComponent(o.orderNumber || '')}" class="block bg-gray-50 rounded-xl p-3 active:bg-gray-100">
@@ -303,7 +412,20 @@ function updateBadges() {
     } catch (e) {}
 }
 
-// ============ FORCE SHOW AUTH (bulletproof fallback) ============
+// ============ PREFILL REMEMBERED IDENTIFIER ============
+function prefillRemembered() {
+    try {
+        const saved = localStorage.getItem('heartix_remember');
+        if (saved) {
+            const input = document.getElementById('login-email');
+            if (input) input.value = saved;
+            const cb = document.getElementById('remember-me');
+            if (cb) cb.checked = true;
+        }
+    } catch (e) {}
+}
+
+// ============ BULLETPROOF FALLBACK ============
 setTimeout(function() {
     const loading = document.getElementById('loading');
     const authSec = document.getElementById('auth-section');
@@ -319,3 +441,4 @@ setTimeout(function() {
 // ============ INIT ============
 updateCartBadges();
 updateWishlistBadges();
+prefillRemembered();
