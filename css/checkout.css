@@ -1,0 +1,56 @@
+/* ========== CHECKOUT PAGE STYLES ========== */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #FBF8F3;
+    overflow-x: hidden;
+}
+
+/* Payment option cards */
+.payment-option {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.payment-option.selected {
+    border-color: #D4A84B;
+    background: #FBF8F3;
+}
+.payment-option.selected .check-circle {
+    display: block;
+}
+.check-circle {
+    display: none;
+}
+
+/* Inputs */
+input, select, textarea {
+    font-family: 'Inter', sans-serif;
+}
+input:focus, select:focus, textarea:focus {
+    border-color: #D4A84B !important;
+}
+.field-error {
+    border-color: #dc2626 !important;
+    background: #FEF2F2;
+}
+
+/* All checkout numbers - Inter Bold (no serif) */
+#checkout-subtotal,
+#checkout-discount,
+#checkout-delivery,
+#checkout-total {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.01em;
+}
+
+#checkout-subtotal,
+#checkout-discount,
+#checkout-delivery {
+    font-size: 15px;
+}
+
+#checkout-total {
+    font-size: 20px;
+    font-weight: 800 !important;
+}
