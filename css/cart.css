@@ -18,29 +18,28 @@ body {
     box-shadow: 0 0 0 3px rgba(212,168,75,0.12);
 }
 
-/* ========== FORCE PLAYFAIR ON ALL PRICES ========== */
-.price-number,
+/* ========== ALL NUMBERS: INTER BOLD (clean, no serif) ========== */
+.price-per-item,
+.price-line-total,
 #subtotal,
 #discount-amount,
 #delivery-charge,
 #total,
-#free-delivery-amount,
-.price-per-item,
-.price-line-total {
-    font-family: 'Playfair Display', serif !important;
+#free-delivery-amount {
+    font-family: 'Inter', sans-serif !important;
     font-weight: 700 !important;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
 }
 
 /* Line item price (৳ 250 - per item) */
 .price-per-item {
-    font-size: 18px;
+    font-size: 16px;
     color: #0A1628;
 }
 
 /* Line total (৳ 1400 - right side) */
 .price-line-total {
-    font-size: 18px;
+    font-size: 16px;
     color: #0A1628;
 }
 
@@ -48,9 +47,10 @@ body {
 #subtotal,
 #discount-amount,
 #delivery-charge {
-    font-size: 18px;
+    font-size: 15px;
 }
 
 #total {
-    font-size: 26px;
+    font-size: 20px;
+    font-weight: 800 !important;
 }
