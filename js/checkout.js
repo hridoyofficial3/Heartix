@@ -1,7 +1,7 @@
 // ============================================================
-// HEARTIX CHECKOUT — with repeat customer + IP tracking + back trap
+// HEARTIX CHECKOUT — with logged-in autofill + repeat customer + IP
 // ============================================================
-import { db } from './firebase.js';
+import { db, auth } from './firebase.js';
 import {
     escapeHtml, formatPrice, showToast,
     getCart, saveCart, validatePhone, generateOrderNumber
@@ -12,6 +12,9 @@ import {
     collection, doc, getDoc, getDocs, query, where,
     runTransaction, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // ============ STATE ============
 let settings = { deliveryCharge: 100, freeDeliveryAbove: 0, bkashNumber: '', nagadNumber: '', whatsapp: '' };
@@ -25,12 +28,15 @@ let autoFillSourceOrder = null;
 let lastCheckedPhone = '';
 let phoneLookupTimer = null;
 let backTrapActive = false;
+let loggedInUser = null;
+let loggedInProfile = null;
 const RECENT_ORDER_WINDOW_MIN = 10;
 
 // ============ HELPERS ============
 function initDistricts() {
     const sel = document.getElementById('customer-district');
     if (!sel) return;
+    const currentVal = sel.value;
     sel.innerHTML = '<option value="">Select District</option>';
     const sorted = [...new Set(DISTRICTS)].sort();
     sorted.forEach(d => {
@@ -39,6 +45,7 @@ function initDistricts() {
         opt.textContent = d;
         sel.appendChild(opt);
     });
+    if (currentVal) sel.value = currentVal;
 }
 
 // Load saved coupon
@@ -160,6 +167,56 @@ async function validateCoupon(coupon, subtotal) {
     }
 }
 
+// ============ LOAD LOGGED-IN USER PROFILE ============
+async function loadLoggedInUser() {
+    return new Promise((resolve) => {
+        const unsub = onAuthStateChanged(auth, async (user) => {
+            try { unsub(); } catch (e) {}
+            if (user) {
+                loggedInUser = user;
+                try {
+                    const snap = await getDoc(doc(db, "customers", user.uid));
+                    if (snap.exists()) {
+                        loggedInProfile = snap.data();
+                    } else {
+                        loggedInProfile = { email: user.email, name: user.displayName || '' };
+                    }
+                } catch (e) {
+                    loggedInProfile = { email: user.email, name: user.displayName || '' };
+                }
+            }
+            resolve();
+        });
+    });
+}
+
+// Pre-fill from logged-in profile
+function prefillFromLoggedInProfile() {
+    if (!loggedInUser || !loggedInProfile) return false;
+
+    const p = loggedInProfile;
+    let filled = false;
+
+    if (p.name) { document.getElementById('customer-name').value = p.name; filled = true; }
+    if (p.phone) { document.getElementById('customer-phone').value = p.phone; filled = true; }
+    if (p.email || loggedInUser.email) {
+        document.getElementById('customer-email').value = p.email || loggedInUser.email;
+        filled = true;
+    }
+    if (p.address) { document.getElementById('customer-address').value = p.address; filled = true; }
+    if (p.district) { document.getElementById('customer-district').value = p.district; filled = true; }
+    if (p.thana) { document.getElementById('customer-thana').value = p.thana; filled = true; }
+
+    if (filled) {
+        showToast('আপনার saved তথ্য অটো-ফিল করা হয়েছে ✅', 'success');
+    }
+
+    // Mark phone as already-checked to skip repeat modal
+    if (p.phone) lastCheckedPhone = p.phone;
+
+    return filled;
+}
+
 // ============ LOAD SETTINGS ============
 async function loadSettings() {
     fetchIP().then(ip => { currentIP = ip; });
@@ -196,9 +253,17 @@ async function afterLoad() {
     attachPaymentListeners();
     attachPhoneListener();
 
+    // Check if user is logged in
+    await loadLoggedInUser();
+
     const result = await loadFreshCartData();
     renderOrderReview();
     await updateSummary();
+
+    // Auto-fill from logged-in profile
+    if (loggedInUser) {
+        prefillFromLoggedInProfile();
+    }
 
     updatePaymentInfo('full-cod');
 
@@ -226,6 +291,8 @@ function attachPhoneListener() {
         if (phoneLookupTimer) clearTimeout(phoneLookupTimer);
         if (phone.length !== 11) return;
         if (phone === lastCheckedPhone) return;
+        // Skip if logged-in user's own phone
+        if (loggedInProfile && loggedInProfile.phone === phone) return;
 
         phoneLookupTimer = setTimeout(() => {
             lastCheckedPhone = phone;
@@ -339,7 +406,6 @@ window.showWarningModal = function(order, minutesAgo) {
 window.cancelFromWarning = function() {
     document.getElementById('warning-modal').classList.add('hidden');
     releaseBackTrap();
-    // Clear fields so user cannot silently bypass by continuing
     document.getElementById('customer-phone').value = '';
     document.getElementById('customer-name').value = '';
     document.getElementById('customer-address').value = '';
@@ -393,7 +459,6 @@ window.showHistoryModal = function() {
 
 window.closeHistoryModal = function() {
     document.getElementById('history-modal').classList.add('hidden');
-    // If nothing else is open, release the trap
     const warnOpen = !document.getElementById('warning-modal').classList.contains('hidden');
     const repOpen = !document.getElementById('repeat-modal').classList.contains('hidden');
     if (!warnOpen && !repOpen) releaseBackTrap();
