@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX CHECKOUT — with repeat customer + IP tracking
+// HEARTIX CHECKOUT — with repeat customer + IP tracking + back trap
 // ============================================================
 import { db } from './firebase.js';
 import {
@@ -20,10 +20,11 @@ let isPlacingOrder = false;
 let cachedFreshPrices = {};
 let appliedCoupon = null;
 let currentIP = '';
-let previousOrders = [];        // cached from phone lookup
-let autoFillSourceOrder = null; // the order to auto-fill from
+let previousOrders = [];
+let autoFillSourceOrder = null;
 let lastCheckedPhone = '';
 let phoneLookupTimer = null;
+let backTrapActive = false;
 const RECENT_ORDER_WINDOW_MIN = 10;
 
 // ============ HELPERS ============
@@ -46,7 +47,7 @@ try {
     if (saved && saved.code) appliedCoupon = saved;
 } catch (e) {}
 
-// ============ IP FETCH (free API) ============
+// ============ IP FETCH ============
 async function fetchIP() {
     try {
         const res = await fetch('https://api.ipify.org?format=json', { cache: 'no-store' });
@@ -89,7 +90,6 @@ async function checkSameIPRecent(ip, phone) {
             const data = d.data();
             const cPhone = data.customer?.phone || '';
             const ts = data.createdAt?.toMillis ? data.createdAt.toMillis() : 0;
-            // Different phone, but same IP, within window
             if (cPhone !== phone && ts && (now - ts) < windowMs) {
                 found = true;
             }
@@ -162,7 +162,6 @@ async function validateCoupon(coupon, subtotal) {
 
 // ============ LOAD SETTINGS ============
 async function loadSettings() {
-    // Start IP fetch in parallel (doesn't block)
     fetchIP().then(ip => { currentIP = ip; });
 
     if (!db) { isLoading = false; afterLoad(); return; }
@@ -215,12 +214,11 @@ async function afterLoad() {
     }
 }
 
-// ============ PHONE INPUT LISTENER (auto-suggest) ============
+// ============ PHONE INPUT LISTENER ============
 function attachPhoneListener() {
     const phoneInput = document.getElementById('customer-phone');
     if (!phoneInput) return;
     phoneInput.addEventListener('input', (e) => {
-        // Only digits
         const raw = e.target.value.replace(/\D/g, '');
         if (raw !== e.target.value) e.target.value = raw;
         const phone = raw;
@@ -245,7 +243,6 @@ async function handlePhoneLookup(phone) {
     const latest = orders[0];
     autoFillSourceOrder = latest;
 
-    // Calculate time since last order
     const ts = latest.createdAt?.toMillis ? latest.createdAt.toMillis() : 0;
     const minutesAgo = ts ? Math.floor((Date.now() - ts) / 60000) : null;
 
@@ -253,6 +250,33 @@ async function handlePhoneLookup(phone) {
         showWarningModal(latest, minutesAgo);
     } else {
         showRepeatModal(latest, orders.length);
+    }
+}
+
+// ============ BACK BUTTON TRAP ============
+function activateBackTrap() {
+    if (backTrapActive) return;
+    backTrapActive = true;
+    try { history.pushState({ trap: true }, '', location.href); } catch (e) {}
+    window.addEventListener('popstate', handlePopState);
+    document.body.style.overflow = 'hidden';
+}
+
+function releaseBackTrap() {
+    if (!backTrapActive) return;
+    backTrapActive = false;
+    window.removeEventListener('popstate', handlePopState);
+    document.body.style.overflow = '';
+}
+
+function handlePopState() {
+    const warnOpen = !document.getElementById('warning-modal').classList.contains('hidden');
+    const repOpen = !document.getElementById('repeat-modal').classList.contains('hidden');
+    const histOpen = !document.getElementById('history-modal').classList.contains('hidden');
+    if (warnOpen || repOpen || histOpen) {
+        try { history.pushState({ trap: true }, '', location.href); } catch (e) {}
+    } else {
+        releaseBackTrap();
     }
 }
 
@@ -284,15 +308,18 @@ window.showRepeatModal = function(order, count) {
     statusEl.textContent = (order.status || 'pending').toUpperCase();
     statusEl.className = 'text-[9px] px-2 py-0.5 rounded-full font-bold uppercase flex-shrink-0 ' + getStatusClass(order.status);
     document.getElementById('repeat-modal').classList.remove('hidden');
+    activateBackTrap();
 }
 
 window.closeRepeatModal = function() {
     document.getElementById('repeat-modal').classList.add('hidden');
+    releaseBackTrap();
 }
 
 window.continueFromRepeat = function() {
     autoFillFromOrder(autoFillSourceOrder);
-    closeRepeatModal();
+    document.getElementById('repeat-modal').classList.add('hidden');
+    releaseBackTrap();
     showToast('তথ্য অটো-ফিল করা হয়েছে ✅', 'success');
 }
 
@@ -306,18 +333,32 @@ window.showWarningModal = function(order, minutesAgo) {
     statusEl.className = 'text-[9px] px-2 py-0.5 rounded-full font-bold uppercase flex-shrink-0 ' + getStatusClass(order.status);
     document.getElementById('warn-track-link').href = 'track-order.html?order=' + encodeURIComponent(order.orderNumber || '');
     document.getElementById('warning-modal').classList.remove('hidden');
+    activateBackTrap();
 }
 
-window.closeWarningModal = function() {
+window.cancelFromWarning = function() {
     document.getElementById('warning-modal').classList.add('hidden');
-    // Optional: clear phone so user can type another one
-    // lastCheckedPhone = '';
+    releaseBackTrap();
+    // Clear fields so user cannot silently bypass by continuing
+    document.getElementById('customer-phone').value = '';
+    document.getElementById('customer-name').value = '';
+    document.getElementById('customer-address').value = '';
+    document.getElementById('customer-district').value = '';
+    document.getElementById('customer-thana').value = '';
+    lastCheckedPhone = '';
+    autoFillSourceOrder = null;
+    showToast('ফোন নাম্বার আবার লিখুন বা আগের Order Track করুন', 'info');
+    setTimeout(() => {
+        const p = document.getElementById('customer-phone');
+        if (p) p.focus();
+    }, 250);
 }
 
 window.continueFromWarning = function() {
     autoFillFromOrder(autoFillSourceOrder);
-    closeWarningModal();
-    showToast('নতুন অর্ডারের জন্য প্রস্তুত', 'success');
+    document.getElementById('warning-modal').classList.add('hidden');
+    releaseBackTrap();
+    showToast('নতুন অর্ডারের জন্য প্রস্তুত ✅', 'success');
 }
 
 window.showHistoryModal = function() {
@@ -352,6 +393,10 @@ window.showHistoryModal = function() {
 
 window.closeHistoryModal = function() {
     document.getElementById('history-modal').classList.add('hidden');
+    // If nothing else is open, release the trap
+    const warnOpen = !document.getElementById('warning-modal').classList.contains('hidden');
+    const repOpen = !document.getElementById('repeat-modal').classList.contains('hidden');
+    if (!warnOpen && !repOpen) releaseBackTrap();
 }
 
 // ============ AUTO-FILL ============
@@ -508,7 +553,6 @@ function validateForm() {
     const phone = (document.getElementById('customer-phone').value || '').trim();
     const email = (document.getElementById('customer-email').value || '').trim();
     const address = (document.getElementById('customer-address').value || '').trim();
-    // District & Thana now optional — no validation
     let ok = true;
 
     if (!name || name.length < 2) { setFieldError('customer-name', true); if (ok) showToast('সঠিক নাম দিন', 'error'); ok = false; }
@@ -526,7 +570,7 @@ function validateForm() {
     return ok;
 }
 
-// ============ PLACE ORDER (ATOMIC TRANSACTION) ============
+// ============ PLACE ORDER ============
 window.placeOrder = async function() {
     if (isPlacingOrder) return;
     const cart = getCart();
@@ -549,15 +593,12 @@ window.placeOrder = async function() {
     try {
         if (!db) throw new Error("Database connection failed");
 
-        // Make sure IP is fetched
         if (!currentIP) {
             currentIP = await fetchIP();
         }
 
-        // Final check: same IP (with different phone) within window → flag
         const ipFlagged = await checkSameIPRecent(currentIP, phone);
 
-        // Get previous order count for this phone (if not already looked up)
         if (previousOrders.length === 0) {
             previousOrders = await lookupOrdersByPhone(phone);
         }
@@ -565,7 +606,6 @@ window.placeOrder = async function() {
         const orderCount = previousOrders.length + 1;
         const previousOrderNumbers = previousOrders.slice(0, 5).map(o => o.orderNumber || '').filter(Boolean);
 
-        // Coupon data
         let couponData = null;
         if (appliedCoupon && appliedCoupon.code) {
             const cSnap = await getDoc(doc(db, "coupons", appliedCoupon.code));
