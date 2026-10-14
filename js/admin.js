@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX ADMIN — JavaScript (Complete + Featured + Pin to Top)
+// HEARTIX ADMIN — JavaScript (Complete + Featured + Pin + Smart Delete)
 // ============================================================
 import { db, auth } from './firebase.js';
 import { escapeHtml, formatPrice as fmt } from './common.js';
@@ -97,7 +97,7 @@ async function verifyAdmin(uid) {
     return false;
 }
 
-// ============ MORE MENU (Mobile) ============
+// ============ MORE MENU ============
 window.openMoreMenu = function() {
     document.getElementById('more-menu-modal').classList.remove('hidden');
 }
@@ -269,7 +269,6 @@ window.openInlineCategoryModal = function() {
     document.getElementById('inline-cat-icon').value = '';
     document.getElementById('inline-cat-modal').classList.remove('hidden');
 }
-
 window.closeInlineCategoryModal = function() {
     document.getElementById('inline-cat-modal').classList.add('hidden');
 }
@@ -280,21 +279,16 @@ window.saveInlineCategory = async function() {
     const icon = document.getElementById('inline-cat-icon').value.trim() || '📦';
     if (!key || !label) return toast('Key ও Name দুটোই দিন', 'error');
     if (allCategories.some(c => c.key === key)) return toast('এই Key আগে থেকেই আছে', 'error');
-
     const btn = document.getElementById('inline-cat-save-btn');
     btn.disabled = true; btn.textContent = 'Saving...';
-
     try {
         allCategories.push({ key, label, icon });
         await setDoc(doc(db, "settings", "main"), { categories: allCategories }, { merge: true });
-
         populateCategoryCheckboxes();
         const newCb = document.querySelector(`#p-categories-list .cat-checkbox[value="${key}"]`);
         if (newCb) newCb.checked = true;
-
         populateSectionDropdown();
         renderAdminCategories();
-
         closeInlineCategoryModal();
         toast('Category যোগ হয়েছে!');
     } catch (e) {
@@ -923,8 +917,6 @@ window.renderAdminProducts = function() {
         const stock = Number(p.stock) || 0;
         const badge = stock <= 0 ? '<span class="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">OUT</span>' :
             (stock < 5 ? `<span class="text-[10px] font-bold bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">${stock} left</span>` : `<span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">${stock} in stock</span>`);
-
-        // Featured + Pinned badges
         let badges = badge;
         if (p.featured === true) {
             badges += ' <span class="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full"><i class="fas fa-star text-[8px] mr-0.5"></i>Featured</span>';
@@ -932,7 +924,6 @@ window.renderAdminProducts = function() {
         if (p.pinned === true) {
             badges += ' <span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full"><i class="fas fa-thumbtack text-[8px] mr-0.5"></i>Pinned</span>';
         }
-
         const cats = getProductCategories(p);
         const catText = cats.length > 0 ? cats.join(', ') : 'Uncategorized';
         html += `<div class="bg-white rounded-2xl p-3 premium-shadow flex items-center gap-3">
@@ -1067,14 +1058,12 @@ window.saveProduct = async function() {
         };
 
         if (id) {
-            // Preserve existing sortOrder
             const existing = allProductsList.find(x => x.id === id);
             if (existing && typeof existing.sortOrder === 'number') {
                 data.sortOrder = existing.sortOrder;
             }
             await updateDoc(doc(db, "products", id), data);
         } else {
-            // New product: assign sortOrder at end of its first category
             try {
                 const snap = await getDocs(collection(db, "products"));
                 let maxOrder = -1;
@@ -1418,16 +1407,80 @@ window.saveOrderEdit = async function() {
     }
 }
 
+// ============ SMART DELETE — Stock Restore by Status ============
 window.confirmDeleteOrder = async function() {
     if (!editingOrderId) return;
-    if (!confirm("এই order টি permanently delete করবেন?\n\nStock restore হবে না।")) return;
+    const order = allOrdersList.find(x => x.id === editingOrderId);
+    if (!order) return;
+
+    const status = order.status || 'pending';
+    const itemsCount = (order.items || []).length;
+    const stockDeducted = order.stockDeducted !== false;
+
+    // Decide restore based on status
+    let shouldRestore = false;
+    let confirmMsg = '';
+
+    if (status === 'pending' || status === 'confirmed' || status === 'shipped') {
+        shouldRestore = stockDeducted;
+        if (shouldRestore) {
+            confirmMsg = `এই order (${status}) permanently delete করবেন?\n\n✅ Stock ফেরত যাবে — ${itemsCount} টি product-এর stock restore হবে।\n\nকারণ: Order এখনো ডেলিভারি হয়নি।`;
+        } else {
+            confirmMsg = `এই order (${status}) permanently delete করবেন?\n\n⚠️ Stock আগেই restore হয়েছে।\n\nDelete করলে order record মুছে যাবে।`;
+        }
+    } else if (status === 'delivered') {
+        shouldRestore = false;
+        confirmMsg = `এই order (delivered) permanently delete করবেন?\n\n❌ Stock restore হবে না।\n\nকারণ: Customer already product পেয়েছে।`;
+    } else if (status === 'cancelled') {
+        shouldRestore = false;
+        confirmMsg = `এই order (cancelled) permanently delete করবেন?\n\n❌ Stock restore হবে না।\n\nকারণ: Cancel করার সময় already stock ফেরত গেছে।`;
+    } else {
+        shouldRestore = false;
+        confirmMsg = `এই order টি permanently delete করবেন?\n\nStock restore হবে না।`;
+    }
+
+    if (!confirm(confirmMsg)) return;
+
+    const btn = document.getElementById('oe-save-btn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Deleting...';
+    }
+
     try {
+        // Restore stock if applicable
+        if (shouldRestore) {
+            for (const item of (order.items || [])) {
+                if (!item.id) continue;
+                try {
+                    await updateDoc(doc(db, "products", item.id), {
+                        stock: increment(Number(item.quantity) || 1)
+                    });
+                } catch (e) {
+                    console.warn('Stock restore failed:', item.id, e);
+                }
+            }
+        }
+
         await deleteDoc(doc(db, "orders", editingOrderId));
-        toast('Order deleted', 'warn');
+
+        if (shouldRestore) {
+            toast('Order deleted + Stock restored ✅', 'success');
+        } else {
+            toast('Order deleted', 'warn');
+        }
+
         closeOrderEdit();
         await loadOrders();
+        await loadProducts();
         updateStats();
-    } catch (e) { toast("Error: " + e.message, 'error'); }
+    } catch (e) {
+        toast("Error: " + e.message, 'error');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-trash mr-1"></i> DELETE';
+        }
+    }
 }
 
 window.openProductPicker = function() {
@@ -1725,4 +1778,4 @@ document.getElementById('test-image-file')?.addEventListener('change', function(
     r.readAsDataURL(f);
 });
 
-console.log('✅ admin.js loaded (with featured + pinned)');
+console.log('✅ admin.js loaded (with smart delete — stock restore by status)');
