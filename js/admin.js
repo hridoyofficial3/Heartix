@@ -1,10 +1,11 @@
 // ============================================================
-// HEARTIX ADMIN — JS (with Activity Log)
+// HEARTIX ADMIN — JS (with Activity Log + Email Notification)
 // ============================================================
 import { db, auth } from './firebase.js';
 import { escapeHtml, formatPrice as fmt } from './common.js';
 import { DISTRICTS } from './districts.js';
 import { logActivity } from './staff-activity.js';
+import { notifyStatusChange } from './email-notify.js';
 
 import {
     collection, getDocs, addDoc, updateDoc, deleteDoc,
@@ -94,15 +95,13 @@ function showSection(id) {
 }
 
 async function verifyAdmin(uid) {
-    // New: Check staff collection first
     try {
         const staffSnap = await getDoc(doc(db, "staff", uid));
         if (staffSnap.exists()) {
             const d = staffSnap.data();
             if (d.active === true && (d.role === 'owner' || d.role === 'admin')) return true;
         }
-    } catch (e) { /* fall through */ }
-    // Legacy: settings/admins.uids
+    } catch (e) {}
     try {
         const snap = await getDoc(doc(db, "settings", "admins"));
         if (snap.exists()) {
@@ -131,7 +130,6 @@ onAuthStateChanged(auth, async (user) => {
             if (se) se.textContent = user.email || '';
             showSection('dashboard-section');
             loadAllData();
-            // Activity log: login
             setTimeout(() => {
                 logActivity('login', { description: 'Admin panel-এ login করেছেন' });
             }, 1200);
@@ -201,7 +199,6 @@ async function loadAllData() {
     updateStats();
 }
 
-// ============ MESSAGES BADGE ============
 async function loadMessagesBadge() {
     try {
         const snap = await getDocs(collection(db, "messages"));
@@ -219,7 +216,6 @@ async function loadMessagesBadge() {
     } catch (e) { console.warn('Messages badge:', e); }
 }
 
-// ============ SETTINGS DATA ============
 async function loadSettingsData() {
     try {
         const snap = await getDoc(doc(db, "settings", "main"));
@@ -1248,7 +1244,6 @@ window.openOrderEdit = function(id) {
     editingOrderId = id;
     editingOrderItems = JSON.parse(JSON.stringify(o.items || []));
     document.getElementById('oe-order-num').textContent = o.orderNumber || id.slice(0, 10);
-
     const c = o.customer || {};
     document.getElementById('oe-edit-name').value = c.name || '';
     document.getElementById('oe-edit-phone').value = c.phone || '';
@@ -1256,20 +1251,16 @@ window.openOrderEdit = function(id) {
     populateOeDistrictDropdown();
     document.getElementById('oe-edit-district').value = c.district || '';
     document.getElementById('oe-edit-thana').value = c.thana || '';
-
     document.getElementById('oe-orig-discount').textContent = 'Orig: ৳' + fmt(o.discount || 0);
     document.getElementById('oe-orig-delivery').textContent = 'Orig: ৳' + fmt(o.deliveryCharge || 0);
     document.getElementById('oe-orig-advance').textContent = 'Orig: ৳' + fmt(o.advancePaid || 0);
-
     document.getElementById('oe-discount').value = o.discount || 0;
     document.getElementById('oe-delivery').value = o.deliveryCharge || 0;
     document.getElementById('oe-advance').value = o.advancePaid || 0;
     document.getElementById('oe-note').value = o.adminNote || '';
-
     renderOrderEditItems();
     recalcOrderEdit();
     document.getElementById('order-edit-modal').classList.remove('hidden');
-
     if (!oeHistoryPushed) {
         try { history.pushState({ oeModal: true }, '', location.href); oeHistoryPushed = true; } catch (e) {}
     }
@@ -1627,6 +1618,7 @@ window.closeStatusConfirm = function() {
     pendingStatusChange = null;
 }
 
+// ============ CONFIRM STATUS CHANGE (with Email) ============
 window.confirmStatusChange = async function() {
     if (!pendingStatusChange) return;
     const { orderId, newStatus } = pendingStatusChange;
@@ -1655,6 +1647,19 @@ window.confirmStatusChange = async function() {
             description: `Order ${order?.orderNumber || orderId.slice(0,8)} এর status ${oldStatus || 'pending'} → ${newStatus}`,
             meta: { orderId, oldStatus, newStatus }
         });
+
+        // ============ SEND STATUS UPDATE EMAIL ============
+        const customerEmail = order?.customer?.email || '';
+        if (customerEmail) {
+            notifyStatusChange({
+                orderNumber: order?.orderNumber || '',
+                customerName: order?.customer?.name || '',
+                customerEmail: customerEmail,
+                newStatus: newStatus,
+                total: order?.total || 0
+            }).catch(e => console.warn('Status email failed:', e));
+        }
+
         closeStatusConfirm();
         await loadOrders();
         updateStats();
@@ -1792,4 +1797,4 @@ document.getElementById('test-image-file')?.addEventListener('change', function(
     r.readAsDataURL(f);
 });
 
-console.log('✅ admin.js loaded (with activity log)');
+console.log('✅ admin.js loaded (with activity log + email)');
