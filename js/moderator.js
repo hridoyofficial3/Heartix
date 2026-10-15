@@ -1,8 +1,9 @@
 // ============================================================
-// HEARTIX MODERATOR PANEL — Read-only + Status Update
+// HEARTIX MODERATOR PANEL — Read-only + Status Update + Log
 // ============================================================
 import { db, auth } from './firebase.js';
 import { escapeHtml, formatPrice as fmt, showToast as toast } from './common.js';
+import { logActivity } from './staff-activity.js';
 
 import {
     collection, getDocs, doc, getDoc, updateDoc,
@@ -19,6 +20,7 @@ let allProductsList = [];
 let currentOrderFilter = 'all';
 let currentMessageFilter = 'all';
 let currentUser = null;
+let currentUserProfile = null;
 let statusPickerOrderId = null;
 let pendingStatusChange = null;
 
@@ -33,14 +35,25 @@ function showSection(id) {
 }
 
 async function verifyModerator(uid) {
+    // Check staff collection (new system)
     try {
-        // Check moderator list
+        const staffSnap = await getDoc(doc(db, "staff", uid));
+        if (staffSnap.exists()) {
+            const d = staffSnap.data();
+            // Allow if active and role is moderator, manager, admin, or owner
+            if (d.active === true && ['owner','admin','manager','moderator'].includes(d.role)) {
+                currentUserProfile = d;
+                return true;
+            }
+        }
+    } catch (e) {}
+    // Legacy fallback
+    try {
         const mSnap = await getDoc(doc(db, "settings", "moderators"));
         if (mSnap.exists()) {
             const uids = mSnap.data().uids || [];
             if (Array.isArray(uids) && uids.includes(uid)) return true;
         }
-        // Also allow admins
         const aSnap = await getDoc(doc(db, "settings", "admins"));
         if (aSnap.exists()) {
             const uids = aSnap.data().uids || [];
@@ -60,12 +73,17 @@ onAuthStateChanged(auth, async (user) => {
             if (ed) ed.textContent = user.email || '';
             showSection('dashboard-section');
             loadAllData();
+            // Log login
+            setTimeout(() => {
+                logActivity('login', { description: 'Moderator panel-এ login করেছেন' });
+            }, 1200);
         } else {
             await signOut(auth);
             showSection('not-moderator-section');
         }
     } else {
         currentUser = null;
+        currentUserProfile = null;
         showSection('login-section');
     }
 });
@@ -101,6 +119,7 @@ window.login = async function() {
 };
 
 window.logout = async function() {
+    try { await logActivity('logout', { description: 'Moderator panel থেকে logout করেছেন' }); } catch (e) {}
     try { await signOut(auth); } catch (e) {}
     location.reload();
 };
@@ -338,7 +357,8 @@ window.confirmStatusChange = async function() {
     try {
         const order = allOrdersList.find(x => x.id === orderId);
         const oldStatus = order?.status;
-        // Handle stock restore on cancel
+
+        // Stock restore on cancel
         if (newStatus === 'cancelled' && oldStatus !== 'cancelled' && order?.items && order.stockDeducted !== false) {
             for (const item of order.items) {
                 if (!item.id) continue;
@@ -353,8 +373,16 @@ window.confirmStatusChange = async function() {
             }
             await updateDoc(doc(db, "orders", orderId), { stockDeducted: true });
         }
+
         await updateDoc(doc(db, "orders", orderId), { status: newStatus });
         toast('Status: ' + newStatus);
+
+        // Log activity
+        await logActivity('order_status', {
+            description: `Order ${order?.orderNumber || orderId.slice(0,8)} এর status ${oldStatus || 'pending'} → ${newStatus}`,
+            meta: { orderId, oldStatus, newStatus, orderNumber: order?.orderNumber || '' }
+        });
+
         closeStatusConfirm();
         await loadOrders();
         updateStats();
@@ -472,15 +500,22 @@ function renderMessages() {
 window.openDetail = async function(id) {
     const m = allMessagesList.find(x => x.id === id);
     if (!m) return;
-    // Mark as read
+
+    // Mark as read + log
     if (!m.read) {
         try {
             await updateDoc(doc(db, "messages", id), { read: true });
             m.read = true;
             updateMessagesBadge();
             renderMessages();
+            // Log activity
+            logActivity('message_read', {
+                description: `${m.name || 'Unknown'} এর message পড়েছেন (${m.subject || 'General'})`,
+                meta: { messageId: id, name: m.name || '' }
+            });
         } catch (e) {}
     }
+
     document.getElementById('dm-name').textContent = m.name || 'Unknown';
     document.getElementById('dm-contact').textContent = m.contact || '';
     document.getElementById('dm-subject').textContent = 'Subject: ' + (m.subject || 'General');
@@ -535,7 +570,6 @@ function updateStats() {
 }
 
 // ============ INITIAL ============
-const origRenderAdminOrders = renderAdminOrders;
-window.renderAdminOrders = origRenderAdminOrders; // Export for search input
+window.renderAdminOrders = renderAdminOrders; // Export for search input
 
-console.log('✅ moderator.js loaded');
+console.log('✅ moderator.js loaded (with activity log)');
