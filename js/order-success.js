@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX ORDER SUCCESS PAGE
+// HEARTIX ORDER SUCCESS PAGE — with WhatsApp Confirm
 // ============================================================
 import { db } from './firebase.js';
 import { showToast } from './common.js';
@@ -14,6 +14,7 @@ const orderNum = (params.get('order') || '').trim().toUpperCase();
 
 const orderEl = document.getElementById('order-number');
 const trackBtn = document.getElementById('track-btn');
+const waConfirmBtn = document.getElementById('wa-confirm-btn');
 
 if (orderNum) {
     if (orderEl) orderEl.textContent = orderNum;
@@ -61,21 +62,90 @@ window.copyOrderNumber = function(e) {
     }
 };
 
-// ============ LOAD SETTINGS (WhatsApp) ============
-async function loadSettings() {
-    if (!db) return;
+// ============ LOAD SETTINGS + ORDER + BUILD WHATSAPP LINK ============
+async function loadWhatsAppConfirm() {
+    if (!db || !orderNum) return;
+
     try {
-        const snap = await getDoc(doc(db, "settings", "main"));
-        if (snap.exists()) {
-            const s = snap.data();
-            if (s.whatsapp) {
-                document.getElementById('wa-line').classList.remove('hidden');
-                const waMsg = encodeURIComponent(`Hi, my order number is: ${orderNum || '(unknown)'}`);
-                document.getElementById('wa-link').href = `https://wa.me/${s.whatsapp}?text=${waMsg}`;
+        // Load settings + order in parallel
+        const [settingsSnap, orderSnap] = await Promise.all([
+            getDoc(doc(db, "settings", "main")).catch(() => null),
+            getDoc(doc(db, "orders", "?")).catch(() => null) // placeholder
+        ]);
+
+        let waNumber = '';
+        let waEnabled = false;
+        if (settingsSnap && settingsSnap.exists()) {
+            const s = settingsSnap.data();
+            const int = s.integrations || {};
+            const wa = int.whatsapp || {};
+            waEnabled = !!wa.enabled;
+            waNumber = (wa.number || '').replace(/\D/g, '');
+        }
+
+        if (!waEnabled || !waNumber) return;
+
+        // Try to find the order by orderNumber (query required)
+        let orderData = null;
+        try {
+            const ordersQ = await getOrderByNumber(orderNum);
+            if (ordersQ) orderData = ordersQ;
+        } catch (e) { /* silent */ }
+
+        // Build WhatsApp message
+        let message = `Hi Heartix,\n\nআমি আমার অর্ডার কনফার্ম করতে চাই।\n\n`;
+        message += `📦 Order Number: ${orderNum}\n`;
+
+        if (orderData) {
+            if (orderData.customer?.name) message += `👤 Name: ${orderData.customer.name}\n`;
+            if (orderData.total) message += `💰 Total: ৳${orderData.total}\n`;
+            if (orderData.paymentMethod) {
+                const methodMap = {
+                    'full-cod': 'Cash on Delivery',
+                    'delivery-advance': 'Delivery Charge Advance',
+                    'full-online': 'Full Online Payment'
+                };
+                message += `💳 Payment: ${methodMap[orderData.paymentMethod] || orderData.paymentMethod}\n`;
+            }
+            if (orderData.items && orderData.items.length > 0) {
+                message += `\n🛒 Items (${orderData.items.length}):\n`;
+                orderData.items.slice(0, 5).forEach(it => {
+                    message += `  • ${it.name} × ${it.quantity}\n`;
+                });
+                if (orderData.items.length > 5) {
+                    message += `  ...এবং আরো ${orderData.items.length - 5} টি\n`;
+                }
             }
         }
-    } catch (e) { console.warn('Settings fetch:', e); }
+
+        message += `\nদয়া করে আমার অর্ডার কনফার্ম করুন। ধন্যবাদ!`;
+
+        const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
+        if (waConfirmBtn) {
+            waConfirmBtn.href = waLink;
+            waConfirmBtn.classList.remove('hidden');
+        }
+    } catch (e) {
+        console.warn('WhatsApp confirm setup failed:', e);
+    }
+}
+
+// Helper to find order by orderNumber
+async function getOrderByNumber(num) {
+    try {
+        const { collection, query, where, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+        const q = query(collection(db, "orders"), where("orderNumber", "==", num));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+            return { id: snap.docs[0].id, ...snap.docs[0].data() };
+        }
+    } catch (e) {
+        console.warn('Order lookup failed:', e);
+    }
+    return null;
 }
 
 // ============ INIT ============
-loadSettings();
+loadWhatsAppConfirm();
+
+console.log('✅ order-success.js loaded (with WhatsApp confirm)');
