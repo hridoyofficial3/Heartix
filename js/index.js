@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX INDEX (Home) — with Featured + Pinned + SortOrder
+// HEARTIX INDEX (Home) — Featured + Pinned + SortOrder + Low Stock
 // ============================================================
 import { db } from './firebase.js';
 import {
@@ -44,17 +44,13 @@ function getCategories(p) {
 // ============ SORT HELPER ============
 function sortProducts(list) {
     return list.sort((a, b) => {
-        // Pinned first
         const aPinned = a.pinned === true ? 1 : 0;
         const bPinned = b.pinned === true ? 1 : 0;
         if (aPinned !== bPinned) return bPinned - aPinned;
-
-        // Then by sortOrder
         const aOrder = Number(a.sortOrder);
         const bOrder = Number(b.sortOrder);
         const aHas = !isNaN(aOrder) && aOrder > 0;
         const bHas = !isNaN(bOrder) && bOrder > 0;
-
         if (aHas && bHas) return aOrder - bOrder;
         if (aHas) return -1;
         if (bHas) return 1;
@@ -391,6 +387,7 @@ function renderProductCard(p) {
     else actionHtml = `<div class="mt-2 qty-control w-full"><button onclick="event.preventDefault(); event.stopPropagation(); removeFromCart('${p.id}')">−</button><span class="qty-num flex-1">${qty}</span><button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')">+</button></div>`;
 
     const isPinned = p.pinned === true;
+    const isLowStock = !isOut && p.stock !== undefined && Number(p.stock) < 5;
 
     return `<div class="product-card bg-white rounded-2xl p-2.5 premium-shadow relative flex flex-col">
         <button onclick="toggleWishlist('${p.id}', event)" class="wishlist-btn ${inWishlist ? 'active' : ''}" aria-label="Wishlist">
@@ -401,6 +398,7 @@ function renderProductCard(p) {
                 <img src="${p.image || 'https://via.placeholder.com/200x200?text=No+Image'}" alt="${escapeHtml(p.name)}" loading="lazy" class="product-img w-full h-28 rounded-lg" onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
                 ${hasDiscount ? `<span class="absolute top-1.5 left-1.5 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">-${discountPct}%</span>` : ''}
                 ${isPinned ? `<span class="absolute bottom-1.5 left-1.5 bg-purple-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full"><i class="fas fa-thumbtack mr-0.5"></i>Top</span>` : ''}
+                ${isLowStock ? `<span class="absolute top-9 left-1.5 bg-orange-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full animate-pulse"><i class="fas fa-fire mr-0.5"></i>Only ${p.stock} left</span>` : ''}
             </div>
             <h4 class="text-[12px] font-semibold text-navy leading-tight mb-1 line-clamp-2" style="min-height:32px;">${escapeHtml(p.name)}</h4>
             <div class="text-[9px] text-gray-500 mb-1.5">${starsHtml}</div>
@@ -485,13 +483,12 @@ function renderRecentlyViewed() {
     list.innerHTML = html;
 }
 
-// ============ DYNAMIC SECTIONS (Featured + Custom + Testimonials) ============
+// ============ DYNAMIC SECTIONS ============
 function renderDynamicContent() {
     const container = document.getElementById('dynamic-content');
     if (!container) return;
     let html = '';
 
-    // Featured Products section (if any)
     const featuredProducts = allProducts.filter(p => p.featured === true);
     if (featuredProducts.length > 0) {
         html += `<div class="mt-8 px-5">
@@ -506,14 +503,11 @@ function renderDynamicContent() {
         </div>`;
     }
 
-    // Custom Sections
     let bannerIdx = 0;
     (customSections || []).forEach((section) => {
         if (!section || !section.categoryKey) return;
         let secProducts = allProducts.filter(p => getCategories(p).includes(section.categoryKey));
         if (secProducts.length === 0) return;
-
-        // Sort within section (pinned + sortOrder)
         secProducts = sortProducts(secProducts);
 
         html += `<div class="mt-8 px-5">
@@ -533,7 +527,6 @@ function renderDynamicContent() {
         }
     });
 
-    // Testimonials
     if (testimonials && testimonials.length > 0) {
         html += `<div class="mt-10 px-5">
             <h3 class="section-title">What Our Customers Say</h3>
