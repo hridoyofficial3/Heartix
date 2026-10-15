@@ -23,13 +23,71 @@
         .oe-chevron { transition: transform 0.2s ease; }
         details.integration-card[open] .int-chevron { transform: rotate(180deg); }
         .int-chevron { transition: transform 0.2s ease; }
+
+        /* Help Modal Styles */
+        .help-tab {
+            padding: 10px 14px; border-radius: 10px; font-size: 11px; font-weight: 700;
+            white-space: nowrap; cursor: pointer; transition: all 0.2s;
+            background: white; color: #6b7280; border: 2px solid #f3f4f6;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .help-tab.active {
+            background: linear-gradient(135deg, #0A1628, #152238);
+            color: white; border-color: #0A1628;
+        }
+        .help-tab i { font-size: 12px; }
+
+        .help-step {
+            display: flex; gap: 12px; padding: 14px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .help-step:last-child { border-bottom: none; }
+        .help-step-num {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, #D4A84B, #E8C77B);
+            color: #0A1628; font-weight: 800; font-size: 14px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; box-shadow: 0 3px 8px rgba(212,168,75,0.35);
+        }
+        .help-step-content { flex: 1; min-width: 0; }
+        .help-step-title {
+            font-weight: 700; color: #0A1628; font-size: 13px; margin-bottom: 4px;
+        }
+        .help-step-desc {
+            color: #4b5563; font-size: 12px; line-height: 1.6;
+        }
+        .help-step-hint {
+            margin-top: 8px; padding: 8px 10px; background: #FBF8F3;
+            border-left: 3px solid #D4A84B; border-radius: 6px;
+            font-size: 11px; color: #6b7280;
+        }
+        .help-copy-box {
+            margin-top: 8px; padding: 10px 12px;
+            background: #F0FDF4; border: 1px solid #86EFAC; border-radius: 8px;
+            font-size: 11px; color: #166534;
+        }
+        .help-copy-box code {
+            background: white; padding: 2px 6px; border-radius: 4px;
+            font-family: monospace; font-size: 11px; font-weight: 600;
+            border: 1px solid #86EFAC;
+        }
+        .help-warn-box {
+            margin-top: 8px; padding: 10px 12px;
+            background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 8px;
+            font-size: 11px; color: #92400E;
+        }
+        .help-image-placeholder {
+            margin: 10px 0; padding: 20px; background: #F9FAFB;
+            border: 2px dashed #d1d5db; border-radius: 10px;
+            text-align: center; color: #9ca3af; font-size: 11px;
+        }
+        .help-image-placeholder i { font-size: 28px; margin-bottom: 6px; display: block; }
     </style>
 </head>
 <body class="pb-20 md:pb-6">
 
     <div id="toast-container"></div>
 
-    <!-- LOADING -->
     <div id="loading-section" class="min-h-screen flex items-center justify-center">
         <div class="text-center">
             <div class="w-16 h-16 mx-auto mb-4 rounded-2xl gold-gradient flex items-center justify-center animate-pulse">
@@ -39,7 +97,6 @@
         </div>
     </div>
 
-    <!-- LOGIN -->
     <div id="login-section" class="hidden min-h-screen flex items-center justify-center p-4">
         <div class="w-full max-w-sm">
             <div class="text-center mb-8">
@@ -72,7 +129,6 @@
         </div>
     </div>
 
-    <!-- NOT ADMIN -->
     <div id="not-admin-section" class="hidden min-h-screen flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl premium-shadow-lg w-full max-w-sm text-center">
             <div class="w-20 h-20 mx-auto mb-4 rounded-3xl bg-red-50 flex items-center justify-center">
@@ -86,7 +142,6 @@
         </div>
     </div>
 
-    <!-- DASHBOARD -->
     <div id="dashboard-section" class="hidden min-h-screen">
 
         <aside class="sidebar-desktop hidden md:flex fixed left-0 top-0 bottom-0 w-[240px] navy-gradient flex-col z-40">
@@ -179,7 +234,6 @@
 
         <main class="p-4 md:p-8 max-w-6xl mx-auto">
 
-            <!-- DASHBOARD TAB -->
             <div id="content-dashboard" class="tab-content">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Dashboard</h2>
@@ -238,7 +292,6 @@
                 </div>
             </div>
 
-            <!-- PRODUCTS TAB -->
             <div id="content-products" class="tab-content hidden">
                 <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -266,7 +319,6 @@
                 <div id="product-list-admin" class="space-y-3"></div>
             </div>
 
-            <!-- CATEGORIES TAB -->
             <div id="content-categories" class="tab-content hidden">
                 <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -283,7 +335,6 @@
                 <div id="category-list-admin" class="space-y-3"></div>
             </div>
 
-            <!-- COUPONS TAB -->
             <div id="content-coupons" class="tab-content hidden">
                 <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -297,7 +348,6 @@
                 <div id="coupon-list-admin" class="space-y-3"></div>
             </div>
 
-            <!-- CONTENT TAB -->
             <div id="content-content" class="tab-content hidden">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Website Content</h2>
@@ -348,7 +398,6 @@
                 </div>
             </div>
 
-            <!-- ORDERS TAB -->
             <div id="content-orders" class="tab-content hidden">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Orders</h2>
@@ -376,7 +425,6 @@
                 <div id="order-list-admin" class="space-y-3"></div>
             </div>
 
-            <!-- REVIEWS TAB -->
             <div id="content-reviews" class="tab-content hidden">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Product Reviews</h2>
@@ -385,7 +433,6 @@
                 <div id="reviews-list-admin" class="space-y-3"></div>
             </div>
 
-            <!-- STAFF TAB -->
             <div id="content-staff" class="tab-content hidden">
                 <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -412,7 +459,6 @@
                 <div id="staff-list" class="space-y-3"></div>
             </div>
 
-            <!-- ACTIVITY TAB -->
             <div id="content-activity" class="tab-content hidden">
                 <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -450,7 +496,7 @@
                 <div id="activity-list"></div>
             </div>
 
-            <!-- SETTINGS TAB -->
+            <!-- ============ SETTINGS TAB ============ -->
             <div id="content-settings" class="tab-content hidden">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Settings</h2>
@@ -486,17 +532,24 @@
                     <input type="text" id="setting-nagad" placeholder="Nagad Number" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                 </div>
 
+                <!-- ========== INTEGRATIONS ========== -->
                 <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
-                            <i class="fas fa-plug text-indigo-600"></i>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
+                                <i class="fas fa-plug text-indigo-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-navy">Integrations</h3>
+                                <p class="text-[11px] text-gray-500">Third-party services on/off করুন</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="font-bold text-navy">Integrations</h3>
-                            <p class="text-[11px] text-gray-500">Third-party services on/off করুন</p>
-                        </div>
+                        <button onclick="openHelpModal()" class="w-9 h-9 rounded-full bg-gold/15 active:bg-gold/25 flex items-center justify-center flex-shrink-0" title="Setup Guide">
+                            <i class="fas fa-circle-question text-gold text-base"></i>
+                        </button>
                     </div>
 
+                    <!-- 1. GOOGLE ANALYTICS -->
                     <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
                         <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                             <div class="flex items-center gap-3 min-w-0">
@@ -519,10 +572,10 @@
                                 <span class="text-sm font-semibold text-navy">Enable Google Analytics</span>
                             </label>
                             <input type="text" id="int-ga-id" placeholder="G-XXXXXXXXXX" maxlength="30" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
-                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>Measurement ID (G- দিয়ে শুরু)</p>
                         </div>
                     </details>
 
+                    <!-- 2. FACEBOOK PIXEL -->
                     <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
                         <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                             <div class="flex items-center gap-3 min-w-0">
@@ -545,10 +598,10 @@
                                 <span class="text-sm font-semibold text-navy">Enable Facebook Pixel</span>
                             </label>
                             <input type="text" id="int-fb-id" placeholder="1234567890123456" maxlength="20" inputmode="numeric" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
-                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>Pixel ID (শুধু সংখ্যা)</p>
                         </div>
                     </details>
 
+                    <!-- 3. EMAILJS -->
                     <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
                         <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                             <div class="flex items-center gap-3 min-w-0">
@@ -570,21 +623,121 @@
                                 <input type="checkbox" id="int-em-enabled" class="w-5 h-5 accent-[#D4A84B]">
                                 <span class="text-sm font-semibold text-navy">Enable Email Notifications</span>
                             </label>
-
                             <input type="text" id="int-em-publickey" placeholder="Public Key (UOTXxxx...)" maxlength="60" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
-                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>EmailJS → Account → General → Public Key</p>
-
                             <input type="text" id="int-em-serviceid" placeholder="Service ID (Heartix)" maxlength="40" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
-                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>EmailJS → Email Services → Service ID</p>
+                            <input type="text" id="int-em-customertpl" placeholder="Customer Template ID" maxlength="40" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <input type="text" id="int-em-admintpl" placeholder="Admin Template ID" maxlength="40" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <input type="email" id="int-em-adminemail" placeholder="Admin Email" maxlength="100" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                        </div>
+                    </details>
 
-                            <input type="text" id="int-em-customertpl" placeholder="Customer Template ID (template_xxx)" maxlength="40" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
-                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>Order Confirmation template ID</p>
+                    <!-- 4. WHATSAPP -->
+                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
+                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
+                                    <i class="fab fa-whatsapp text-green-600 text-base"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy">WhatsApp</p>
+                                    <p class="text-[10px] text-gray-500">Order confirm button</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span id="wa-status" class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
+                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 space-y-2 border-t border-gray-200 pt-3">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="int-wa-enabled" class="w-5 h-5 accent-[#D4A84B]">
+                                <span class="text-sm font-semibold text-navy">Enable WhatsApp Buttons</span>
+                            </label>
+                            <input type="text" id="int-wa-number" placeholder="8801712345678" maxlength="15" inputmode="numeric" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>Country code সহ (88 দিয়ে শুরু)</p>
+                        </div>
+                    </details>
 
-                            <input type="text" id="int-em-admintpl" placeholder="Admin Template ID (template_xxx)" maxlength="40" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
-                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>Admin New Order Alert template ID</p>
+                    <!-- 5. SMS -->
+                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
+                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
+                                    <i class="fas fa-sms text-blue-600 text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy">SMS</p>
+                                    <p class="text-[10px] text-gray-500">BulkSMSBD integration</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span id="sms-status" class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
+                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 space-y-2 border-t border-gray-200 pt-3">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="int-sms-enabled" class="w-5 h-5 accent-[#D4A84B]">
+                                <span class="text-sm font-semibold text-navy">Enable SMS</span>
+                            </label>
+                            <input type="text" id="int-sms-apikey" placeholder="BulkSMSBD API Key" maxlength="100" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <input type="text" id="int-sms-senderid" placeholder="Sender ID (e.g. Heartix)" maxlength="20" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                        </div>
+                    </details>
 
-                            <input type="email" id="int-em-adminemail" placeholder="Admin Email (twhob71122@gmail.com)" maxlength="100" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
-                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>যেখানে admin notification যাবে</p>
+                    <!-- 6. BKASH -->
+                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
+                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
+                                    <i class="fas fa-mobile-alt text-pink-600 text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy">bKash Payment</p>
+                                    <p class="text-[10px] text-gray-500">Payment gateway</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span id="bkash-status" class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
+                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 space-y-2 border-t border-gray-200 pt-3">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="int-bkash-enabled" class="w-5 h-5 accent-[#D4A84B]">
+                                <span class="text-sm font-semibold text-navy">Enable bKash Payment</span>
+                            </label>
+                            <input type="text" id="int-bkash-merchant" placeholder="Merchant Number (01XXXXXXXXX)" maxlength="20" inputmode="numeric" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <input type="text" id="int-bkash-apikey" placeholder="bKash API Key" maxlength="100" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <input type="text" id="int-bkash-secret" placeholder="bKash API Secret" maxlength="100" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                        </div>
+                    </details>
+
+                    <!-- 7. NAGAD -->
+                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
+                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
+                                    <i class="fas fa-mobile-alt text-orange-600 text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy">Nagad Payment</p>
+                                    <p class="text-[10px] text-gray-500">Payment gateway</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span id="nagad-status" class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
+                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 space-y-2 border-t border-gray-200 pt-3">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="int-nagad-enabled" class="w-5 h-5 accent-[#D4A84B]">
+                                <span class="text-sm font-semibold text-navy">Enable Nagad Payment</span>
+                            </label>
+                            <input type="text" id="int-nagad-merchant" placeholder="Merchant Number (01XXXXXXXXX)" maxlength="20" inputmode="numeric" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <input type="text" id="int-nagad-apikey" placeholder="Nagad API Key" maxlength="100" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <input type="text" id="int-nagad-secret" placeholder="Nagad API Secret" maxlength="100" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
                         </div>
                     </details>
                 </div>
@@ -595,7 +748,6 @@
 
         </main>
 
-        <!-- MOBILE BOTTOM NAV -->
         <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white border-t border-gray-100" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
             <div class="flex justify-around items-center py-1.5">
                 <button onclick="showTab('dashboard')" data-tab="dashboard" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
@@ -620,7 +772,549 @@
 
     </div>
 
-    <!-- MORE MENU -->
+    <!-- ============ HELP MODAL ============ -->
+    <div id="help-modal" class="hidden fixed inset-0 modal-bg z-[95] flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-3xl flex flex-col animate-slide-up" style="max-height: 95vh;">
+            <!-- Header -->
+            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl gold-gradient flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-circle-question text-navy text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-lg leading-none">Setup Guides</h3>
+                        <p class="text-gold text-[11px] mt-1">Step-by-step integration tutorial</p>
+                    </div>
+                </div>
+                <button onclick="closeHelpModal()" class="w-9 h-9 rounded-full bg-white/10 active:bg-white/20 text-white flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="border-b border-gray-100 p-3 flex-shrink-0 overflow-x-auto hide-scrollbar">
+                <div class="flex gap-2">
+                    <button onclick="switchHelpTab('ga')" data-helptab="ga" class="help-tab active"><i class="fas fa-chart-line"></i> Analytics</button>
+                    <button onclick="switchHelpTab('fb')" data-helptab="fb" class="help-tab"><i class="fab fa-facebook"></i> Pixel</button>
+                    <button onclick="switchHelpTab('em')" data-helptab="em" class="help-tab"><i class="fas fa-envelope"></i> Email</button>
+                    <button onclick="switchHelpTab('wa')" data-helptab="wa" class="help-tab"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    <button onclick="switchHelpTab('sms')" data-helptab="sms" class="help-tab"><i class="fas fa-sms"></i> SMS</button>
+                    <button onclick="switchHelpTab('bkash')" data-helptab="bkash" class="help-tab"><i class="fas fa-mobile-alt"></i> bKash</button>
+                    <button onclick="switchHelpTab('nagad')" data-helptab="nagad" class="help-tab"><i class="fas fa-mobile-alt"></i> Nagad</button>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-6">
+
+                <!-- ============ GOOGLE ANALYTICS GUIDE ============ -->
+                <div data-helpcontent="ga" class="help-content">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-chart-line text-orange-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display text-xl font-bold text-navy">Google Analytics Setup</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">সময় লাগবে: ৫ মিনিট • সম্পূর্ণ ফ্রি</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">১</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Analytics Website-এ যান</p>
+                            <p class="help-step-desc">Mobile browser-এ যান: <code class="text-xs bg-gray-100 px-1.5 py-0.5 rounded">analytics.google.com</code></p>
+                            <div class="help-image-placeholder"><i class="fas fa-mobile-alt"></i>Screenshot: Google Analytics homepage</div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">২</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Gmail দিয়ে Sign Up</p>
+                            <p class="help-step-desc">উপরে ডান দিকে <strong>"Sign up"</strong> button-এ tap করুন → Gmail select করুন। যদি আগে থেকে account থাকে, Sign in করুন।</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৩</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Account Setup</p>
+                            <p class="help-step-desc">Account name: <strong>Heartix</strong> → Next → Property name: <strong>Heartix Website</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৪</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Data Stream তৈরি</p>
+                            <p class="help-step-desc">Platform: <strong>Web</strong> → Website URL: <code class="text-xs bg-gray-100 px-1.5 py-0.5 rounded">heartix.vercel.app</code> → Stream name: <strong>Heartix Web</strong> → Create</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৫</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Measurement ID Copy করুন</p>
+                            <p class="help-step-desc">Stream Details-এ যান → উপরে ডান দিকে দেখবেন:</p>
+                            <div class="help-copy-box">
+                                <i class="fas fa-copy mr-1"></i>Measurement ID: <code>G-XXXXXXXXXX</code>
+                            </div>
+                            <p class="help-step-desc mt-2">সেই <strong>G-</strong> দিয়ে শুরু হওয়া code-টি copy করুন।</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৬</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Heartix Admin Panel-এ Paste</p>
+                            <p class="help-step-desc">Admin Panel → Settings → Integrations → <strong>Google Analytics</strong> card expand করুন:</p>
+                            <div class="help-copy-box">
+                                ✅ Enable Google Analytics — <strong>tick দিন</strong><br>
+                                📝 Measurement ID field-এ <code>G-XXXXXXXXXX</code> paste করুন
+                            </div>
+                            <div class="help-warn-box">
+                                <i class="fas fa-exclamation-triangle mr-1"></i> End-এ <strong>SAVE INTEGRATIONS</strong> click করতে ভুলবেন না!
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">✓</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title text-green-600">সম্পূর্ণ হয়েছে!</p>
+                            <p class="help-step-desc">Badge <strong class="text-green-600">ON</strong> হয়ে যাবে। এখন থেকে visitor tracking হবে। ২৪ ঘণ্টা পর Analytics dashboard-এ data দেখা যাবে।</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ FACEBOOK PIXEL GUIDE ============ -->
+                <div data-helpcontent="fb" class="help-content hidden">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fab fa-facebook text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display text-xl font-bold text-navy">Facebook Pixel Setup</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">সময় লাগবে: ৭ মিনিট • সম্পূর্ণ ফ্রি</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">১</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Business Manager-এ যান</p>
+                            <p class="help-step-desc"><code class="text-xs bg-gray-100 px-1.5 py-0.5 rounded">business.facebook.com</code> → Login করুন Facebook দিয়ে।</p>
+                            <div class="help-image-placeholder"><i class="fab fa-facebook"></i>Screenshot: Business Manager dashboard</div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">২</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Events Manager খুলুন</p>
+                            <p class="help-step-desc">Left sidebar → <strong>Events Manager</strong> → <strong>Connect Data Sources</strong> → <strong>Web</strong> → <strong>Facebook Pixel</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৩</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Pixel তৈরি করুন</p>
+                            <p class="help-step-desc">Pixel Name: <strong>Heartix Pixel</strong> → Website URL: <code class="text-xs bg-gray-100 px-1.5 py-0.5 rounded">heartix.vercel.app</code> → Create</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৪</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Pixel ID Copy করুন</p>
+                            <p class="help-step-desc">Pixel setup-এ <strong>"Manually Install Pixel Code"</strong> select করুন। উপরে দেখবেন:</p>
+                            <div class="help-copy-box">
+                                <i class="fas fa-copy mr-1"></i>Pixel ID: <code>1234567890123456</code>
+                            </div>
+                            <p class="help-step-desc mt-2">শুধু <strong>১৫-১৬ ডিজিটের numeric ID</strong> copy করুন (fbq code block থেকে)।</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৫</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Heartix Admin Panel-এ Paste</p>
+                            <p class="help-step-desc">Admin Panel → Settings → Integrations → <strong>Facebook Pixel</strong> card:</p>
+                            <div class="help-copy-box">
+                                ✅ Enable Facebook Pixel — <strong>tick দিন</strong><br>
+                                📝 Pixel ID field-এ <code>1234567890123456</code> paste করুন
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">✓</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title text-green-600">সম্পূর্ণ হয়েছে!</p>
+                            <p class="help-step-desc">Badge <strong class="text-green-600">ON</strong>। এখন visitor tracking + Facebook Ads-এ conversion tracking হবে।</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ EMAILJS GUIDE ============ -->
+                <div data-helpcontent="em" class="help-content hidden">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-envelope text-purple-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display text-xl font-bold text-navy">Email Notifications Setup</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">সময় লাগবে: ২০ মিনিট • Free tier: 200 emails/month</p>
+                        </div>
+                    </div>
+
+                    <div class="help-warn-box mb-4">
+                        <strong>Note:</strong> এটা সবচেয়ে complex setup। ৪টা আলাদা value copy করতে হবে — Public Key, Service ID, ২টা Template ID।
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">১</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">EmailJS-এ Sign Up</p>
+                            <p class="help-step-desc"><code class="text-xs bg-gray-100 px-1.5 py-0.5 rounded">emailjs.com</code> → "Sign Up Free" → Google দিয়ে signup করুন।</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">২</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Gmail Connect করুন</p>
+                            <p class="help-step-desc">Left sidebar → Email Services → "+ Add New Service" → Gmail select → "Connect Account" → Gmail allow → <strong>Service ID</strong> note করুন (যেমন <code>Heartix</code>)।</p>
+                            <div class="help-copy-box">
+                                <i class="fas fa-copy mr-1"></i>Service ID: <code>Heartix</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৩</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Admin Alert Template তৈরি</p>
+                            <p class="help-step-desc">Email Templates → "+ New Template" → "Contact Us" preset → Name: <strong>Admin New Order Alert</strong></p>
+                            <p class="help-step-desc mt-2"><strong>Subject:</strong> <code>🛒 New Order — {{order_number}}</code></p>
+                            <p class="help-step-desc"><strong>To Email:</strong> আপনার নিজের admin email</p>
+                            <p class="help-step-desc mt-2">Content-এ customer info variable বসান (order_number, customer_name, customer_phone, customer_address, total)।</p>
+                            <div class="help-copy-box">
+                                <i class="fas fa-copy mr-1"></i>Template ID: <code>template_xxxxxxxxx</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৪</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Customer Template তৈরি</p>
+                            <p class="help-step-desc">আরেকটা template → Name: <strong>Order Confirmation</strong></p>
+                            <p class="help-step-desc mt-2"><strong>To Email:</strong> <code>{{to_email}}</code></p>
+                            <p class="help-step-desc"><strong>Subject:</strong> <code>{{custom_subject}}</code></p>
+                            <p class="help-step-desc mt-2">Content-এ dynamic variables বসান (status_message, status_description, customer_name, order_number, total)।</p>
+                            <div class="help-copy-box">
+                                <i class="fas fa-copy mr-1"></i>Template ID: <code>template_xxxxxxxxx</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৫</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Public Key Copy করুন</p>
+                            <p class="help-step-desc">Left sidebar → Account → General → <strong>API Keys</strong> section → Public Key copy করুন।</p>
+                            <div class="help-copy-box">
+                                <i class="fas fa-copy mr-1"></i>Public Key: <code>UOTXxxxxxxxxx</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৬</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Admin Panel-এ সব Paste</p>
+                            <p class="help-step-desc">Settings → Integrations → Email Notifications card:</p>
+                            <div class="help-copy-box">
+                                ✅ Enable Email Notifications — tick<br>
+                                📝 Public Key — paste<br>
+                                📝 Service ID — paste<br>
+                                📝 Customer Template ID — paste<br>
+                                📝 Admin Template ID — paste<br>
+                                📝 Admin Email — আপনার email
+                            </div>
+                            <p class="help-step-desc mt-2">তারপর <strong>SAVE INTEGRATIONS</strong>।</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">✓</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title text-green-600">সম্পূর্ণ হয়েছে!</p>
+                            <p class="help-step-desc">এখন order place করলে customer + admin — দুজনকেই email যাবে।</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ WHATSAPP GUIDE ============ -->
+                <div data-helpcontent="wa" class="help-content hidden">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fab fa-whatsapp text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display text-xl font-bold text-navy">WhatsApp Setup</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">সময় লাগবে: ২ মিনিট • সম্পূর্ণ ফ্রি</p>
+                        </div>
+                    </div>
+
+                    <div class="help-warn-box mb-4">
+                        <i class="fas fa-check-circle text-green-600 mr-1"></i><strong>সবচেয়ে সহজ!</strong> কোনো account খুলতে হবে না। শুধু আপনার WhatsApp number দিলেই কাজ শেষ।
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">১</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">আপনার WhatsApp Number জানুন</p>
+                            <p class="help-step-desc">যে number-এ customer-দের message যাবে সেটা select করুন।</p>
+                            <div class="help-copy-box">
+                                <strong>Format:</strong> <code>8801XXXXXXXXX</code><br>
+                                <strong>Example:</strong> 8801712345678<br>
+                                <br>
+                                ⚠️ অবশ্যই <strong>88</strong> দিয়ে শুরু করুন (Bangladesh country code)<br>
+                                ⚠️ কোনো space, dash, + চিহ্ন থাকবে না
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">২</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Admin Panel-এ Paste করুন</p>
+                            <p class="help-step-desc">Settings → Integrations → WhatsApp card:</p>
+                            <div class="help-copy-box">
+                                ✅ Enable WhatsApp Buttons — tick<br>
+                                📝 WhatsApp Number — <code>8801XXXXXXXXX</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৩</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Save করুন</p>
+                            <p class="help-step-desc">End-এ <strong>SAVE INTEGRATIONS</strong> click করুন।</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">✓</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title text-green-600">সম্পূর্ণ হয়েছে!</p>
+                            <p class="help-step-desc">এখন order success page-এ <strong>"Confirm on WhatsApp"</strong> button দেখা যাবে এবং প্রতিটা order-এ <strong>WhatsApp button</strong> থাকবে।</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ SMS GUIDE ============ -->
+                <div data-helpcontent="sms" class="help-content hidden">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-sms text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display text-xl font-bold text-navy">SMS Setup (BulkSMSBD)</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">সময় লাগবে: ৩০ মিনিট • Paid (৳0.25-0.30/SMS)</p>
+                        </div>
+                    </div>
+
+                    <div class="help-warn-box mb-4">
+                        <i class="fas fa-exclamation-triangle mr-1"></i><strong>সতর্কতা:</strong> এটা সম্পূর্ণ ফ্রি নয়। BulkSMSBD account-এ minimum ৳500 recharge করতে হয়। প্রথমে WhatsApp ব্যবহার করুন, পরে দরকার হলে SMS।
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">১</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">BulkSMSBD-তে Account খুলুন</p>
+                            <p class="help-step-desc"><code class="text-xs bg-gray-100 px-1.5 py-0.5 rounded">bulksmsbd.com</code> → "Sign Up" → Name, Email, Phone দিন → verify করুন।</p>
+                            <div class="help-image-placeholder"><i class="fas fa-sms"></i>Screenshot: BulkSMSBD signup page</div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">২</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Account-এ Balance যোগ করুন</p>
+                            <p class="help-step-desc">Dashboard → <strong>Recharge</strong> → minimum ৳500 → bKash/Nagad দিয়ে payment করুন।</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৩</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Sender ID তৈরি করুন</p>
+                            <p class="help-step-desc">Dashboard → <strong>Sender ID</strong> → "Add Sender ID" → Name: <strong>Heartix</strong> → Submit।<br>
+                            Approve হতে ২৪-৪৮ ঘণ্টা লাগে।</p>
+                            <div class="help-copy-box">
+                                <i class="fas fa-copy mr-1"></i>Sender ID: <code>Heartix</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৪</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">API Key Copy করুন</p>
+                            <p class="help-step-desc">Dashboard → <strong>API</strong> → API Key copy করুন।</p>
+                            <div class="help-copy-box">
+                                <i class="fas fa-copy mr-1"></i>API Key: <code>xxxxxxxxxxxxxxxxxx</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৫</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Admin Panel-এ Paste</p>
+                            <p class="help-step-desc">Settings → Integrations → SMS card:</p>
+                            <div class="help-copy-box">
+                                ✅ Enable SMS — tick<br>
+                                📝 API Key — paste<br>
+                                📝 Sender ID — <code>Heartix</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">⚠️</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title text-amber-600">আরো একটা Step বাকি</p>
+                            <p class="help-step-desc">SMS এর জন্য Vercel Serverless function setup লাগবে (কোড developer-এর দরকার)।<br>
+                            এই config save করার পর developer-কে বলুন <strong>"SMS serverless function setup"</strong> — তিনি <code>/api/send-sms.js</code> file বানিয়ে দিবেন।</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ BKASH GUIDE ============ -->
+                <div data-helpcontent="bkash" class="help-content hidden">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-pink-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-mobile-alt text-pink-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display text-xl font-bold text-navy">bKash Payment Gateway</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Merchant approval লাগবে: ৭-১৫ দিন</p>
+                        </div>
+                    </div>
+
+                    <div class="help-warn-box mb-4">
+                        <i class="fas fa-info-circle mr-1"></i><strong>গুরুত্বপূর্ণ:</strong> bKash Merchant account পেতে business documents লাগবে (Trade License, TIN, Bank account)। Approval ৭-১৫ দিন লাগে। আবেদন জমা দিয়ে রাখুন, approve হলে নিচের steps follow করুন।
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">১</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">bKash Merchant-এ Apply করুন</p>
+                            <p class="help-step-desc"><code class="text-xs bg-gray-100 px-1.5 py-0.5 rounded">merchant.bkash.com</code> → "Get Started" → Business info + Documents upload → Submit।</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">২</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Approval-এর পর Merchant Dashboard</p>
+                            <p class="help-step-desc">Approval email পেলে login করুন → Developer section → <strong>API Credentials</strong>।</p>
+                            <div class="help-copy-box">
+                                <i class="fas fa-copy mr-1"></i>Merchant Number: <code>01XXXXXXXXX</code><br>
+                                <i class="fas fa-copy mr-1"></i>API Key: <code>xxxxxxxxx</code><br>
+                                <i class="fas fa-copy mr-1"></i>API Secret: <code>xxxxxxxxx</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৩</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Admin Panel-এ Paste</p>
+                            <p class="help-step-desc">Settings → Integrations → bKash card:</p>
+                            <div class="help-copy-box">
+                                ✅ Enable bKash — tick<br>
+                                📝 Merchant Number — paste<br>
+                                📝 API Key — paste<br>
+                                📝 API Secret — paste
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">⚠️</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title text-amber-600">আরো Serverless Setup বাকি</p>
+                            <p class="help-step-desc">bKash API integration সম্পূর্ণ করতে Vercel serverless function লাগবে। Developer-কে বলুন <strong>"bKash serverless integration"</strong> — ৪-৬ ঘণ্টায় setup হবে।</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ NAGAD GUIDE ============ -->
+                <div data-helpcontent="nagad" class="help-content hidden">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-mobile-alt text-orange-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display text-xl font-bold text-navy">Nagad Payment Gateway</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Merchant approval লাগবে: ৭-১৫ দিন</p>
+                        </div>
+                    </div>
+
+                    <div class="help-warn-box mb-4">
+                        <i class="fas fa-info-circle mr-1"></i><strong>গুরুত্বপূর্ণ:</strong> bKash-এর মতোই Nagad Merchant account পেতে business documents লাগবে। Approval ৭-১৫ দিন।
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">১</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Nagad Merchant-এ Apply</p>
+                            <p class="help-step-desc"><code class="text-xs bg-gray-100 px-1.5 py-0.5 rounded">nagad.com.bd/merchant</code> → "Merchant Sign Up" → Documents upload → Submit।</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">২</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Approval-এর পর API Credentials</p>
+                            <p class="help-step-desc">Nagad Merchant Portal → API section → ৩টা value copy করুন।</p>
+                            <div class="help-copy-box">
+                                <i class="fas fa-copy mr-1"></i>Merchant Number<br>
+                                <i class="fas fa-copy mr-1"></i>API Key<br>
+                                <i class="fas fa-copy mr-1"></i>API Secret
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">৩</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title">Admin Panel-এ Paste</p>
+                            <p class="help-step-desc">Settings → Integrations → Nagad card-এ ৩টা value paste করুন → <strong>SAVE INTEGRATIONS</strong>।</p>
+                        </div>
+                    </div>
+
+                    <div class="help-step">
+                        <div class="help-step-num">⚠️</div>
+                        <div class="help-step-content">
+                            <p class="help-step-title text-amber-600">Serverless Setup বাকি</p>
+                            <p class="help-step-desc">Developer-কে বলুন <strong>"Nagad serverless integration"</strong>।</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <div id="more-menu-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end justify-center">
         <div class="bg-white rounded-t-3xl w-full max-w-md animate-slide-up">
             <div class="p-5">
@@ -668,7 +1362,6 @@
         </div>
     </div>
 
-    <!-- STAFF MODAL -->
     <div id="staff-modal" class="hidden fixed inset-0 modal-bg z-[85] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -712,7 +1405,6 @@
         </div>
     </div>
 
-    <!-- STAFF DETAIL MODAL -->
     <div id="staff-detail-modal" class="hidden fixed inset-0 modal-bg z-[85] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -750,7 +1442,6 @@
         </div>
     </div>
 
-    <!-- ORDER EDIT MODAL -->
     <div id="order-edit-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-lg flex flex-col" style="max-height: 95vh; height: 95vh;">
             <div class="navy-gradient px-4 py-3 rounded-t-3xl flex justify-between items-center flex-shrink-0">
@@ -876,7 +1567,6 @@
         </div>
     </div>
 
-    <!-- PRODUCT PICKER MODAL -->
     <div id="product-picker-modal" class="hidden fixed inset-0 modal-bg z-[60] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[85vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -892,7 +1582,6 @@
         </div>
     </div>
 
-    <!-- STATUS PICKER MODAL -->
     <div id="status-picker-modal" class="hidden fixed inset-0 modal-bg z-[65] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
@@ -908,7 +1597,6 @@
         </div>
     </div>
 
-    <!-- STATUS CONFIRM MODAL -->
     <div id="status-confirm-modal" class="hidden fixed inset-0 modal-bg z-[70] flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm p-6 text-center animate-slide-up">
             <div id="sc-icon-wrap" class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center">
@@ -923,7 +1611,6 @@
         </div>
     </div>
 
-    <!-- PRODUCT MODAL -->
     <div id="product-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -976,7 +1663,6 @@
         </div>
     </div>
 
-    <!-- INLINE CATEGORY MODAL -->
     <div id="inline-cat-modal" class="hidden fixed inset-0 modal-bg z-[80] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-sm p-5 animate-slide-up">
             <div class="flex justify-between items-center mb-4">
@@ -996,7 +1682,6 @@
         </div>
     </div>
 
-    <!-- CATEGORY MODAL -->
     <div id="category-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -1026,7 +1711,6 @@
         </div>
     </div>
 
-    <!-- COUPON MODAL -->
     <div id="coupon-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -1065,7 +1749,6 @@
         </div>
     </div>
 
-    <!-- SECTION MODAL -->
     <div id="section-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
@@ -1081,7 +1764,6 @@
         </div>
     </div>
 
-    <!-- BANNER MODAL -->
     <div id="banner-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
@@ -1102,7 +1784,6 @@
         </div>
     </div>
 
-    <!-- TESTIMONIAL MODAL -->
     <div id="testimonial-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -1126,7 +1807,6 @@
         </div>
     </div>
 
-    <!-- HERO MODAL -->
     <div id="hero-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -1157,7 +1837,6 @@
         </div>
     </div>
 
-    <!-- CATEGORY REORDER MODAL -->
     <div id="category-reorder-modal" class="hidden fixed inset-0 modal-bg z-[75] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -1171,7 +1850,6 @@
         </div>
     </div>
 
-    <!-- SECTION REORDER MODAL -->
     <div id="section-reorder-modal" class="hidden fixed inset-0 modal-bg z-[75] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -1185,7 +1863,6 @@
         </div>
     </div>
 
-    <!-- PRODUCT REORDER MODAL -->
     <div id="product-reorder-modal" class="hidden fixed inset-0 modal-bg z-[75] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -1202,6 +1879,26 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // ============ HELP MODAL FUNCTIONS ============
+        window.openHelpModal = function() {
+            document.getElementById('help-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+        window.closeHelpModal = function() {
+            document.getElementById('help-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        };
+        window.switchHelpTab = function(tab) {
+            document.querySelectorAll('.help-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('[data-helpcontent]').forEach(c => c.classList.add('hidden'));
+            const tabBtn = document.querySelector(`.help-tab[data-helptab="${tab}"]`);
+            const content = document.querySelector(`[data-helpcontent="${tab}"]`);
+            if (tabBtn) tabBtn.classList.add('active');
+            if (content) content.classList.remove('hidden');
+        };
+    </script>
 
     <script type="module" src="js/admin-reorder.js"></script>
     <script type="module" src="js/admin.js"></script>
