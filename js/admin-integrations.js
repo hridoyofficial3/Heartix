@@ -7,6 +7,7 @@ import {
     doc, getDoc, setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+// Auto-load sub-modules
 import './admin-back-trap.js';
 import './admin-bulk.js';
 
@@ -34,7 +35,7 @@ if (document.readyState === 'loading') {
     setTimeout(wrapShowTab, 1500);
 }
 
-// ============ BADGE ============
+// ============ BADGE UPDATER ============
 function setBadge(id, enabled) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -53,19 +54,19 @@ async function loadIntegrationsUI() {
         const snap = await getDoc(doc(db, "settings", "main"));
         const int = snap.exists() ? (snap.data().integrations || {}) : {};
 
-        // GA
+        // === Google Analytics ===
         const ga = int.googleAnalytics || {};
         if (document.getElementById('int-ga-enabled')) document.getElementById('int-ga-enabled').checked = !!ga.enabled;
         if (document.getElementById('int-ga-id')) document.getElementById('int-ga-id').value = ga.measurementId || '';
         setBadge('ga-status', !!ga.enabled);
 
-        // FB
+        // === Facebook Pixel ===
         const fb = int.facebookPixel || {};
         if (document.getElementById('int-fb-enabled')) document.getElementById('int-fb-enabled').checked = !!fb.enabled;
         if (document.getElementById('int-fb-id')) document.getElementById('int-fb-id').value = fb.pixelId || '';
         setBadge('fb-status', !!fb.enabled);
 
-        // EmailJS
+        // === EmailJS ===
         const em = int.emailjs || {};
         if (document.getElementById('int-em-enabled')) document.getElementById('int-em-enabled').checked = !!em.enabled;
         if (document.getElementById('int-em-publickey')) document.getElementById('int-em-publickey').value = em.publicKey || '';
@@ -75,7 +76,7 @@ async function loadIntegrationsUI() {
         if (document.getElementById('int-em-adminemail')) document.getElementById('int-em-adminemail').value = em.adminEmail || '';
         setBadge('em-status', !!em.enabled);
 
-        // WhatsApp
+        // === WhatsApp ===
         const wa = int.whatsapp || {};
         if (document.getElementById('int-wa-enabled')) document.getElementById('int-wa-enabled').checked = !!wa.enabled;
         if (document.getElementById('int-wa-number')) document.getElementById('int-wa-number').value = wa.number || '';
@@ -85,7 +86,7 @@ async function loadIntegrationsUI() {
 }
 window.loadIntegrationsUI = loadIntegrationsUI;
 
-// ============ LIVE BADGE ============
+// ============ LIVE BADGE UPDATES ============
 document.addEventListener('change', function(e) {
     if (!e.target) return;
     const id = e.target.id;
@@ -100,32 +101,42 @@ function v(id) { return (document.getElementById(id)?.value || '').trim(); }
 function checked(id) { return document.getElementById(id)?.checked || false; }
 function isEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s); }
 
-// ============ SAVE ============
+// ============ SAVE INTEGRATIONS ============
 window.saveIntegrations = async function() {
+    // === GA ===
     const gaEnabled = checked('int-ga-enabled');
     const gaId = v('int-ga-id');
+
+    // === FB ===
     const fbEnabled = checked('int-fb-enabled');
     const fbId = v('int-fb-id');
+
+    // === EmailJS ===
     const emEnabled = checked('int-em-enabled');
     const emPublicKey = v('int-em-publickey');
     const emServiceId = v('int-em-serviceid');
     const emCustomerTpl = v('int-em-customertpl');
     const emAdminTpl = v('int-em-admintpl');
     const emAdminEmail = v('int-em-adminemail');
+
+    // === WhatsApp ===
     const waEnabled = checked('int-wa-enabled');
     const waNumber = v('int-wa-number');
 
-    // Validation
+    // ============ VALIDATION ============
     if (gaEnabled && !gaId) return toast('Google Analytics ID দিন', 'error');
     if (gaEnabled && !/^G-[A-Z0-9]+$/i.test(gaId)) return toast('GA ID সঠিক নয় (G- দিয়ে শুরু)', 'error');
+
     if (fbEnabled && !fbId) return toast('Facebook Pixel ID দিন', 'error');
     if (fbEnabled && !/^\d{10,20}$/.test(fbId)) return toast('Facebook Pixel ID শুধু ১০-২০ ডিজিট', 'error');
+
     if (emEnabled && !emPublicKey) return toast('EmailJS Public Key দিন', 'error');
     if (emEnabled && !emServiceId) return toast('EmailJS Service ID দিন', 'error');
     if (emEnabled && !emCustomerTpl) return toast('EmailJS Customer Template ID দিন', 'error');
     if (emEnabled && !emAdminTpl) return toast('EmailJS Admin Template ID দিন', 'error');
     if (emEnabled && !emAdminEmail) return toast('Admin Email দিন', 'error');
     if (emEnabled && !isEmail(emAdminEmail)) return toast('Admin Email সঠিক নয়', 'error');
+
     if (waEnabled && !waNumber) return toast('WhatsApp Number দিন', 'error');
     if (waEnabled && !/^88\d{10,13}$/.test(waNumber)) return toast('WhatsApp Number ৮৮ দিয়ে শুরু, space ছাড়া', 'error');
 
