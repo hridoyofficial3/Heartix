@@ -396,7 +396,6 @@
                         </div>
                     </div>
 
-                    <!-- Google Analytics -->
                     <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
                         <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                             <div class="flex items-center gap-3 min-w-0">
@@ -423,7 +422,6 @@
                         </div>
                     </details>
 
-                    <!-- Facebook Pixel -->
                     <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
                         <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                             <div class="flex items-center gap-3 min-w-0">
@@ -450,7 +448,6 @@
                         </div>
                     </details>
 
-                    <!-- SMS (Coming Soon) -->
                     <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2 opacity-70">
                         <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                             <div class="flex items-center gap-3 min-w-0">
@@ -472,7 +469,6 @@
                         </div>
                     </details>
 
-                    <!-- Email (Coming Soon) -->
                     <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2 opacity-70">
                         <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                             <div class="flex items-center gap-3 min-w-0">
@@ -494,7 +490,6 @@
                         </div>
                     </details>
 
-                    <!-- WhatsApp (Coming Soon) -->
                     <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2 opacity-70">
                         <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                             <div class="flex items-center gap-3 min-w-0">
@@ -516,7 +511,6 @@
                         </div>
                     </details>
 
-                    <!-- bKash (Coming Soon) -->
                     <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2 opacity-70">
                         <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                             <div class="flex items-center gap-3 min-w-0">
@@ -538,7 +532,6 @@
                         </div>
                     </details>
 
-                    <!-- Nagad (Coming Soon) -->
                     <details class="integration-card bg-gray-50 rounded-xl overflow-hidden opacity-70">
                         <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                             <div class="flex items-center gap-3 min-w-0">
@@ -1085,5 +1078,78 @@
     <script type="module" src="js/admin-reorder.js"></script>
     <script type="module" src="js/admin.js"></script>
     <script type="module" src="js/admin-integrations.js"></script>
+
+    <!-- ============ BACK BUTTON TRAP (INLINE) ============ -->
+    <script>
+    (function() {
+        var MODALS = [
+            'product-modal','category-modal','coupon-modal','hero-modal',
+            'section-modal','banner-modal','testimonial-modal','more-menu-modal',
+            'status-picker-modal','category-reorder-modal','section-reorder-modal',
+            'product-reorder-modal','inline-cat-modal','product-picker-modal',
+            'status-confirm-modal','order-edit-modal','bulk-upload-modal'
+        ];
+
+        function anyOpen() {
+            for (var i = 0; i < MODALS.length; i++) {
+                var el = document.getElementById(MODALS[i]);
+                if (el && !el.classList.contains('hidden')) return true;
+            }
+            if (document.getElementById('delete-order-modal')) return true;
+            return false;
+        }
+
+        function closeAll() {
+            for (var i = 0; i < MODALS.length; i++) {
+                var el = document.getElementById(MODALS[i]);
+                if (el) el.classList.add('hidden');
+            }
+            var del = document.getElementById('delete-order-modal');
+            if (del) {
+                del.style.opacity = '0';
+                setTimeout(function() { try { del.remove(); } catch(e) {} }, 100);
+            }
+        }
+
+        window.addEventListener('popstate', function() {
+            if (anyOpen()) {
+                closeAll();
+                try { history.pushState({ bt: Date.now() }, '', location.href); } catch(e) {}
+                console.log('🛡️ Back blocked — modal closed');
+            } else {
+                console.log('🛡️ Back allowed — no modal');
+            }
+        });
+
+        var names = [
+            'openAddModal','openCategoryModal','openCouponModal','openHeroModal',
+            'openSectionModal','openBannerModal','openTestimonialModal',
+            'openStatusPicker','openProductPicker','openInlineCategoryModal',
+            'openCategoryReorder','openSectionReorder','openProductReorder',
+            'openMoreMenu','openBulkUpload','openOrderEdit','confirmDeleteOrder'
+        ];
+
+        var attempts = 0;
+        var wrapTimer = setInterval(function() {
+            attempts++;
+            var count = 0;
+            names.forEach(function(n) {
+                if (typeof window[n] === 'function' && !window[n]._btWrapped) {
+                    var orig = window[n];
+                    window[n] = function() {
+                        try { history.pushState({ bt: Date.now() }, '', location.href); } catch(e) {}
+                        return orig.apply(this, arguments);
+                    };
+                    window[n]._btWrapped = true;
+                    count++;
+                }
+            });
+            if (count > 0) console.log('🛡️ Back trap wrapped', count, 'openers (attempt ' + attempts + ')');
+            if (attempts > 40) clearInterval(wrapTimer);
+        }, 250);
+
+        console.log('🛡️ Back trap ready');
+    })();
+    </script>
 </body>
 </html>
