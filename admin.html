@@ -21,6 +21,8 @@
     <style>
         details.oe-section[open] .oe-chevron { transform: rotate(180deg); }
         .oe-chevron { transition: transform 0.2s ease; }
+        details.integration-card[open] .int-chevron { transform: rotate(180deg); }
+        .int-chevron { transition: transform 0.2s ease; }
     </style>
 </head>
 <body class="pb-20 md:pb-6">
@@ -381,7 +383,186 @@
                     <input type="text" id="setting-bkash" placeholder="bKash Number" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
                     <input type="text" id="setting-nagad" placeholder="Nagad Number" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                 </div>
-                <button onclick="saveSettings()" class="btn-primary w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-save mr-2"></i> SAVE SETTINGS</button>
+
+                <!-- ====== INTEGRATIONS ====== -->
+                <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
+                            <i class="fas fa-plug text-indigo-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-navy">Integrations</h3>
+                            <p class="text-[11px] text-gray-500">Third-party services on/off করুন</p>
+                        </div>
+                    </div>
+
+                    <!-- Google Analytics -->
+                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
+                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
+                                    <i class="fas fa-chart-line text-orange-500 text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy">Google Analytics</p>
+                                    <p class="text-[10px] text-gray-500">GA4 tracking</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span id="ga-status" class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
+                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 space-y-2 border-t border-gray-200 pt-3">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="int-ga-enabled" class="w-5 h-5 accent-[#D4A84B]">
+                                <span class="text-sm font-semibold text-navy">Enable Google Analytics</span>
+                            </label>
+                            <input type="text" id="int-ga-id" placeholder="G-XXXXXXXXXX" maxlength="30" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>Measurement ID (G- দিয়ে শুরু)</p>
+                        </div>
+                    </details>
+
+                    <!-- Facebook Pixel -->
+                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
+                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
+                                    <i class="fab fa-facebook text-blue-600 text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy">Facebook Pixel</p>
+                                    <p class="text-[10px] text-gray-500">Ad tracking</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span id="fb-status" class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
+                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 space-y-2 border-t border-gray-200 pt-3">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="int-fb-enabled" class="w-5 h-5 accent-[#D4A84B]">
+                                <span class="text-sm font-semibold text-navy">Enable Facebook Pixel</span>
+                            </label>
+                            <input type="text" id="int-fb-id" placeholder="1234567890123456" maxlength="20" inputmode="numeric" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>Pixel ID (শুধু সংখ্যা)</p>
+                        </div>
+                    </details>
+
+                    <!-- SMS (Coming Soon) -->
+                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2 opacity-70">
+                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
+                                    <i class="fas fa-sms text-green-600 text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy">SMS Gateway</p>
+                                    <p class="text-[10px] text-gray-500">BulkSMSBD — Coming soon</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
+                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 border-t border-gray-200 pt-3">
+                            <p class="text-[11px] text-gray-500"><i class="fas fa-info-circle mr-1"></i>Phase 2 Part 2-এ যোগ হবে</p>
+                        </div>
+                    </details>
+
+                    <!-- Email (Coming Soon) -->
+                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2 opacity-70">
+                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
+                                    <i class="fas fa-envelope text-purple-600 text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy">Email Service</p>
+                                    <p class="text-[10px] text-gray-500">SendGrid — Coming soon</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
+                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 border-t border-gray-200 pt-3">
+                            <p class="text-[11px] text-gray-500"><i class="fas fa-info-circle mr-1"></i>Phase 2 Part 2-এ যোগ হবে</p>
+                        </div>
+                    </details>
+
+                    <!-- WhatsApp (Coming Soon) -->
+                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2 opacity-70">
+                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
+                                    <i class="fab fa-whatsapp text-emerald-600 text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy">WhatsApp API</p>
+                                    <p class="text-[10px] text-gray-500">Auto messaging — Coming soon</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
+                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 border-t border-gray-200 pt-3">
+                            <p class="text-[11px] text-gray-500"><i class="fas fa-info-circle mr-1"></i>Phase 2 Part 2-এ যোগ হবে</p>
+                        </div>
+                    </details>
+
+                    <!-- bKash (Coming Soon) -->
+                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2 opacity-70">
+                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
+                                    <i class="fas fa-mobile-alt text-pink-600 text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy">bKash Payment</p>
+                                    <p class="text-[10px] text-gray-500">Payment Gateway — Coming soon</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
+                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 border-t border-gray-200 pt-3">
+                            <p class="text-[11px] text-gray-500"><i class="fas fa-info-circle mr-1"></i>Phase 2 Part 2-এ যোগ হবে</p>
+                        </div>
+                    </details>
+
+                    <!-- Nagad (Coming Soon) -->
+                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden opacity-70">
+                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
+                                    <i class="fas fa-mobile-alt text-orange-600 text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy">Nagad Payment</p>
+                                    <p class="text-[10px] text-gray-500">Payment Gateway — Coming soon</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
+                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 border-t border-gray-200 pt-3">
+                            <p class="text-[11px] text-gray-500"><i class="fas fa-info-circle mr-1"></i>Phase 2 Part 2-এ যোগ হবে</p>
+                        </div>
+                    </details>
+                </div>
+
+                <button onclick="saveSettings()" class="btn-primary w-full py-4 rounded-xl font-bold text-sm mb-3"><i class="fas fa-save mr-2"></i> SAVE ALL SETTINGS</button>
+                <button onclick="saveIntegrations()" id="save-integrations-btn" class="btn-gold w-full py-4 rounded-xl font-bold text-sm"><i class="fas fa-plug mr-2"></i> SAVE INTEGRATIONS</button>
             </div>
 
         </main>
@@ -410,7 +591,7 @@
 
     </div>
 
-    <!-- MORE MENU (Mobile) -->
+    <!-- MORE MENU -->
     <div id="more-menu-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end justify-center">
         <div class="bg-white rounded-t-3xl w-full max-w-md animate-slide-up">
             <div class="p-5">
@@ -448,11 +629,9 @@
         </div>
     </div>
 
-    <!-- ============ NEW ORDER EDIT MODAL (Compact) ============ -->
+    <!-- ORDER EDIT MODAL -->
     <div id="order-edit-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-lg flex flex-col" style="max-height: 95vh; height: 95vh;">
-
-            <!-- STICKY HEADER -->
             <div class="navy-gradient px-4 py-3 rounded-t-3xl flex justify-between items-center flex-shrink-0">
                 <div class="min-w-0">
                     <h3 class="text-white font-bold text-base leading-none">Edit Order</h3>
@@ -462,11 +641,7 @@
                     <i class="fas fa-times text-xs"></i>
                 </button>
             </div>
-
-            <!-- SCROLLABLE BODY -->
             <div class="flex-1 overflow-y-auto p-3 space-y-2.5" style="min-height: 0;">
-
-                <!-- CUSTOMER SECTION -->
                 <details class="oe-section bg-gray-50 rounded-xl overflow-hidden" open>
                     <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                         <div class="flex items-center gap-2">
@@ -488,8 +663,6 @@
                         </div>
                     </div>
                 </details>
-
-                <!-- ITEMS SECTION -->
                 <div class="bg-gray-50 rounded-xl">
                     <div class="flex items-center justify-between p-3 pb-1">
                         <div class="flex items-center gap-2">
@@ -504,8 +677,6 @@
                     </div>
                     <div id="oe-items-list" class="px-3 pb-3 space-y-1.5"></div>
                 </div>
-
-                <!-- ADJUSTMENTS SECTION -->
                 <details class="oe-section bg-amber-50 rounded-xl overflow-hidden border border-amber-200" open>
                     <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                         <div class="flex items-center gap-2">
@@ -517,8 +688,6 @@
                         <i class="fas fa-chevron-down oe-chevron text-amber-500 text-[10px]"></i>
                     </summary>
                     <div class="px-3 pb-3 space-y-2.5">
-
-                        <!-- DISCOUNT -->
                         <div>
                             <div class="flex justify-between items-baseline mb-1">
                                 <label class="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Discount (৳)</label>
@@ -526,8 +695,6 @@
                             </div>
                             <input type="number" id="oe-discount" placeholder="0" min="0" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-sm font-semibold bg-white focus:border-gold">
                         </div>
-
-                        <!-- DELIVERY -->
                         <div>
                             <div class="flex justify-between items-baseline mb-1">
                                 <label class="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Delivery Charge (৳)</label>
@@ -535,8 +702,6 @@
                             </div>
                             <input type="number" id="oe-delivery" placeholder="0" min="0" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-sm font-semibold bg-white focus:border-gold">
                         </div>
-
-                        <!-- ADVANCE PAID -->
                         <div>
                             <div class="flex justify-between items-baseline mb-1">
                                 <label class="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Advance Paid (৳)</label>
@@ -544,20 +709,14 @@
                             </div>
                             <input type="number" id="oe-advance" placeholder="0" min="0" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-sm font-semibold bg-white focus:border-gold">
                         </div>
-
-                        <!-- ADMIN NOTE -->
                         <div>
                             <label class="text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-1 block">Admin Note (Internal)</label>
                             <textarea id="oe-note" rows="2" placeholder="কাস্টমারের সাথে কথা হয়েছে..." maxlength="500" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium resize-none bg-white focus:border-gold"></textarea>
                         </div>
                     </div>
                 </details>
-
             </div>
-
-            <!-- STICKY FOOTER -->
             <div class="border-t border-gray-100 p-3 bg-white flex-shrink-0 space-y-2 rounded-b-3xl">
-                <!-- SUMMARY -->
                 <div class="navy-gradient rounded-xl p-3 space-y-1">
                     <div class="flex justify-between text-[10px] items-baseline">
                         <span class="text-white/60">Subtotal</span>
@@ -584,8 +743,6 @@
                         <span id="oe-due" class="text-red-300 font-bold">৳0</span>
                     </div>
                 </div>
-
-                <!-- BUTTONS -->
                 <div class="grid grid-cols-5 gap-2">
                     <button onclick="confirmDeleteOrder()" class="col-span-2 bg-red-50 active:bg-red-100 text-red-600 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition">
                         <i class="fas fa-trash text-[11px]"></i> Delete
