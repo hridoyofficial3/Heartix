@@ -35,12 +35,11 @@ function showSection(id) {
 }
 
 async function verifyModerator(uid) {
-    // Check staff collection (new system)
+    // New system: Check staff collection
     try {
         const staffSnap = await getDoc(doc(db, "staff", uid));
         if (staffSnap.exists()) {
             const d = staffSnap.data();
-            // Allow if active and role is moderator, manager, admin, or owner
             if (d.active === true && ['owner','admin','manager','moderator'].includes(d.role)) {
                 currentUserProfile = d;
                 return true;
@@ -508,7 +507,6 @@ window.openDetail = async function(id) {
             m.read = true;
             updateMessagesBadge();
             renderMessages();
-            // Log activity
             logActivity('message_read', {
                 description: `${m.name || 'Unknown'} এর message পড়েছেন (${m.subject || 'General'})`,
                 meta: { messageId: id, name: m.name || '' }
@@ -570,6 +568,6 @@ function updateStats() {
 }
 
 // ============ INITIAL ============
-window.renderAdminOrders = renderAdminOrders; // Export for search input
+window.renderAdminOrders = renderAdminOrders;
 
 console.log('✅ moderator.js loaded (with activity log)');
