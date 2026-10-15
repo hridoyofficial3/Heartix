@@ -67,11 +67,8 @@ async function loadWhatsAppConfirm() {
     if (!db || !orderNum) return;
 
     try {
-        // Load settings + order in parallel
-        const [settingsSnap, orderSnap] = await Promise.all([
-            getDoc(doc(db, "settings", "main")).catch(() => null),
-            getDoc(doc(db, "orders", "?")).catch(() => null) // placeholder
-        ]);
+        // Load settings
+        const settingsSnap = await getDoc(doc(db, "settings", "main")).catch(() => null);
 
         let waNumber = '';
         let waEnabled = false;
@@ -85,11 +82,10 @@ async function loadWhatsAppConfirm() {
 
         if (!waEnabled || !waNumber) return;
 
-        // Try to find the order by orderNumber (query required)
+        // Try to find the order by orderNumber
         let orderData = null;
         try {
-            const ordersQ = await getOrderByNumber(orderNum);
-            if (ordersQ) orderData = ordersQ;
+            orderData = await getOrderByNumber(orderNum);
         } catch (e) { /* silent */ }
 
         // Build WhatsApp message
@@ -124,6 +120,7 @@ async function loadWhatsAppConfirm() {
         if (waConfirmBtn) {
             waConfirmBtn.href = waLink;
             waConfirmBtn.classList.remove('hidden');
+            waConfirmBtn.classList.add('flex');
         }
     } catch (e) {
         console.warn('WhatsApp confirm setup failed:', e);
