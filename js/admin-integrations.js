@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX ADMIN — Integrations (GA + Facebook Pixel) + Bulk load
+// HEARTIX ADMIN — Integrations + Bulk + Back Trap
 // ============================================================
 import { db } from './firebase.js';
 import { showToast as toast } from './common.js';
@@ -7,7 +7,8 @@ import {
     doc, getDoc, setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Auto-load bulk upload module
+// Auto-load sub-modules
+import './admin-back-trap.js';
 import './admin-bulk.js';
 
 // ============ WRAP showTab ============
@@ -112,4 +113,4 @@ setTimeout(() => {
     if (settingsTab && !settingsTab.classList.contains('hidden')) loadIntegrationsUI();
 }, 2000);
 
-console.log('✅ admin-integrations.js loaded (+ bulk)');
+console.log('✅ admin-integrations.js loaded');
