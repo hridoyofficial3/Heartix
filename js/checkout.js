@@ -587,7 +587,7 @@ function validateForm() {
     return ok;
 }
 
-// ============ PLACE ORDER (with Email) ============
+// ============ PLACE ORDER (with Email — awaits before navigation) ============
 window.placeOrder = async function() {
     if (isPlacingOrder) return;
     const cart = getCart();
@@ -729,26 +729,23 @@ window.placeOrder = async function() {
             });
         });
 
-        // ============ SEND EMAIL NOTIFICATIONS (non-blocking) ============
-        if (email) {
-            notifyOrderPlaced({
+        // ============ SEND EMAIL NOTIFICATIONS (awaits with 5s timeout) ============
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending notifications...';
+        try {
+            const emailPromise = notifyOrderPlaced({
                 orderNumber,
                 customerName: name,
                 customerPhone: phone,
-                customerEmail: email,
+                customerEmail: email || '',
                 customerAddress: [address, thana, district].filter(Boolean).join(', '),
                 total: finalTotal
-            }).catch(e => console.warn('Email notify failed:', e));
-        } else {
-            // Customer-এর email না থাকলে শুধু admin alert
-            notifyOrderPlaced({
-                orderNumber,
-                customerName: name,
-                customerPhone: phone,
-                customerEmail: '',
-                customerAddress: [address, thana, district].filter(Boolean).join(', '),
-                total: finalTotal
-            }).catch(e => console.warn('Admin alert failed:', e));
+            });
+            const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
+            await Promise.race([emailPromise, timeoutPromise]);
+            console.log('✅ Email notifications sent');
+        } catch (e) {
+            console.warn('Email notification failed:', e);
+            // Continue anyway — don't block user
         }
 
         saveCart([]);
