@@ -1,8 +1,9 @@
 // ============================================================
-// HEARTIX MESSAGES — Admin inbox
+// HEARTIX MESSAGES — Admin inbox (with activity log)
 // ============================================================
 import { db, auth } from './firebase.js';
 import { escapeHtml, showToast as toast } from './common.js';
+import { logActivity } from './staff-activity.js';
 
 import {
     collection, getDocs, doc, getDoc, updateDoc, deleteDoc,
@@ -29,6 +30,15 @@ function showSection(id) {
 }
 
 async function verifyAdmin(uid) {
+    // Check staff collection first
+    try {
+        const staffSnap = await getDoc(doc(db, "staff", uid));
+        if (staffSnap.exists()) {
+            const d = staffSnap.data();
+            if (d.active === true && ['owner','admin','manager','moderator'].includes(d.role)) return true;
+        }
+    } catch (e) {}
+    // Legacy: settings/admins
     try {
         const snap = await getDoc(doc(db, "settings", "admins"));
         if (snap.exists()) {
@@ -46,6 +56,7 @@ onAuthStateChanged(auth, async (user) => {
         if (ok) {
             showSection('messages-section');
             loadMessages();
+            setTimeout(() => logActivity('login', { description: 'Messages panel-এ login করেছেন' }), 1200);
         } else {
             await signOut(auth);
             showSection('not-admin-section');
@@ -86,6 +97,7 @@ window.login = async function() {
 };
 
 window.logout = async function() {
+    try { await logActivity('logout', { description: 'Messages panel থেকে logout করেছেন' }); } catch (e) {}
     try { await signOut(auth); } catch (e) {}
     location.reload();
 };
@@ -98,7 +110,6 @@ window.loadMessages = async function() {
         allMessages = [];
         snap.forEach(d => allMessages.push({ id: d.id, ...d.data() }));
     } catch (e) {
-        // Fallback without orderBy (if index issue)
         try {
             const snap = await getDocs(collection(db, "messages"));
             allMessages = [];
@@ -183,7 +194,6 @@ window.openDetail = async function(id) {
     currentMessageId = id;
     currentMessage = m;
 
-    // Mark as read
     if (!m.read) {
         try {
             await updateDoc(doc(db, "messages", id), { read: true });
@@ -192,6 +202,11 @@ window.openDetail = async function(id) {
             const unreadEl = document.getElementById('unread-count-text');
             if (unreadEl) unreadEl.textContent = unread + ' unread';
             renderMessages();
+            // Log activity
+            logActivity('message_read', {
+                description: `${m.name || 'Unknown'} এর message পড়েছেন (${m.subject || 'General'})`,
+                meta: { messageId: id, name: m.name || '' }
+            });
         } catch (e) {}
     }
 
@@ -201,7 +216,6 @@ window.openDetail = async function(id) {
     document.getElementById('dm-message').textContent = m.message || '';
     document.getElementById('dm-date').textContent = m.createdAt?.toDate ? m.createdAt.toDate().toLocaleString('en-GB') : '';
 
-    // Contact buttons
     const contact = (m.contact || '').trim();
     const isPhone = /^01[3-9]\d{8}$/.test(contact.replace(/\s+/g, ''));
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
@@ -240,12 +254,19 @@ window.closeDetail = function() {
 window.deleteCurrentMessage = async function() {
     if (!currentMessageId) return;
     if (!confirm('এই message ডিলিট করবেন?')) return;
+    const m = allMessages.find(x => x.id === currentMessageId);
     try {
         await deleteDoc(doc(db, "messages", currentMessageId));
         toast('Message deleted', 'warn');
+        logActivity('message_delete', {
+            description: `${m?.name || 'Unknown'} এর message delete করেছেন`,
+            meta: { messageId: currentMessageId }
+        });
         closeDetail();
         await loadMessages();
     } catch (e) {
         toast('ডিলিট করা যায়নি', 'error');
     }
 };
+
+console.log('✅ messages.js loaded (with activity log)');
