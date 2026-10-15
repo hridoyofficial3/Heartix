@@ -536,6 +536,45 @@
                             <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>Pixel ID (শুধু সংখ্যা)</p>
                         </div>
                     </details>
+
+                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
+                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
+                                    <i class="fas fa-envelope text-purple-600 text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy">Email Notifications</p>
+                                    <p class="text-[10px] text-gray-500">EmailJS integration</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span id="em-status" class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
+                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 space-y-2 border-t border-gray-200 pt-3">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="int-em-enabled" class="w-5 h-5 accent-[#D4A84B]">
+                                <span class="text-sm font-semibold text-navy">Enable Email Notifications</span>
+                            </label>
+
+                            <input type="text" id="int-em-publickey" placeholder="Public Key (UOTXxxx...)" maxlength="60" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>EmailJS → Account → General → Public Key</p>
+
+                            <input type="text" id="int-em-serviceid" placeholder="Service ID (Heartix)" maxlength="40" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>EmailJS → Email Services → Service ID</p>
+
+                            <input type="text" id="int-em-customertpl" placeholder="Customer Template ID (template_xxx)" maxlength="40" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>Order Confirmation template ID</p>
+
+                            <input type="text" id="int-em-admintpl" placeholder="Admin Template ID (template_xxx)" maxlength="40" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>Admin New Order Alert template ID</p>
+
+                            <input type="email" id="int-em-adminemail" placeholder="Admin Email (twhob71122@gmail.com)" maxlength="100" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>যেখানে admin notification যাবে</p>
+                        </div>
+                    </details>
                 </div>
 
                 <button onclick="saveSettings()" class="btn-primary w-full py-4 rounded-xl font-bold text-sm mb-3"><i class="fas fa-save mr-2"></i> SAVE ALL SETTINGS</button>
