@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX ADMIN — Integrations (GA + FB + EmailJS + WhatsApp + SMS + bKash + Nagad)
+// HEARTIX ADMIN — Integrations (GA + FB + EmailJS + WhatsApp)
 // ============================================================
 import { db } from './firebase.js';
 import { showToast as toast } from './common.js';
@@ -10,6 +10,7 @@ import {
 import './admin-back-trap.js';
 import './admin-bulk.js';
 
+// ============ WRAP showTab ============
 function wrapShowTab() {
     if (typeof window.showTab === 'function' && !window._integrationsWrapped) {
         const orig = window.showTab;
@@ -33,6 +34,7 @@ if (document.readyState === 'loading') {
     setTimeout(wrapShowTab, 1500);
 }
 
+// ============ BADGE ============
 function setBadge(id, enabled) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -45,21 +47,25 @@ function setBadge(id, enabled) {
     }
 }
 
+// ============ LOAD UI ============
 async function loadIntegrationsUI() {
     try {
         const snap = await getDoc(doc(db, "settings", "main"));
         const int = snap.exists() ? (snap.data().integrations || {}) : {};
 
+        // GA
         const ga = int.googleAnalytics || {};
         if (document.getElementById('int-ga-enabled')) document.getElementById('int-ga-enabled').checked = !!ga.enabled;
         if (document.getElementById('int-ga-id')) document.getElementById('int-ga-id').value = ga.measurementId || '';
         setBadge('ga-status', !!ga.enabled);
 
+        // FB
         const fb = int.facebookPixel || {};
         if (document.getElementById('int-fb-enabled')) document.getElementById('int-fb-enabled').checked = !!fb.enabled;
         if (document.getElementById('int-fb-id')) document.getElementById('int-fb-id').value = fb.pixelId || '';
         setBadge('fb-status', !!fb.enabled);
 
+        // EmailJS
         const em = int.emailjs || {};
         if (document.getElementById('int-em-enabled')) document.getElementById('int-em-enabled').checked = !!em.enabled;
         if (document.getElementById('int-em-publickey')) document.getElementById('int-em-publickey').value = em.publicKey || '';
@@ -69,35 +75,17 @@ async function loadIntegrationsUI() {
         if (document.getElementById('int-em-adminemail')) document.getElementById('int-em-adminemail').value = em.adminEmail || '';
         setBadge('em-status', !!em.enabled);
 
+        // WhatsApp
         const wa = int.whatsapp || {};
         if (document.getElementById('int-wa-enabled')) document.getElementById('int-wa-enabled').checked = !!wa.enabled;
         if (document.getElementById('int-wa-number')) document.getElementById('int-wa-number').value = wa.number || '';
         setBadge('wa-status', !!wa.enabled);
 
-        const sms = int.sms || {};
-        if (document.getElementById('int-sms-enabled')) document.getElementById('int-sms-enabled').checked = !!sms.enabled;
-        if (document.getElementById('int-sms-apikey')) document.getElementById('int-sms-apikey').value = sms.apiKey || '';
-        if (document.getElementById('int-sms-senderid')) document.getElementById('int-sms-senderid').value = sms.senderId || '';
-        setBadge('sms-status', !!sms.enabled);
-
-        const bkash = int.bkash || {};
-        if (document.getElementById('int-bkash-enabled')) document.getElementById('int-bkash-enabled').checked = !!bkash.enabled;
-        if (document.getElementById('int-bkash-merchant')) document.getElementById('int-bkash-merchant').value = bkash.merchantNumber || '';
-        if (document.getElementById('int-bkash-apikey')) document.getElementById('int-bkash-apikey').value = bkash.apiKey || '';
-        if (document.getElementById('int-bkash-secret')) document.getElementById('int-bkash-secret').value = bkash.apiSecret || '';
-        setBadge('bkash-status', !!bkash.enabled);
-
-        const nagad = int.nagad || {};
-        if (document.getElementById('int-nagad-enabled')) document.getElementById('int-nagad-enabled').checked = !!nagad.enabled;
-        if (document.getElementById('int-nagad-merchant')) document.getElementById('int-nagad-merchant').value = nagad.merchantNumber || '';
-        if (document.getElementById('int-nagad-apikey')) document.getElementById('int-nagad-apikey').value = nagad.apiKey || '';
-        if (document.getElementById('int-nagad-secret')) document.getElementById('int-nagad-secret').value = nagad.apiSecret || '';
-        setBadge('nagad-status', !!nagad.enabled);
-
     } catch (e) { console.warn('Load integrations failed:', e); }
 }
 window.loadIntegrationsUI = loadIntegrationsUI;
 
+// ============ LIVE BADGE ============
 document.addEventListener('change', function(e) {
     if (!e.target) return;
     const id = e.target.id;
@@ -105,15 +93,14 @@ document.addEventListener('change', function(e) {
     if (id === 'int-fb-enabled') setBadge('fb-status', e.target.checked);
     if (id === 'int-em-enabled') setBadge('em-status', e.target.checked);
     if (id === 'int-wa-enabled') setBadge('wa-status', e.target.checked);
-    if (id === 'int-sms-enabled') setBadge('sms-status', e.target.checked);
-    if (id === 'int-bkash-enabled') setBadge('bkash-status', e.target.checked);
-    if (id === 'int-nagad-enabled') setBadge('nagad-status', e.target.checked);
 });
 
+// ============ HELPERS ============
 function v(id) { return (document.getElementById(id)?.value || '').trim(); }
 function checked(id) { return document.getElementById(id)?.checked || false; }
 function isEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s); }
 
+// ============ SAVE ============
 window.saveIntegrations = async function() {
     const gaEnabled = checked('int-ga-enabled');
     const gaId = v('int-ga-id');
@@ -127,18 +114,8 @@ window.saveIntegrations = async function() {
     const emAdminEmail = v('int-em-adminemail');
     const waEnabled = checked('int-wa-enabled');
     const waNumber = v('int-wa-number');
-    const smsEnabled = checked('int-sms-enabled');
-    const smsApiKey = v('int-sms-apikey');
-    const smsSenderId = v('int-sms-senderid');
-    const bkashEnabled = checked('int-bkash-enabled');
-    const bkashMerchant = v('int-bkash-merchant');
-    const bkashApiKey = v('int-bkash-apikey');
-    const bkashSecret = v('int-bkash-secret');
-    const nagadEnabled = checked('int-nagad-enabled');
-    const nagadMerchant = v('int-nagad-merchant');
-    const nagadApiKey = v('int-nagad-apikey');
-    const nagadSecret = v('int-nagad-secret');
 
+    // Validation
     if (gaEnabled && !gaId) return toast('Google Analytics ID দিন', 'error');
     if (gaEnabled && !/^G-[A-Z0-9]+$/i.test(gaId)) return toast('GA ID সঠিক নয় (G- দিয়ে শুরু)', 'error');
     if (fbEnabled && !fbId) return toast('Facebook Pixel ID দিন', 'error');
@@ -151,14 +128,6 @@ window.saveIntegrations = async function() {
     if (emEnabled && !isEmail(emAdminEmail)) return toast('Admin Email সঠিক নয়', 'error');
     if (waEnabled && !waNumber) return toast('WhatsApp Number দিন', 'error');
     if (waEnabled && !/^88\d{10,13}$/.test(waNumber)) return toast('WhatsApp Number ৮৮ দিয়ে শুরু, space ছাড়া', 'error');
-    if (smsEnabled && !smsApiKey) return toast('SMS API Key দিন', 'error');
-    if (smsEnabled && !smsSenderId) return toast('SMS Sender ID দিন', 'error');
-    if (bkashEnabled && !bkashMerchant) return toast('bKash Merchant Number দিন', 'error');
-    if (bkashEnabled && !bkashApiKey) return toast('bKash API Key দিন', 'error');
-    if (bkashEnabled && !bkashSecret) return toast('bKash API Secret দিন', 'error');
-    if (nagadEnabled && !nagadMerchant) return toast('Nagad Merchant Number দিন', 'error');
-    if (nagadEnabled && !nagadApiKey) return toast('Nagad API Key দিন', 'error');
-    if (nagadEnabled && !nagadSecret) return toast('Nagad API Secret দিন', 'error');
 
     const btn = document.getElementById('save-integrations-btn');
     btn.disabled = true;
@@ -177,10 +146,7 @@ window.saveIntegrations = async function() {
                     adminTemplateId: emAdminTpl,
                     adminEmail: emAdminEmail
                 },
-                whatsapp: { enabled: waEnabled, number: waNumber },
-                sms: { enabled: smsEnabled, apiKey: smsApiKey, senderId: smsSenderId },
-                bkash: { enabled: bkashEnabled, merchantNumber: bkashMerchant, apiKey: bkashApiKey, apiSecret: bkashSecret },
-                nagad: { enabled: nagadEnabled, merchantNumber: nagadMerchant, apiKey: nagadApiKey, apiSecret: nagadSecret }
+                whatsapp: { enabled: waEnabled, number: waNumber }
             }
         }, { merge: true });
         toast('Integrations saved! Page reload হচ্ছে...', 'success');
@@ -197,4 +163,4 @@ setTimeout(() => {
     if (settingsTab && !settingsTab.classList.contains('hidden')) loadIntegrationsUI();
 }, 2000);
 
-console.log('✅ admin-integrations.js loaded (7 integrations)');
+console.log('✅ admin-integrations.js loaded (4 integrations)');
