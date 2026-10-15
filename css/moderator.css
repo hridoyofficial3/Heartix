@@ -1,0 +1,142 @@
+/* ============================================================
+   HEARTIX MODERATOR PANEL STYLES
+   ============================================================ */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #F5F5F7;
+    overflow-x: hidden;
+}
+
+/* Order status badges */
+.order-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.status-pending { background: #FEF3C7; color: #92400E; }
+.status-confirmed { background: #DBEAFE; color: #1E40AF; }
+.status-shipped { background: #E9D5FF; color: #6B21A8; }
+.status-delivered { background: #D1FAE5; color: #065F46; }
+.status-cancelled { background: #FEE2E2; color: #991B1B; }
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, #0A1628, #152238);
+    color: white;
+    transition: all 0.2s ease;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(10,22,40,0.25); }
+.btn-gold {
+    background: linear-gradient(135deg, #D4A84B, #E8C77B);
+    color: #0A1628;
+    transition: all 0.2s ease;
+}
+.btn-gold:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(212,168,75,0.4); }
+
+/* Order item row */
+.order-item-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 8px;
+    background: #F9FAFB;
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+/* Toast */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+.toast {
+    min-width: 260px;
+    max-width: 90vw;
+    padding: 14px 20px;
+    border-radius: 14px;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+    animation: slideDown 0.35s ease-out;
+    pointer-events: auto;
+}
+.toast-success { background: linear-gradient(135deg, #16a34a, #22c55e); }
+.toast-error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+.toast-warn { background: linear-gradient(135deg, #ea580c, #f97316); }
+.toast-info { background: linear-gradient(135deg, #0A1628, #152238); }
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
+
+/* Modal background */
+.modal-bg {
+    background: rgba(10, 22, 40, 0.75);
+    backdrop-filter: blur(6px);
+}
+
+/* Sidebar / mobile */
+@media (min-width: 768px) {
+    body { padding-left: 240px; }
+    .sidebar-desktop { display: flex !important; }
+    .mobile-bottom-nav { display: none !important; }
+}
+@media (max-width: 767px) {
+    .sidebar-desktop { display: none !important; }
+}
+
+/* Nav item */
+.nav-item { transition: all 0.2s ease; }
+.nav-item.active {
+    background: linear-gradient(135deg, #D4A84B 0%, #E8C77B 100%);
+    color: #0A1628 !important;
+    box-shadow: 0 4px 12px rgba(212,168,75,0.35);
+}
+.nav-item.active .nav-icon { color: #0A1628 !important; }
+.nav-item:not(.active) { color: rgba(255,255,255,0.8); }
+.nav-item:not(.active) .nav-icon { color: rgba(255,255,255,0.6); }
+
+/* Details/Summary */
+summary.order-summary { list-style: none; }
+summary.order-summary::-webkit-details-marker { display: none; }
+summary.order-summary::-moz-list-bullet { list-style: none; }
+details.order-details[open] .order-chevron { transform: rotate(180deg); }
+.order-chevron { transition: transform 0.25s ease; }
+
+/* Message card */
+.msg-card { transition: all 0.15s ease; }
+.msg-card:active { transform: scale(0.99); }
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    background: #dc2626;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Input focus */
+input:focus, select:focus, textarea:focus {
+    border-color: #D4A84B !important;
+    box-shadow: 0 0 0 3px rgba(212,168,75,0.12);
+}
