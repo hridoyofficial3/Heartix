@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX CHECKOUT — with logged-in autofill + repeat customer + IP
+// HEARTIX CHECKOUT — with logged-in autofill + repeat customer + IP + Email
 // ============================================================
 import { db, auth } from './firebase.js';
 import {
@@ -7,6 +7,7 @@ import {
     getCart, saveCart, validatePhone, generateOrderNumber
 } from './common.js';
 import { DISTRICTS } from './districts.js';
+import { notifyOrderPlaced } from './email-notify.js';
 
 import {
     collection, doc, getDoc, getDocs, query, where,
@@ -48,7 +49,6 @@ function initDistricts() {
     if (currentVal) sel.value = currentVal;
 }
 
-// Load saved coupon
 try {
     const saved = JSON.parse(localStorage.getItem('heartix_coupon') || 'null');
     if (saved && saved.code) appliedCoupon = saved;
@@ -108,7 +108,6 @@ async function checkSameIPRecent(ip, phone) {
     }
 }
 
-// ============ FRESH CART VALIDATION ============
 async function loadFreshCartData() {
     const cart = getCart();
     if (cart.length === 0) return { ok: true };
@@ -142,7 +141,6 @@ async function loadFreshCartData() {
     return { ok: issues.length === 0, issues };
 }
 
-// ============ COUPON VALIDATION ============
 async function validateCoupon(coupon, subtotal) {
     if (!coupon || !coupon.code) return { valid: false, discount: 0, reason: 'no_coupon' };
     try {
@@ -167,7 +165,6 @@ async function validateCoupon(coupon, subtotal) {
     }
 }
 
-// ============ LOAD LOGGED-IN USER PROFILE ============
 async function loadLoggedInUser() {
     return new Promise((resolve) => {
         const unsub = onAuthStateChanged(auth, async (user) => {
@@ -190,13 +187,10 @@ async function loadLoggedInUser() {
     });
 }
 
-// Pre-fill from logged-in profile
 function prefillFromLoggedInProfile() {
     if (!loggedInUser || !loggedInProfile) return false;
-
     const p = loggedInProfile;
     let filled = false;
-
     if (p.name) { document.getElementById('customer-name').value = p.name; filled = true; }
     if (p.phone) { document.getElementById('customer-phone').value = p.phone; filled = true; }
     if (p.email || loggedInUser.email) {
@@ -206,21 +200,15 @@ function prefillFromLoggedInProfile() {
     if (p.address) { document.getElementById('customer-address').value = p.address; filled = true; }
     if (p.district) { document.getElementById('customer-district').value = p.district; filled = true; }
     if (p.thana) { document.getElementById('customer-thana').value = p.thana; filled = true; }
-
     if (filled) {
         showToast('আপনার saved তথ্য অটো-ফিল করা হয়েছে ✅', 'success');
     }
-
-    // Mark phone as already-checked to skip repeat modal
     if (p.phone) lastCheckedPhone = p.phone;
-
     return filled;
 }
 
-// ============ LOAD SETTINGS ============
 async function loadSettings() {
     fetchIP().then(ip => { currentIP = ip; });
-
     if (!db) { isLoading = false; afterLoad(); return; }
     try {
         const snap = await getDoc(doc(db, "settings", "main"));
@@ -237,7 +225,6 @@ async function loadSettings() {
     afterLoad();
 }
 
-// ============ AFTER LOAD ============
 async function afterLoad() {
     document.getElementById('loading-skeleton').classList.add('hidden');
     document.getElementById('main-content').classList.remove('hidden');
@@ -252,21 +239,14 @@ async function afterLoad() {
     initDistricts();
     attachPaymentListeners();
     attachPhoneListener();
-
-    // Check if user is logged in
     await loadLoggedInUser();
-
     const result = await loadFreshCartData();
     renderOrderReview();
     await updateSummary();
-
-    // Auto-fill from logged-in profile
     if (loggedInUser) {
         prefillFromLoggedInProfile();
     }
-
     updatePaymentInfo('full-cod');
-
     if (!result.ok) {
         const missing = result.issues.filter(i => i.type === 'missing').length;
         const lowStock = result.issues.filter(i => i.type === 'stock').length;
@@ -279,7 +259,6 @@ async function afterLoad() {
     }
 }
 
-// ============ PHONE INPUT LISTENER ============
 function attachPhoneListener() {
     const phoneInput = document.getElementById('customer-phone');
     if (!phoneInput) return;
@@ -287,13 +266,10 @@ function attachPhoneListener() {
         const raw = e.target.value.replace(/\D/g, '');
         if (raw !== e.target.value) e.target.value = raw;
         const phone = raw;
-
         if (phoneLookupTimer) clearTimeout(phoneLookupTimer);
         if (phone.length !== 11) return;
         if (phone === lastCheckedPhone) return;
-        // Skip if logged-in user's own phone
         if (loggedInProfile && loggedInProfile.phone === phone) return;
-
         phoneLookupTimer = setTimeout(() => {
             lastCheckedPhone = phone;
             handlePhoneLookup(phone);
@@ -306,13 +282,10 @@ async function handlePhoneLookup(phone) {
     const orders = await lookupOrdersByPhone(phone);
     previousOrders = orders;
     if (orders.length === 0) return;
-
     const latest = orders[0];
     autoFillSourceOrder = latest;
-
     const ts = latest.createdAt?.toMillis ? latest.createdAt.toMillis() : 0;
     const minutesAgo = ts ? Math.floor((Date.now() - ts) / 60000) : null;
-
     if (minutesAgo !== null && minutesAgo < RECENT_ORDER_WINDOW_MIN) {
         showWarningModal(latest, minutesAgo);
     } else {
@@ -320,7 +293,6 @@ async function handlePhoneLookup(phone) {
     }
 }
 
-// ============ BACK BUTTON TRAP ============
 function activateBackTrap() {
     if (backTrapActive) return;
     backTrapActive = true;
@@ -347,7 +319,6 @@ function handlePopState() {
     }
 }
 
-// ============ MODAL SHOWERS ============
 const STATUS_COLORS = {
     'pending': 'bg-yellow-100 text-yellow-700',
     'confirmed': 'bg-blue-100 text-blue-700',
@@ -464,7 +435,6 @@ window.closeHistoryModal = function() {
     if (!warnOpen && !repOpen) releaseBackTrap();
 }
 
-// ============ AUTO-FILL ============
 function autoFillFromOrder(order) {
     if (!order) return;
     const c = order.customer || {};
@@ -475,7 +445,6 @@ function autoFillFromOrder(order) {
     if (c.thana) document.getElementById('customer-thana').value = c.thana;
 }
 
-// ============ RENDER ORDER REVIEW ============
 function renderOrderReview() {
     const cart = getCart();
     const reviewDiv = document.getElementById('order-review');
@@ -500,7 +469,6 @@ function renderOrderReview() {
     reviewDiv.innerHTML = html;
 }
 
-// ============ UPDATE SUMMARY ============
 async function updateSummary() {
     const cart = getCart();
     let subtotal = 0;
@@ -509,7 +477,6 @@ async function updateSummary() {
         const price = fresh ? fresh.price : (Number(item.price) || 0);
         subtotal += price * (Number(item.quantity) || 0);
     });
-
     let discount = 0;
     if (appliedCoupon && appliedCoupon.code) {
         const validation = await validateCoupon(appliedCoupon, subtotal);
@@ -528,14 +495,11 @@ async function updateSummary() {
             }
         }
     }
-
     const afterDiscount = subtotal - discount;
     const isFree = settings.freeDeliveryAbove > 0 && afterDiscount >= settings.freeDeliveryAbove;
     const dc = isFree ? 0 : settings.deliveryCharge;
     const total = afterDiscount + dc;
-
     document.getElementById('checkout-subtotal').innerText = '৳ ' + formatPrice(subtotal);
-
     const discountRow = document.getElementById('checkout-discount-row');
     if (discount > 0) {
         discountRow.classList.remove('hidden');
@@ -544,16 +508,13 @@ async function updateSummary() {
     } else {
         discountRow.classList.add('hidden');
     }
-
     document.getElementById('checkout-delivery').innerText = dc === 0 ? 'ফ্রি' : '৳ ' + formatPrice(dc);
     document.getElementById('checkout-total').innerText = '৳ ' + formatPrice(total);
-
     const fn = document.getElementById('checkout-free-note');
     if (isFree) fn.classList.remove('hidden');
     else fn.classList.add('hidden');
 }
 
-// ============ PAYMENT METHOD ============
 function attachPaymentListeners() {
     document.querySelectorAll('input[name="payment"]').forEach(radio => {
         radio.addEventListener('change', function() {
@@ -577,18 +538,15 @@ async function updatePaymentInfo(method) {
         const price = fresh ? fresh.price : (Number(item.price) || 0);
         subtotal += price * (Number(item.quantity) || 0);
     });
-
     let discount = 0;
     if (appliedCoupon && appliedCoupon.code) {
         const validation = await validateCoupon(appliedCoupon, subtotal);
         if (validation.valid) discount = validation.discount;
     }
-
     const afterDiscount = subtotal - discount;
     const isFree = settings.freeDeliveryAbove > 0 && afterDiscount >= settings.freeDeliveryAbove;
     const dc = isFree ? 0 : settings.deliveryCharge;
     const total = afterDiscount + dc;
-
     if (method === 'full-cod') { box.classList.add('hidden'); return; }
     box.classList.remove('hidden');
     let html = '';
@@ -605,7 +563,6 @@ async function updatePaymentInfo(method) {
     content.innerHTML = html;
 }
 
-// ============ FORM VALIDATION ============
 function setFieldError(id, hasError) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -619,23 +576,18 @@ function validateForm() {
     const email = (document.getElementById('customer-email').value || '').trim();
     const address = (document.getElementById('customer-address').value || '').trim();
     let ok = true;
-
     if (!name || name.length < 2) { setFieldError('customer-name', true); if (ok) showToast('সঠিক নাম দিন', 'error'); ok = false; }
     else setFieldError('customer-name', false);
-
     if (!validatePhone(phone)) { setFieldError('customer-phone', true); if (ok) showToast('সঠিক ফোন নাম্বার (01XXXXXXXXX)', 'error'); ok = false; }
     else setFieldError('customer-phone', false);
-
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setFieldError('customer-email', true); if (ok) showToast('সঠিক ইমেইল দিন', 'error'); ok = false; }
     else setFieldError('customer-email', false);
-
     if (!address || address.length < 5) { setFieldError('customer-address', true); if (ok) showToast('সম্পূর্ণ ঠিকানা দিন', 'error'); ok = false; }
     else setFieldError('customer-address', false);
-
     return ok;
 }
 
-// ============ PLACE ORDER ============
+// ============ PLACE ORDER (with Email) ============
 window.placeOrder = async function() {
     if (isPlacingOrder) return;
     const cart = getCart();
@@ -657,13 +609,10 @@ window.placeOrder = async function() {
 
     try {
         if (!db) throw new Error("Database connection failed");
-
         if (!currentIP) {
             currentIP = await fetchIP();
         }
-
         const ipFlagged = await checkSameIPRecent(currentIP, phone);
-
         if (previousOrders.length === 0) {
             previousOrders = await lookupOrdersByPhone(phone);
         }
@@ -716,7 +665,6 @@ window.placeOrder = async function() {
             }
 
             finalSubtotal = readData.reduce((s, r) => s + r.freshPrice * r.qty, 0);
-
             finalDiscount = 0;
             let couponValid = false;
             if (couponSnapData) {
@@ -750,7 +698,6 @@ window.placeOrder = async function() {
             for (const r of readData) {
                 transaction.update(r.ref, { stock: r.stock - r.qty });
             }
-
             if (couponValid && couponRef && couponSnapData) {
                 const newCount = (couponSnapData.usedCount || 0) + 1;
                 transaction.update(couponRef, { usedCount: newCount });
@@ -782,6 +729,28 @@ window.placeOrder = async function() {
             });
         });
 
+        // ============ SEND EMAIL NOTIFICATIONS (non-blocking) ============
+        if (email) {
+            notifyOrderPlaced({
+                orderNumber,
+                customerName: name,
+                customerPhone: phone,
+                customerEmail: email,
+                customerAddress: [address, thana, district].filter(Boolean).join(', '),
+                total: finalTotal
+            }).catch(e => console.warn('Email notify failed:', e));
+        } else {
+            // Customer-এর email না থাকলে শুধু admin alert
+            notifyOrderPlaced({
+                orderNumber,
+                customerName: name,
+                customerPhone: phone,
+                customerEmail: '',
+                customerAddress: [address, thana, district].filter(Boolean).join(', '),
+                total: finalTotal
+            }).catch(e => console.warn('Admin alert failed:', e));
+        }
+
         saveCart([]);
         try { localStorage.removeItem('heartix_coupon'); } catch(e) {}
         window.location.href = 'order-success.html?order=' + encodeURIComponent(orderNumber);
@@ -794,6 +763,5 @@ window.placeOrder = async function() {
     }
 };
 
-// ============ INIT ============
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadSettings);
 else loadSettings();
