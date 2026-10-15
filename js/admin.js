@@ -1,9 +1,10 @@
 // ============================================================
-// HEARTIX ADMIN — JS (Editable Customer + Compact Order Edit)
+// HEARTIX ADMIN — JS (with Activity Log)
 // ============================================================
 import { db, auth } from './firebase.js';
 import { escapeHtml, formatPrice as fmt } from './common.js';
 import { DISTRICTS } from './districts.js';
+import { logActivity } from './staff-activity.js';
 
 import {
     collection, getDocs, addDoc, updateDoc, deleteDoc,
@@ -93,6 +94,15 @@ function showSection(id) {
 }
 
 async function verifyAdmin(uid) {
+    // New: Check staff collection first
+    try {
+        const staffSnap = await getDoc(doc(db, "staff", uid));
+        if (staffSnap.exists()) {
+            const d = staffSnap.data();
+            if (d.active === true && (d.role === 'owner' || d.role === 'admin')) return true;
+        }
+    } catch (e) { /* fall through */ }
+    // Legacy: settings/admins.uids
     try {
         const snap = await getDoc(doc(db, "settings", "admins"));
         if (snap.exists()) {
@@ -121,6 +131,10 @@ onAuthStateChanged(auth, async (user) => {
             if (se) se.textContent = user.email || '';
             showSection('dashboard-section');
             loadAllData();
+            // Activity log: login
+            setTimeout(() => {
+                logActivity('login', { description: 'Admin panel-এ login করেছেন' });
+            }, 1200);
         } else {
             await signOut(auth);
             showSection('not-admin-section');
@@ -154,6 +168,7 @@ window.login = async function() {
 }
 
 window.logout = async function() {
+    try { await logActivity('logout', { description: 'Admin panel থেকে logout করেছেন' }); } catch (e) {}
     try { await signOut(auth); } catch (e) {}
     location.reload();
 }
@@ -309,6 +324,7 @@ window.saveInlineCategory = async function() {
         renderAdminCategories();
         closeInlineCategoryModal();
         toast('Category যোগ হয়েছে!');
+        logActivity('category_add', { description: `নতুন category: "${label}" (${key})`, meta: { key, label } });
     } catch (e) { toast('Error: ' + e.message, 'error'); }
     finally { btn.disabled = false; btn.textContent = 'SAVE'; }
 }
@@ -441,10 +457,15 @@ window.saveCoupon = async function() {
 
     try {
         const existing = allCouponsList.find(c => c.code === code);
+        const isEdit = !!existing;
         const data = { description, type, value, minOrder, maxUses, expiry, active, usedCount: existing?.usedCount || 0, updatedAt: new Date().toISOString() };
         if (!existing) data.createdAt = new Date().toISOString();
         await setDoc(doc(db, "coupons", code), data, { merge: true });
         toast('Coupon saved!');
+        logActivity(isEdit ? 'coupon_edit' : 'coupon_add', {
+            description: `${isEdit ? 'Edit' : 'নতুন'} coupon: "${code}" (${type === 'percentage' ? value + '%' : '৳' + value})`,
+            meta: { code, type, value }
+        });
         closeCouponModal();
         await loadCoupons();
     } catch (e) { toast("Error: " + e.message, 'error'); }
@@ -456,6 +477,7 @@ window.deleteCoupon = async function(code) {
     try {
         await deleteDoc(doc(db, "coupons", code));
         toast('Coupon deleted', 'warn');
+        logActivity('coupon_delete', { description: `Coupon delete: "${code}"`, meta: { code } });
         await loadCoupons();
     } catch (e) { toast("Error: " + e.message, 'error'); }
 }
@@ -537,6 +559,7 @@ window.saveHeroBanner = async function() {
         if (idx !== '') heroBanners[parseInt(idx)] = b; else heroBanners.push(b);
         await setDoc(doc(db, "settings", "main"), { heroBanners }, { merge: true });
         closeHeroModal(); renderHeroBannersList(); toast('Saved!');
+        logActivity('settings_update', { description: `Hero banner ${idx !== '' ? 'update' : 'যোগ'} করা হয়েছে`, meta: { idx } });
     } catch (e) { toast("Error: " + e.message, 'error'); }
     finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE'; }
 }
@@ -546,6 +569,7 @@ window.deleteHeroBanner = async function(i) {
     heroBanners.splice(i, 1);
     await setDoc(doc(db, "settings", "main"), { heroBanners }, { merge: true });
     renderHeroBannersList(); toast('Deleted', 'warn');
+    logActivity('settings_update', { description: 'Hero banner delete করা হয়েছে' });
 }
 
 // ============ CATEGORIES ============
@@ -642,6 +666,7 @@ window.saveCategory = async function() {
         else if (emoji) finalIcon = emoji;
         else if (existingCategoryImage && !removeExistingCategoryImage) finalIcon = existingCategoryImage;
         const newCategory = { key, label, icon: finalIcon };
+        const isEdit = !!oldKey;
         if (oldKey) { const idx = allCategories.findIndex(c => c.key === oldKey); if (idx > -1) allCategories[idx] = newCategory; }
         else allCategories.push(newCategory);
         await setDoc(doc(db, "settings", "main"), { categories: allCategories }, { merge: true });
@@ -649,6 +674,10 @@ window.saveCategory = async function() {
             const updated = await updateProductsCategory(oldKey, key);
             toast(`Saved! ${updated} products updated.`);
         } else toast('Saved!');
+        logActivity(isEdit ? 'category_edit' : 'category_add', {
+            description: `${isEdit ? 'Edit' : 'নতুন'} category: "${label}"`,
+            meta: { key, label }
+        });
         closeCategoryModal(); renderAdminCategories(); populateSectionDropdown(); populateCategoryCheckboxes(); await loadProducts();
     } catch (e) { toast("Error: " + e.message, 'error'); }
     finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE'; }
@@ -693,6 +722,7 @@ window.deleteCategory = async function(index) {
     }
     renderAdminCategories(); populateSectionDropdown(); populateCategoryCheckboxes(); await loadProducts();
     toast('Deleted', 'warn');
+    logActivity('category_delete', { description: `Category delete: "${cat.label}"`, meta: { key: cat.key } });
 }
 
 // ============ SECTIONS ============
@@ -738,6 +768,7 @@ window.saveSection = async function() {
     if (idx !== '') customSections[parseInt(idx)] = sec; else customSections.push(sec);
     await setDoc(doc(db, "settings", "main"), { customSections }, { merge: true });
     closeSectionModal(); renderSectionsList(); toast('Saved!');
+    logActivity('settings_update', { description: `Section ${idx !== '' ? 'update' : 'যোগ'}: "${title}"` });
 }
 
 window.deleteSection = async function(i) {
@@ -745,6 +776,7 @@ window.deleteSection = async function(i) {
     customSections.splice(i, 1);
     await setDoc(doc(db, "settings", "main"), { customSections }, { merge: true });
     renderSectionsList(); toast('Deleted', 'warn');
+    logActivity('settings_update', { description: 'Section delete করা হয়েছে' });
 }
 
 // ============ MIDDLE BANNERS ============
@@ -805,6 +837,7 @@ window.saveBanner = async function() {
         if (isEdit) middleBanners[parseInt(idx)] = banner; else middleBanners.push(banner);
         await setDoc(doc(db, "settings", "main"), { middleBanners }, { merge: true });
         closeBannerModal(); renderBannersList(); toast('Saved!');
+        logActivity('settings_update', { description: `Middle banner ${isEdit ? 'update' : 'যোগ'} করা হয়েছে` });
     } catch (e) { toast("Error: " + e.message, 'error'); }
     finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE'; }
 }
@@ -814,6 +847,7 @@ window.deleteBanner = async function(i) {
     middleBanners.splice(i, 1);
     await setDoc(doc(db, "settings", "main"), { middleBanners }, { merge: true });
     renderBannersList(); toast('Deleted', 'warn');
+    logActivity('settings_update', { description: 'Middle banner delete করা হয়েছে' });
 }
 
 // ============ TESTIMONIALS ============
@@ -878,6 +912,7 @@ window.saveTestimonial = async function() {
         if (idx !== '') testimonials[parseInt(idx)] = t; else testimonials.push(t);
         await setDoc(doc(db, "settings", "main"), { testimonials }, { merge: true });
         closeTestimonialModal(); renderTestimonialsList(); toast('Saved!');
+        logActivity('settings_update', { description: `Testimonial ${idx !== '' ? 'update' : 'যোগ'}: "${name}"` });
     } catch (e) { toast("Error: " + e.message, 'error'); }
     finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE'; }
 }
@@ -887,6 +922,7 @@ window.deleteTestimonial = async function(i) {
     testimonials.splice(i, 1);
     await setDoc(doc(db, "settings", "main"), { testimonials }, { merge: true });
     renderTestimonialsList(); toast('Deleted', 'warn');
+    logActivity('settings_update', { description: 'Testimonial delete করা হয়েছে' });
 }
 
 // ============ PRODUCTS ============
@@ -1038,6 +1074,7 @@ window.saveProduct = async function() {
         const allImages = [...existingImages, ...newUrls].filter(u => typeof u === 'string' && u.length > 0);
         if (allImages.length === 0) throw new Error('No valid images');
         const data = { name, price, oldPrice, category: categories[0], categories, stock, brand, description, featured, pinned, image: allImages[0], images: allImages };
+        const isEdit = !!id;
         if (id) {
             const existing = allProductsList.find(x => x.id === id);
             if (existing && typeof existing.sortOrder === 'number') data.sortOrder = existing.sortOrder;
@@ -1059,14 +1096,23 @@ window.saveProduct = async function() {
             await addDoc(collection(db, "products"), data);
         }
         toast('Saved!'); closeModal(); await loadProducts(); updateStats();
+        logActivity(isEdit ? 'product_edit' : 'product_add', {
+            description: `${isEdit ? 'Edit' : 'নতুন'} product: "${name}" (৳${price})`,
+            meta: { productId: id || 'new', name, price }
+        });
     } catch (e) { toast("Error: " + e.message, 'error'); }
     finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i> SAVE PRODUCT'; }
 }
 
 window.deleteProduct = async function(id) {
+    const p = allProductsList.find(x => x.id === id);
     if (!confirm("Delete this product?")) return;
     await deleteDoc(doc(db, "products", id));
     await loadProducts(); updateStats(); toast('Deleted', 'warn');
+    logActivity('product_delete', {
+        description: `Product delete: "${p?.name || id}"`,
+        meta: { productId: id, name: p?.name || '' }
+    });
 }
 
 // ============ ORDERS ============
@@ -1203,7 +1249,6 @@ window.openOrderEdit = function(id) {
     editingOrderItems = JSON.parse(JSON.stringify(o.items || []));
     document.getElementById('oe-order-num').textContent = o.orderNumber || id.slice(0, 10);
 
-    // Customer editable fields
     const c = o.customer || {};
     document.getElementById('oe-edit-name').value = c.name || '';
     document.getElementById('oe-edit-phone').value = c.phone || '';
@@ -1212,12 +1257,10 @@ window.openOrderEdit = function(id) {
     document.getElementById('oe-edit-district').value = c.district || '';
     document.getElementById('oe-edit-thana').value = c.thana || '';
 
-    // Original values
     document.getElementById('oe-orig-discount').textContent = 'Orig: ৳' + fmt(o.discount || 0);
     document.getElementById('oe-orig-delivery').textContent = 'Orig: ৳' + fmt(o.deliveryCharge || 0);
     document.getElementById('oe-orig-advance').textContent = 'Orig: ৳' + fmt(o.advancePaid || 0);
 
-    // Amounts
     document.getElementById('oe-discount').value = o.discount || 0;
     document.getElementById('oe-delivery').value = o.deliveryCharge || 0;
     document.getElementById('oe-advance').value = o.advancePaid || 0;
@@ -1227,7 +1270,6 @@ window.openOrderEdit = function(id) {
     recalcOrderEdit();
     document.getElementById('order-edit-modal').classList.remove('hidden');
 
-    // Back trap
     if (!oeHistoryPushed) {
         try { history.pushState({ oeModal: true }, '', location.href); oeHistoryPushed = true; } catch (e) {}
     }
@@ -1243,11 +1285,9 @@ window.closeOrderEdit = function() {
     }
 }
 
-// Back button trap
 window.addEventListener('popstate', function() {
     const m = document.getElementById('order-edit-modal');
     if (m && !m.classList.contains('hidden')) {
-        // Modal is open — close it and re-push to prevent navigation
         m.classList.add('hidden');
         editingOrderId = null;
         editingOrderItems = [];
@@ -1288,7 +1328,6 @@ window.changeItemQty = function(i, delta) {
 
 window.removeEditItem = function(i) { editingOrderItems.splice(i, 1); renderOrderEditItems(); recalcOrderEdit(); }
 
-// === FIXED: Global export so oninput works ===
 window.recalcOrderEdit = function() {
     const subtotal = editingOrderItems.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0);
     const discount = parseFloat(document.getElementById('oe-discount').value) || 0;
@@ -1304,7 +1343,6 @@ window.recalcOrderEdit = function() {
     document.getElementById('oe-due').textContent = '৳' + fmt(due);
 };
 
-// Add input listeners for real-time recalc
 ['oe-discount', 'oe-delivery', 'oe-advance'].forEach(id => {
     document.addEventListener('input', function(e) {
         if (e.target && e.target.id === id) window.recalcOrderEdit();
@@ -1317,7 +1355,6 @@ window.saveOrderEdit = async function() {
     const order = allOrdersList.find(x => x.id === editingOrderId);
     if (!order) return;
 
-    // Customer fields
     const newName = (document.getElementById('oe-edit-name').value || '').trim();
     const newPhone = (document.getElementById('oe-edit-phone').value || '').trim();
     const newAddress = (document.getElementById('oe-edit-address').value || '').trim();
@@ -1361,6 +1398,10 @@ window.saveOrderEdit = async function() {
             dueAmount, adminNote
         });
         toast('Order updated!');
+        logActivity('order_edit', {
+            description: `Order ${order.orderNumber || editingOrderId.slice(0,8)} edit করা হয়েছে (total ৳${fmt(total)})`,
+            meta: { orderId: editingOrderId, total }
+        });
         closeOrderEdit();
         await loadOrders();
         await loadProducts();
@@ -1474,6 +1515,10 @@ window.executeDelete = async function(shouldRestore) {
         }
         await deleteDoc(doc(db, "orders", editingOrderId));
         toast(shouldRestore ? 'Order deleted + Stock restored ✅' : 'Order deleted', shouldRestore ? 'success' : 'warn');
+        logActivity('order_delete', {
+            description: `Order delete: ${order.orderNumber || editingOrderId.slice(0,8)} (৳${fmt(order.total)})${shouldRestore ? ' — stock restored' : ''}`,
+            meta: { orderId: editingOrderId, restore: shouldRestore }
+        });
         closeDeleteModal();
         closeOrderEdit();
         await loadOrders();
@@ -1606,6 +1651,10 @@ window.confirmStatusChange = async function() {
         }
         await updateDoc(doc(db, "orders", orderId), { status: newStatus });
         toast('Status: ' + newStatus);
+        logActivity('order_status', {
+            description: `Order ${order?.orderNumber || orderId.slice(0,8)} এর status ${oldStatus || 'pending'} → ${newStatus}`,
+            meta: { orderId, oldStatus, newStatus }
+        });
         closeStatusConfirm();
         await loadOrders();
         updateStats();
@@ -1652,6 +1701,7 @@ window.deleteReview = async function(id) {
     await deleteDoc(doc(db, "reviews", id));
     await loadReviews();
     toast('Review deleted', 'warn');
+    logActivity('message_delete', { description: 'একটি product review delete করা হয়েছে', meta: { reviewId: id } });
 }
 
 // ============ STATS ============
@@ -1705,6 +1755,7 @@ window.saveSettings = async function() {
         };
         await setDoc(doc(db, "settings", "main"), settings, { merge: true });
         toast('Settings saved!');
+        logActivity('settings_update', { description: 'Site settings update করা হয়েছে' });
     } catch (e) { toast("Error: " + e.message, 'error'); }
 }
 
@@ -1741,4 +1792,4 @@ document.getElementById('test-image-file')?.addEventListener('change', function(
     r.readAsDataURL(f);
 });
 
-console.log('✅ admin.js loaded (compact order edit + editable customer + back trap)');
+console.log('✅ admin.js loaded (with activity log)');
