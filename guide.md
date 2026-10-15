@@ -1,34 +1,35 @@
-# 📖 Heartix — Master Guide v6.0
+# 📖 Heartix — Master Guide v7.0
 
-**Version:** 6.0
-**Last Updated:** 15 October 2025, 10:30 PM
+**Version:** 7.0
+**Last Updated:** 16 October 2025, 4:30 AM
 **Live Site:** heartix.vercel.app
-**Status:** Phase 0 ✅ + Phase 1 ✅ + Staff System ✅ | Phase 2 পরবর্তী
+**Status:** Phase 0 ✅ + Phase 1 ✅ + Staff ✅ + Email ✅ | Phase 2 চলছে
 **Maintainer:** Developer + Claude AI
-**Purpose:** Single source of truth — যেকোনো AI সাথে সাথে কাজ বুঝতে পারবে
+**Purpose:** Single source of truth
 
 ---
 
 # 📋 PART 1: এই Guide কীভাবে পড়বেন
 
-## এই Guide পড়ার Order
-1. **Part 2** — Project পরিচিতি (কী সাইট, tech stack)
-2. **Part 3** — বর্তমান অবস্থা (কী হয়েছে, কী বাকি)
-3. **Part 4** — File Structure + Identification
+## Order
+1. **Part 2** — Project পরিচিতি
+2. **Part 3** — বর্তমান অবস্থা
+3. **Part 4** — File Structure
 4. **Part 5** — Firebase Structure
-5. **Part 5.5** — Staff + Activity System ⭐
-6. **Part 5.6** — Firebase Rules (Full Text) ⭐
-7. **Part 6** — বাকি কাজের Plan
-8. **Part 7-9** — Rules, Security, Recovery
-9. **Part 10** — Quick Reference
+5. **Part 5.5** — Staff + Activity System
+6. **Part 5.6** — Firebase Rules (Full Text)
+7. **Part 5.7** — Email Notifications (EmailJS) ⭐ নতুন
+8. **Part 6** — বাকি কাজ
+9. **Part 7-9** — Rules, Security, Recovery
+10. **Part 10** — Quick Reference
 
-## যদি আপনি নতুন AI হন
-- **File এলোমেলো হলে** → Part 4-এর "File Identification"
-- **User কিছু চাইলে** → Part 6 দেখে priority
-- **Error হলে** → Part 9
+## নতুন AI-এর জন্য
+- **File এলোমেলো** → Part 4-এর File Identification
+- **Error** → Part 9
 - **Function খুঁজলে** → Part 10
-- **Staff/Activity নিয়ে প্রশ্ন** → Part 5.5
-- **Firestore Rules update করতে** → Part 5.6
+- **Staff/Activity** → Part 5.5
+- **Firestore Rules** → Part 5.6
+- **Email যোগ করতে** → Part 5.7
 
 ---
 
@@ -37,27 +38,28 @@
 ## Heartix কী?
 বাংলাদেশের প্রিমিয়াম স্মার্ট অ্যাপ্লায়েন্স ই-কমার্স সাইট।
 
-## Tech Stack (সব ফ্রি)
+## Tech Stack
 | Component | Tech |
 |-----------|------|
 | Frontend | HTML5 + Tailwind CSS (CDN) + Vanilla JS (ES Modules) |
 | Backend | Firebase Firestore + Auth |
 | Images | Cloudinary (unsigned upload) |
+| Email | EmailJS (client-side, free tier) |
 | Hosting | Vercel |
-| Icons | Font Awesome 6 (CDN) |
-| Fonts | Inter + Playfair Display (Google) |
+| Icons | Font Awesome 6 |
+| Fonts | Inter + Playfair Display |
 
 ## Colors
-- Navy: `#0A1628` (primary)
-- Gold: `#D4A84B` (accent)
-- Cream: `#FBF8F3` (background)
-- Green: `#16a34a` (success)
-- Red: `#dc2626` (danger)
+- Navy: `#0A1628`
+- Gold: `#D4A84B`
+- Cream: `#FBF8F3`
+- Green: `#16a34a`
+- Red: `#dc2626`
 
-## Font Rules (গুরুত্বপূর্ণ!)
+## Font Rules
 - **Body/UI:** Inter
-- **Headings:** Playfair Display (`font-display` class)
-- **Numbers (Price/Total):** **Inter Bold** — Playfair NEVER!
+- **Headings:** Playfair Display (`font-display`)
+- **Numbers:** **Inter Bold** — Playfair NEVER!
 
 ## Firebase Config
 - Project ID: `heartix`
@@ -66,11 +68,17 @@
 - Cloudinary cloud: `ju2w6e9r`
 - Upload preset: `heartix_unsigned`
 
+## EmailJS Config ⭐
+- Account: `twhob71122@gmail.com`
+- Public Key: `UOTXJmNFXydPMnWDP`
+- Service ID: `Heartix`
+- Template Admin: `template_yd1wxrt`
+- Template Customer: `template_2utpxqd`
+
 ## Admin Credentials
-- **Primary Admin Email:** `admin@heartix.com`
-- **Primary Admin UID:** `IeE3IFsCrmSE5hfzhXWbtes32To2` (Owner)
-- **Staff Collection:** `staff/{uid}` doc with role field
-- **Legacy Backup:** `settings/admins.uids[]`
+- Owner Email: `admin@heartix.com`
+- Owner UID: `IeE3IFsCrmSE5hfzhXWbtes32To2`
+- Legacy: `settings/admins.uids[]`
 
 ---
 
@@ -78,61 +86,57 @@
 
 ## ✅ সম্পূর্ণ ফেজ
 
-### Phase 0: Modular File Structure — সম্পূর্ণ ✅
+### Phase 0: Modular File Structure ✅
 সব page-এর inline CSS/JS আলাদা ফাইলে।
 
-### Phase 1: Reorder System — সম্পূর্ণ ✅
-- Category Reorder, Section Reorder, Product Reorder
+### Phase 1: Reorder System ✅
+- Category, Section, Product reorder
 - Featured + Pin to Top
 
-### Phase 1.5: Staff + Activity System — সম্পূর্ণ ✅
-
-**Components:**
-
-1. **Firestore Rules v5** — `staff` + `activity_log` collection
-2. **Staff Management** — Add/Edit/Disable/Remove staff with roles
-3. **Role-Based Access** — Owner, Admin, Manager, Moderator, Delivery
-4. **Activity Log** — সব action automatic tracked
-5. **Moderator Panel** — Restricted access, status update + logging
-6. **Last Login Tracker** — `staff/{uid}.lastLogin` field
-7. **Secondary Firebase App** — Staff create without admin logout
-
----
-
-## 🆕 নতুন Features (v6.0)
-
-### ১. Staff Management System
+### Phase 1.5: Staff + Activity System ✅
+- Firestore Rules v5
 - ৫টা role: Owner, Admin, Manager, Moderator, Delivery
-- Add Staff (secondary Firebase app দিয়ে — admin logout হয় না)
-- Edit Staff (name, phone, role)
-- Enable/Disable staff (temporary block)
-- Remove staff (permanent delete)
-- Role-based permission check
+- Staff CRUD (secondary Firebase app)
+- Full activity audit trail
+- Last login tracker
+- Moderator panel
 
-### ২. Activity Log System
-- Auto-track: Login, Logout, Order status change, Product CRUD, Coupon CRUD, Category CRUD, Settings update, Staff CRUD, Message read/delete
-- Filters: Date (আজ/গতকাল/৭ দিন/সব) + Staff + Action type
-- Relative time display ("এইমাত্র", "5 মিনিট আগে")
-- Grouped by date
-- Color-coded badges (LOGIN, ORDER, STAFF_ADD, etc.)
-
-### ৩. Last Login Tracker
-- `staff/{uid}.lastLogin` — `serverTimestamp()` দিয়ে update হয় login-এ
-- Staff card-এ display: "2 মিনিট আগে", "1 ঘণ্টা আগে"
-
-### ৪. Moderator Panel (Staff-based)
-- `staff/{uid}` collection থেকে verify
-- Restricted access: Orders + Messages (read-only + status change)
-- Status change → automatically logged
-- Admin activity-তে দেখা যায়
+### Phase 2: Integrations (চলছে) ✅
+- **Google Analytics** ✅
+- **Facebook Pixel** ✅
+- **Email Notifications (EmailJS)** ✅ ⭐ নতুন
+- SMS (BulkSMSBD) — pending
+- WhatsApp API — pending
+- bKash Gateway — pending
+- Nagad Gateway — pending
 
 ---
 
-## 🐛 Bug Fixes (v6.0)
-1. Activity Log conflict (দুইটা system একসাথে চলত) → single source
-2. `admin-staff.js` duplicate `logActivity` → removed
-3. `lastLogin` field update → `staff-activity.js`-এ যোগ
-4. Moderator login → `staff` collection verify
+## 🆕 নতুন Features (v7.0)
+
+### Email Notification System ⭐
+
+**কী কী email যায়:**
+1. **Order Placed** → Admin Alert (new order) + Customer Confirmation
+2. **Status Change** → Customer Update (pending/confirmed/shipped/delivered/cancelled)
+
+**Features:**
+- Toggle-based (Admin panel থেকে ON/OFF)
+- Default OFF — keys paste করলে ON
+- Non-blocking (email fail হলেও order place হয়)
+- 5-সেকেন্ড timeout (user বেশি wait করে না)
+- Auto-trigger from checkout + status change
+
+**Templates:**
+- **Template 1** (`template_yd1wxrt`) — Admin new order alert
+- **Template 2** (`template_2utpxqd`) — Universal customer (order + status)
+
+---
+
+## 🐛 Recent Fixes (v7.0)
+1. Firestore Rules — Guest checkout-এ stock decrement allow
+2. Coupon usedCount — Guest increment allowed (only +1)
+3. Email await before navigation — email send হওয়ার আগে page navigate বন্ধ
 
 ---
 
@@ -151,98 +155,53 @@
 | `contact.html` | Contact | common.css, contact.css | contact.js |
 | `order-success.html` | Post-order | common.css, order-success.css | order-success.js |
 | `track-order.html` | Tracking | common.css, track-order.css | track-order.js |
-| `admin.html` | Admin panel (9 tabs) | common.css, admin.css | admin-reorder.js, admin.js, admin-integrations.js, staff-activity.js, admin-activity.js, admin-staff.js |
-| `messages.html` | Admin inbox | common.css, messages.css | messages.js |
+| `admin.html` | Admin (9 tabs) | common.css, admin.css | admin-reorder.js, admin.js, admin-integrations.js, staff-activity.js, admin-activity.js, admin-staff.js |
+| `messages.html` | Inbox | common.css, messages.css | messages.js |
 | `moderator.html` | Moderator panel | common.css, moderator.css | moderator.js |
-| `about.html` | Static | common.css | inline |
-| `faq.html` | Static | common.css | inline |
-| `terms.html` | Static | common.css | inline |
-| `privacy.html` | Static | common.css | inline |
-| `return-policy.html` | Static | common.css | inline |
+| `about.html`, `faq.html`, `terms.html`, `privacy.html`, `return-policy.html` | Static | common.css | inline |
 
 ## CSS Files (`css/`)
-
-| File | Used by |
-|------|---------|
-| `common.css` | সব page |
-| `index.css` | index.html |
-| `product.css` | product.html |
-| `cart.css` | cart.html |
-| `checkout.css` | checkout.html |
-| `account.css` | account.html |
-| `wishlist.css` | wishlist.html |
-| `contact.css` | contact.html |
-| `order-success.css` | order-success.html |
-| `track-order.css` | track-order.html |
-| `admin.css` | admin.html |
-| `messages.css` | messages.html |
-| `moderator.css` | moderator.html |
+`common.css`, `index.css`, `product.css`, `cart.css`, `checkout.css`, `account.css`, `wishlist.css`, `contact.css`, `order-success.css`, `track-order.css`, `admin.css`, `messages.css`, `moderator.css`
 
 ## JS Files (`js/`)
 
-| File | Used by | Unique Functions |
-|------|---------|------------------|
+| File | Used by | Purpose |
+|------|---------|---------|
 | `firebase.js` | সব | exports `db`, `auth` |
-| `common.js` | সব | `showToast`, `escapeHtml`, `formatPrice`, cart/wishlist helpers, `initIntegrations` auto-call |
-| `districts.js` | checkout, account, admin | `DISTRICTS` |
+| `common.js` | সব | helpers + `initIntegrations` auto-call |
+| `districts.js` | checkout, account, admin | ৬৪ districts |
 | `integrations.js` | common.js | GA4 + FB Pixel auto-loader |
-| `staff-activity.js` ⭐ | admin.js, messages.js, moderator.js | `logActivity(action, {description, meta})` + lastLogin tracker |
-| `admin-activity.js` ⭐ | admin.html | Activity tab UI + filters |
-| `admin-staff.js` ⭐ | admin.html | Staff CRUD (secondary Firebase app) |
-| `admin.js` | admin.html | সব admin logic + activity logs |
-| `admin-reorder.js` | admin.html | Category/Section/Product reorder |
-| `admin-integrations.js` | admin.html | GA + FB settings UI |
+| `email-notify.js` ⭐ | checkout.js, admin.js, moderator.js | `notifyOrderPlaced`, `notifyStatusChange` |
+| `staff-activity.js` | admin.js, messages.js, moderator.js | `logActivity` + lastLogin |
+| `admin-activity.js` | admin.html | Activity tab UI |
+| `admin-staff.js` | admin.html | Staff CRUD |
+| `admin.js` | admin.html | Admin logic + activity logs + email |
+| `admin-reorder.js` | admin.html | Reorder system |
+| `admin-integrations.js` | admin.html | GA + FB + EmailJS settings UI |
 | `admin-back-trap.js` | admin-integrations.js | Back button trap |
 | `admin-bulk.js` | admin-integrations.js | CSV bulk upload |
-| `index.js` | index.html | Home logic |
-| `product.js` | product.html | Product detail |
-| `cart.js` | cart.html | Cart |
-| `checkout.js` | checkout.html | Checkout + IP + repeat |
-| `account.js` | account.html | Auth + Profile |
-| `wishlist.js` | wishlist.html | Wishlist |
-| `contact.js` | contact.html | Contact form |
-| `order-success.js` | order-success.html | Post-order |
-| `track-order.js` | track-order.html | Order tracking |
-| `messages.js` | messages.html | Admin inbox |
-| `moderator.js` ⭐ | moderator.html | Moderator panel + status log |
+| `index.js`, `product.js`, `cart.js` | respective | Page logic |
+| `checkout.js` | checkout.html | Order + IP + repeat + **email** |
+| `account.js`, `wishlist.js`, `contact.js` | respective | Page logic |
+| `order-success.js`, `track-order.js` | respective | Post-order logic |
+| `messages.js` | messages.html | Admin inbox + log |
+| `moderator.js` | moderator.html | Moderator + status log + **email** |
 
-## File Identification Guide ⭐
+## File Identification Guide
 
-### HTML চেনার সহজ নিয়ম
+### HTML চেনার নিয়ম
+- **Title tag দেখুন** — যেমন "Admin Control - Heartix" = `admin.html`
+- **শেষের script দেখুন** — `admin-reorder.js` + `admin.js` + `admin-integrations.js` + `staff-activity.js` + `admin-activity.js` + `admin-staff.js` = `admin.html`
 
-**Title tag দেখুন:**
-
-| Title | File |
-|-------|------|
-| Heartix — Premium Smart Appliances | index.html |
-| Admin Control - Heartix | admin.html |
-| Messages - Heartix Admin | messages.html |
-| Moderator Panel - Heartix | moderator.html |
-| (বাকি) | Title = filename |
-
-**শেষের `<script>` দেখুন:**
-- `admin-reorder.js + admin.js + admin-integrations.js + staff-activity.js + admin-activity.js + admin-staff.js` → **admin.html**
-- `moderator.js` → **moderator.html**
-- `index.js` → **index.html**
-- ইত্যাদি
-
-**Unique HTML element:**
-- `id="content-activity"` → admin.html (Activity tab)
-- `id="staff-modal"` → admin.html (Staff modal)
-- `id="activity-list"` → admin.html
-
-### JS চেনার সহজ নিয়ম
-
-**Unique function:**
-
-| Function | File |
-|----------|------|
+### JS চেনার নিয়ম
+| Unique Function | File |
+|-----------------|------|
 | `logActivity` | staff-activity.js |
-| `loadActivity`, `filterActivity`, `refreshActivity` | admin-activity.js |
+| `notifyOrderPlaced`, `notifyStatusChange` | email-notify.js |
 | `openAddStaffModal`, `saveStaff`, `removeStaff` | admin-staff.js |
 | `renderAdminOrders`, `confirmStatusChange` | admin.js, moderator.js |
-| `renderAdminProducts`, `executeDelete` | admin.js |
 | `placeOrder` | checkout.js |
+| `loadActivity`, `refreshActivity` | admin-activity.js |
 
 ---
 
@@ -252,31 +211,18 @@
 
 ### `products`
 ```js
-{
-  id, name, price, oldPrice,
-  category, categories: [],
-  stock, brand, description,
-  image, images: [],
-  sortOrder, featured, pinned,
-  createdAt
-}
+{ id, name, price, oldPrice, category, categories: [], stock, brand, description, image, images: [], sortOrder, featured, pinned, createdAt }
 ```
 
 ### `orders`
 ```js
 {
   id, orderNumber,
-  customer: {
-    name, phone, email, address, district, thana,
-    ipAddress, isRepeat, orderCount,
-    previousOrderNumbers, flagged, flagReason
-  },
+  customer: { name, phone, email, address, district, thana, ipAddress, isRepeat, orderCount, previousOrderNumbers, flagged, flagReason },
   items: [{ id, name, price, quantity, image }],
-  subtotal, discount, couponCode,
-  deliveryCharge, total,
+  subtotal, discount, couponCode, deliveryCharge, total,
   paymentMethod, advancePaid, dueAmount,
-  status, stockDeducted, adminNote,
-  createdAt
+  status, stockDeducted, adminNote, createdAt
 }
 ```
 
@@ -297,7 +243,7 @@
 
 ### `coupons`
 ```js
-{ code(docID), description, type, value, minOrder, maxUses, usedCount, expiry, active, createdAt, updatedAt }
+{ code, description, type, value, minOrder, maxUses, usedCount, expiry, active, createdAt, updatedAt }
 ```
 
 ### `settings/main`
@@ -313,162 +259,75 @@
   heroBanners: [{ badge, title, subtitle, bg, link, image }],
   integrations: {
     googleAnalytics: { enabled, measurementId },
-    facebookPixel: { enabled, pixelId }
+    facebookPixel: { enabled, pixelId },
+    emailjs: { enabled, publicKey, serviceId, customerTemplateId, adminTemplateId, adminEmail }
   }
 }
 ```
 
-### `settings/admins` (Legacy backup)
-```js
-{ uids: string[] }
-```
-
 ### `staff` ⭐
 ```js
-{
-  uid,          // = doc ID (Firebase Auth UID)
-  name,
-  email,
-  phone,
-  role,         // 'owner' | 'admin' | 'manager' | 'moderator' | 'delivery'
-  active,       // boolean
-  lastLogin,    // serverTimestamp
-  createdAt,    // ISO string
-  createdBy,    // UID of creator
-  updatedAt,    // ISO string (on edit)
-  updatedBy     // UID of updater
-}
+{ uid, name, email, phone, role, active, lastLogin, createdAt, createdBy, updatedAt, updatedBy }
 ```
 
 ### `activity_log` ⭐
 ```js
-{
-  uid,          // staff UID
-  name,         // staff name
-  email,        // staff email
-  role,         // staff role
-  action,       // 'login' | 'logout' | 'order_status' | ... (see PART 10)
-  description,  // Human readable Bengali/English
-  meta,         // { orderId, oldStatus, newStatus, ... }
-  createdAt     // serverTimestamp
-}
+{ uid, name, email, role, action, description, meta, createdAt }
 ```
 
-## Firestore Indexes (Required)
+## Firestore Indexes
+- `orders`: `createdAt` DESC
 - `orders`: `orderNumber` ASC
 - `orders`: `customer.phone` ASC + `createdAt` DESC
 - `orders`: `customer.ipAddress` ASC + `createdAt` DESC
-- `orders`: `createdAt` DESC
 - `reviews`: `createdAt` DESC
 - `activity_log`: `createdAt` DESC
 
 ---
 
-# 🎭 PART 5.5: Staff + Activity System ⭐
-
-## Overview
-
-Staff + Activity system ২টা main collection:
-- `staff` — কারা কাজ করতে পারবে + role
-- `activity_log` — কে কী করেছে
+# 🎭 PART 5.5: Staff + Activity System
 
 ## Role Hierarchy
-
 ```
 Owner     → সব কিছু + Staff management
 Admin     → সব কিছু (Owner ছাড়া)
 Manager   → Products, Orders, Coupons, Categories
 Moderator → Orders, Messages (status change only)
-Delivery  → Only assigned orders (future)
+Delivery  → Assigned orders only
 ```
 
-## Role Permissions Matrix
-
-| Action | Owner | Admin | Manager | Moderator | Delivery |
-|--------|-------|-------|---------|-----------|----------|
-| Add Staff | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Edit Staff | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Remove Staff | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Products | ✅ | ✅ | ✅ | read | ❌ |
-| Orders (edit) | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Orders (status change) | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Messages | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Coupons | ✅ | ✅ | ✅ | read | ❌ |
-| Categories | ✅ | ✅ | ✅ | read | ❌ |
-| Settings | ✅ | ✅ | ❌ | ❌ | ❌ |
-
-## Activity Log Flow
-
-```
-Staff/Moderator action
-    ↓
-logActivity(action, {description, meta})   ← staff-activity.js
-    ↓
-1. activity_log collection-এ entry save
-    ↓
-2. যদি action === 'login':
-   staff/{uid} update { lastLogin: serverTimestamp() }
-    ↓
-admin-activity.js → loadActivity() → renderActivity()
-    ↓
-Admin Activity tab-এ দেখা যায়
-```
-
-## Adding Staff — Full Flow
-
+## Adding Staff Flow
 ```
 Admin clicks "Add Staff"
     ↓
-Fill: name, email, phone, password, role
+Secondary Firebase app create (admin logout হয় না)
     ↓
-saveStaff() runs
+staff/{newUser.uid} doc create
     ↓
-1. Permission check (current role Owner/Admin only)
+logActivity('staff_add')
     ↓
-2. Secondary Firebase app create (admin logout হয় না)
-    const secondaryApp = initializeApp(config, "secondary-" + Date.now())
-    const cred = await createSecondaryUser(secondaryAuth, email, password)
-    await deleteApp(secondaryApp)
-    ↓
-3. staff/{newUser.uid} doc create
-    ↓
-4. logActivity('staff_add', {...})
-    ↓
-5. Staff list refresh
+Staff list refresh
 ```
 
-## Activity Tab Filters
-
-- **Date:** আজ / গতকাল / ৭ দিন / সব
-- **Staff:** All Staff / specific staff
-- **Action:** All Actions / Login / Orders / Products / Messages / Staff / Settings / Coupons / Categories
-
-## Adding a New Activity Type
-
-**Step ১:** `staff-activity.js`-এ logActivity call যোগ
-```javascript
-await logActivity('new_action', {
-    description: 'বর্ণনা লিখুন',
-    meta: { key: 'value' }
-});
-```
-
-**Step ২:** `admin-activity.js`-এ `ACTION_META`-তে entry যোগ
-```javascript
-'new_action': { icon: 'icon-name', color: 'text-color', bg: 'bg-color', label: 'New Label' }
-```
+## Activity Log Actions
+- `login`, `logout`
+- `order_status`, `order_edit`, `order_delete`
+- `product_add`, `product_edit`, `product_delete`
+- `message_read`, `message_delete`
+- `staff_add`, `staff_edit`, `staff_disable`, `staff_remove`
+- `coupon_add`, `coupon_edit`, `coupon_delete`
+- `category_add`, `category_edit`, `category_delete`
+- `settings_update`
 
 ---
 
-# 🔐 PART 5.6: Firebase Rules (Full Text) ⭐
+# 🔐 PART 5.6: Firebase Rules (Full Text)
 
-## How to Deploy
-
-1. `console.firebase.google.com` → heartix → Firestore Database → **Rules** tab
-2. পুরনো rules মুছুন (Select all → Delete)
-3. নিচের rules paste করুন
-4. **Publish** ক্লিক করুন
-5. সফল হলে সবুজ toast দেখবেন
+## Deploy Procedure
+1. `console.firebase.google.com` → heartix → Firestore → **Rules**
+2. Select all → Delete
+3. নিচের rules paste
+4. **Publish**
 
 ## Full Rules Text
 
@@ -478,55 +337,41 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ====== HELPERS ======
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
+    function isSignedIn() { return request.auth != null; }
     function staffDoc() {
       return get(/databases/$(database)/documents/staff/$(request.auth.uid)).data;
     }
-
     function isStaff() {
       return isSignedIn() &&
         exists(/databases/$(database)/documents/staff/$(request.auth.uid)) &&
         staffDoc().active == true;
     }
-
-    function role() {
-      return isStaff() ? staffDoc().role : null;
-    }
-
-    function isOwner() {
-      return role() == 'owner';
-    }
-
-    function isAdmin() {
-      return role() in ['owner', 'admin'];
-    }
-
-    function isManager() {
-      return role() in ['owner', 'admin', 'manager'];
-    }
-
-    function isModerator() {
-      return role() in ['owner', 'admin', 'manager', 'moderator'];
-    }
-
-    function isDelivery() {
-      return role() in ['owner', 'admin', 'manager', 'moderator', 'delivery'];
-    }
+    function role() { return isStaff() ? staffDoc().role : null; }
+    function isOwner() { return role() == 'owner'; }
+    function isAdmin() { return role() in ['owner', 'admin']; }
+    function isManager() { return role() in ['owner', 'admin', 'manager']; }
+    function isModerator() { return role() in ['owner', 'admin', 'manager', 'moderator']; }
+    function isDelivery() { return role() in ['owner', 'admin', 'manager', 'moderator', 'delivery']; }
 
     // ====== PRODUCTS ======
     match /products/{doc} {
       allow read: if true;
-      allow create, update: if isManager();
+      allow create: if isManager();
+      // Manager+ full edit, OR guest can ONLY decrease stock (guest checkout)
+      allow update: if isManager() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock']) &&
+        request.resource.data.stock is number &&
+        resource.data.stock is number &&
+        request.resource.data.stock < resource.data.stock &&
+        resource.data.stock > 0
+      );
       allow delete: if isAdmin();
     }
 
     // ====== ORDERS ======
     match /orders/{doc} {
       allow read: if true;
-      allow create: if true;  // guest checkout allowed
+      allow create: if true;
       allow update: if isModerator();
       allow delete: if isAdmin();
     }
@@ -534,7 +379,13 @@ service cloud.firestore {
     // ====== COUPONS ======
     match /coupons/{doc} {
       allow read: if true;
-      allow write: if isManager();
+      allow create, delete: if isManager();
+      allow update: if isManager() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount']) &&
+        request.resource.data.usedCount is number &&
+        resource.data.usedCount is number &&
+        request.resource.data.usedCount == resource.data.usedCount + 1
+      );
     }
 
     // ====== REVIEWS ======
@@ -544,7 +395,7 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // ====== MESSAGES (Contact form) ======
+    // ====== MESSAGES ======
     match /messages/{doc} {
       allow create: if true;
       allow read, update: if isModerator();
@@ -558,7 +409,7 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // ====== SETTINGS (main, admins) ======
+    // ====== SETTINGS ======
     match /settings/{doc} {
       allow read: if true;
       allow write: if isAdmin();
@@ -580,70 +431,204 @@ service cloud.firestore {
 }
 ```
 
-## Rules Explanation
-
-| Collection | Read | Create | Update | Delete |
-|-----------|------|--------|--------|--------|
-| products | সবাই | Manager+ | Manager+ | Admin+ |
-| orders | সবাই | সবাই (guest) | Moderator+ | Admin+ |
-| coupons | সবাই | Manager+ | Manager+ | Manager+ |
-| reviews | সবাই | সবাই | — | Admin+ |
-| messages | Moderator+ | সবাই | Moderator+ | Admin+ |
-| customers | Owner/Admin | নিজে | নিজে | Admin+ |
-| settings | সবাই | — | Admin+ | — |
-| staff | Staff/Admin/নিজে | Admin+ | Admin+ | Admin+ |
-| activity_log | Admin+ | Staff+ | কেউ না | কেউ না |
-
 ## Critical Notes
-
-- **Legacy fallback:** `settings/admins.uids[]` array-ও কাজ করে (rules-এ `staff` priority)
-- **Owner UID:** `IeE3IFsCrmSE5hfzhXWbtes32To2` — এটাই owner
-- **Staff doc missing হলে:** Rule fail → login কাজ করবে না
-- **Rules update করলে:** সব active session re-auth করবে
+- **Guest stock decrement** — order place-এ stock কমাতে পারে
+- **Guest coupon usedCount** — exact +1 allowed
+- **Other updates** — শুধু Manager+
+- **Owner UID:** `IeE3IFsCrmSE5hfzhXWbtes32To2`
 
 ---
 
-# ⬜ PART 6: বাকি কাজ (Priority Order)
+# 📧 PART 5.7: Email Notifications (EmailJS) ⭐ নতুন
 
-## 🥇 Phase 2: Plug & Play Settings — পরবর্তী ⏭
-**সময়:** ~৪-৫ ঘণ্টা
+## Overview
 
-### Integration List
-1. **Google Analytics** — ✅ completed
-2. **Facebook Pixel** — ✅ completed
-3. **SMS (BulkSMSBD)** — Vercel serverless
-4. **Email (SendGrid)** — Vercel serverless
-5. **WhatsApp API**
-6. **bKash Payment Gateway**
-7. **Nagad Payment Gateway**
+EmailJS = third-party email service। Client-side থেকে email পাঠায়, কোনো backend লাগে না।
 
-### Files to Create
-- `/api/send-sms.js`, `/api/send-email.js` (Vercel serverless)
-- `js/integrations/sms.js`, `js/integrations/email.js`
-- `verifyAdmin(uid)` check in serverless
+**Features:**
+- Free tier: **200 emails/month**
+- Paid: $7/month = 1000 emails
+- Alternative: **Brevo** (free 300/day = 9000/month)
 
-## 🥈 Phase 3: Admin Tools — ~৩-৪ ঘণ্টা
+## Config Registry
+
+| Item | Value |
+|------|-------|
+| Account Email | `twhob71122@gmail.com` |
+| Account Password | `Heartix2025!Admin` |
+| Public Key | `UOTXJmNFXydPMnWDP` |
+| Service ID | `Heartix` |
+| Admin Template ID | `template_yd1wxrt` |
+| Customer Template ID | `template_2utpxqd` |
+| Admin Email (recipient) | `twhob71122@gmail.com` |
+| From Name | `Heartix` |
+| Reply To | `twhob71122@gmail.com` |
+
+## Architecture
+
+```
+Order Placed / Status Changed
+    ↓
+notifyOrderPlaced() / notifyStatusChange()
+    ↓
+email-notify.js — checks config from Firestore
+    ↓
+If enabled: Load EmailJS SDK → Send 2 emails
+    ↓
+Template substitution:
+  - Admin:    {{order_number}}, {{customer_name}}, {{customer_phone}}, {{customer_address}}, {{total}}
+  - Customer: {{to_email}}, {{custom_subject}}, {{status_message}}, {{status_description}}, {{customer_name}}, {{order_number}}, {{total}}
+```
+
+## Key Functions (`email-notify.js`)
+
+### `notifyOrderPlaced(orderData)`
+```javascript
+await notifyOrderPlaced({
+  orderNumber: 'HX251016ABC',
+  customerName: 'Imran',
+  customerPhone: '01712345678',
+  customerEmail: 'customer@gmail.com',
+  customerAddress: 'Dhaka',
+  total: 1440
+});
+// Sends: Admin alert + Customer confirmation
+```
+
+### `notifyStatusChange(orderData)`
+```javascript
+await notifyStatusChange({
+  orderNumber: 'HX251016ABC',
+  customerName: 'Imran',
+  customerEmail: 'customer@gmail.com',
+  newStatus: 'confirmed',  // pending/confirmed/shipped/delivered/cancelled
+  total: 1440
+});
+// Sends: Customer status update email
+```
+
+## Email Trigger Points
+
+| Trigger | Function | Where |
+|---------|----------|-------|
+| Order placed | `notifyOrderPlaced()` | `checkout.js` → `placeOrder()` |
+| Status change (admin) | `notifyStatusChange()` | `admin.js` → `confirmStatusChange()` |
+| Status change (moderator) | `notifyStatusChange()` | `moderator.js` → `confirmStatusChange()` |
+
+## Status Messages
+
+| Status | Message | Description |
+|--------|---------|-------------|
+| pending | ⏳ Order Pending | Your order is pending confirmation. |
+| confirmed | ✅ Order Confirmed! | Your order is confirmed. Delivery in 2-3 days. |
+| shipped | 🚚 Order Shipped! | Your order has been shipped and is on the way. |
+| delivered | 📦 Order Delivered! | Your order has been delivered successfully. Thank you! |
+| cancelled | ❌ Order Cancelled | Your order has been cancelled. Contact us for more info. |
+
+## Admin Panel Setup (Settings → Integrations)
+
+```
+📧 Email Notifications     [ON]
+   ✅ Enable Email Notifications
+   Public Key: UOTXJmNFXydPMnWDP
+   Service ID: Heartix
+   Customer Template ID: template_2utpxqd
+   Admin Template ID: template_yd1wxrt
+   Admin Email: twhob71122@gmail.com
+```
+
+## Firestore Storage
+```js
+// settings/main
+integrations: {
+  emailjs: {
+    enabled: true,
+    publicKey: "UOTXJmNFXydPMnWDP",
+    serviceId: "Heartix",
+    customerTemplateId: "template_2utpxqd",
+    adminTemplateId: "template_yd1wxrt",
+    adminEmail: "twhob71122@gmail.com"
+  }
+}
+```
+
+## How to Update EmailJS Config
+
+### Option A: Admin Panel (সহজ)
+```
+Settings → Integrations → Email Notifications
+→ Change fields → SAVE INTEGRATIONS
+```
+
+### Option B: EmailJS Dashboard (Gmail change)
+```
+dashboard.emailjs.com → Email Services
+→ Disconnect → Connect new Gmail
+```
+
+### Option C: New Template
+```
+dashboard.emailjs.com → Email Templates
+→ Edit template → Save
+```
+
+### Option D: Switch Provider (Brevo/Resend)
+```
+1. New provider-এ account + keys
+2. Admin panel-এ keys paste
+3. (Optional) email-notify.js-এ code change — যদি API structure আলাদা হয়
+```
+
+## Free Tier Limits
+
+| Provider | Free | Paid Entry |
+|----------|------|-----------|
+| EmailJS | 200/month | $7/month = 1000 |
+| Brevo | 300/day (~9000/month) | $9/month = 5000 |
+| Resend | 3000/month | $20/month |
+| Mailgun | 100/day | $15/month |
+
+## Common Issues
+
+| সমস্যা | কারণ | সমাধান |
+|--------|------|--------|
+| Email আসছে না | Page navigation আগেই হয়েছে | `await` before redirect — checkout.js check |
+| "Missing permissions" | Rules-এ stock decrement allow নেই | Rules updated (v6) |
+| Template variable mismatch | Template-এ variable নেই | EmailJS template edit |
+| "Public Key required" | Admin panel-এ key খালি | Settings-এ paste |
+| Free tier exceeded | 200/month পার | Paid plan / Provider switch |
+
+---
+
+# ⬜ PART 6: বাকি কাজ
+
+## 🥇 Phase 2 — বাকি (চলছে)
+- **SMS (BulkSMSBD)** — Vercel serverless, ২-৩ ঘণ্টা
+- **WhatsApp API** — ২ ঘণ্টা
+- **bKash Gateway** — ৪-৬ ঘণ্টা
+- **Nagad Gateway** — ৪-৬ ঘণ্টা
+
+## 🥈 Phase 3: Admin Tools
 1. Bulk CSV Upload ✅ completed
 2. Moderator Tab ✅ completed
 3. Landing Pages Tab
-4. Inventory Alert (stock < 5)
+4. Inventory Alert (stock < 5 email)
 5. Bulk Order Update
 
-## 🥉 Phase 4: Analytics — ~৪-৫ ঘণ্টা
+## 🥉 Phase 4: Analytics
 1. Sales Dashboard (Chart.js)
 2. Customer Segmentation
 3. Profit Calculator
 4. Return Rate Tracking
-5. Top Products Report
 
-## 📱 Phase 5: Customer UX — ~৫-৬ ঘণ্টা
+## 📱 Phase 5: Customer UX
 1. PWA Setup
 2. Push Notification
 3. Dark Mode
 4. Reviews with Images
 5. Pre-order System
 
-## 🎯 Phase 6: Marketing — ~৫-৬ ঘণ্টা
+## 🎯 Phase 6: Marketing
 1. Abandoned Cart Recovery
 2. Refer & Earn
 3. Loyalty Points
@@ -654,213 +639,151 @@ service cloud.firestore {
 
 # 🚨 PART 7: Rules (কী করবেন, কী করবেন না)
 
-## ✅ সবসময় করুন
-1. `escapeHtml()` — সব user input render-এ
-2. `serverTimestamp()` — Firestore-এ
-3. Transaction — price calculation-এ
+## ✅ সবসময়
+1. `escapeHtml()` — user input render
+2. `serverTimestamp()` — Firestore
+3. Transaction — price calc
 4. Relative paths — `./firebase.js`
-5. `type="module"` — script tag-এ
-6. Cache bypass — test-এ `?v=2`
-7. Console.log — file শেষে (`✅ filename loaded`)
+5. `type="module"` — script tag
+6. Cache bypass — test-এ `?v=X`
+7. Console.log — file শেষে
 8. বাংলা message — user-facing
-9. Number font → **Inter Bold**
-10. `logActivity()` — সব significant action-এ
+9. Number font → Inter Bold
+10. `logActivity()` — significant actions
+11. **`await` before navigation** — email/async operations
 
-## ❌ কখনো করবেন না
+## ❌ কখনো না
 1. `common.css` direct edit
-2. API keys client-side
+2. API keys client-side (EmailJS Public Key ছাড়া)
 3. `escapeHtml()` skip
-4. `eval()` ব্যবহার
-5. Firestore rules-এ `allow if true`
-6. Admin UID manual সরানো
+4. `eval()`
+5. `allow if true` in rules
+6. Admin UID manual remove
 7. `common.css`/`firebase.js` delete
-8. ৫+ images / product
+8. ৫+ images
 9. Stock 0-এ order allow
-10. দুইটা logActivity system (duplicate)
-
-## File Edit Rules
-- একবারে একটাই file
-- Commit history check আগে
-- Local test না করে push না
-- Full file content দিন (patch নয়)
+10. Duplicate `logActivity` system
+11. Fire-and-forget async before redirect
 
 ---
 
 # 🔐 PART 8: Security
 
 ## ✅ যা আছে
-- [x] Firestore rules (staff + activity based)
-- [x] Role-based access (Owner/Admin/Manager/Moderator/Delivery)
-- [x] Email/Password + Google Auth
-- [x] Server-side price (transaction)
-- [x] XSS protection (`escapeHtml`)
-- [x] Back button trap
-- [x] IP flagging
-- [x] Cart tampering prevention
-- [x] HTTPS (Vercel)
-- [x] Coupon double-validation
-- [x] Wishlist auto-cleanup
-- [x] Activity audit trail
-- [x] Staff active/disable
-- [x] Secondary Firebase app (no admin logout)
+- Firestore rules (role-based)
+- XSS protection (`escapeHtml`)
+- Server-side price (transaction)
+- Back button trap
+- IP flagging
+- Coupon double-validation
+- Activity audit trail
+- Secondary Firebase app
+- EmailJS Public Key (safe for client)
+- Email config in Firestore (protected by rules)
 
-## ⚠️ যা যোগ করা উচিত
-- [ ] Rate limiting (serverless)
-- [ ] reCAPTCHA on register
-- [ ] Email verification
-- [ ] Admin 2FA
-- [ ] Weekly Firestore export
-- [ ] Server-side duplicate order check
-- [ ] Activity log retention policy
+## ⚠️ যোগ করা উচিত
+- Rate limiting (serverless)
+- reCAPTCHA on register
+- Email verification
+- Admin 2FA
+- Weekly Firestore export
 
 ## 🚫 কখনো না
-- `allow read, write: if true`
+- Firestore-এ `allow if true`
+- EmailJS Private Key client-side-এ
 - Admin credentials hardcode
-- User input সরাসরি HTML-এ
 - `eval()`
-- API keys client
 - Password plain text
 
 ---
 
 # 🛠️ PART 9: Recovery Guide
 
-## Common Problems & Solutions
+## Common Problems
 
-| সমস্যা | কারণ | সমাধান |
-|--------|------|--------|
-| White screen | JS import fail | Console → error দেখুন |
-| 404 on css/js | Wrong path | File path check |
-| Permission denied | Rules ভুল | Firestore check |
-| Order place fail | Transaction error | Stock/permission check |
-| Google login fail | Domain authorized না | Firebase → Auth → Settings |
-| Index error | Composite index নেই | Error link → Create Index |
-| **Staff tab খালি** | UID ভুল বা rules | `staff/{UID}` doc check |
-| **"Last login: কখনো login করেনি"** | `staff-activity.js` পুরনো | Cache clear (`?v=XX`) |
-| **Activity tab খালি** | logActivity fail | Console → import error |
-| **Moderator login fail** | staff doc-এ role/active ভুল | Firestore-এ fix |
-| **Add Staff logout হয়ে যায়** | পুরনো `admin-staff.js` | নতুন version pull |
-| **Two activity systems conflict** | পুরনো admin-staff.js | নিশ্চিত করুন একটাই `logActivity` |
-| **Password reset দরকার** | Password ভুলে গেছেন | Firebase Console → Auth → Reset |
-| Font wrong | Playfair on number | `css/[page].css` force |
-| Back button bypass | Trap নেই | `history.pushState` |
-| Modal keyboard ঢাকে | CSS issue | `max-height: calc(100vh - 2rem)` |
-| Stock wrong | Delete-এ restore হয়নি | Smart delete logic verify |
-| Reorder কাজ করে না | `sortOrder` নেই | saveProduct-এ assign |
+| সমস্যা | সমাধান |
+|--------|-------|
+| White screen | Console → import error |
+| 404 on css/js | Path check |
+| Permission denied | Rules check |
+| Index error | Error link → Create Index |
+| Staff tab খালি | `staff/{uid}` doc check |
+| Activity log খালি | Console → import error |
+| **Email আসছে না** | `await` before navigation + EmailJS history |
+| **"Missing permissions" order place-এ** | Rules update (stock decrement allow) |
+| **Password reset** | Firebase Console → Auth → Reset |
+| Back button bypass | `history.pushState` |
 
-## Staff/Activity Specific Recovery
+## Staff/Activity Recovery
 
-### যদি Staff tab-এ "No staff found" দেখায়:
-1. Firestore Console → `staff` collection check
-2. আপনার UID-তে doc আছে কি?
-3. `active: true` আছে কি?
-4. `role: owner` বা `admin` আছে কি?
+### Staff tab-এ "No staff found"
+1. Firestore → `staff` collection
+2. Your UID-তে doc আছে?
+3. `active: true` + `role: owner`?
 
-### যদি Activity Log খালি দেখায়:
-1. Browser Console (F12) → errors দেখুন
-2. `staff-activity.js loaded` print হয়েছে কি?
-3. `admin-activity.js loaded` print হয়েছে কি?
-4. `activity_log` collection-এ data আছে কি?
-5. `staff/{your-uid}` doc-এ name, email সেট করা আছে কি?
+### Activity Log empty
+1. Console F12 → errors
+2. `staff-activity.js loaded` print?
+3. `activity_log` collection-এ data?
+4. `staff/{your-uid}` doc-এ name, email?
 
-### যদি Moderator login না হয়:
-1. Firestore → `staff/{moderator-uid}` doc check
-2. `active: true` এবং `role: 'moderator'` বা higher আছে কি?
-3. Firebase Auth-এ user আছে কি?
-4. Password reset-এর জন্য Firebase Console ব্যবহার করুন
+### Email আসছে না
+1. Admin panel → Settings → Email Notification card-এ "ON"?
+2. EmailJS dashboard → History → status?
+3. Gmail Spam folder?
+4. Console-এ `Email notification failed` error?
+5. `notifyOrderPlaced()` `await` করা আছে? (checkout.js)
 
-### Password Reset Procedure (Firebase Console):
-1. `console.firebase.google.com` → heartix → Authentication → Users
-2. User-এর row-এ **⋮ (3-dot)** → **Reset password**
-3. New password কপি → login
-
-### Rules Publish Procedure:
-1. `console.firebase.google.com` → heartix → Firestore Database → Rules
-2. Select all (Ctrl+A) → Delete
-3. PART 5.6 থেকে rules paste করুন
-4. **Publish** ক্লিক
-5. সবুজ toast দেখবেন
-
-## Rollback Procedure
-1. GitHub → Commits → find last good commit
-2. "Revert" click
-3. Vercel auto-deploy → wait 2 min
-4. Hard refresh browser
+### Rules Publish Procedure
+1. Console → Firestore → Rules
+2. Select all → Delete
+3. PART 5.6 থেকে paste
+4. **Publish**
 
 ---
 
 # 📋 PART 10: Quick Reference
 
-## Global Functions (window.xxx)
+## Global Functions
+
+### Email ⭐
+- `notifyOrderPlaced(data)` — email-notify.js
+- `notifyStatusChange(data)` — email-notify.js
+- `saveIntegrations()` — admin-integrations.js
+
+### Staff
+- `openAddStaffModal()`, `saveStaff()`, `openEditStaff(uid)`, `toggleStaffActive(uid)`, `removeStaff(uid)`, `openStaffDetail(uid)`
+
+### Activity
+- `logActivity(action, {description, meta})`
+- `loadActivity()`, `filterActivity(type, value)`, `refreshActivity()`
 
 ### Auth
-- `login()`, `logout()` — admin.js, messages.js, moderator.js
-- `loginUser()`, `registerUser()`, `googleSignIn()`, `forgotPassword()`, `logoutUser()` — account.js
-
-### Staff ⭐
-- `openAddStaffModal()` — admin-staff.js
-- `saveStaff()` — Create or update staff
-- `openEditStaff(uid)` — Edit form
-- `toggleStaffActive(uid)` — Enable/Disable
-- `removeStaff(uid)` — Permanent remove
-- `openStaffDetail(uid)` — Detail modal
-- `closeStaffModal()`, `closeStaffDetail()` — Close modals
-
-### Activity ⭐
-- `logActivity(action, {description, meta})` — staff-activity.js
-- `loadActivity()` — admin-activity.js
-- `filterActivity(type, value)` — Filter change
-- `refreshActivity()` — Reload button
+- `login()`, `logout()`, `loginUser()`, `registerUser()`, `googleSignIn()`, `forgotPassword()`, `logoutUser()`
 
 ### Cart
-- `addToCart(id)`, `removeFromCart(id)` — index.js, product.js, wishlist.js
-- `applyCoupon()`, `removeCoupon()`, `changeQty()`, `removeItem()`, `clearCart()`, `moveToWishlist()`, `proceedToCheckout()` — cart.js
+- `addToCart(id)`, `removeFromCart(id)`, `applyCoupon()`, `removeCoupon()`, `changeQty()`, `removeItem()`, `clearCart()`, `moveToWishlist()`, `proceedToCheckout()`
 
 ### Checkout
-- `placeOrder()` — checkout.js
-- `showRepeatModal()`, `showWarningModal()`, `showHistoryModal()`, `continueFromRepeat()`, `cancelFromWarning()`, `continueFromWarning()` — checkout.js
-
-### Account
-- `saveProfile()`, `loadMyOrders()`, `openAddressEdit()`, `cancelAddressEdit()`, `togglePassword()` — account.js
+- `placeOrder()`, `showRepeatModal()`, `showWarningModal()`, `showHistoryModal()`
 
 ### Admin
-- `showTab(tab)`, `openMoreMenu()` — admin.js
-- `openAddModal()`, `editProduct()`, `saveProduct()`, `deleteProduct()` — admin.js
-- `openOrderEdit()`, `saveOrderEdit()`, `confirmDeleteOrder()`, `executeDelete()` — admin.js
-- `openStatusPicker()`, `selectStatus()`, `confirmStatusChange()` — admin.js, moderator.js
-- `filterOrders()`, `exportOrdersCSV()`, `recalcOrderEdit()` — admin.js
-- `openCategoryModal()`, `saveCategory()`, `editCategory()`, `deleteCategory()` — admin.js
-- `openCouponModal()`, `saveCoupon()`, `editCoupon()`, `deleteCoupon()` — admin.js
-- `saveSettings()` — admin.js
-- `openCategoryReorder()`, `moveCategoryUp()` — admin-reorder.js
-- `loadMessages()`, `filterMessages()`, `openDetail()`, `closeDetail()` — messages.js
+- `showTab(tab)`, `openAddModal()`, `editProduct()`, `saveProduct()`, `deleteProduct()`, `openOrderEdit()`, `saveOrderEdit()`, `confirmDeleteOrder()`, `executeDelete()`, `openStatusPicker()`, `selectStatus()`, `confirmStatusChange()`, `filterOrders()`, `exportOrdersCSV()`, `recalcOrderEdit()`, `openCategoryModal()`, `saveCategory()`, `openCouponModal()`, `saveCoupon()`, `openHeroModal()`, `openSectionModal()`, `openBannerModal()`, `openTestimonialModal()`, `saveSettings()`
 
 ### Moderator
-- `login()`, `logout()` — moderator.js
-- `showTab(tab)` — moderator.js
-- `filterOrders()`, `filterMessages()` — moderator.js
-- `openStatusPicker()`, `selectStatus()`, `confirmStatusChange()` — moderator.js (log-enabled)
+- `login()`, `logout()`, `showTab(tab)`, `filterOrders()`, `filterMessages()`, `openStatusPicker()`, `selectStatus()`, `confirmStatusChange()`
 
 ## Key IDs
 
-### Staff Modal
-- `#staff-modal`, `#staff-modal-title`
-- `#edit-staff-uid`, `#staff-name`, `#staff-email`, `#staff-phone`, `#staff-password`, `#staff-role`
-- `#staff-save-btn`, `#staff-password-field`
-- `#staff-list`, `#staff-count`, `#staff-count-badge`
+### Email Settings
+- `#int-em-enabled`, `#int-em-publickey`, `#int-em-serviceid`, `#int-em-customertpl`, `#int-em-admintpl`, `#int-em-adminemail`
+- `#em-status`, `#save-integrations-btn`
 
-### Staff Detail Modal
-- `#staff-detail-modal`, `#staff-detail-avatar`, `#staff-detail-name`, `#staff-detail-email`, `#staff-detail-phone`, `#staff-detail-role`, `#staff-detail-desc`, `#staff-detail-today`, `#staff-detail-uid`, `#staff-detail-edit-btn`
+### Staff Modal
+- `#staff-modal`, `#staff-name`, `#staff-email`, `#staff-phone`, `#staff-password`, `#staff-role`, `#staff-save-btn`
 
 ### Activity Tab
-- `#content-activity`, `#activity-list`
-- `#activity-date-filter`, `#activity-staff-filter`, `#activity-action-filter`
-
-### Existing
-- **Checkout:** `#customer-name`, `#customer-phone`, `#customer-email`, `#customer-address`, `#customer-district`, `#customer-thana`
-- **Login:** `#login-email`, `#login-password`, `#remember-me`
-- **Product modal:** `#p-name`, `#p-price`, `#p-stock`, `#p-featured`, `#p-pinned`, etc.
-- **Order Edit:** `#oe-edit-name`, `#oe-edit-phone`, etc.
+- `#content-activity`, `#activity-list`, `#activity-date-filter`, `#activity-staff-filter`, `#activity-action-filter`
 
 ## LocalStorage Keys
 - `heartix_cart`, `heartix_wishlist`, `heartix_recent`, `heartix_coupon`, `heartix_remember`
@@ -882,28 +805,28 @@ service cloud.firestore {
 | Phase 0 | ✅ | 100% |
 | Phase 1 | ✅ | 100% |
 | Phase 1.5 (Staff) | ✅ | 100% |
-| Phase 2 | ⏳ | 30% (GA+FB done) |
+| Phase 2 | ⏳ | 50% (GA+FB+Email = 3/7) |
 | Phase 3-6 | ⏳ | 0% |
 
-**Overall: ~45%**
+**Overall: ~50%**
 
-## File Counts (v6.0)
+## File Counts
 | Type | Count |
 |------|-------|
-| HTML | 18 (2 TODO) |
+| HTML | 18 |
 | CSS | 13 |
-| JS | 25 |
+| JS | 26 |
 | MD | 2 |
 | PNG | 1 |
-| **Total** | **59** |
+| **Total** | **60** |
 
-## Cost (Monthly)
-| Service | Free Tier | Usage |
-|---------|-----------|-------|
-| Firebase reads | 50K/day | <3K |
-| Firebase writes | 20K/day | <300 |
+## Cost
+| Service | Free | Usage |
+|---------|------|-------|
+| Firebase | 50K reads/day | <4K |
 | Cloudinary | 25 credits | <10 |
 | Vercel | 100GB | <2GB |
+| EmailJS | 200/month | <50 |
 | **Total** | **৳0** | — |
 
 ---
@@ -915,109 +838,85 @@ service cloud.firestore {
 2. একবারে একটাই file edit
 3. Full file content দিন
 4. Step-by-step বলুন
-5. Cache bypass (`?v=2`) mention
+5. Cache bypass (`?v=X`) mention
 6. Deploy wait (2 min)
-7. User confused হলে — file identify করুন
-8. Staff system = `staff/{uid}` collection
-9. Activity log = ONE system (`staff-activity.js`) — duplicate বানাবেন না
-
-## File Confused হলে জিজ্ঞেস করুন
-- Title tag কী?
-- শেষে কোন script?
-- Unique function কী?
-- Content-এ কী দেখা যাচ্ছে?
+7. Staff system = `staff/{uid}` (NOT `settings/moderators.uids`)
+8. Activity log = ONE system (`staff-activity.js`)
+9. Email config = Firestore `settings/main.integrations.emailjs`
 
 ## Critical
 - কখনো `common.css`/`firebase.js` delete না
 - কখনো `escapeHtml()` skip না
-- কখনো API key client-side না
+- কখনো EmailJS Private Key client-side না
 - সবসময় `serverTimestamp()`
 - **দুইটা `logActivity` function কখনো না**
-- **`staff-activity.js` = single source of truth**
+- **Async operations-এ `await` before redirect**
 
-## Contact & Credentials
-- Firebase: `heartix` project
+## Contact
+- Firebase: `heartix`
 - Cloudinary: `ju2w6e9r`
 - Support: `twhob71122@gmail.com`
 - Owner UID: `IeE3IFsCrmSE5hfzhXWbtes32To2`
-- Owner Email: `admin@heartix.com`
-
-## Bangla Notes
-- User-facing message বাংলায়
-- Code comments বাংলা বা English — okay
-- `&lt;br&gt;` শুধু hero title-এ (safeHeroTitle handle করে)
+- EmailJS: `twhob71122@gmail.com`
 
 ---
 
 # 📝 PART 13: Changelog
 
+## v7.0 (16 Oct 2025, 4:30 AM)
+### 📧 Email Notifications
+- ✅ EmailJS integration (Free tier 200/month)
+- ✅ Admin + Customer templates
+- ✅ Order placed → 2 emails
+- ✅ Status change → customer email
+- ✅ Admin panel toggle (Settings → Integrations)
+- ✅ Firestore Rules v6 (guest stock/coupon update)
+- ✅ `email-notify.js` helper
+- ✅ Fix: await before navigation
+
 ## v6.0 (15 Oct 2025, 10:30 PM)
-### 🔥 Firebase Rules Embedded
-- ✅ Full 107-line rules text in PART 5.6
-- ✅ Rules explanation table
-- ✅ Deploy procedure
-- ✅ Complete single-file documentation
+- Firebase Rules embedded in guide
+- Self-contained documentation
 
 ## v5.0 (15 Oct 2025, 10 PM)
-### ⭐ Staff + Activity System
-- ✅ Firestore Rules v5 (staff + activity_log)
-- ✅ `staff/{uid}` collection with roles
-- ✅ `activity_log` collection with full audit trail
-- ✅ `staff-activity.js` — single logActivity helper
-- ✅ `admin-activity.js` — Activity tab with filters
-- ✅ `admin-staff.js` — Staff CRUD with secondary Firebase app
-- ✅ `moderator.js` — Staff-based verify + status change log
-- ✅ `admin.js` — Log all significant actions
-- ✅ `messages.js` — Message read/delete log
-- ✅ Last login tracker
-- ✅ Fixed: Activity Log conflict
+### Staff + Activity System
+- `staff/{uid}` collection
+- `activity_log` collection
+- `staff-activity.js`, `admin-activity.js`, `admin-staff.js`
+- Moderator panel
 
 ## v4.0 (15 Oct 2025, 5 AM)
-- ✅ Editable order customer info
-- ✅ Real-time total update
-- ✅ Custom delete modal
-- ✅ Smart stock restore
-- ✅ Back button trap
+- Editable order customer info
+- Real-time total update
+- Custom delete modal
 
-## v3.0 (15 Oct 2025)
-- ✅ Phase 1 complete (Reorder)
-- ✅ Featured + Pin
-- ✅ Compact order cards
-- ✅ Google logo fix
-- ✅ Number fonts fix
-
-## v2.0 (14 Oct 2025)
-- ✅ Phase 0 complete (Modular)
-- ✅ Multi-category
-- ✅ Repeat customer
-- ✅ IP tracking
-- ✅ Account address save
-
-## v1.0
-- Basic e-commerce
+## v3.0, v2.0, v1.0
+(আগের versions)
 
 ---
 
 # 🎯 FINAL NOTES
 
 ## এই Guide যেকোনো AI-কে দিলে
-1. Project বুঝবে সাথে সাথে
+1. Project বুঝবে
 2. File identify করতে পারবে
 3. Priority order জানবে
 4. Security maintain করবে
 5. Error recovery করতে পারবে
-6. Staff + Activity system বুঝবে
-7. **Firestore Rules deploy করতে পারবে (PART 5.6)** ⭐
+6. Staff + Activity handle করতে পারবে
+7. Firestore Rules deploy করতে পারবে
+8. **Email system configure করতে পারবে (Part 5.7)** ⭐
 
 ## Next Session
 **Start with:** `guide.md` খুলে "Phase 2" বলুন
 
 **Priority:** Phase 2 → 3 → 4 → 5 → 6
 
-**Estimated total:** ~২৫-৩০ ঘণ্টা বাকি
+**Estimated remaining:** ~২০-২৫ ঘণ্টা
 
 ## Version History
-- **v6.0** — Firebase Rules embedded (single file) ⭐
+- **v7.0** — Email Notifications (EmailJS) ⭐
+- **v6.0** — Firebase Rules embedded
 - **v5.0** — Staff + Activity System
 - **v4.0** — Editable orders
 - **v3.0** — Reorder system
@@ -1026,10 +925,9 @@ service cloud.firestore {
 
 ---
 
-**Last Updated:** 15 October 2025, 10:30 PM
-**Total Sections:** 13 + Part 5.5 + Part 5.6
+**Last Updated:** 16 October 2025, 4:30 AM
+**Total Sections:** 13 + Part 5.5 + 5.6 + 5.7
 **Purpose:** Single source of truth (self-contained)
-**Maintainer:** Developer + Claude AI
-**Version:** 6.0
+**Version:** 7.0
 
 *এই guide প্রতিটা commit-এ update করা উচিত।*
