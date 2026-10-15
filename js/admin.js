@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX ADMIN — JS (with Activity Log + Email Notification)
+// HEARTIX ADMIN — JS (with Activity Log + Email + Low Stock)
 // ============================================================
 import { db, auth } from './firebase.js';
 import { escapeHtml, formatPrice as fmt } from './common.js';
@@ -54,6 +54,7 @@ let middleBanners = [];
 let testimonials = [];
 let heroBanners = [];
 let currentOrderFilter = 'all';
+let currentProductFilter = 'all';
 let currentUser = null;
 let editingOrderId = null;
 let editingOrderItems = [];
@@ -937,23 +938,72 @@ function getProductCategories(p) {
     return [];
 }
 
+window.filterProducts = function(filter, btn) {
+    currentProductFilter = filter;
+    document.querySelectorAll('.product-filter-btn').forEach(b => {
+        b.classList.remove('bg-navy', 'text-white');
+        b.classList.add('bg-white', 'text-gray-600');
+    });
+    if (btn) {
+        btn.classList.add('bg-navy', 'text-white');
+        btn.classList.remove('bg-white', 'text-gray-600');
+    }
+    renderAdminProducts();
+};
+
+window.showLowStockProducts = function() {
+    currentProductFilter = 'low';
+    showTab('products');
+    setTimeout(() => {
+        const btns = document.querySelectorAll('.product-filter-btn');
+        btns.forEach(b => {
+            b.classList.remove('bg-navy', 'text-white');
+            b.classList.add('bg-white', 'text-gray-600');
+        });
+        if (btns[1]) {
+            btns[1].classList.add('bg-navy', 'text-white');
+            btns[1].classList.remove('bg-white', 'text-gray-600');
+        }
+        renderAdminProducts();
+    }, 150);
+};
+
 window.renderAdminProducts = function() {
     const list = document.getElementById('product-list-admin'); if (!list) return;
     const search = (document.getElementById('product-search')?.value || '').toLowerCase();
     let filtered = allProductsList;
+
+    if (currentProductFilter === 'low') {
+        filtered = filtered.filter(p => Number(p.stock) > 0 && Number(p.stock) < 5);
+    } else if (currentProductFilter === 'out') {
+        filtered = filtered.filter(p => Number(p.stock) <= 0);
+    }
+
     if (search) filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(search));
-    if (filtered.length === 0) { list.innerHTML = '<div class="bg-white rounded-2xl p-12 text-center premium-shadow"><i class="fas fa-box-open text-4xl text-gray-200 mb-3"></i><p class="text-sm text-gray-500">No products</p></div>'; return; }
+
+    if (filtered.length === 0) {
+        const emptyMsg = currentProductFilter === 'low'
+            ? 'কোনো low stock প্রোডাক্ট নেই ✅'
+            : currentProductFilter === 'out'
+            ? 'সব প্রোডাক্ট স্টকে আছে ✅'
+            : 'No products';
+        const emptyIcon = currentProductFilter === 'all' ? 'box-open' : 'check-circle';
+        const emptyColor = currentProductFilter === 'all' ? 'text-gray-200' : 'text-green-300';
+        list.innerHTML = `<div class="bg-white rounded-2xl p-12 text-center premium-shadow"><i class="fas fa-${emptyIcon} text-4xl ${emptyColor} mb-3"></i><p class="text-sm text-gray-500">${emptyMsg}</p></div>`;
+        return;
+    }
+
     let html = '';
     filtered.forEach(p => {
         const stock = Number(p.stock) || 0;
         const badge = stock <= 0 ? '<span class="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">OUT</span>' :
-            (stock < 5 ? `<span class="text-[10px] font-bold bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">${stock} left</span>` : `<span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">${stock} in stock</span>`);
+            (stock < 5 ? `<span class="text-[10px] font-bold bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full animate-pulse">⚠️ ${stock} left</span>` : `<span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">${stock} in stock</span>`);
         let badges = badge;
         if (p.featured === true) badges += ' <span class="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full"><i class="fas fa-star text-[8px] mr-0.5"></i>Featured</span>';
         if (p.pinned === true) badges += ' <span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full"><i class="fas fa-thumbtack text-[8px] mr-0.5"></i>Pinned</span>';
         const cats = getProductCategories(p);
         const catText = cats.length > 0 ? cats.join(', ') : 'Uncategorized';
-        html += `<div class="bg-white rounded-2xl p-3 premium-shadow flex items-center gap-3">
+        html += `<div class="bg-white rounded-2xl p-3 premium-shadow flex items-center gap-3 ${(stock > 0 && stock < 5) ? 'border-l-4 border-orange-400' : stock <= 0 ? 'border-l-4 border-red-500' : ''}">
             <img src="${p.image || 'https://via.placeholder.com/100x100?text=?'}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl flex-shrink-0" onerror="this.src='https://via.placeholder.com/100x100?text=?'">
             <div class="flex-1 min-w-0">
                 <p class="font-semibold text-sm text-navy truncate">${escapeHtml(p.name)}</p>
@@ -1618,7 +1668,6 @@ window.closeStatusConfirm = function() {
     pendingStatusChange = null;
 }
 
-// ============ CONFIRM STATUS CHANGE (with Email) ============
 window.confirmStatusChange = async function() {
     if (!pendingStatusChange) return;
     const { orderId, newStatus } = pendingStatusChange;
@@ -1647,8 +1696,6 @@ window.confirmStatusChange = async function() {
             description: `Order ${order?.orderNumber || orderId.slice(0,8)} এর status ${oldStatus || 'pending'} → ${newStatus}`,
             meta: { orderId, oldStatus, newStatus }
         });
-
-        // ============ SEND STATUS UPDATE EMAIL ============
         const customerEmail = order?.customer?.email || '';
         if (customerEmail) {
             notifyStatusChange({
@@ -1659,7 +1706,6 @@ window.confirmStatusChange = async function() {
                 total: order?.total || 0
             }).catch(e => console.warn('Status email failed:', e));
         }
-
         closeStatusConfirm();
         await loadOrders();
         updateStats();
@@ -1715,12 +1761,18 @@ function updateStats() {
     const orders = document.getElementById('stat-orders');
     const pending = document.getElementById('stat-pending');
     const revenue = document.getElementById('stat-revenue');
+    const lowStock = document.getElementById('stat-low-stock');
     if (products) products.innerText = allProductsList.length;
     if (orders) orders.innerText = allOrdersList.length;
     if (pending) pending.innerText = allOrdersList.filter(o => o.status === 'pending').length;
     if (revenue) {
         const rev = allOrdersList.filter(o => o.status === 'delivered').reduce((s, o) => s + (o.total || 0), 0);
         revenue.innerText = '৳' + fmt(rev);
+    }
+    if (lowStock) {
+        const low = allProductsList.filter(p => Number(p.stock) > 0 && Number(p.stock) < 5).length;
+        const out = allProductsList.filter(p => Number(p.stock) <= 0).length;
+        lowStock.innerText = low + out;
     }
 }
 
@@ -1797,4 +1849,4 @@ document.getElementById('test-image-file')?.addEventListener('change', function(
     r.readAsDataURL(f);
 });
 
-console.log('✅ admin.js loaded (with activity log + email)');
+console.log('✅ admin.js loaded (with low stock + activity + email)');
