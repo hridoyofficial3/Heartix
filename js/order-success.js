@@ -62,12 +62,11 @@ window.copyOrderNumber = function(e) {
     }
 };
 
-// ============ LOAD SETTINGS + ORDER + BUILD WHATSAPP LINK ============
+// ============ LOAD SETTINGS + BUILD WHATSAPP LINK ============
 async function loadWhatsAppConfirm() {
     if (!db || !orderNum) return;
 
     try {
-        // Load settings
         const settingsSnap = await getDoc(doc(db, "settings", "main")).catch(() => null);
 
         let waNumber = '';
@@ -82,13 +81,11 @@ async function loadWhatsAppConfirm() {
 
         if (!waEnabled || !waNumber) return;
 
-        // Try to find the order by orderNumber
         let orderData = null;
         try {
             orderData = await getOrderByNumber(orderNum);
         } catch (e) { /* silent */ }
 
-        // Build WhatsApp message
         let message = `Hi Heartix,\n\nআমি আমার অর্ডার কনফার্ম করতে চাই।\n\n`;
         message += `📦 Order Number: ${orderNum}\n`;
 
@@ -119,8 +116,7 @@ async function loadWhatsAppConfirm() {
         const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
         if (waConfirmBtn) {
             waConfirmBtn.href = waLink;
-            waConfirmBtn.classList.remove('hidden');
-            waConfirmBtn.classList.add('flex');
+            waConfirmBtn.style.display = 'block';
         }
     } catch (e) {
         console.warn('WhatsApp confirm setup failed:', e);
@@ -145,4 +141,4 @@ async function getOrderByNumber(num) {
 // ============ INIT ============
 loadWhatsAppConfirm();
 
-console.log('✅ order-success.js loaded (with WhatsApp confirm)');
+console.log('✅ order-success.js loaded');
