@@ -1,13 +1,14 @@
 // ============================================================
-// HEARTIX STAFF ACTIVITY — Logging helper
+// HEARTIX STAFF ACTIVITY — Logging helper + lastLogin tracker
 // ============================================================
 import { db, auth } from './firebase.js';
 import {
-    collection, addDoc, serverTimestamp, doc, getDoc
+    collection, addDoc, serverTimestamp, doc, getDoc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // Cache staff profile so we don't refetch every log
 let cachedProfile = null;
+let loginRecorded = false;
 
 async function getCurrentUserProfile() {
     if (cachedProfile) return cachedProfile;
@@ -28,7 +29,6 @@ async function getCurrentUserProfile() {
     } catch (e) {
         console.warn('Profile fetch for activity failed:', e);
     }
-    // Fallback
     cachedProfile = {
         uid: user.uid,
         name: user.displayName || user.email || 'Unknown',
@@ -40,7 +40,7 @@ async function getCurrentUserProfile() {
 
 /**
  * Log an activity to the activity_log collection.
- * 
+ *
  * @param {string} action  — short action key (e.g. 'login', 'order_status', 'product_add')
  * @param {object} details — { description: 'human readable', meta: {...} }
  */
@@ -59,8 +59,19 @@ export async function logActivity(action, details = {}) {
             meta: details.meta || {},
             createdAt: serverTimestamp()
         });
+
+        // On login, also update staff doc's lastLogin (only once per session)
+        if (action === 'login' && !loginRecorded) {
+            loginRecorded = true;
+            try {
+                await updateDoc(doc(db, "staff", profile.uid), {
+                    lastLogin: serverTimestamp()
+                });
+            } catch (e) {
+                console.warn('lastLogin update failed:', e);
+            }
+        }
     } catch (e) {
-        // Silent fail — logging should never break the main flow
         console.warn('Activity log failed:', e);
     }
 }
@@ -70,6 +81,7 @@ export async function logActivity(action, details = {}) {
  */
 export function resetActivityProfileCache() {
     cachedProfile = null;
+    loginRecorded = false;
 }
 
 // Expose to window for non-module scripts
@@ -78,4 +90,4 @@ if (typeof window !== 'undefined') {
     window.resetActivityProfileCache = resetActivityProfileCache;
 }
 
-console.log('✅ staff-activity.js loaded');
+console.log('✅ staff-activity.js loaded (with lastLogin tracker)');
