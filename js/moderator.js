@@ -1,9 +1,10 @@
 // ============================================================
-// HEARTIX MODERATOR PANEL — Read-only + Status Update + Log
+// HEARTIX MODERATOR PANEL — Read-only + Status Update + Log + Email
 // ============================================================
 import { db, auth } from './firebase.js';
 import { escapeHtml, formatPrice as fmt, showToast as toast } from './common.js';
 import { logActivity } from './staff-activity.js';
+import { notifyStatusChange } from './email-notify.js';
 
 import {
     collection, getDocs, doc, getDoc, updateDoc,
@@ -35,7 +36,6 @@ function showSection(id) {
 }
 
 async function verifyModerator(uid) {
-    // New system: Check staff collection
     try {
         const staffSnap = await getDoc(doc(db, "staff", uid));
         if (staffSnap.exists()) {
@@ -46,7 +46,6 @@ async function verifyModerator(uid) {
             }
         }
     } catch (e) {}
-    // Legacy fallback
     try {
         const mSnap = await getDoc(doc(db, "settings", "moderators"));
         if (mSnap.exists()) {
@@ -72,7 +71,6 @@ onAuthStateChanged(auth, async (user) => {
             if (ed) ed.textContent = user.email || '';
             showSection('dashboard-section');
             loadAllData();
-            // Log login
             setTimeout(() => {
                 logActivity('login', { description: 'Moderator panel-এ login করেছেন' });
             }, 1200);
@@ -347,6 +345,7 @@ window.closeStatusConfirm = function() {
     pendingStatusChange = null;
 };
 
+// ============ CONFIRM STATUS CHANGE (with Email) ============
 window.confirmStatusChange = async function() {
     if (!pendingStatusChange) return;
     const { orderId, newStatus } = pendingStatusChange;
@@ -357,7 +356,6 @@ window.confirmStatusChange = async function() {
         const order = allOrdersList.find(x => x.id === orderId);
         const oldStatus = order?.status;
 
-        // Stock restore on cancel
         if (newStatus === 'cancelled' && oldStatus !== 'cancelled' && order?.items && order.stockDeducted !== false) {
             for (const item of order.items) {
                 if (!item.id) continue;
@@ -376,11 +374,22 @@ window.confirmStatusChange = async function() {
         await updateDoc(doc(db, "orders", orderId), { status: newStatus });
         toast('Status: ' + newStatus);
 
-        // Log activity
         await logActivity('order_status', {
             description: `Order ${order?.orderNumber || orderId.slice(0,8)} এর status ${oldStatus || 'pending'} → ${newStatus}`,
             meta: { orderId, oldStatus, newStatus, orderNumber: order?.orderNumber || '' }
         });
+
+        // ============ SEND STATUS UPDATE EMAIL ============
+        const customerEmail = order?.customer?.email || '';
+        if (customerEmail) {
+            notifyStatusChange({
+                orderNumber: order?.orderNumber || '',
+                customerName: order?.customer?.name || '',
+                customerEmail: customerEmail,
+                newStatus: newStatus,
+                total: order?.total || 0
+            }).catch(e => console.warn('Status email failed:', e));
+        }
 
         closeStatusConfirm();
         await loadOrders();
@@ -500,7 +509,6 @@ window.openDetail = async function(id) {
     const m = allMessagesList.find(x => x.id === id);
     if (!m) return;
 
-    // Mark as read + log
     if (!m.read) {
         try {
             await updateDoc(doc(db, "messages", id), { read: true });
@@ -570,4 +578,4 @@ function updateStats() {
 // ============ INITIAL ============
 window.renderAdminOrders = renderAdminOrders;
 
-console.log('✅ moderator.js loaded (with activity log)');
+console.log('✅ moderator.js loaded (with activity log + email)');
