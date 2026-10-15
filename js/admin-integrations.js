@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX ADMIN — Integrations (GA + FB Pixel + EmailJS)
+// HEARTIX ADMIN — Integrations (GA + FB + EmailJS + WhatsApp + SMS + bKash + Nagad)
 // ============================================================
 import { db } from './firebase.js';
 import { showToast as toast } from './common.js';
@@ -7,11 +7,9 @@ import {
     doc, getDoc, setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Auto-load sub-modules
 import './admin-back-trap.js';
 import './admin-bulk.js';
 
-// ============ WRAP showTab ============
 function wrapShowTab() {
     if (typeof window.showTab === 'function' && !window._integrationsWrapped) {
         const orig = window.showTab;
@@ -35,93 +33,112 @@ if (document.readyState === 'loading') {
     setTimeout(wrapShowTab, 1500);
 }
 
-// ============ LOAD UI ============
+function setBadge(id, enabled) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (enabled) {
+        el.className = 'text-[9px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700';
+        el.textContent = 'ON';
+    } else {
+        el.className = 'text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600';
+        el.textContent = 'OFF';
+    }
+}
+
 async function loadIntegrationsUI() {
     try {
         const snap = await getDoc(doc(db, "settings", "main"));
         const int = snap.exists() ? (snap.data().integrations || {}) : {};
 
-        // === Google Analytics ===
         const ga = int.googleAnalytics || {};
-        const gaEnabled = document.getElementById('int-ga-enabled');
-        const gaId = document.getElementById('int-ga-id');
-        if (gaEnabled) gaEnabled.checked = !!ga.enabled;
-        if (gaId) gaId.value = ga.measurementId || '';
-        updateGaBadge(!!ga.enabled);
+        if (document.getElementById('int-ga-enabled')) document.getElementById('int-ga-enabled').checked = !!ga.enabled;
+        if (document.getElementById('int-ga-id')) document.getElementById('int-ga-id').value = ga.measurementId || '';
+        setBadge('ga-status', !!ga.enabled);
 
-        // === Facebook Pixel ===
         const fb = int.facebookPixel || {};
-        const fbEnabled = document.getElementById('int-fb-enabled');
-        const fbId = document.getElementById('int-fb-id');
-        if (fbEnabled) fbEnabled.checked = !!fb.enabled;
-        if (fbId) fbId.value = fb.pixelId || '';
-        updateFbBadge(!!fb.enabled);
+        if (document.getElementById('int-fb-enabled')) document.getElementById('int-fb-enabled').checked = !!fb.enabled;
+        if (document.getElementById('int-fb-id')) document.getElementById('int-fb-id').value = fb.pixelId || '';
+        setBadge('fb-status', !!fb.enabled);
 
-        // === EmailJS ===
         const em = int.emailjs || {};
-        const emEnabled = document.getElementById('int-em-enabled');
-        const emPublicKey = document.getElementById('int-em-publickey');
-        const emServiceId = document.getElementById('int-em-serviceid');
-        const emCustomerTpl = document.getElementById('int-em-customertpl');
-        const emAdminTpl = document.getElementById('int-em-admintpl');
-        const emAdminEmail = document.getElementById('int-em-adminemail');
-        if (emEnabled) emEnabled.checked = !!em.enabled;
-        if (emPublicKey) emPublicKey.value = em.publicKey || '';
-        if (emServiceId) emServiceId.value = em.serviceId || '';
-        if (emCustomerTpl) emCustomerTpl.value = em.customerTemplateId || '';
-        if (emAdminTpl) emAdminTpl.value = em.adminTemplateId || '';
-        if (emAdminEmail) emAdminEmail.value = em.adminEmail || '';
-        updateEmBadge(!!em.enabled);
+        if (document.getElementById('int-em-enabled')) document.getElementById('int-em-enabled').checked = !!em.enabled;
+        if (document.getElementById('int-em-publickey')) document.getElementById('int-em-publickey').value = em.publicKey || '';
+        if (document.getElementById('int-em-serviceid')) document.getElementById('int-em-serviceid').value = em.serviceId || '';
+        if (document.getElementById('int-em-customertpl')) document.getElementById('int-em-customertpl').value = em.customerTemplateId || '';
+        if (document.getElementById('int-em-admintpl')) document.getElementById('int-em-admintpl').value = em.adminTemplateId || '';
+        if (document.getElementById('int-em-adminemail')) document.getElementById('int-em-adminemail').value = em.adminEmail || '';
+        setBadge('em-status', !!em.enabled);
+
+        const wa = int.whatsapp || {};
+        if (document.getElementById('int-wa-enabled')) document.getElementById('int-wa-enabled').checked = !!wa.enabled;
+        if (document.getElementById('int-wa-number')) document.getElementById('int-wa-number').value = wa.number || '';
+        setBadge('wa-status', !!wa.enabled);
+
+        const sms = int.sms || {};
+        if (document.getElementById('int-sms-enabled')) document.getElementById('int-sms-enabled').checked = !!sms.enabled;
+        if (document.getElementById('int-sms-apikey')) document.getElementById('int-sms-apikey').value = sms.apiKey || '';
+        if (document.getElementById('int-sms-senderid')) document.getElementById('int-sms-senderid').value = sms.senderId || '';
+        setBadge('sms-status', !!sms.enabled);
+
+        const bkash = int.bkash || {};
+        if (document.getElementById('int-bkash-enabled')) document.getElementById('int-bkash-enabled').checked = !!bkash.enabled;
+        if (document.getElementById('int-bkash-merchant')) document.getElementById('int-bkash-merchant').value = bkash.merchantNumber || '';
+        if (document.getElementById('int-bkash-apikey')) document.getElementById('int-bkash-apikey').value = bkash.apiKey || '';
+        if (document.getElementById('int-bkash-secret')) document.getElementById('int-bkash-secret').value = bkash.apiSecret || '';
+        setBadge('bkash-status', !!bkash.enabled);
+
+        const nagad = int.nagad || {};
+        if (document.getElementById('int-nagad-enabled')) document.getElementById('int-nagad-enabled').checked = !!nagad.enabled;
+        if (document.getElementById('int-nagad-merchant')) document.getElementById('int-nagad-merchant').value = nagad.merchantNumber || '';
+        if (document.getElementById('int-nagad-apikey')) document.getElementById('int-nagad-apikey').value = nagad.apiKey || '';
+        if (document.getElementById('int-nagad-secret')) document.getElementById('int-nagad-secret').value = nagad.apiSecret || '';
+        setBadge('nagad-status', !!nagad.enabled);
+
     } catch (e) { console.warn('Load integrations failed:', e); }
 }
 window.loadIntegrationsUI = loadIntegrationsUI;
 
-// ============ BADGE UPDATERS ============
-function updateGaBadge(enabled) {
-    const el = document.getElementById('ga-status');
-    if (!el) return;
-    if (enabled) { el.className = 'text-[9px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700'; el.textContent = 'ON'; }
-    else { el.className = 'text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600'; el.textContent = 'OFF'; }
-}
-
-function updateFbBadge(enabled) {
-    const el = document.getElementById('fb-status');
-    if (!el) return;
-    if (enabled) { el.className = 'text-[9px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700'; el.textContent = 'ON'; }
-    else { el.className = 'text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600'; el.textContent = 'OFF'; }
-}
-
-function updateEmBadge(enabled) {
-    const el = document.getElementById('em-status');
-    if (!el) return;
-    if (enabled) { el.className = 'text-[9px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700'; el.textContent = 'ON'; }
-    else { el.className = 'text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600'; el.textContent = 'OFF'; }
-}
-
 document.addEventListener('change', function(e) {
     if (!e.target) return;
-    if (e.target.id === 'int-ga-enabled') updateGaBadge(e.target.checked);
-    if (e.target.id === 'int-fb-enabled') updateFbBadge(e.target.checked);
-    if (e.target.id === 'int-em-enabled') updateEmBadge(e.target.checked);
+    const id = e.target.id;
+    if (id === 'int-ga-enabled') setBadge('ga-status', e.target.checked);
+    if (id === 'int-fb-enabled') setBadge('fb-status', e.target.checked);
+    if (id === 'int-em-enabled') setBadge('em-status', e.target.checked);
+    if (id === 'int-wa-enabled') setBadge('wa-status', e.target.checked);
+    if (id === 'int-sms-enabled') setBadge('sms-status', e.target.checked);
+    if (id === 'int-bkash-enabled') setBadge('bkash-status', e.target.checked);
+    if (id === 'int-nagad-enabled') setBadge('nagad-status', e.target.checked);
 });
 
-// ============ SAVE ALL INTEGRATIONS ============
-window.saveIntegrations = async function() {
-    // === GA ===
-    const gaEnabled = document.getElementById('int-ga-enabled')?.checked || false;
-    const gaId = (document.getElementById('int-ga-id')?.value || '').trim();
-    // === FB ===
-    const fbEnabled = document.getElementById('int-fb-enabled')?.checked || false;
-    const fbId = (document.getElementById('int-fb-id')?.value || '').trim();
-    // === EmailJS ===
-    const emEnabled = document.getElementById('int-em-enabled')?.checked || false;
-    const emPublicKey = (document.getElementById('int-em-publickey')?.value || '').trim();
-    const emServiceId = (document.getElementById('int-em-serviceid')?.value || '').trim();
-    const emCustomerTpl = (document.getElementById('int-em-customertpl')?.value || '').trim();
-    const emAdminTpl = (document.getElementById('int-em-admintpl')?.value || '').trim();
-    const emAdminEmail = (document.getElementById('int-em-adminemail')?.value || '').trim();
+function v(id) { return (document.getElementById(id)?.value || '').trim(); }
+function checked(id) { return document.getElementById(id)?.checked || false; }
+function isEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s); }
 
-    // === Validation ===
+window.saveIntegrations = async function() {
+    const gaEnabled = checked('int-ga-enabled');
+    const gaId = v('int-ga-id');
+    const fbEnabled = checked('int-fb-enabled');
+    const fbId = v('int-fb-id');
+    const emEnabled = checked('int-em-enabled');
+    const emPublicKey = v('int-em-publickey');
+    const emServiceId = v('int-em-serviceid');
+    const emCustomerTpl = v('int-em-customertpl');
+    const emAdminTpl = v('int-em-admintpl');
+    const emAdminEmail = v('int-em-adminemail');
+    const waEnabled = checked('int-wa-enabled');
+    const waNumber = v('int-wa-number');
+    const smsEnabled = checked('int-sms-enabled');
+    const smsApiKey = v('int-sms-apikey');
+    const smsSenderId = v('int-sms-senderid');
+    const bkashEnabled = checked('int-bkash-enabled');
+    const bkashMerchant = v('int-bkash-merchant');
+    const bkashApiKey = v('int-bkash-apikey');
+    const bkashSecret = v('int-bkash-secret');
+    const nagadEnabled = checked('int-nagad-enabled');
+    const nagadMerchant = v('int-nagad-merchant');
+    const nagadApiKey = v('int-nagad-apikey');
+    const nagadSecret = v('int-nagad-secret');
+
     if (gaEnabled && !gaId) return toast('Google Analytics ID দিন', 'error');
     if (gaEnabled && !/^G-[A-Z0-9]+$/i.test(gaId)) return toast('GA ID সঠিক নয় (G- দিয়ে শুরু)', 'error');
     if (fbEnabled && !fbId) return toast('Facebook Pixel ID দিন', 'error');
@@ -131,7 +148,17 @@ window.saveIntegrations = async function() {
     if (emEnabled && !emCustomerTpl) return toast('EmailJS Customer Template ID দিন', 'error');
     if (emEnabled && !emAdminTpl) return toast('EmailJS Admin Template ID দিন', 'error');
     if (emEnabled && !emAdminEmail) return toast('Admin Email দিন', 'error');
-    if (emEnabled && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emAdminEmail)) return toast('সঠিক Admin Email দিন', 'error');
+    if (emEnabled && !isEmail(emAdminEmail)) return toast('Admin Email সঠিক নয়', 'error');
+    if (waEnabled && !waNumber) return toast('WhatsApp Number দিন', 'error');
+    if (waEnabled && !/^88\d{10,13}$/.test(waNumber)) return toast('WhatsApp Number ৮৮ দিয়ে শুরু, space ছাড়া', 'error');
+    if (smsEnabled && !smsApiKey) return toast('SMS API Key দিন', 'error');
+    if (smsEnabled && !smsSenderId) return toast('SMS Sender ID দিন', 'error');
+    if (bkashEnabled && !bkashMerchant) return toast('bKash Merchant Number দিন', 'error');
+    if (bkashEnabled && !bkashApiKey) return toast('bKash API Key দিন', 'error');
+    if (bkashEnabled && !bkashSecret) return toast('bKash API Secret দিন', 'error');
+    if (nagadEnabled && !nagadMerchant) return toast('Nagad Merchant Number দিন', 'error');
+    if (nagadEnabled && !nagadApiKey) return toast('Nagad API Key দিন', 'error');
+    if (nagadEnabled && !nagadSecret) return toast('Nagad API Secret দিন', 'error');
 
     const btn = document.getElementById('save-integrations-btn');
     btn.disabled = true;
@@ -149,7 +176,11 @@ window.saveIntegrations = async function() {
                     customerTemplateId: emCustomerTpl,
                     adminTemplateId: emAdminTpl,
                     adminEmail: emAdminEmail
-                }
+                },
+                whatsapp: { enabled: waEnabled, number: waNumber },
+                sms: { enabled: smsEnabled, apiKey: smsApiKey, senderId: smsSenderId },
+                bkash: { enabled: bkashEnabled, merchantNumber: bkashMerchant, apiKey: bkashApiKey, apiSecret: bkashSecret },
+                nagad: { enabled: nagadEnabled, merchantNumber: nagadMerchant, apiKey: nagadApiKey, apiSecret: nagadSecret }
             }
         }, { merge: true });
         toast('Integrations saved! Page reload হচ্ছে...', 'success');
@@ -166,4 +197,4 @@ setTimeout(() => {
     if (settingsTab && !settingsTab.classList.contains('hidden')) loadIntegrationsUI();
 }, 2000);
 
-console.log('✅ admin-integrations.js loaded (GA + FB + EmailJS)');
+console.log('✅ admin-integrations.js loaded (7 integrations)');
