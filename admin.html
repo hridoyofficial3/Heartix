@@ -131,6 +131,15 @@
                 <button onclick="showTab('content')" data-tab="content" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left">
                     <i class="fas fa-layer-group nav-icon w-5 text-center"></i> Content
                 </button>
+                <p class="text-[10px] text-white/40 font-bold uppercase tracking-wider px-3 mb-2 mt-6">Team</p>
+                <button onclick="showTab('staff')" data-tab="staff" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left">
+                    <i class="fas fa-users nav-icon w-5 text-center"></i> Staff
+                    <span id="staff-count-badge" class="ml-auto bg-white/20 text-white text-[10px] font-bold rounded-full px-2 py-0.5">0</span>
+                </button>
+                <button onclick="showTab('activity')" data-tab="activity" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left">
+                    <i class="fas fa-history nav-icon w-5 text-center"></i> Activity
+                </button>
+                <p class="text-[10px] text-white/40 font-bold uppercase tracking-wider px-3 mb-2 mt-6">System</p>
                 <button onclick="showTab('settings')" data-tab="settings" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left">
                     <i class="fas fa-cog nav-icon w-5 text-center"></i> Settings
                 </button>
@@ -169,12 +178,14 @@
         </header>
 
         <main class="p-4 md:p-8 max-w-6xl mx-auto">
+
+            <!-- ============ DASHBOARD TAB ============ -->
             <div id="content-dashboard" class="tab-content">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Dashboard</h2>
                     <p class="text-sm text-gray-500">Welcome back! Here's your business overview.</p>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6">
                     <div class="bg-white rounded-2xl p-4 md:p-5 premium-shadow">
                         <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
                             <i class="fas fa-box text-blue-600 text-base"></i>
@@ -203,6 +214,13 @@
                         <p id="stat-revenue" class="text-xl md:text-2xl font-bold text-navy leading-none break-words">৳0</p>
                         <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Revenue</p>
                     </div>
+                    <div class="bg-white rounded-2xl p-4 md:p-5 premium-shadow col-span-2 md:col-span-1">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center mb-3">
+                            <i class="fas fa-users text-indigo-600 text-base"></i>
+                        </div>
+                        <p id="stat-staff" class="text-2xl md:text-3xl font-bold text-navy leading-none">0</p>
+                        <p class="text-[10px] md:text-xs text-gray-500 font-semibold uppercase tracking-wider mt-2">Staff</p>
+                    </div>
                 </div>
                 <div class="bg-white rounded-2xl premium-shadow p-5">
                     <div class="flex items-center justify-between mb-4">
@@ -213,6 +231,7 @@
                 </div>
             </div>
 
+            <!-- ============ PRODUCTS TAB ============ -->
             <div id="content-products" class="tab-content hidden">
                 <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -235,6 +254,7 @@
                 <div id="product-list-admin" class="space-y-3"></div>
             </div>
 
+            <!-- ============ CATEGORIES TAB ============ -->
             <div id="content-categories" class="tab-content hidden">
                 <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -251,6 +271,7 @@
                 <div id="category-list-admin" class="space-y-3"></div>
             </div>
 
+            <!-- ============ COUPONS TAB ============ -->
             <div id="content-coupons" class="tab-content hidden">
                 <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -264,6 +285,7 @@
                 <div id="coupon-list-admin" class="space-y-3"></div>
             </div>
 
+            <!-- ============ CONTENT TAB ============ -->
             <div id="content-content" class="tab-content hidden">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Website Content</h2>
@@ -314,6 +336,7 @@
                 </div>
             </div>
 
+            <!-- ============ ORDERS TAB ============ -->
             <div id="content-orders" class="tab-content hidden">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Orders</h2>
@@ -341,6 +364,7 @@
                 <div id="order-list-admin" class="space-y-3"></div>
             </div>
 
+            <!-- ============ REVIEWS TAB ============ -->
             <div id="content-reviews" class="tab-content hidden">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Product Reviews</h2>
@@ -349,6 +373,72 @@
                 <div id="reviews-list-admin" class="space-y-3"></div>
             </div>
 
+            <!-- ============ STAFF TAB ============ -->
+            <div id="content-staff" class="tab-content hidden">
+                <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Staff Management</h2>
+                        <p class="text-sm text-gray-500"><span id="staff-count">0</span> জন staff আছেন</p>
+                    </div>
+                    <button onclick="openAddStaffModal()" class="btn-gold px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                        <i class="fas fa-user-plus"></i> Add Staff
+                    </button>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-4">
+                    <p class="text-xs text-blue-800 leading-relaxed">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        <strong>Roles:</strong>
+                        <span class="inline-flex items-center gap-1 mx-1 px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-[10px] font-bold">Owner</span>
+                        <span class="inline-flex items-center gap-1 mx-1 px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-[10px] font-bold">Admin</span>
+                        <span class="inline-flex items-center gap-1 mx-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold">Manager</span>
+                        <span class="inline-flex items-center gap-1 mx-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-[10px] font-bold">Moderator</span>
+                        <span class="inline-flex items-center gap-1 mx-1 px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-[10px] font-bold">Delivery</span>
+                    </p>
+                </div>
+
+                <div id="staff-list" class="space-y-3"></div>
+            </div>
+
+            <!-- ============ ACTIVITY TAB ============ -->
+            <div id="content-activity" class="tab-content hidden">
+                <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Activity Log</h2>
+                        <p class="text-sm text-gray-500">কে কী করছে সব এখানে দেখুন</p>
+                    </div>
+                    <button onclick="refreshActivity()" class="bg-white border-2 border-gray-100 px-4 py-3 rounded-xl text-xs font-bold text-navy hover:border-gold transition flex items-center gap-2">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    <select id="activity-date-filter" onchange="filterActivity('date', this.value)" class="bg-white border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-xs font-semibold">
+                        <option value="today">আজ</option>
+                        <option value="yesterday">গতকাল</option>
+                        <option value="week">গত ৭ দিন</option>
+                        <option value="all">সব</option>
+                    </select>
+                    <select id="activity-staff-filter" onchange="filterActivity('staff', this.value)" class="bg-white border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-xs font-semibold">
+                        <option value="all">All Staff</option>
+                    </select>
+                    <select id="activity-action-filter" onchange="filterActivity('action', this.value)" class="bg-white border-2 border-gray-100 rounded-xl px-3 py-2.5 outline-none text-xs font-semibold">
+                        <option value="all">All Actions</option>
+                        <option value="login">Login</option>
+                        <option value="order">Orders</option>
+                        <option value="product">Products</option>
+                        <option value="message">Messages</option>
+                        <option value="staff">Staff</option>
+                        <option value="settings">Settings</option>
+                        <option value="coupon">Coupons</option>
+                        <option value="category">Categories</option>
+                    </select>
+                </div>
+
+                <div id="activity-list"></div>
+            </div>
+
+            <!-- ============ SETTINGS TAB ============ -->
             <div id="content-settings" class="tab-content hidden">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Settings</h2>
@@ -446,111 +536,6 @@
                             <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>Pixel ID (শুধু সংখ্যা)</p>
                         </div>
                     </details>
-
-                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2 opacity-70">
-                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
-                                    <i class="fas fa-sms text-green-600 text-sm"></i>
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-sm font-semibold text-navy">SMS Gateway</p>
-                                    <p class="text-[10px] text-gray-500">BulkSMSBD — Coming soon</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 flex-shrink-0">
-                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
-                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
-                            </div>
-                        </summary>
-                        <div class="px-3 pb-3 border-t border-gray-200 pt-3">
-                            <p class="text-[11px] text-gray-500"><i class="fas fa-info-circle mr-1"></i>Phase 2 Part 3-এ যোগ হবে</p>
-                        </div>
-                    </details>
-
-                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2 opacity-70">
-                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
-                                    <i class="fas fa-envelope text-purple-600 text-sm"></i>
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-sm font-semibold text-navy">Email Service</p>
-                                    <p class="text-[10px] text-gray-500">SendGrid — Coming soon</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 flex-shrink-0">
-                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
-                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
-                            </div>
-                        </summary>
-                        <div class="px-3 pb-3 border-t border-gray-200 pt-3">
-                            <p class="text-[11px] text-gray-500"><i class="fas fa-info-circle mr-1"></i>Phase 2 Part 3-এ যোগ হবে</p>
-                        </div>
-                    </details>
-
-                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2 opacity-70">
-                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
-                                    <i class="fab fa-whatsapp text-emerald-600 text-sm"></i>
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-sm font-semibold text-navy">WhatsApp API</p>
-                                    <p class="text-[10px] text-gray-500">Auto messaging — Coming soon</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 flex-shrink-0">
-                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
-                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
-                            </div>
-                        </summary>
-                        <div class="px-3 pb-3 border-t border-gray-200 pt-3">
-                            <p class="text-[11px] text-gray-500"><i class="fas fa-info-circle mr-1"></i>Phase 2 Part 3-এ যোগ হবে</p>
-                        </div>
-                    </details>
-
-                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2 opacity-70">
-                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
-                                    <i class="fas fa-mobile-alt text-pink-600 text-sm"></i>
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-sm font-semibold text-navy">bKash Payment</p>
-                                    <p class="text-[10px] text-gray-500">Payment Gateway — Coming soon</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 flex-shrink-0">
-                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
-                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
-                            </div>
-                        </summary>
-                        <div class="px-3 pb-3 border-t border-gray-200 pt-3">
-                            <p class="text-[11px] text-gray-500"><i class="fas fa-info-circle mr-1"></i>Phase 2 Part 3-এ যোগ হবে</p>
-                        </div>
-                    </details>
-
-                    <details class="integration-card bg-gray-50 rounded-xl overflow-hidden opacity-70">
-                        <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
-                                    <i class="fas fa-mobile-alt text-orange-600 text-sm"></i>
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-sm font-semibold text-navy">Nagad Payment</p>
-                                    <p class="text-[10px] text-gray-500">Payment Gateway — Coming soon</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 flex-shrink-0">
-                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">OFF</span>
-                                <i class="fas fa-chevron-down int-chevron text-gray-400 text-xs"></i>
-                            </div>
-                        </summary>
-                        <div class="px-3 pb-3 border-t border-gray-200 pt-3">
-                            <p class="text-[11px] text-gray-500"><i class="fas fa-info-circle mr-1"></i>Phase 2 Part 3-এ যোগ হবে</p>
-                        </div>
-                    </details>
                 </div>
 
                 <button onclick="saveSettings()" class="btn-primary w-full py-4 rounded-xl font-bold text-sm mb-3"><i class="fas fa-save mr-2"></i> SAVE ALL SETTINGS</button>
@@ -559,6 +544,7 @@
 
         </main>
 
+        <!-- ============ MOBILE BOTTOM NAV ============ -->
         <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white border-t border-gray-100" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
             <div class="flex justify-around items-center py-1.5">
                 <button onclick="showTab('dashboard')" data-tab="dashboard" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
@@ -583,7 +569,7 @@
 
     </div>
 
-    <!-- MORE MENU -->
+    <!-- ============ MORE MENU ============ -->
     <div id="more-menu-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end justify-center">
         <div class="bg-white rounded-t-3xl w-full max-w-md animate-slide-up">
             <div class="p-5">
@@ -610,6 +596,16 @@
                         <span class="font-semibold text-navy">Reviews</span>
                         <i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i>
                     </button>
+                    <button onclick="showTab('staff'); closeMoreMenu()" class="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl active:bg-gray-100">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center"><i class="fas fa-users text-indigo-600"></i></div>
+                        <span class="font-semibold text-navy">Staff</span>
+                        <i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i>
+                    </button>
+                    <button onclick="showTab('activity'); closeMoreMenu()" class="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl active:bg-gray-100">
+                        <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center"><i class="fas fa-history text-teal-600"></i></div>
+                        <span class="font-semibold text-navy">Activity Log</span>
+                        <i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i>
+                    </button>
                     <button onclick="showTab('settings'); closeMoreMenu()" class="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl active:bg-gray-100">
                         <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center"><i class="fas fa-cog text-gray-600"></i></div>
                         <span class="font-semibold text-navy">Settings</span>
@@ -621,7 +617,97 @@
         </div>
     </div>
 
-    <!-- ORDER EDIT MODAL -->
+    <!-- ============ STAFF MODAL (Add/Edit) ============ -->
+    <div id="staff-modal" class="hidden fixed inset-0 modal-bg z-[85] flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
+            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
+                <h3 id="staff-modal-title" class="text-white font-bold text-lg">Add New Staff</h3>
+                <button onclick="closeStaffModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <input type="hidden" id="edit-staff-uid">
+
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Full Name *</label>
+                    <input type="text" id="staff-name" placeholder="e.g. Karim Ahmed" maxlength="60" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Email *</label>
+                    <input type="email" id="staff-email" placeholder="staff@heartix.com" maxlength="120" autocomplete="off" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold disabled:bg-gray-50">
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Phone</label>
+                    <input type="tel" id="staff-phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
+                </div>
+
+                <div id="staff-password-field">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Password * (min 8 chars)</label>
+                    <input type="password" id="staff-password" placeholder="••••••••" maxlength="60" autocomplete="new-password" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Role *</label>
+                    <select id="staff-role" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white focus:border-gold">
+                        <option value="moderator">🟢 Moderator — Orders + Messages</option>
+                        <option value="manager">🔵 Manager — Products + Orders + Coupons</option>
+                        <option value="admin">🟡 Admin — সব কিছু</option>
+                        <option value="delivery">🟠 Delivery — Assigned orders only</option>
+                    </select>
+                    <p class="text-[10px] text-gray-400 mt-1"><i class="fas fa-info-circle mr-1"></i>Admin শুধু Moderator/Manager/Delivery বানাতে পারবে</p>
+                </div>
+
+                <button onclick="saveStaff()" id="staff-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm">
+                    <i class="fas fa-check mr-2"></i> CREATE STAFF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ STAFF DETAIL MODAL ============ -->
+    <div id="staff-detail-modal" class="hidden fixed inset-0 modal-bg z-[85] flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
+            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
+                <h3 class="text-white font-bold text-lg">Staff Details</h3>
+                <button onclick="closeStaffDetail()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="text-center">
+                    <div id="staff-detail-avatar" class="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center text-2xl font-bold text-gray-600 mx-auto mb-3">U</div>
+                    <p id="staff-detail-name" class="font-display text-xl font-bold text-navy"></p>
+                    <p id="staff-detail-email" class="text-xs text-gray-500 mt-1"></p>
+                    <div id="staff-detail-role" class="mt-2"></div>
+                    <p id="staff-detail-desc" class="text-[11px] text-gray-500 mt-2 italic"></p>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-4 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Phone</span>
+                        <span id="staff-detail-phone" class="text-sm font-semibold text-navy">—</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Today</span>
+                        <span id="staff-detail-today" class="text-sm font-semibold text-navy">0 actions</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">UID</span>
+                        <span id="staff-detail-uid" class="text-[10px] font-mono text-gray-500">—</span>
+                    </div>
+                </div>
+
+                <button id="staff-detail-edit-btn" class="btn-gold w-full py-3.5 rounded-xl font-bold text-sm">
+                    <i class="fas fa-pen mr-1"></i> Edit Staff
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ ORDER EDIT MODAL ============ -->
     <div id="order-edit-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-lg flex flex-col" style="max-height: 95vh; height: 95vh;">
             <div class="navy-gradient px-4 py-3 rounded-t-3xl flex justify-between items-center flex-shrink-0">
@@ -747,7 +833,7 @@
         </div>
     </div>
 
-    <!-- PRODUCT PICKER MODAL -->
+    <!-- ============ PRODUCT PICKER MODAL ============ -->
     <div id="product-picker-modal" class="hidden fixed inset-0 modal-bg z-[60] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[85vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -763,7 +849,7 @@
         </div>
     </div>
 
-    <!-- STATUS PICKER MODAL -->
+    <!-- ============ STATUS PICKER MODAL ============ -->
     <div id="status-picker-modal" class="hidden fixed inset-0 modal-bg z-[65] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
@@ -779,7 +865,7 @@
         </div>
     </div>
 
-    <!-- STATUS CONFIRM MODAL -->
+    <!-- ============ STATUS CONFIRM MODAL ============ -->
     <div id="status-confirm-modal" class="hidden fixed inset-0 modal-bg z-[70] flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm p-6 text-center animate-slide-up">
             <div id="sc-icon-wrap" class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center">
@@ -794,7 +880,7 @@
         </div>
     </div>
 
-    <!-- PRODUCT MODAL -->
+    <!-- ============ PRODUCT MODAL ============ -->
     <div id="product-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -847,7 +933,7 @@
         </div>
     </div>
 
-    <!-- INLINE CATEGORY MODAL -->
+    <!-- ============ INLINE CATEGORY MODAL ============ -->
     <div id="inline-cat-modal" class="hidden fixed inset-0 modal-bg z-[80] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-sm p-5 animate-slide-up">
             <div class="flex justify-between items-center mb-4">
@@ -867,7 +953,7 @@
         </div>
     </div>
 
-    <!-- CATEGORY MODAL -->
+    <!-- ============ CATEGORY MODAL ============ -->
     <div id="category-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -897,7 +983,7 @@
         </div>
     </div>
 
-    <!-- COUPON MODAL -->
+    <!-- ============ COUPON MODAL ============ -->
     <div id="coupon-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -936,7 +1022,7 @@
         </div>
     </div>
 
-    <!-- SECTION MODAL -->
+    <!-- ============ SECTION MODAL ============ -->
     <div id="section-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
@@ -952,7 +1038,7 @@
         </div>
     </div>
 
-    <!-- BANNER MODAL -->
+    <!-- ============ BANNER MODAL ============ -->
     <div id="banner-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center">
@@ -973,7 +1059,7 @@
         </div>
     </div>
 
-    <!-- TESTIMONIAL MODAL -->
+    <!-- ============ TESTIMONIAL MODAL ============ -->
     <div id="testimonial-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -997,7 +1083,7 @@
         </div>
     </div>
 
-    <!-- HERO MODAL -->
+    <!-- ============ HERO MODAL ============ -->
     <div id="hero-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -1028,7 +1114,7 @@
         </div>
     </div>
 
-    <!-- CATEGORY REORDER MODAL -->
+    <!-- ============ CATEGORY REORDER MODAL ============ -->
     <div id="category-reorder-modal" class="hidden fixed inset-0 modal-bg z-[75] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -1042,7 +1128,7 @@
         </div>
     </div>
 
-    <!-- SECTION REORDER MODAL -->
+    <!-- ============ SECTION REORDER MODAL ============ -->
     <div id="section-reorder-modal" class="hidden fixed inset-0 modal-bg z-[75] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -1056,7 +1142,7 @@
         </div>
     </div>
 
-    <!-- PRODUCT REORDER MODAL -->
+    <!-- ============ PRODUCT REORDER MODAL ============ -->
     <div id="product-reorder-modal" class="hidden fixed inset-0 modal-bg z-[75] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -1077,66 +1163,6 @@
     <script type="module" src="js/admin-reorder.js"></script>
     <script type="module" src="js/admin.js"></script>
     <script type="module" src="js/admin-integrations.js"></script>
-
-    <!-- ============ BACK BUTTON TRAP (AGGRESSIVE) ============ -->
-    <script>
-    (function() {
-        var MODALS = [
-            'product-modal','category-modal','coupon-modal','hero-modal',
-            'section-modal','banner-modal','testimonial-modal','more-menu-modal',
-            'status-picker-modal','category-reorder-modal','section-reorder-modal',
-            'product-reorder-modal','inline-cat-modal','product-picker-modal',
-            'status-confirm-modal','order-edit-modal','bulk-upload-modal'
-        ];
-
-        function anyOpen() {
-            for (var i = 0; i < MODALS.length; i++) {
-                var el = document.getElementById(MODALS[i]);
-                if (el && !el.classList.contains('hidden')) return true;
-            }
-            return !!document.getElementById('delete-order-modal');
-        }
-
-        function closeAll() {
-            for (var i = 0; i < MODALS.length; i++) {
-                var el = document.getElementById(MODALS[i]);
-                if (el) el.classList.add('hidden');
-            }
-            var del = document.getElementById('delete-order-modal');
-            if (del) {
-                del.style.opacity = '0';
-                setTimeout(function() { try { del.remove(); } catch(e) {} }, 100);
-            }
-        }
-
-        function pushGuard() {
-            try { history.pushState({ __ag: Date.now() }, '', location.href); } catch(e) {}
-        }
-
-        // Always have a guard state so back button can be caught
-        setInterval(function() {
-            if (anyOpen()) {
-                var s = history.state;
-                if (!s || !s.__ag) pushGuard();
-            }
-        }, 100);
-
-        // Every back press: close modal if open, always stay on admin.html
-        window.addEventListener('popstate', function() {
-            if (anyOpen()) {
-                closeAll();
-                console.log('🛡️ Modal closed');
-            } else {
-                console.log('🛡️ Stayed on admin');
-            }
-            pushGuard();
-        });
-
-        // Initial guard
-        pushGuard();
-
-        console.log('🛡️ Aggressive back trap ready');
-    })();
-    </script>
+    <script type="module" src="js/admin-staff.js"></script>
 </body>
 </html>
