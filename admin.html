@@ -384,7 +384,6 @@
                     <input type="text" id="setting-nagad" placeholder="Nagad Number" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                 </div>
 
-                <!-- ====== INTEGRATIONS ====== -->
                 <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
@@ -1079,7 +1078,7 @@
     <script type="module" src="js/admin.js"></script>
     <script type="module" src="js/admin-integrations.js"></script>
 
-    <!-- ============ BACK BUTTON TRAP (INLINE) ============ -->
+    <!-- ============ BACK BUTTON TRAP (SIMPLE) ============ -->
     <script>
     (function() {
         var MODALS = [
@@ -1089,6 +1088,9 @@
             'product-reorder-modal','inline-cat-modal','product-picker-modal',
             'status-confirm-modal','order-edit-modal','bulk-upload-modal'
         ];
+
+        var pushed = false;
+        var releaseTime = 0;
 
         function anyOpen() {
             for (var i = 0; i < MODALS.length; i++) {
@@ -1111,42 +1113,45 @@
             }
         }
 
+        function activate() {
+            if (pushed) return;
+            try {
+                history.pushState({ _bt: 1 }, '', location.href);
+                pushed = true;
+                console.log('🛡️ Trap activated');
+            } catch(e) {}
+        }
+
+        function deactivate() {
+            if (!pushed) return;
+            pushed = false;
+            releaseTime = Date.now();
+            try { history.back(); } catch(e) {}
+            console.log('🛡️ Trap released');
+        }
+
+        // Poll: auto-activate when modal opens, auto-release when all close
+        setInterval(function() {
+            var open = anyOpen();
+            if (open && !pushed) activate();
+            else if (!open && pushed) deactivate();
+        }, 150);
+
+        // On back press
         window.addEventListener('popstate', function() {
+            // Ignore our own history.back() from deactivate
+            if (Date.now() - releaseTime < 500) {
+                console.log('🛡️ Ignored own popstate');
+                return;
+            }
             if (anyOpen()) {
                 closeAll();
-                try { history.pushState({ bt: Date.now() }, '', location.href); } catch(e) {}
+                pushed = false;
                 console.log('🛡️ Back blocked — modal closed');
             } else {
                 console.log('🛡️ Back allowed — no modal');
             }
         });
-
-        var names = [
-            'openAddModal','openCategoryModal','openCouponModal','openHeroModal',
-            'openSectionModal','openBannerModal','openTestimonialModal',
-            'openStatusPicker','openProductPicker','openInlineCategoryModal',
-            'openCategoryReorder','openSectionReorder','openProductReorder',
-            'openMoreMenu','openBulkUpload','openOrderEdit','confirmDeleteOrder'
-        ];
-
-        var attempts = 0;
-        var wrapTimer = setInterval(function() {
-            attempts++;
-            var count = 0;
-            names.forEach(function(n) {
-                if (typeof window[n] === 'function' && !window[n]._btWrapped) {
-                    var orig = window[n];
-                    window[n] = function() {
-                        try { history.pushState({ bt: Date.now() }, '', location.href); } catch(e) {}
-                        return orig.apply(this, arguments);
-                    };
-                    window[n]._btWrapped = true;
-                    count++;
-                }
-            });
-            if (count > 0) console.log('🛡️ Back trap wrapped', count, 'openers (attempt ' + attempts + ')');
-            if (attempts > 40) clearInterval(wrapTimer);
-        }, 250);
 
         console.log('🛡️ Back trap ready');
     })();
