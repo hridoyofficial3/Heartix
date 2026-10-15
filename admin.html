@@ -1078,7 +1078,7 @@
     <script type="module" src="js/admin.js"></script>
     <script type="module" src="js/admin-integrations.js"></script>
 
-    <!-- ============ BACK BUTTON TRAP (SIMPLE) ============ -->
+    <!-- ============ BACK BUTTON TRAP (AGGRESSIVE) ============ -->
     <script>
     (function() {
         var MODALS = [
@@ -1089,16 +1089,12 @@
             'status-confirm-modal','order-edit-modal','bulk-upload-modal'
         ];
 
-        var pushed = false;
-        var releaseTime = 0;
-
         function anyOpen() {
             for (var i = 0; i < MODALS.length; i++) {
                 var el = document.getElementById(MODALS[i]);
                 if (el && !el.classList.contains('hidden')) return true;
             }
-            if (document.getElementById('delete-order-modal')) return true;
-            return false;
+            return !!document.getElementById('delete-order-modal');
         }
 
         function closeAll() {
@@ -1113,47 +1109,33 @@
             }
         }
 
-        function activate() {
-            if (pushed) return;
-            try {
-                history.pushState({ _bt: 1 }, '', location.href);
-                pushed = true;
-                console.log('🛡️ Trap activated');
-            } catch(e) {}
+        function pushGuard() {
+            try { history.pushState({ __ag: Date.now() }, '', location.href); } catch(e) {}
         }
 
-        function deactivate() {
-            if (!pushed) return;
-            pushed = false;
-            releaseTime = Date.now();
-            try { history.back(); } catch(e) {}
-            console.log('🛡️ Trap released');
-        }
-
-        // Poll: auto-activate when modal opens, auto-release when all close
+        // Always have a guard state so back button can be caught
         setInterval(function() {
-            var open = anyOpen();
-            if (open && !pushed) activate();
-            else if (!open && pushed) deactivate();
-        }, 150);
-
-        // On back press
-        window.addEventListener('popstate', function() {
-            // Ignore our own history.back() from deactivate
-            if (Date.now() - releaseTime < 500) {
-                console.log('🛡️ Ignored own popstate');
-                return;
+            if (anyOpen()) {
+                var s = history.state;
+                if (!s || !s.__ag) pushGuard();
             }
+        }, 100);
+
+        // Every back press: close modal if open, always stay on admin.html
+        window.addEventListener('popstate', function() {
             if (anyOpen()) {
                 closeAll();
-                pushed = false;
-                console.log('🛡️ Back blocked — modal closed');
+                console.log('🛡️ Modal closed');
             } else {
-                console.log('🛡️ Back allowed — no modal');
+                console.log('🛡️ Stayed on admin');
             }
+            pushGuard();
         });
 
-        console.log('🛡️ Back trap ready');
+        // Initial guard
+        pushGuard();
+
+        console.log('🛡️ Aggressive back trap ready');
     })();
     </script>
 </body>
