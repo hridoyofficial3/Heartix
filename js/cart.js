@@ -1,5 +1,6 @@
 // ============================================================
 // HEARTIX CART PAGE
+// v2 - Pre-order support
 // ============================================================
 import { db } from './firebase.js';
 import {
@@ -13,27 +14,23 @@ import {
     collection, doc, getDoc, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ============ STATE ============
 let settings = { deliveryCharge: 100, freeDeliveryAbove: 0 };
 let allProductsMap = {};
 let isLoading = true;
 let loadFailed = false;
 let appliedCoupon = null;
 
-// Load saved coupon from localStorage
 try {
     const saved = JSON.parse(localStorage.getItem('heartix_coupon') || 'null');
     if (saved && saved.code) appliedCoupon = saved;
 } catch (e) {}
 
-// ============ HELPERS ============
 function getStock(productId) {
     const p = allProductsMap[productId];
     if (!p) return null;
     return p.stock !== undefined ? Number(p.stock) : 999;
 }
 
-// ============ LOAD DATA ============
 async function loadData() {
     if (!db) {
         isLoading = false;
@@ -66,7 +63,6 @@ async function loadData() {
     renderCart();
 }
 
-// ============ RENDER CART ============
 function renderCart() {
     const skeleton = document.getElementById('loading-skeleton');
     const errorState = document.getElementById('error-state');
@@ -119,7 +115,8 @@ function renderCart() {
         subtotal += lineTotal;
 
         const productMissing = stock === null;
-        const notEnoughStock = !productMissing && stock !== 999 && qty > stock;
+        const isPreorder = item.isPreorder || (stock !== null && stock <= 0);
+        const notEnoughStock = !productMissing && !isPreorder && stock !== 999 && qty > stock;
         if (productMissing) hasMissingProduct = true;
         if (notEnoughStock) hasStockIssue = true;
 
@@ -130,17 +127,20 @@ function renderCart() {
             warning = `<p class="text-[10px] text-red-500 mt-1"><i class="fas fa-exclamation-triangle"></i> স্টকে মাত্র ${stock} টি আছে</p>`;
         }
 
+        const preorderBadge = isPreorder ? `<span class="inline-flex items-center gap-1 text-[9px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-bold mt-1"><i class="fas fa-clock text-[7px]"></i> Pre-order</span>` : '';
+
         html += `
             <div class="bg-white rounded-2xl premium-shadow p-3 flex items-center gap-3 ${productMissing ? 'opacity-60' : ''}">
                 <img src="${item.image || 'https://via.placeholder.com/100x100?text=?'}" alt="${escapeHtml(item.name)}" class="w-20 h-20 object-contain rounded-xl bg-gray-50 flex-shrink-0" onerror="this.src='https://via.placeholder.com/100x100?text=?'">
                 <div class="flex-1 min-w-0">
                     <h4 class="text-sm font-semibold navy-text line-clamp-2 mb-1">${escapeHtml(item.name)}</h4>
-                    <p class="price-per-item mb-2">৳ ${formatPrice(price)}</p>
+                    <p class="price-per-item mb-1">৳ ${formatPrice(price)}</p>
+                    ${preorderBadge}
                     ${warning}
                     <div class="flex items-center gap-2 mt-1 flex-wrap">
                         <button onclick="changeQty(${index}, -1)" class="w-8 h-8 bg-cream rounded-lg flex items-center justify-center text-navy font-bold text-lg">−</button>
                         <span class="font-semibold text-sm w-8 text-center navy-text">${qty}</span>
-                        <button onclick="changeQty(${index}, 1)" class="w-8 h-8 bg-cream rounded-lg flex items-center justify-center text-navy font-bold text-lg ${(!productMissing && stock !== 999 && qty >= stock) ? 'opacity-40' : ''}" ${(!productMissing && stock !== 999 && qty >= stock) ? 'disabled' : ''}>+</button>
+                        <button onclick="changeQty(${index}, 1)" class="w-8 h-8 bg-cream rounded-lg flex items-center justify-center text-navy font-bold text-lg ${(!productMissing && !isPreorder && stock !== 999 && qty >= stock) ? 'opacity-40' : ''}" ${(!productMissing && !isPreorder && stock !== 999 && qty >= stock) ? 'disabled' : ''}>+</button>
                         <button onclick="moveToWishlist(${index})" class="ml-1 text-[10px] text-gray-500 font-semibold px-2 py-1 rounded-lg bg-gray-50 hover:bg-gray-100">
                             <i class="fas fa-heart text-red-400 mr-1"></i> Save
                         </button>
@@ -159,7 +159,6 @@ function renderCart() {
 
     document.getElementById('cart-count-summary').textContent = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
 
-    // Calculate discount
     let discount = 0;
     if (appliedCoupon && appliedCoupon.value > 0) {
         if (appliedCoupon.type === 'percentage') {
@@ -194,7 +193,6 @@ function renderCart() {
 
     updateCouponUI();
 
-    // Free delivery note
     const freeNote = document.getElementById('free-delivery-note');
     const freeHint = document.getElementById('free-delivery-hint');
 
@@ -216,7 +214,6 @@ function renderCart() {
         freeHint.classList.add('hidden');
     }
 
-    // Stock warning
     const stockWarnBox = document.getElementById('stock-warning-box');
     const stockWarnText = document.getElementById('stock-warning-text');
     const checkoutBtn = document.getElementById('checkout-btn');
@@ -233,7 +230,6 @@ function renderCart() {
     }
 }
 
-// ============ COUPON UI ============
 function updateCouponUI() {
     const inputWrap = document.getElementById('coupon-input-wrap');
     const appliedBox = document.getElementById('coupon-applied');
@@ -334,7 +330,6 @@ window.removeCoupon = function() {
     renderCart();
 }
 
-// ============ ACTIONS ============
 window.proceedToCheckout = function() {
     const cart = getCart();
     for (const item of cart) {
@@ -343,7 +338,8 @@ window.proceedToCheckout = function() {
             showToast('কিছু প্রোডাক্ট আর নেই, কার্ট রিফ্রেশ করুন', 'error');
             return;
         }
-        if (stock !== 999 && item.quantity > stock) {
+        const isPreorder = item.isPreorder || stock <= 0;
+        if (!isPreorder && stock !== 999 && item.quantity > stock) {
             showToast(`"${item.name}" স্টকে মাত্র ${stock} টি`, 'error');
             return;
         }
@@ -357,6 +353,7 @@ window.changeQty = function(index, change) {
 
     const productId = cart[index].id;
     const stock = getStock(productId);
+    const isPreorder = cart[index].isPreorder || (stock !== null && stock <= 0);
     const newQty = (Number(cart[index].quantity) || 0) + change;
 
     if (newQty <= 0) {
@@ -369,7 +366,7 @@ window.changeQty = function(index, change) {
         return;
     }
 
-    if (stock !== null && stock !== 999 && newQty > stock) {
+    if (!isPreorder && stock !== null && stock !== 999 && newQty > stock) {
         showToast(`স্টকে মাত্র ${stock} টি আছে`, 'error');
         return;
     }
@@ -419,7 +416,6 @@ window.moveToWishlist = function(index) {
     showToast('Wishlist-এ সরানো হয়েছে', 'success');
 }
 
-// ============ INIT ============
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadData);
 } else {
