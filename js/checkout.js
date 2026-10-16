@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX CHECKOUT — with logged-in autofill + repeat customer + IP + Email
+// HEARTIX CHECKOUT — Pre-order support
 // ============================================================
 import { db, auth } from './firebase.js';
 import {
@@ -17,7 +17,6 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// ============ STATE ============
 let settings = { deliveryCharge: 100, freeDeliveryAbove: 0, bkashNumber: '', nagadNumber: '', whatsapp: '' };
 let isLoading = true;
 let isPlacingOrder = false;
@@ -33,7 +32,6 @@ let loggedInUser = null;
 let loggedInProfile = null;
 const RECENT_ORDER_WINDOW_MIN = 10;
 
-// ============ HELPERS ============
 function initDistricts() {
     const sel = document.getElementById('customer-district');
     if (!sel) return;
@@ -54,7 +52,6 @@ try {
     if (saved && saved.code) appliedCoupon = saved;
 } catch (e) {}
 
-// ============ IP FETCH ============
 async function fetchIP() {
     try {
         const res = await fetch('https://api.ipify.org?format=json', { cache: 'no-store' });
@@ -66,7 +63,6 @@ async function fetchIP() {
     }
 }
 
-// ============ FIREBASE QUERIES ============
 async function lookupOrdersByPhone(phone) {
     try {
         const q = query(collection(db, "orders"), where("customer.phone", "==", phone));
@@ -122,7 +118,10 @@ async function loadFreshCartData() {
             }
             const data = snap.data();
             const stock = Number(data.stock) || 0;
-            if (stock < item.quantity) {
+            const isPreorder = item.isPreorder || stock <= 0;
+
+            // Pre-order item — skip stock check
+            if (!isPreorder && stock < item.quantity) {
                 issues.push({ type: 'stock', name: data.name || item.name, stock });
                 continue;
             }
@@ -131,7 +130,9 @@ async function loadFreshCartData() {
                 name: data.name || item.name,
                 price: Number(data.price) || 0,
                 image: data.image || item.image || '',
-                quantity: item.quantity
+                quantity: item.quantity,
+                isPreorder: isPreorder,
+                stock: stock
             };
         } catch (e) {
             issues.push({ type: 'error', name: item.name });
@@ -456,12 +457,15 @@ function renderOrderReview() {
         const qty = Number(item.quantity) || 1;
         const image = fresh ? fresh.image : item.image;
         const name = fresh ? fresh.name : item.name;
+        const isPreorder = fresh ? fresh.isPreorder : (item.isPreorder || false);
+        const preorderBadge = isPreorder ? `<span class="inline-flex items-center gap-1 text-[9px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-bold mt-1"><i class="fas fa-clock text-[7px]"></i> Pre-order</span>` : '';
         html += `
             <div class="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0">
                 <img src="${image || 'https://via.placeholder.com/60x60?text=?'}" class="w-14 h-14 object-contain rounded-lg bg-gray-50 flex-shrink-0" onerror="this.src='https://via.placeholder.com/60x60?text=?'">
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium navy-text line-clamp-2">${escapeHtml(name)}</p>
                     <p class="text-xs text-gray-500 mt-0.5">৳ ${formatPrice(price)} × ${qty}</p>
+                    ${preorderBadge}
                 </div>
                 <p class="font-bold navy-text text-sm flex-shrink-0">৳ ${formatPrice(price * qty)}</p>
             </div>`;
@@ -587,7 +591,6 @@ function validateForm() {
     return ok;
 }
 
-// ============ PLACE ORDER (with Email — awaits before navigation) ============
 window.placeOrder = async function() {
     if (isPlacingOrder) return;
     const cart = getCart();
@@ -609,9 +612,7 @@ window.placeOrder = async function() {
 
     try {
         if (!db) throw new Error("Database connection failed");
-        if (!currentIP) {
-            currentIP = await fetchIP();
-        }
+        if (!currentIP) currentIP = await fetchIP();
         const ipFlagged = await checkSameIPRecent(currentIP, phone);
         if (previousOrders.length === 0) {
             previousOrders = await lookupOrdersByPhone(phone);
@@ -635,6 +636,7 @@ window.placeOrder = async function() {
         let finalAdvance = 0;
         let finalDiscount = 0;
         let finalItems = [];
+        let hasPreorderItem = false;
 
         await runTransaction(db, async (transaction) => {
             const readData = [];
@@ -645,14 +647,20 @@ window.placeOrder = async function() {
                 const data = pSnap.data();
                 const currentStock = Number(data.stock) || 0;
                 const qty = Number(item.quantity) || 1;
-                if (currentStock < qty) throw new Error(`"${data.name || item.name}" - স্টকে মাত্র ${currentStock} টি আছে`);
+                const isPreorder = item.isPreorder || currentStock <= 0;
+
+                if (isPreorder) hasPreorderItem = true;
+                if (!isPreorder && currentStock < qty) {
+                    throw new Error(`"${data.name || item.name}" - স্টকে মাত্র ${currentStock} টি আছে`);
+                }
                 readData.push({
                     ref: pRef,
                     freshPrice: Number(data.price) || 0,
                     freshName: data.name || item.name,
                     freshImage: data.image || item.image || '',
                     stock: currentStock,
-                    qty
+                    qty,
+                    isPreorder
                 });
             }
 
@@ -692,11 +700,15 @@ window.placeOrder = async function() {
                 name: r.freshName,
                 price: r.freshPrice,
                 quantity: r.qty,
-                image: r.freshImage
+                image: r.freshImage,
+                isPreorder: r.isPreorder
             }));
 
+            // Deduct stock only for non-preorder items
             for (const r of readData) {
-                transaction.update(r.ref, { stock: r.stock - r.qty });
+                if (!r.isPreorder) {
+                    transaction.update(r.ref, { stock: r.stock - r.qty });
+                }
             }
             if (couponValid && couponRef && couponSnapData) {
                 const newCount = (couponSnapData.usedCount || 0) + 1;
@@ -724,12 +736,12 @@ window.placeOrder = async function() {
                 advancePaid: finalAdvance,
                 dueAmount: finalTotal - finalAdvance,
                 status: 'pending',
-                stockDeducted: true,
+                stockDeducted: !hasPreorderItem,
+                hasPreorder: hasPreorderItem,
                 createdAt: serverTimestamp()
             });
         });
 
-        // ============ SEND EMAIL NOTIFICATIONS (awaits with 5s timeout) ============
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending notifications...';
         try {
             const emailPromise = notifyOrderPlaced({
@@ -742,10 +754,8 @@ window.placeOrder = async function() {
             });
             const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
             await Promise.race([emailPromise, timeoutPromise]);
-            console.log('✅ Email notifications sent');
         } catch (e) {
             console.warn('Email notification failed:', e);
-            // Continue anyway — don't block user
         }
 
         saveCart([]);
