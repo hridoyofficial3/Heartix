@@ -2,7 +2,6 @@
 // HEARTIX COMMON HELPERS
 // ============================================================
 import { initIntegrations } from './integrations.js';
-import './theme.js';
 
 // ============ TOAST ============
 export function showToast(msg, type = 'success') {
