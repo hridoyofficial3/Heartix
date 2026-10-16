@@ -1,6 +1,6 @@
 // ============================================================
-// HEARTIX WISHLIST PAGE — with auto-cleanup of invalid IDs
-// v2 — Price font fixed (Inter Bold, stacked, no inline old price)
+// HEARTIX WISHLIST PAGE
+// v3 - Pre-order support
 // ============================================================
 import { db } from './firebase.js';
 import {
@@ -14,11 +14,9 @@ import {
     collection, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ============ STATE ============
 let allProducts = [];
 let isLoading = true;
 
-// ============ INITIAL BADGE ============
 (function() {
     try {
         const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
@@ -28,24 +26,27 @@ let isLoading = true;
     } catch(e) {}
 })();
 
-// ============ CART ACTIONS ============
 window.addToCart = function(id) {
     const p = allProducts.find(x => x.id === id);
     if (!p) return;
     const stock = p.stock !== undefined ? Number(p.stock) : 999;
-    if (stock <= 0) { showToast('প্রোডাক্ট স্টকে নেই', 'error'); return; }
+    const isPreorder = stock <= 0;
     let cart = getCart();
     const idx = cart.findIndex(i => i.id === id);
     const currentQty = idx > -1 ? (Number(cart[idx].quantity) || 0) : 0;
-    if (stock !== 999 && currentQty + 1 > stock) {
+    if (!isPreorder && stock !== 999 && currentQty + 1 > stock) {
         showToast(`স্টকে মাত্র ${stock} টি আছে`, 'error');
         return;
     }
-    if (idx > -1) cart[idx].quantity = currentQty + 1;
-    else cart.push({ id, name: p.name, price: Number(p.price) || 0, image: p.image, quantity: 1 });
+    if (idx > -1) {
+        cart[idx].quantity = currentQty + 1;
+        if (isPreorder) cart[idx].isPreorder = true;
+    } else {
+        cart.push({ id, name: p.name, price: Number(p.price) || 0, image: p.image, quantity: 1, isPreorder });
+    }
     saveCart(cart);
     updateCartBadges();
-    showToast((p.name || '').substring(0, 25) + ' কার্টে যোগ', 'success');
+    showToast(isPreorder ? 'Pre-order কার্টে যোগ' : (p.name || '').substring(0, 25) + ' কার্টে যোগ', 'success');
     renderWishlist();
 }
 
@@ -74,7 +75,6 @@ window.removeFromWishlist = function(id, e) {
     }
 }
 
-// ============ UPDATE WISHLIST BADGE (header) ============
 function updateWishlistBadge() {
     try {
         const w = getWishlist();
@@ -91,7 +91,6 @@ function updateWishlistBadge() {
     } catch (e) {}
 }
 
-// ============ CLEAN UP INVALID WISHLIST IDs ============
 function cleanupInvalidWishlist() {
     const rawWishlist = getWishlist();
     if (rawWishlist.length === 0) return rawWishlist;
@@ -113,7 +112,6 @@ function cleanupInvalidWishlist() {
     return validIds;
 }
 
-// ============ RENDER ============
 function renderWishlist() {
     const skeleton = document.getElementById('loading-skeleton');
     const emptyEl = document.getElementById('empty-wishlist');
@@ -145,7 +143,7 @@ function renderWishlist() {
 
         let actionHtml = '';
         if (isOut) {
-            actionHtml = `<button disabled class="w-full mt-2 add-cart-btn opacity-50">Out of Stock</button>`;
+            actionHtml = `<button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')" class="w-full mt-2 add-cart-btn bg-purple-50 border-purple-500 text-purple-700"><i class="fas fa-clock"></i> Pre-order</button>`;
         } else if (qty === 0) {
             actionHtml = `<button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')" class="w-full mt-2 add-cart-btn"><i class="fas fa-shopping-bag"></i> Add To Cart</button>`;
         } else {
@@ -160,6 +158,7 @@ function renderWishlist() {
                 <div class="relative mb-2">
                     <img src="${p.image || 'https://via.placeholder.com/200x200?text=No+Image'}" alt="${escapeHtml(p.name)}" loading="lazy" class="prod-img w-full h-28 rounded-lg" onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
                     ${hasDiscount ? `<span class="absolute top-1.5 left-1.5 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">-${discountPct}%</span>` : ''}
+                    ${isOut ? `<span class="absolute top-1.5 right-1.5 bg-purple-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full"><i class="fas fa-clock mr-0.5"></i>Pre-order</span>` : ''}
                 </div>
                 <h4 class="text-[12px] font-semibold text-navy leading-tight mb-1 line-clamp-2" style="min-height:32px;">${escapeHtml(p.name)}</h4>
                 <div class="mb-1.5">
@@ -173,7 +172,6 @@ function renderWishlist() {
     listEl.innerHTML = html;
 }
 
-// ============ LOAD PRODUCTS ============
 async function loadProducts() {
     if (!db) { isLoading = false; renderWishlist(); return; }
     try {
@@ -185,8 +183,7 @@ async function loadProducts() {
     renderWishlist();
 }
 
-// ============ INIT ============
 updateCartBadges();
 loadProducts();
 
-console.log('✅ wishlist.js v2 loaded (price font fixed)');
+console.log('✅ wishlist.js v3 loaded (pre-order)');
