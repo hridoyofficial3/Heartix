@@ -1,197 +1,319 @@
-# 📖 Heartix — Master Guide v9.0
+# Heartix Master Guide v9.0
 
-**Version:** 9.0
-**Last Updated:** 17 October 2025
-**Live Site:** heartix.vercel.app
-**Status:** Phase 0-3 ✅ | Phase 4-6 ⏳
-**Maintainer:** Developer + Claude AI
-**Purpose:** Single source of truth
+Version: 9.0 | Updated: 17 Oct 2025 | Live: heartix.vercel.app
+Status: Phase 0-3 ✅
 
----
+## PROJECT INFO
 
-# 📋 PART 1: এই Guide কীভাবে পড়বেন
+Heartix — বাংলাদেশের প্রিমিয়াম স্মার্ট অ্যাপ্লায়েন্স ই-কমার্স সাইট।
 
-## Order
-1. **Part 2** — Project পরিচিতি
-2. **Part 3** — বর্তমান অবস্থা
-3. **Part 4** — File Structure
-4. **Part 5** — Firebase Structure
-5. **Part 5.5** — Firestore Rules (Full Text)
-6. **Part 5.6** — Features Detail
-7. **Part 6** — বাকি কাজ
-8. **Part 7-9** — Rules, Security, Recovery
-9. **Part 10** — Quick Reference
+Tech Stack:
+- Frontend: HTML5 + Tailwind CDN + Vanilla JS (ES Modules)
+- Backend: Firebase Firestore + Auth
+- Images: Cloudinary (ju2w6e9r / heartix_unsigned)
+- Email: EmailJS (UOTXJmNFXydPMnWDP / Heartix)
+- WhatsApp: wa.me deep link
+- Hosting: Vercel
+- Charts: Chart.js 4.x
+- PWA: Service Worker + Manifest
 
----
+Colors: Navy #0A1628 | Gold #D4A84B | Cream #FBF8F3 | WhatsApp #25D366 | Purple #A855F7
 
-# 🎯 PART 2: Project পরিচিতি
+Admin: admin@heartix.com | Owner UID: IeE3IFsCrmSE5hfzhXWbtes32To2
 
-## Heartix কী?
-বাংলাদেশের প্রিমিয়াম স্মার্ট অ্যাপ্লায়েন্স ই-কমার্স সাইট।
+## CURRENT STATUS
 
-## Tech Stack
-| Component | Tech |
-|-----------|------|
-| Frontend | HTML5 + Tailwind CSS (CDN) + Vanilla JS (ES Modules) |
-| Backend | Firebase Firestore + Auth |
-| Images | Cloudinary (unsigned upload) |
-| Email | EmailJS (client-side, free tier) |
-| WhatsApp | wa.me deep link (manual, free) |
-| Hosting | Vercel |
-| Charts | Chart.js 4.x (CDN) |
-| PWA | Service Worker + Manifest |
-| Icons | Font Awesome 6 |
-| Fonts | Inter + Playfair Display |
+সম্পূর্ণ (Phase 0-3):
+1. Modular structure
+2. Reorder system (admin-reorder.js)
+3. Staff + Activity (admin-staff.js, staff-activity.js)
+4. GA4 + FB Pixel (integrations.js)
+5. EmailJS (email-notify.js)
+6. WhatsApp manual (checkout-whatsapp.js)
+7. Phone login (account.js + phone_lookup)
+8. WhatsApp checkout button
+9. Integration Help Panel
+10. Contact WhatsApp sync
+11. Messages bottom nav
+12. Admin parallel loading (4x faster)
+13. Homepage optimization
+14. Price font Inter Bold
+15. Inventory Alert Email (inventory-alert.js)
+16. Bulk Order Update (admin-bulk-orders.js)
+17. Reviews with Images (product.js)
+18. Pre-order System (product/cart/checkout.js + admin-preorder-badge.js)
+19. Analytics Dashboard (admin-analytics.js)
+20. Backup & Export (inventory-alert.js)
+21. PWA (manifest.json + sw.js)
+22. Landing Pages (landing.html/js + admin-landing.js)
 
-## Colors
-- Navy: `#0A1628`
-- Gold: `#D4A84B`
-- Cream: `#FBF8F3`
-- WhatsApp Green: `#25D366`
-- Purple (Pre-order): `#A855F7`
+Pending (Phase 4-6):
+Advanced Analytics, Customer Segmentation, Profit Calculator, Push Notifications, Dark Mode, Abandoned Cart, Refer & Earn, Loyalty, Spin Wheel, Bundle, Flash Sale
 
-## Firebase Config
-- Project ID: `heartix`
-- Auth domain: `heartix.firebaseapp.com`
-- Support email: `twhob71122@gmail.com`
-- Cloudinary cloud: `ju2w6e9r`
-- Upload preset: `heartix_unsigned`
+## FILE STRUCTURE
 
-## EmailJS Config
-- Account: `twhob71122@gmail.com`
-- Public Key: `UOTXJmNFXydPMnWDP`
-- Service ID: `Heartix`
-- Template Admin: `template_yd1wxrt`
-- Template Customer: `template_2utpxqd`
+Root HTML:
+index.html (index.css, index.js)
+product.html (product.css, product.js)
+cart.html (cart.css, cart.js)
+checkout.html (checkout.css, checkout.js)
+account.html (account.css, account.js)
+wishlist.html (wishlist.css, wishlist.js)
+contact.html (contact.css, contact.js)
+order-success.html (order-success.css, order-success.js)
+track-order.html (track-order.css, track-order.js)
+admin.html (admin.css + 9 JS files)
+messages.html (messages.css, messages.js)
+moderator.html (moderator.css, moderator.js)
+landing.html (landing.css, landing.js)
+about/faq/terms/privacy/return-policy.html (inline)
+manifest.json, sw.js
 
-## Admin Credentials
-- Owner Email: `admin@heartix.com`
-- Owner UID: `IeE3IFsCrmSE5hfzhXWbtes32To2`
+JS Files:
+firebase.js — exports db, auth
+common.js — helpers + initIntegrations
+districts.js — 64 districts
+integrations.js — GA4 + FB Pixel
+email-notify.js — notifyOrderPlaced, notifyStatusChange, notifyLowStockAlert
+staff-activity.js — logActivity + lastLogin
+admin-activity.js — Activity tab
+admin-staff.js — Staff CRUD
+admin.js — Admin logic (parallel)
+admin-reorder.js — Reorder
+admin-integrations.js — GA/FB/EmailJS/WhatsApp
+admin-back-trap.js — Back trap
+admin-bulk.js — CSV upload
+admin-bulk-orders.js — Bulk order update
+admin-analytics.js — Chart.js analytics
+admin-backup.js — Stub
+admin-preorder-badge.js — Purple badge
+admin-landing.js — Landing CRUD
+inventory-alert.js — Low stock + backup
+index.js, product.js, cart.js, checkout.js, account.js, wishlist.js, contact.js
+order-success.js, track-order.js, messages.js, moderator.js, landing.js
 
----
+## FIREBASE COLLECTIONS
 
-# 📊 PART 3: বর্তমান অবস্থা
+products: {id, name, price, oldPrice, category, categories[], stock, brand, description, image, images[], sortOrder, featured, pinned, createdAt}
 
-## ✅ সম্পূর্ণ Features
+orders: {id, orderNumber, customer{name,phone,email,address,district,thana,ipAddress,isRepeat,orderCount,previousOrderNumbers,flagged,flagReason}, items[{id,name,price,quantity,image,isPreorder}], subtotal, discount, couponCode, deliveryCharge, total, paymentMethod, advancePaid, dueAmount, status, stockDeducted, hasPreorder, adminNote, source, landingSlug, landingTitle, createdAt}
 
-### Phase 0: Modular File Structure ✅
-সব page থেকে inline CSS/JS সরিয়ে আলাদা ফাইলে।
+customers: {uid, name, phone, email, address, district, thana, photoURL, provider, createdAt, updatedAt}
 
-### Phase 1: Reorder System ✅
-Category, Section, Product reorder + Featured + Pin to Top।
+phone_lookup: {uid, email, updatedAt} — path: phone_lookup/{phone}
 
-### Phase 1.5: Staff + Activity System ✅
-৫টা role, `staff/{uid}`, `activity_log`, Moderator panel।
+landing_pages: {id, title, slug, badge, subtitle, description, theme, banner, countdownEnd, productIds[], active, createdAt, updatedAt}
 
-### Phase 2: Integrations ✅
-| # | Integration | Status |
-|---|-------------|--------|
-| ১ | Google Analytics (GA4) | ✅ |
-| ২ | Facebook Pixel | ✅ |
-| ৩ | EmailJS (Email) | ✅ |
-| ৪ | WhatsApp (manual wa.me) | ✅ |
+messages: {name, contact, subject, message, read, createdAt}
 
-### Phase 3: Admin Tools ✅
-| # | Feature | Status |
-|---|---------|--------|
-| ১ | Phone Login (phone_lookup) | ✅ |
-| ২ | WhatsApp Checkout Button | ✅ |
-| ৩ | Integration Help Panel | ✅ |
-| ৪ | Contact WhatsApp Auto-Sync | ✅ |
-| ৫ | Messages Bottom Nav | ✅ |
-| ৬ | Admin Parallel Loading | ✅ |
-| ৭ | Homepage Optimization | ✅ |
-| ৮ | Price Font Standardized | ✅ |
-| ৯ | Inventory Alert Email | ✅ |
-| ১০ | Bulk Order Update | ✅ |
-| ১১ | Reviews with Images | ✅ |
-| ১২ | Pre-order System | ✅ |
-| ১৩ | Analytics Dashboard (Charts) | ✅ |
-| ১৪ | Backup & Export JSON | ✅ |
-| ১৫ | PWA Setup | ✅ |
-| ১৬ | Landing Pages | ✅ |
+reviews: {productId, name, rating, text, image, createdAt}
 
-### Pending (Phase 4-6)
-- Sales Dashboard Advanced
-- Customer Segmentation
-- Profit Calculator
-- Product Bundle
-- Loyalty Points
-- Flash Sale
-- Push Notifications
-- Abandoned Cart Recovery
-- Refer & Earn
+coupons: {code, description, type, value, minOrder, maxUses, usedCount, expiry, active, createdAt, updatedAt}
 
----
+settings/main: {deliveryCharge, freeDeliveryAbove, contactAddress, contactPhone, contactEmail, whatsapp, bkashNumber, nagadNumber, facebook, instagram, categories[], customSections[], middleBanners[], testimonials[], heroBanners[], integrations{googleAnalytics, facebookPixel, emailjs, whatsapp}}
 
-# 📁 PART 4: সম্পূর্ণ File Structure
+staff: {uid, name, email, phone, role, active, lastLogin, createdAt, createdBy, updatedAt, updatedBy}
 
-## Root HTML Files
+activity_log: {uid, name, email, role, action, description, meta, createdAt}
 
-| File | Purpose | CSS | JS |
-|------|---------|-----|-----|
-| `index.html` | Home | common.css, index.css | index.js |
-| `product.html` | Product detail | common.css, product.css | product.js |
-| `cart.html` | Cart | common.css, cart.css | cart.js |
-| `checkout.html` | Checkout | common.css, checkout.css | checkout.js |
-| `account.html` | Auth + Profile | common.css, account.css | account.js |
-| `wishlist.html` | Wishlist | common.css, wishlist.css | wishlist.js |
-| `contact.html` | Contact | common.css, contact.css | contact.js |
-| `order-success.html` | Post-order | common.css, order-success.css | order-success.js |
-| `track-order.html` | Tracking | common.css, track-order.css | track-order.js |
-| `admin.html` | Admin (11 tabs) | common.css, admin.css | 9 JS files |
-| `messages.html` | Inbox | common.css, messages.css | messages.js |
-| `moderator.html` | Moderator | common.css, moderator.css | moderator.js |
-| `landing.html` | Landing Pages | common.css, landing.css | landing.js |
-| `about.html`, `faq.html`, `terms.html`, `privacy.html`, `return-policy.html` | Static | common.css | inline |
-| `manifest.json` | PWA Manifest | — | — |
-| `sw.js` | Service Worker | — | — |
+Indexes: orders(createdAt DESC, orderNumber ASC, customer.phone+createdAt, customer.ipAddress+createdAt, customer.email+createdAt), reviews(createdAt DESC), activity_log(createdAt DESC), landing_pages(slug ASC, createdAt DESC)
 
-## CSS Files (`css/`)
-`common.css`, `index.css`, `product.css`, `cart.css`, `checkout.css`, `account.css`, `wishlist.css`, `contact.css`, `order-success.css`, `track-order.css`, `admin.css`, `messages.css`, `moderator.css`, `landing.css`
+## FIRESTORE RULES v10
 
-## JS Files (`js/`)
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() { return request.auth != null; }
+    function staffDoc() { return get(/databases/$(database)/documents/staff/$(request.auth.uid)).data; }
+    function isStaff() { return isSignedIn() && exists(/databases/$(database)/documents/staff/$(request.auth.uid)) && staffDoc().active == true; }
+    function role() { return isStaff() ? staffDoc().role : null; }
+    function isOwner() { return role() == 'owner'; }
+    function isAdmin() { return role() in ['owner', 'admin']; }
+    function isManager() { return role() in ['owner', 'admin', 'manager']; }
+    function isModerator() { return role() in ['owner', 'admin', 'manager', 'moderator']; }
+    function isDelivery() { return role() in ['owner', 'admin', 'manager', 'moderator', 'delivery']; }
 
-| File | Used by | Purpose |
-|------|---------|---------|
-| `firebase.js` | সব | exports `db`, `auth` |
-| `common.js` | সব | helpers + `initIntegrations` |
-| `districts.js` | checkout, account, admin | ৬৪ districts |
-| `integrations.js` | common.js | GA4 + FB Pixel auto-loader |
-| `email-notify.js` | checkout.js, admin.js, moderator.js | `notifyOrderPlaced`, `notifyStatusChange`, `notifyLowStockAlert` |
-| `staff-activity.js` | admin.js, messages.js, moderator.js | `logActivity` + lastLogin |
-| `admin-activity.js` | admin.html | Activity tab UI |
-| `admin-staff.js` | admin.html | Staff CRUD |
-| `admin.js` | admin.html | Admin logic (parallel loading) |
-| `admin-reorder.js` | admin.html | Reorder system |
-| `admin-integrations.js` | admin.html | GA + FB + EmailJS + WhatsApp |
-| `admin-back-trap.js` | admin-integrations.js | Back button trap |
-| `admin-bulk.js` | admin-integrations.js | CSV bulk upload |
-| `admin-bulk-orders.js` | admin.html | Bulk order status update |
-| `admin-analytics.js` | admin.html | Chart.js analytics |
-| `admin-backup.js` | admin-analytics.js | Stub (backup moved) |
-| `admin-preorder-badge.js` | admin-analytics.js | Pre-order badge injection |
-| `admin-landing.js` | admin.html | Landing pages CRUD |
-| `inventory-alert.js` | admin.html | Low stock email + backup buttons |
-| `index.js` | index.html | Homepage |
-| `product.js` | product.html | Product page (pre-order + reviews images) |
-| `cart.js` | cart.html | Cart (pre-order support) |
-| `checkout.js` | checkout.html | Order + email |
-| `account.js` | account.html | Auth + phone lookup |
-| `wishlist.js` | wishlist.html | Wishlist (pre-order) |
-| `contact.js` | contact.html | Contact form |
-| `order-success.js` | order-success.html | WhatsApp confirm |
-| `track-order.js` | track-order.html | Order lookup |
-| `messages.js` | messages.html | Admin inbox |
-| `moderator.js` | moderator.html | Moderator panel |
-| `landing.js` | landing.html | Customer landing view |
+    match /products/{doc} {
+      allow read: if true;
+      allow create: if isManager();
+      allow update: if isManager() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock']) && request.resource.data.stock is number && resource.data.stock is number && request.resource.data.stock < resource.data.stock && resource.data.stock > 0);
+      allow delete: if isAdmin();
+    }
+    match /orders/{doc} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if isModerator();
+      allow delete: if isAdmin();
+    }
+    match /coupons/{doc} {
+      allow read: if true;
+      allow create, delete: if isManager();
+      allow update: if isManager() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount']) && request.resource.data.usedCount is number && resource.data.usedCount is number && request.resource.data.usedCount == resource.data.usedCount + 1);
+    }
+    match /reviews/{doc} {
+      allow read: if true;
+      allow create: if true;
+      allow delete: if isAdmin();
+    }
+    match /messages/{doc} {
+      allow create: if true;
+      allow read, update: if isModerator();
+      allow delete: if isAdmin();
+    }
+    match /customers/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create, update: if isSignedIn() && request.auth.uid == uid;
+      allow delete: if isAdmin();
+    }
+    match /phone_lookup/{phone} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.email is string && request.resource.data.email.size() < 120;
+      allow update: if isSignedIn() && resource.data.uid == request.auth.uid && request.resource.data.uid == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+    match /settings/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /staff/{uid} {
+      allow read: if isStaff() || isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow create, update, delete: if isAdmin();
+    }
+    match /activity_log/{doc} {
+      allow read: if isAdmin();
+      allow create: if isStaff();
+      allow update, delete: if false;
+    }
+    match /landing_pages/{doc} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() || isManager();
+    }
+  }
+}
 
----
+## KEY FUNCTIONS
 
-# 🗄️ PART 5: Firebase Structure
+Email: notifyOrderPlaced(data), notifyStatusChange(data), notifyLowStockAlert(products)
 
-## Collections
+WhatsApp: orderViaWhatsApp(), loadWhatsAppConfirm()
 
-### `products`
-```js
-{ id, name, price, oldPrice, category, categories: [], stock, brand, description, image, images: [], sortOrder, featured, pinned, createdAt }
+Staff: openAddStaffModal(), saveStaff(), openEditStaff(uid), toggleStaffActive(uid), removeStaff(uid), openStaffDetail(uid)
+
+Activity: logActivity(action, {description, meta}), loadActivity(), filterActivity(type, value), refreshActivity()
+
+Auth: loginUser(), registerUser(), googleSignIn(), forgotPassword(), logoutUser()
+
+Cart: addToCart(id), removeFromCart(id), applyCoupon(), removeCoupon(), changeQty(), removeItem(), clearCart(), moveToWishlist(), proceedToCheckout()
+
+Checkout: placeOrder(), showRepeatModal(), showWarningModal(), showHistoryModal()
+
+Admin: showTab(tab), openAddModal(), editProduct(), saveProduct(), deleteProduct(), openOrderEdit(), saveOrderEdit(), confirmDeleteOrder(), executeDelete(), openStatusPicker(), selectStatus(), confirmStatusChange(), filterOrders(), exportOrdersCSV(), recalcOrderEdit(), openCategoryModal(), saveCategory(), openCouponModal(), saveCoupon(), openHeroModal(), openSectionModal(), openBannerModal(), openTestimonialModal(), saveSettings(), saveIntegrations()
+
+Analytics: setAnalyticsPeriod(period)
+
+Landing Admin: openNewLanding(), editLanding(id), saveLanding(), deleteLanding(id), copyLandingLink(slug), openLandingPreview(slug), openProductPickerLanding(), renderPickerList(), togglePickerProduct(id, checked), confirmProductPicker(), removeSelectedProduct(idx)
+
+Landing Customer: selectProduct(pid), submitOrder(), scrollToOrderForm(), toggleWishlistLanding(id, event), copyOrderNum(num)
+
+Backup: handleBackup(), handleSendAlert()
+
+## LOCALSTORAGE KEYS
+
+heartix_cart, heartix_wishlist, heartix_recent, heartix_coupon, heartix_remember, heartix_last_order
+
+## STATUS VALUES
+
+Order: pending, confirmed, shipped, delivered, cancelled
+Payment: full-cod, delivery-advance, full-online
+Coupon: percentage, fixed
+Staff Roles: owner, admin, manager, moderator, delivery
+Landing Theme: navy, gold, red, purple
+Activity Actions: login, logout, order_status, order_edit, order_delete, product_add, product_edit, product_delete, message_read, message_delete, staff_add, staff_edit, staff_disable, staff_remove, coupon_add, coupon_edit, coupon_delete, category_add, category_edit, category_delete, settings_update
+
+## RULES
+
+সবসময়:
+1. escapeHtml() — user input
+2. serverTimestamp() — Firestore
+3. Transaction — price calc
+4. Relative paths — ./firebase.js
+5. type="module" — script tag
+6. Cache bypass — ?v=X
+7. Console.log — file শেষে
+8. বাংলা message — user-facing
+9. Number font → Inter Bold
+10. logActivity() — significant actions
+11. await before navigation
+12. WhatsApp: 88 দিয়ে শুরু, space ছাড়া
+13. Script tag order admin.html-এ maintain
+
+কখনো না:
+1. common.css direct edit
+2. API keys client-side (EmailJS Public Key ছাড়া)
+3. escapeHtml() skip
+4. eval()
+5. allow if true in rules
+6. Admin UID manual remove
+7. common.css/firebase.js delete
+8. ৫+ images
+9. Stock 0-এ order (except pre-order)
+10. Duplicate logActivity
+11. Fire-and-forget async before redirect
+12. Duplicate script tag
+
+## RECOVERY
+
+White screen → Console import error
+404 on css/js → Path check
+Permission denied → Rules check
+Index error → Error link → Create Index
+Staff tab খালি → staff/{uid} doc
+Activity log খালি → Console errors
+Email না আসা → await + EmailJS history
+WhatsApp button নেই → integrations.whatsapp.enabled
+WhatsApp ভুল নাম্বার → integrations.whatsapp.number
+Landing save fail → landing_pages rules
+Countdown ভুল → Future date check
+Chart দেখাচ্ছে না → Chart.js CDN
+
+## STATISTICS
+
+Progress: Phase 0-3: 100% ✅ | Phase 4-6: 0% ⏳ | Overall: ~65%
+
+File Counts: HTML: 19 | CSS: 14 | JS: 31 | MD: 2 | JSON: 1
+
+Cost: ৳0 (all free tier)
+
+## CHANGELOG
+
+v9.0 (17 Oct 2025): Phone Login, WhatsApp Checkout, Integration Help Panel, Contact WhatsApp Sync, Messages Bottom Nav, Admin Parallel Loading, Homepage Optimization, Price Font Inter Bold, Inventory Alert Email, Bulk Order Update, Reviews with Images, Pre-order System, Analytics Dashboard, Backup & Export JSON, PWA Setup, Landing Pages, Firestore Rules v10
+
+v8.0 (16 Oct 2025): WhatsApp manual wa.me link, checkout-whatsapp.js new, SMS/bKash/Nagad gateways removed
+
+v7.0 (16 Oct 2025): EmailJS integration, Admin + Customer templates
+
+v5.0 (15 Oct 2025): Staff + Activity System, Moderator panel
+
+## NEXT SESSION
+
+Priority: Phase 4 → Advanced Analytics, Customer Segmentation, Profit Calculator
+
+Golden Rules for AI:
+1. এই guide.md আগে পড়ুন
+2. সবসময় full file দিন — user mobile-এ edit করতে পারেন না
+3. Cache bypass (?v=X) mention
+4. Deploy wait (2 min)
+5. Staff = staff/{uid}
+6. Activity = staff-activity.js
+7. Email = settings.main.integrations.emailjs
+8. WhatsApp = settings.main.integrations.whatsapp
+9. Landing = landing_pages collection
+10. ৪+১ integration final
+
+Contact:
+Firebase: heartix
+Cloudinary: ju2w6e9r
+Support: twhob71122@gmail.com
+Owner UID: IeE3IFsCrmSE5hfzhXWbtes32To2
+
+Last Updated: 17 Oct 2025 | Version: 9.0
