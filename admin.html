@@ -39,11 +39,6 @@
             flex-shrink: 0;
             box-shadow: 0 2px 6px rgba(212,168,75,0.35);
         }
-        .help-step-line {
-            position: absolute; left: 13px; top: 32px; bottom: -12px;
-            width: 2px; background: #e5e7eb;
-        }
-        .help-step:last-child .help-step-line { display: none; }
         .help-code {
             background: #0A1628; color: #E8C77B;
             padding: 2px 6px; border-radius: 4px;
@@ -156,6 +151,9 @@
                 <p class="text-[10px] text-white/40 font-bold uppercase tracking-wider px-3 mb-2 mt-6">Website</p>
                 <button onclick="showTab('content')" data-tab="content" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left">
                     <i class="fas fa-layer-group nav-icon w-5 text-center"></i> Content
+                </button>
+                <button onclick="showTab('landing')" data-tab="landing" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left">
+                    <i class="fas fa-window-maximize nav-icon w-5 text-center"></i> Landing Pages
                 </button>
                 <p class="text-[10px] text-white/40 font-bold uppercase tracking-wider px-3 mb-2 mt-6">Team</p>
                 <button onclick="showTab('staff')" data-tab="staff" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left">
@@ -377,6 +375,25 @@
                 </div>
             </div>
 
+            <div id="content-landing" class="tab-content hidden">
+                <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Landing Pages</h2>
+                        <p class="text-sm text-gray-500">Marketing-এর জন্য special offer page বানান</p>
+                    </div>
+                    <button onclick="openNewLanding()" class="btn-gold px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                        <i class="fas fa-plus"></i> New Landing Page
+                    </button>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-4">
+                    <p class="text-xs text-blue-800 leading-relaxed">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        <strong>কীভাবে কাজ করে:</strong> Landing page তৈরি করে তার link Facebook/WhatsApp-এ share করুন। Customer সরাসরি offer page-এ যাবে।
+                    </p>
+                </div>
+                <div id="landing-list-admin" class="space-y-3"></div>
+            </div>
+
             <div id="content-orders" class="tab-content hidden">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Orders</h2>
@@ -580,7 +597,7 @@
                                 <span class="text-sm font-semibold text-navy">Enable Facebook Pixel</span>
                             </label>
                             <input type="text" id="int-fb-id" placeholder="1234567890123456" maxlength="20" inputmode="numeric" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
-                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>business.facebook.com → Pixel ID (শুধু সংখ্যা)</p>
+                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>business.facebook.com → Pixel ID</p>
                         </div>
                     </details>
 
@@ -605,12 +622,11 @@
                                 <input type="checkbox" id="int-em-enabled" class="w-5 h-5 accent-[#D4A84B]">
                                 <span class="text-sm font-semibold text-navy">Enable Email Notifications</span>
                             </label>
-                            <input type="text" id="int-em-publickey" placeholder="Public Key (UOTXxxx...)" maxlength="60" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
-                            <input type="text" id="int-em-serviceid" placeholder="Service ID (Heartix)" maxlength="40" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <input type="text" id="int-em-publickey" placeholder="Public Key" maxlength="60" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <input type="text" id="int-em-serviceid" placeholder="Service ID" maxlength="40" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
                             <input type="text" id="int-em-customertpl" placeholder="Customer Template ID" maxlength="40" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
                             <input type="text" id="int-em-admintpl" placeholder="Admin Template ID" maxlength="40" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
                             <input type="email" id="int-em-adminemail" placeholder="Admin Email" maxlength="100" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
-                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>emailjs.com → Account + Templates</p>
                         </div>
                     </details>
 
@@ -636,7 +652,7 @@
                                 <span class="text-sm font-semibold text-navy">Enable WhatsApp Order Buttons</span>
                             </label>
                             <input type="text" id="int-wa-number" placeholder="8801712345678" maxlength="15" inputmode="numeric" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
-                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>Country code সহ (88 দিয়ে শুরু, space ছাড়া)</p>
+                            <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>88 দিয়ে শুরু, space ছাড়া</p>
                         </div>
                     </details>
                 </div>
@@ -652,10 +668,10 @@
                         </div>
                     </div>
                     <div class="space-y-2">
-                        <button id="send-alert-btn" type="button" class="w-full bg-amber-50 border-2 border-amber-200 text-amber-800 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:bg-amber-100 hover:border-amber-300 transition-all">
+                        <button id="send-alert-btn" type="button" class="w-full bg-amber-50 border-2 border-amber-200 text-amber-800 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:bg-amber-100">
                             <i class="fas fa-bell"></i> Send Low Stock Alert Email
                         </button>
-                        <button id="backup-btn" type="button" class="w-full bg-blue-50 border-2 border-blue-200 text-blue-800 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:bg-blue-100 hover:border-blue-300 transition-all">
+                        <button id="backup-btn" type="button" class="w-full bg-blue-50 border-2 border-blue-200 text-blue-800 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:bg-blue-100">
                             <i class="fas fa-download"></i> Download Full Backup (JSON)
                         </button>
                     </div>
@@ -700,6 +716,11 @@
                     <button onclick="showTab('analytics'); closeMoreMenu()" class="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl active:bg-gray-100">
                         <div class="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center"><i class="fas fa-chart-line text-pink-600"></i></div>
                         <span class="font-semibold text-navy">Analytics</span>
+                        <i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i>
+                    </button>
+                    <button onclick="showTab('landing'); closeMoreMenu()" class="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl active:bg-gray-100">
+                        <div class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center"><i class="fas fa-window-maximize text-rose-600"></i></div>
+                        <span class="font-semibold text-navy">Landing Pages</span>
                         <i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i>
                     </button>
                     <button onclick="showTab('categories'); closeMoreMenu()" class="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl active:bg-gray-100">
@@ -759,7 +780,6 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-
             <div class="px-4 pt-3 pb-2 flex gap-1.5 overflow-x-auto hide-scrollbar flex-shrink-0 border-b border-gray-100">
                 <button onclick="showHelpTab('ga')" id="help-tab-ga" class="help-tab active whitespace-nowrap px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
                     <i class="fas fa-chart-line"></i> Analytics
@@ -774,7 +794,6 @@
                     <i class="fab fa-whatsapp"></i> WhatsApp
                 </button>
             </div>
-
             <div class="flex-1 overflow-y-auto p-5">
                 <div id="help-content-ga" class="help-content">
                     <div class="flex items-start gap-3 mb-5">
@@ -789,53 +808,42 @@
                     <div class="bg-blue-50 border-l-4 border-blue-400 rounded-r-xl p-3 mb-5">
                         <p class="text-xs text-blue-900 leading-relaxed">
                             <i class="fas fa-info-circle mr-1"></i>
-                            <strong>কী করে:</strong> কতজন ভিজিটর আসে, কোথা থেকে আসে, কী দেখে, কী কেনে — সব ডেটা পাবেন। সম্পূর্ণ ফ্রি।
+                            <strong>কী করে:</strong> কতজন ভিজিটর আসে, কোথা থেকে আসে, কী দেখে, কী কেনে — সব ডেটা পাবেন।
                         </p>
                     </div>
-                    <div class="space-y-1">
-                        <div class="flex gap-3 relative help-step">
+                    <div class="space-y-3">
+                        <div class="flex gap-3">
                             <div class="help-step-num">1</div>
-                            <div class="flex-1 pb-4">
-                                <p class="font-bold text-navy text-sm">analytics.google.com-এ যান</p>
-                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">আপনার Gmail account দিয়ে sign in করুন।</p>
-                                <a href="https://analytics.google.com" target="_blank" rel="noopener" class="inline-flex items-center gap-1 mt-2 text-[11px] text-blue-600 font-bold">
-                                    <i class="fas fa-external-link-alt"></i> Open Analytics
-                                </a>
-                            </div>
-                        </div>
-                        <div class="flex gap-3 relative help-step">
-                            <div class="help-step-num">2</div>
-                            <div class="flex-1 pb-4">
-                                <p class="font-bold text-navy text-sm">Account তৈরি করুন</p>
-                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Admin (নিচে বাম দিকে) → <strong>Create Account</strong> → Account name: <span class="help-code">Heartix</span></p>
-                            </div>
-                        </div>
-                        <div class="flex gap-3 relative help-step">
-                            <div class="help-step-num">3</div>
-                            <div class="flex-1 pb-4">
-                                <p class="font-bold text-navy text-sm">Property তৈরি করুন</p>
-                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Property name: <span class="help-code">Heartix</span>, Time zone: <strong>Bangladesh</strong>, Currency: <strong>BDT</strong></p>
-                            </div>
-                        </div>
-                        <div class="flex gap-3 relative help-step">
-                            <div class="help-step-num">4</div>
-                            <div class="flex-1 pb-4">
-                                <p class="font-bold text-navy text-sm">Data Stream যোগ করুন</p>
-                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Platform: <strong>Web</strong>, Website URL: <span class="help-code">heartix.vercel.app</span></p>
-                            </div>
-                        </div>
-                        <div class="flex gap-3 relative help-step">
-                            <div class="help-step-num">5</div>
-                            <div class="flex-1 pb-4">
-                                <p class="font-bold text-navy text-sm">Measurement ID কপি করুন</p>
-                                <p class="text-xs text-gray-600 mt-1 leading-relaxed"><span class="help-code">G-</span> দিয়ে শুরু একটা ID দেখাবে। কপি করুন।</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-3 relative help-step">
-                            <div class="help-step-num">6</div>
                             <div class="flex-1">
-                                <p class="font-bold text-navy text-sm">Heartix Admin-এ paste করুন</p>
-                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Settings → Integrations → Google Analytics → Enable + ID paste → Save।</p>
+                                <p class="font-bold text-navy text-sm">analytics.google.com-এ যান</p>
+                                <p class="text-xs text-gray-600 mt-1">Gmail account দিয়ে sign in করুন।</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="help-step-num">2</div>
+                            <div class="flex-1">
+                                <p class="font-bold text-navy text-sm">Account তৈরি করুন</p>
+                                <p class="text-xs text-gray-600 mt-1">Create Account → Name: <span class="help-code">Heartix</span></p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="help-step-num">3</div>
+                            <div class="flex-1">
+                                <p class="font-bold text-navy text-sm">Property + Data Stream</p>
+                                <p class="text-xs text-gray-600 mt-1">Platform: Web, URL: heartix.vercel.app</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="help-step-num">4</div>
+                            <div class="flex-1">
+                                <p class="font-bold text-navy text-sm">Measurement ID কপি</p>
+                                <p class="text-xs text-gray-600 mt-1"><span class="help-code">G-</span> দিয়ে শুরু</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="help-step-num">5</div>
+                            <div class="flex-1">
+                                <p class="font-bold text-navy text-sm">Admin-এ paste + Save</p>
                             </div>
                         </div>
                     </div>
@@ -848,35 +856,31 @@
                         </div>
                         <div>
                             <h4 class="font-display text-lg font-bold text-navy">Facebook Pixel</h4>
-                            <p class="text-xs text-gray-500 mt-0.5">Facebook Ads-এর জন্য কনভার্সন ট্র্যাকিং</p>
                         </div>
                     </div>
-                    <div class="space-y-1">
-                        <div class="flex gap-3 relative help-step">
+                    <div class="space-y-3">
+                        <div class="flex gap-3">
                             <div class="help-step-num">1</div>
-                            <div class="flex-1 pb-4">
+                            <div class="flex-1">
                                 <p class="font-bold text-navy text-sm">business.facebook.com-এ যান</p>
-                                <a href="https://business.facebook.com" target="_blank" rel="noopener" class="inline-flex items-center gap-1 mt-2 text-[11px] text-blue-600 font-bold">
-                                    <i class="fas fa-external-link-alt"></i> Open Business Manager
-                                </a>
                             </div>
                         </div>
-                        <div class="flex gap-3 relative help-step">
+                        <div class="flex gap-3">
                             <div class="help-step-num">2</div>
-                            <div class="flex-1 pb-4">
-                                <p class="font-bold text-navy text-sm">Events Manager → Connect Data Sources</p>
+                            <div class="flex-1">
+                                <p class="font-bold text-navy text-sm">Events Manager → Connect Data</p>
                             </div>
                         </div>
-                        <div class="flex gap-3 relative help-step">
+                        <div class="flex gap-3">
                             <div class="help-step-num">3</div>
-                            <div class="flex-1 pb-4">
+                            <div class="flex-1">
                                 <p class="font-bold text-navy text-sm">Web → Facebook Pixel → Create</p>
                             </div>
                         </div>
-                        <div class="flex gap-3 relative help-step">
+                        <div class="flex gap-3">
                             <div class="help-step-num">4</div>
                             <div class="flex-1">
-                                <p class="font-bold text-navy text-sm">Pixel ID কপি করে Admin-এ paste</p>
+                                <p class="font-bold text-navy text-sm">Pixel ID কপি করে paste</p>
                             </div>
                         </div>
                     </div>
@@ -889,36 +893,24 @@
                         </div>
                         <div>
                             <h4 class="font-display text-lg font-bold text-navy">Email Notifications</h4>
-                            <p class="text-xs text-gray-500 mt-0.5">EmailJS integration</p>
                         </div>
                     </div>
-                    <div class="space-y-1">
-                        <div class="flex gap-3 relative help-step">
+                    <div class="space-y-3">
+                        <div class="flex gap-3">
                             <div class="help-step-num">1</div>
-                            <div class="flex-1 pb-4">
-                                <p class="font-bold text-navy text-sm">emailjs.com-এ সাইন আপ</p>
-                                <a href="https://www.emailjs.com/" target="_blank" rel="noopener" class="inline-flex items-center gap-1 mt-2 text-[11px] text-blue-600 font-bold">
-                                    <i class="fas fa-external-link-alt"></i> Open EmailJS
-                                </a>
-                            </div>
+                            <div class="flex-1"><p class="font-bold text-navy text-sm">emailjs.com-এ sign up</p></div>
                         </div>
-                        <div class="flex gap-3 relative help-step">
+                        <div class="flex gap-3">
                             <div class="help-step-num">2</div>
-                            <div class="flex-1 pb-4">
-                                <p class="font-bold text-navy text-sm">Gmail Service → Service ID কপি</p>
-                            </div>
+                            <div class="flex-1"><p class="font-bold text-navy text-sm">Gmail Service → Service ID</p></div>
                         </div>
-                        <div class="flex gap-3 relative help-step">
+                        <div class="flex gap-3">
                             <div class="help-step-num">3</div>
-                            <div class="flex-1 pb-4">
-                                <p class="font-bold text-navy text-sm">Admin ও Customer Template বানান</p>
-                            </div>
+                            <div class="flex-1"><p class="font-bold text-navy text-sm">Admin + Customer Template</p></div>
                         </div>
-                        <div class="flex gap-3 relative help-step">
+                        <div class="flex gap-3">
                             <div class="help-step-num">4</div>
-                            <div class="flex-1">
-                                <p class="font-bold text-navy text-sm">Public Key + সব ID paste করুন</p>
-                            </div>
+                            <div class="flex-1"><p class="font-bold text-navy text-sm">Public Key + IDs paste</p></div>
                         </div>
                     </div>
                 </div>
@@ -930,19 +922,16 @@
                         </div>
                         <div>
                             <h4 class="font-display text-lg font-bold text-navy">WhatsApp Orders</h4>
-                            <p class="text-xs text-gray-500 mt-0.5">Manual order button</p>
                         </div>
                     </div>
-                    <div class="space-y-1">
-                        <div class="flex gap-3 relative help-step">
+                    <div class="space-y-3">
+                        <div class="flex gap-3">
                             <div class="help-step-num">1</div>
-                            <div class="flex-1 pb-4">
-                                <p class="font-bold text-navy text-sm">WhatsApp নাম্বার নিন</p>
-                            </div>
+                            <div class="flex-1"><p class="font-bold text-navy text-sm">WhatsApp নাম্বার নিন</p></div>
                         </div>
-                        <div class="flex gap-3 relative help-step">
+                        <div class="flex gap-3">
                             <div class="help-step-num">2</div>
-                            <div class="flex-1 pb-4">
+                            <div class="flex-1">
                                 <p class="font-bold text-navy text-sm">Format: 88 + নাম্বার (01 বাদ)</p>
                                 <div class="bg-gray-50 rounded-lg p-3 mt-2 text-[11px] space-y-1">
                                     <p class="flex items-center gap-2"><i class="fas fa-times text-red-500"></i> <span class="font-mono line-through text-gray-400">01712345678</span></p>
@@ -950,15 +939,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex gap-3 relative help-step">
+                        <div class="flex gap-3">
                             <div class="help-step-num">3</div>
-                            <div class="flex-1">
-                                <p class="font-bold text-navy text-sm">Enable + Save Integrations</p>
-                            </div>
+                            <div class="flex-1"><p class="font-bold text-navy text-sm">Enable + Save</p></div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -975,19 +961,19 @@
                 <input type="hidden" id="edit-staff-uid">
                 <div>
                     <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Full Name *</label>
-                    <input type="text" id="staff-name" placeholder="e.g. Karim Ahmed" maxlength="60" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
+                    <input type="text" id="staff-name" maxlength="60" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
                 </div>
                 <div>
                     <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Email *</label>
-                    <input type="email" id="staff-email" placeholder="staff@heartix.com" maxlength="120" autocomplete="off" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold disabled:bg-gray-50">
+                    <input type="email" id="staff-email" maxlength="120" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold disabled:bg-gray-50">
                 </div>
                 <div>
                     <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Phone</label>
-                    <input type="tel" id="staff-phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
+                    <input type="tel" id="staff-phone" maxlength="11" inputmode="numeric" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
                 </div>
                 <div id="staff-password-field">
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Password * (min 8 chars)</label>
-                    <input type="password" id="staff-password" placeholder="••••••••" maxlength="60" autocomplete="new-password" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Password *</label>
+                    <input type="password" id="staff-password" maxlength="60" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
                 </div>
                 <div>
                     <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Role *</label>
@@ -1065,12 +1051,12 @@
                         <i class="fas fa-chevron-down oe-chevron text-gray-400 text-[10px]"></i>
                     </summary>
                     <div class="px-3 pb-3 space-y-2">
-                        <input type="text" id="oe-edit-name" placeholder="Customer Name" maxlength="100" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
-                        <input type="tel" id="oe-edit-phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
-                        <textarea id="oe-edit-address" rows="2" placeholder="Full Address" maxlength="500" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white resize-none focus:border-gold"></textarea>
+                        <input type="text" id="oe-edit-name" maxlength="100" placeholder="Customer Name" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                        <input type="tel" id="oe-edit-phone" maxlength="11" placeholder="01XXXXXXXXX" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                        <textarea id="oe-edit-address" rows="2" placeholder="Full Address" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white resize-none focus:border-gold"></textarea>
                         <div class="grid grid-cols-2 gap-2">
                             <select id="oe-edit-district" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold"></select>
-                            <input type="text" id="oe-edit-thana" placeholder="Thana" maxlength="60" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
+                            <input type="text" id="oe-edit-thana" maxlength="60" placeholder="Thana" class="w-full border-2 border-gray-100 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
                         </div>
                     </div>
                 </details>
@@ -1082,8 +1068,8 @@
                             </div>
                             <span class="text-xs font-bold text-navy">Items</span>
                         </div>
-                        <button onclick="openProductPicker()" class="text-gold text-[10px] font-bold flex items-center gap-1 active:opacity-70">
-                            <i class="fas fa-plus-circle"></i> Add Item
+                        <button onclick="openProductPicker()" class="text-gold text-[10px] font-bold flex items-center gap-1">
+                            <i class="fas fa-plus-circle"></i> Add
                         </button>
                     </div>
                     <div id="oe-items-list" class="px-3 pb-3 space-y-1.5"></div>
@@ -1104,16 +1090,16 @@
                             <input type="number" id="oe-discount" placeholder="0" min="0" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-sm font-semibold bg-white focus:border-gold">
                         </div>
                         <div>
-                            <label class="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Delivery Charge (৳)</label>
+                            <label class="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Delivery (৳)</label>
                             <input type="number" id="oe-delivery" placeholder="0" min="0" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-sm font-semibold bg-white focus:border-gold">
                         </div>
                         <div>
-                            <label class="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Advance Paid (৳)</label>
+                            <label class="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Advance (৳)</label>
                             <input type="number" id="oe-advance" placeholder="0" min="0" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-sm font-semibold bg-white focus:border-gold">
                         </div>
                         <div>
                             <label class="text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-1 block">Admin Note</label>
-                            <textarea id="oe-note" rows="2" placeholder="Internal note..." maxlength="500" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium resize-none bg-white focus:border-gold"></textarea>
+                            <textarea id="oe-note" rows="2" maxlength="500" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium resize-none bg-white focus:border-gold"></textarea>
                         </div>
                     </div>
                 </details>
@@ -1260,11 +1246,11 @@
                 <button onclick="closeInlineCategoryModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><i class="fas fa-times text-xs text-gray-600"></i></button>
             </div>
             <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Key *</label>
-            <input type="text" id="inline-cat-key" placeholder="e.g. AC" maxlength="30" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm mb-3">
+            <input type="text" id="inline-cat-key" maxlength="30" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm mb-3">
             <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Display Name *</label>
-            <input type="text" id="inline-cat-label" placeholder="e.g. Air Conditioner" maxlength="60" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm mb-3">
+            <input type="text" id="inline-cat-label" maxlength="60" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm mb-3">
             <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Icon (Emoji)</label>
-            <input type="text" id="inline-cat-icon" placeholder="❄️" maxlength="4" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm mb-4 text-center text-2xl">
+            <input type="text" id="inline-cat-icon" maxlength="4" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm mb-4 text-center text-2xl">
             <div class="grid grid-cols-2 gap-3">
                 <button onclick="closeInlineCategoryModal()" class="py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm">Cancel</button>
                 <button onclick="saveInlineCategory()" id="inline-cat-save-btn" class="btn-gold py-3 rounded-xl font-bold text-sm">SAVE</button>
@@ -1280,9 +1266,9 @@
             </div>
             <div class="p-5 space-y-4">
                 <input type="hidden" id="edit-category-key">
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category Key *</label><input type="text" id="cat-key" placeholder="e.g. AC" maxlength="30" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category Key *</label><input type="text" id="cat-key" maxlength="30" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
                 <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Display Name *</label><input type="text" id="cat-label" maxlength="60" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Icon (Emoji)</label><input type="text" id="cat-icon-emoji" placeholder="❄️" maxlength="4" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium text-center text-2xl"></div>
+                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Icon (Emoji)</label><input type="text" id="cat-icon-emoji" maxlength="4" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium text-center text-2xl"></div>
                 <div class="text-center text-xs text-gray-400 font-bold uppercase tracking-wider py-1">— OR —</div>
                 <div>
                     <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Category Image</label>
@@ -1309,8 +1295,8 @@
             </div>
             <div class="p-5 space-y-4">
                 <input type="hidden" id="edit-coupon-code">
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Coupon Code *</label><input type="text" id="cp-code" placeholder="SAVE10" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-bold uppercase tracking-wider"></div>
-                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Description</label><input type="text" id="cp-desc" placeholder="10% off" maxlength="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Coupon Code *</label><input type="text" id="cp-code" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-bold uppercase tracking-wider"></div>
+                <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Description</label><input type="text" id="cp-desc" maxlength="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
                 <div>
                     <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Discount Type *</label>
                     <select id="cp-type" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white" onchange="updateCouponValueLabel()">
@@ -1324,7 +1310,7 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Min Order (৳)</label><input type="number" id="cp-min" min="0" value="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
-                    <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Max Uses</label><input type="number" id="cp-maxuses" min="0" value="0" placeholder="0 = unlimited" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
+                    <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Max Uses</label><input type="number" id="cp-maxuses" min="0" value="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
                 </div>
                 <div><label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Expiry Date</label><input type="date" id="cp-expiry" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium"></div>
                 <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer">
@@ -1458,6 +1444,126 @@
         </div>
     </div>
 
+    <!-- LANDING PAGE MODAL -->
+    <div id="landing-modal" class="hidden fixed inset-0 modal-bg z-[80] flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-lg max-h-[95vh] flex flex-col">
+            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center flex-shrink-0">
+                <h3 id="landing-modal-title" class="text-white font-bold text-lg">New Landing Page</h3>
+                <button onclick="closeLandingModal()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-5 space-y-4">
+                <input type="hidden" id="landing-edit-id">
+
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Title *</label>
+                    <input type="text" id="land-title" placeholder="e.g. Eid Sale 2026" maxlength="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">URL Slug *</label>
+                    <div class="flex items-center gap-2 border-2 border-gray-100 rounded-xl px-4 py-3 focus-within:border-gold">
+                        <span class="text-xs text-gray-400 font-mono whitespace-nowrap">landing.html?slug=</span>
+                        <input type="text" id="land-slug" placeholder="eid-sale" maxlength="60" class="flex-1 outline-none text-sm font-medium lowercase">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Badge</label>
+                        <input type="text" id="land-badge" placeholder="🔥 Limited" maxlength="40" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Theme</label>
+                        <select id="land-theme" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium bg-white focus:border-gold">
+                            <option value="navy">Navy</option>
+                            <option value="gold">Gold</option>
+                            <option value="red">Red</option>
+                            <option value="purple">Purple</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Subtitle</label>
+                    <input type="text" id="land-subtitle" placeholder="৩০% ছাড় সব প্রোডাক্টে" maxlength="150" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Description</label>
+                    <textarea id="land-description" rows="3" placeholder="বিস্তারিত লিখুন..." maxlength="1000" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm resize-none focus:border-gold"></textarea>
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Countdown End (Optional)</label>
+                    <input type="datetime-local" id="land-countdown" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Banner (Optional)</label>
+                    <div id="land-banner-preview" class="hidden mb-2 relative">
+                        <img id="land-banner-preview-img" class="w-full h-32 object-cover rounded-xl border-2 border-gold">
+                        <button type="button" onclick="clearLandingBanner()" class="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-lg">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center">
+                        <label for="land-banner-file" class="cursor-pointer block">
+                            <i class="fas fa-image text-2xl text-gray-300 mb-1"></i>
+                            <p class="text-xs text-gray-500 font-semibold">Upload Banner</p>
+                        </label>
+                        <input type="file" id="land-banner-file" accept="image/*" class="hidden">
+                        <p id="land-banner-name" class="text-xs text-green-600 mt-1 font-semibold"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Products *</label>
+                        <button type="button" onclick="openProductPickerLanding()" class="text-gold text-[11px] font-bold">
+                            <i class="fas fa-plus-circle mr-1"></i>Add Products
+                        </button>
+                    </div>
+                    <div id="land-selected-products" class="border-2 border-gray-100 rounded-xl p-2 max-h-60 overflow-y-auto"></div>
+                </div>
+
+                <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer">
+                    <input type="checkbox" id="land-active" checked class="w-5 h-5 accent-[#D4A84B]">
+                    <span class="text-sm font-semibold text-navy">Active (Customer দেখতে পাবে)</span>
+                </label>
+            </div>
+            <div class="border-t border-gray-100 p-4 flex-shrink-0">
+                <button onclick="saveLanding()" id="land-save-btn" class="btn-primary w-full py-4 rounded-xl font-bold text-sm">
+                    <i class="fas fa-check mr-2"></i> SAVE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="land-picker-modal" class="hidden fixed inset-0 modal-bg z-[85] flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[85vh] flex flex-col">
+            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center flex-shrink-0">
+                <div>
+                    <h3 class="text-white font-bold text-lg">Select Products</h3>
+                    <p class="text-gold text-[11px] mt-0.5">Multiple select করা যাবে</p>
+                </div>
+                <button onclick="closeProductPickerLanding()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-4 flex-shrink-0">
+                <input type="text" id="land-picker-search" oninput="renderPickerList()" placeholder="Search products..." class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold">
+            </div>
+            <div id="land-picker-list" class="flex-1 overflow-y-auto px-4 space-y-2"></div>
+            <div class="border-t border-gray-100 p-4 flex-shrink-0">
+                <button onclick="confirmProductPicker()" class="btn-gold w-full py-3.5 rounded-xl font-bold text-sm">
+                    <i class="fas fa-check mr-1"></i> Confirm Selection
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         window.openIntegrationHelp = function() {
             document.getElementById('integration-help-modal').classList.remove('hidden');
@@ -1474,8 +1580,6 @@
             const content = document.getElementById('help-content-' + tab);
             if (tabBtn) tabBtn.classList.add('active');
             if (content) content.classList.remove('hidden');
-            const scroller = content ? content.closest('.overflow-y-auto') : null;
-            if (scroller) scroller.scrollTop = 0;
         };
     </script>
 
@@ -1489,5 +1593,6 @@
     <script type="module" src="js/admin-bulk-orders.js"></script>
     <script type="module" src="js/admin-analytics.js"></script>
     <script type="module" src="js/admin-preorder-badge.js"></script>
+    <script type="module" src="js/admin-landing.js"></script>
 </body>
 </html>
