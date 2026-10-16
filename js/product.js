@@ -572,4 +572,4 @@ async function loadProduct() {
 
 loadProduct();
 
-console.log('✅ product.js v5 loaded (pre-order + share top)');
+console.log('✅ product.js v5 loaded (pre-order + share top)'); 
