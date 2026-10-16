@@ -2,6 +2,7 @@
 // HEARTIX COMMON HELPERS
 // ============================================================
 import { initIntegrations } from './integrations.js';
+import './theme.js';
 
 // ============ TOAST ============
 export function showToast(msg, type = 'success') {
@@ -143,7 +144,6 @@ export function generateOrderNumber() {
 }
 
 // ============ AUTO-INIT INTEGRATIONS ============
-// Runs once when common.js is imported by any page
 if (typeof window !== 'undefined') {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
