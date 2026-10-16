@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/landing.css">
 </head>
-<body class="pb-24">
+<body>
 
     <div id="toast-container"></div>
 
@@ -54,10 +54,8 @@
 
     <div id="main-content" class="max-w-3xl mx-auto hidden">
 
-        <!-- HERO -->
         <div id="hero-section"></div>
 
-        <!-- COUNTDOWN -->
         <div id="countdown-section" class="hidden">
             <div class="bg-gradient-to-r from-red-600 to-orange-500 text-white py-3 px-4">
                 <div class="max-w-md mx-auto flex items-center justify-between gap-3">
@@ -70,7 +68,7 @@
             </div>
         </div>
 
-        <!-- PRODUCTS SECTION -->
+        <!-- PRODUCTS -->
         <div class="p-4">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
@@ -86,10 +84,9 @@
             </div>
         </div>
 
-        <!-- ORDER FORM (INLINE - ALWAYS VISIBLE) -->
+        <!-- ORDER FORM -->
         <div id="order-form-section" class="p-4 pt-2">
             <div class="bg-white rounded-3xl premium-shadow-lg overflow-hidden">
-                <!-- Form header -->
                 <div class="navy-gradient p-5 text-center relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
                     <div class="absolute bottom-0 left-0 w-24 h-24 bg-gold/10 rounded-full -ml-12 -mb-12"></div>
@@ -97,15 +94,13 @@
                         <div class="w-14 h-14 gold-gradient rounded-2xl mx-auto mb-3 flex items-center justify-center shadow-lg">
                             <i class="fas fa-shopping-cart text-navy text-xl"></i>
                         </div>
-                        <h3 class="font-display text-2xl text-white font-bold mb-1">অর্ডার করুন</h3>
-                        <p class="text-gold text-xs">নিচের ফর্মটি পূরণ করুন</p>
+                        <h3 class="font-display text-2xl text-white font-bold mb-1">অর্ডার ফর্ম পূরণ করুন</h3>
+                        <p class="text-gold text-xs">নিচের তথ্য দিয়ে অর্ডার কনফার্ম করুন</p>
                     </div>
                 </div>
 
-                <!-- Form body -->
                 <div class="p-5 space-y-4">
 
-                    <!-- Product selector -->
                     <div id="form-product-section">
                         <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">
                             <i class="fas fa-box gold-text mr-1"></i> প্রোডাক্ট নির্বাচন করুন *
@@ -113,7 +108,6 @@
                         <div id="form-product-selector" class="space-y-2 max-h-56 overflow-y-auto p-2 border-2 border-gray-100 rounded-xl"></div>
                     </div>
 
-                    <!-- Name -->
                     <div>
                         <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
                             <i class="fas fa-user gold-text mr-1"></i> আপনার নাম *
@@ -122,7 +116,6 @@
                             class="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 outline-none text-sm font-medium focus:border-gold transition">
                     </div>
 
-                    <!-- Phone -->
                     <div>
                         <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
                             <i class="fas fa-phone gold-text mr-1"></i> মোবাইল নাম্বার *
@@ -131,37 +124,31 @@
                             class="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 outline-none text-sm font-medium focus:border-gold transition">
                     </div>
 
-                    <!-- Address -->
                     <div>
                         <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
                             <i class="fas fa-map-marker-alt gold-text mr-1"></i> সম্পূর্ণ ঠিকানা *
                         </label>
-                        <textarea id="order-address" rows="2" placeholder="বাসা নম্বর, রোড, এলাকা, থানা, জেলা" maxlength="300"
+                        <textarea id="order-address" rows="3" placeholder="বাসা নম্বর, রোড, এলাকা, থানা, জেলা" maxlength="300"
                             class="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 outline-none text-sm font-medium resize-none focus:border-gold transition"></textarea>
                     </div>
 
-                    <!-- Submit WhatsApp -->
-                    <button onclick="submitOrder()" id="submit-order-btn"
-                        class="w-full bg-[#25D366] active:bg-[#1DA851] text-white font-bold py-4 rounded-2xl text-base shadow-lg shadow-[#25D366]/30 flex items-center justify-center gap-3 transition-all active:scale-[0.98]">
-                        <i class="fab fa-whatsapp text-2xl"></i>
-                        <span>WhatsApp-এ অর্ডার কনফার্ম করুন</span>
-                    </button>
-
-                    <!-- Or call -->
-                    <div class="flex items-center gap-3">
-                        <div class="flex-1 h-px bg-gray-200"></div>
-                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">অথবা</span>
-                        <div class="flex-1 h-px bg-gray-200"></div>
+                    <div>
+                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
+                            <i class="fas fa-sticky-note gold-text mr-1"></i> নোট (Optional)
+                        </label>
+                        <input type="text" id="order-note" placeholder="বিশেষ কোনো নির্দেশনা..." maxlength="150"
+                            class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium focus:border-gold transition">
                     </div>
 
-                    <a id="call-order-btn" href="#" class="w-full bg-navy active:bg-navy-dark text-white font-bold py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2 transition">
-                        <i class="fas fa-phone-alt"></i>
-                        <span>ফোনে অর্ডার করুন</span>
-                    </a>
+                    <button onclick="submitOrder()" id="submit-order-btn"
+                        class="w-full navy-gradient active:opacity-90 text-white font-bold py-4 rounded-2xl text-base shadow-lg flex items-center justify-center gap-3 transition-all active:scale-[0.98]">
+                        <i class="fas fa-check-circle text-xl"></i>
+                        <span>অর্ডার কনফার্ম করুন</span>
+                    </button>
 
-                    <p class="text-[10px] text-gray-400 text-center leading-relaxed pt-1">
+                    <p class="text-[10px] text-gray-400 text-center leading-relaxed">
                         <i class="fas fa-shield-alt text-green-500 mr-1"></i>
-                        আপনার তথ্য নিরাপদ। অর্ডার কনফার্ম করতে আমরা কল দেব।
+                        আপনার তথ্য সম্পূর্ণ নিরাপদ। অর্ডার কনফার্ম করতে আমরা কল দেব।
                     </p>
                 </div>
             </div>
@@ -181,6 +168,19 @@
         <footer class="navy-gradient px-5 py-6 mt-6 text-center">
             <p class="text-white/50 text-[10px]">© 2025 Heartix. All rights reserved.</p>
         </footer>
+
+    </div>
+
+    <!-- SMALL FLOATING CALL/WHATSAPP ICONS (right side) -->
+    <div id="floating-contact" class="hidden fixed right-3 bottom-4 z-40 flex flex-col gap-2">
+
+        <a id="float-call" href="#" class="w-12 h-12 rounded-full bg-navy text-white shadow-xl flex items-center justify-center active:scale-95 transition-all" title="ফোনে কল করুন">
+            <i class="fas fa-phone-alt text-base"></i>
+        </a>
+
+        <a id="float-wa" href="#" target="_blank" rel="noopener" class="w-12 h-12 rounded-full bg-[#25D366] text-white shadow-xl flex items-center justify-center active:scale-95 transition-all" title="WhatsApp">
+            <i class="fab fa-whatsapp text-xl"></i>
+        </a>
 
     </div>
 
