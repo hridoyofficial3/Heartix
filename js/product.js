@@ -19,7 +19,7 @@ let productId = null;
 let quantity = 1;
 let currentImageIndex = 0;
 let allImages = [];
-let settings = { whatsapp: '', contactPhone: '' };
+let settings = { whatsapp: '', contactPhone: '', waEnabled: false };
 let allProducts = [];
 let allReviews = [];
 
@@ -232,10 +232,26 @@ function updateContactLinks() {
     const msg = encodeURIComponent(`Hi, I want to order: ${currentProduct.name} (৳${currentProduct.price})`);
     const waBtn = document.getElementById('whatsapp-btn');
     const callBtn = document.getElementById('call-btn');
-    if (settings.whatsapp) waBtn.href = `https://wa.me/${settings.whatsapp}?text=${msg}`;
-    else waBtn.href = '#';
-    if (settings.contactPhone) callBtn.href = `tel:${settings.contactPhone}`;
-    else callBtn.href = '#';
+
+    // WhatsApp — hide if disabled or no number
+    if (waBtn) {
+        if (settings.waEnabled && settings.whatsapp) {
+            waBtn.href = `https://wa.me/${settings.whatsapp}?text=${msg}`;
+            waBtn.style.display = '';
+        } else {
+            waBtn.style.display = 'none';
+        }
+    }
+
+    // Call
+    if (callBtn) {
+        if (settings.contactPhone) {
+            callBtn.href = `tel:${settings.contactPhone}`;
+            callBtn.style.display = '';
+        } else {
+            callBtn.style.display = 'none';
+        }
+    }
 }
 
 // ============ RENDER PRODUCT ============
@@ -397,7 +413,6 @@ function renderRelated() {
         container.innerHTML = '<p class="text-center text-gray-400 text-xs py-4 w-full">কোনো প্রোডাক্ট নেই</p>';
         return;
     }
-    // Prefer same category (uses multi-category if available)
     const getCats = (p) => Array.isArray(p.categories) && p.categories.length > 0 ? p.categories : (p.category ? [p.category] : []);
     const myCats = getCats(currentProduct);
     const sameCat = related.filter(p => getCats(p).some(c => myCats.includes(c)));
@@ -451,9 +466,20 @@ async function loadProduct() {
         currentProduct = { id: prodSnap.id, ...prodSnap.data() };
         addToRecentlyViewed(productId);
 
+        // ========== SETTINGS (WhatsApp from NEW integrations field) ==========
         if (setSnap && setSnap.exists()) {
             const s = setSnap.data();
-            settings.whatsapp = s.whatsapp || '';
+            const int = s.integrations || {};
+            const wa = int.whatsapp || {};
+
+            if (wa.enabled && wa.number) {
+                settings.whatsapp = String(wa.number).replace(/\D/g, '');
+                settings.waEnabled = true;
+            } else {
+                settings.whatsapp = '';
+                settings.waEnabled = false;
+            }
+
             settings.contactPhone = s.contactPhone || '';
         }
 
