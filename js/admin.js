@@ -1,5 +1,6 @@
 // ============================================================
 // HEARTIX ADMIN — JS (with Activity Log + Email + Low Stock)
+// v2 — WhatsApp field removed (auto-synced from integrations)
 // ============================================================
 import { db, auth } from './firebase.js';
 import { escapeHtml, formatPrice as fmt } from './common.js';
@@ -1793,7 +1794,7 @@ async function loadSettings() {
             document.getElementById('setting-address').value = s.contactAddress || '';
             document.getElementById('setting-phone').value = s.contactPhone || '';
             document.getElementById('setting-email').value = s.contactEmail || '';
-            document.getElementById('setting-whatsapp').value = s.whatsapp || '';
+            // WhatsApp field removed — now managed via Integrations
             document.getElementById('setting-bkash').value = s.bkashNumber || '';
             document.getElementById('setting-nagad').value = s.nagadNumber || '';
         }
@@ -1812,7 +1813,7 @@ window.saveSettings = async function() {
             contactAddress: document.getElementById('setting-address').value.trim(),
             contactPhone: document.getElementById('setting-phone').value.trim(),
             contactEmail: document.getElementById('setting-email').value.trim(),
-            whatsapp: document.getElementById('setting-whatsapp').value.trim(),
+            // whatsapp auto-synced from integrations.whatsapp (see admin-integrations.js)
             bkashNumber: document.getElementById('setting-bkash').value.trim(),
             nagadNumber: document.getElementById('setting-nagad').value.trim()
         };
@@ -1855,4 +1856,4 @@ document.getElementById('test-image-file')?.addEventListener('change', function(
     r.readAsDataURL(f);
 });
 
-console.log('✅ admin.js loaded (Call navy + WhatsApp green)');
+console.log('✅ admin.js v2 loaded (WhatsApp field removed — auto-synced from integrations)');
