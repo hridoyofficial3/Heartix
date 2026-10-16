@@ -1,5 +1,6 @@
 // ============================================================
 // HEARTIX WISHLIST PAGE — with auto-cleanup of invalid IDs
+// v2 — Price font fixed (Inter Bold, stacked, no inline old price)
 // ============================================================
 import { db } from './firebase.js';
 import {
@@ -105,7 +106,6 @@ function cleanupInvalidWishlist() {
     });
 
     if (invalidIds.length > 0) {
-        // Save cleaned list
         saveWishlist(validIds);
         console.log('Cleaned invalid wishlist IDs:', invalidIds);
     }
@@ -122,10 +122,7 @@ function renderWishlist() {
     if (isLoading) return;
     skeleton.classList.add('hidden');
 
-    // Clean up invalid IDs first
     const validIds = cleanupInvalidWishlist();
-
-    // Update badge based on cleaned list
     updateWishlistBadge();
 
     const wishlistProducts = validIds.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
@@ -165,9 +162,9 @@ function renderWishlist() {
                     ${hasDiscount ? `<span class="absolute top-1.5 left-1.5 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">-${discountPct}%</span>` : ''}
                 </div>
                 <h4 class="text-[12px] font-semibold text-navy leading-tight mb-1 line-clamp-2" style="min-height:32px;">${escapeHtml(p.name)}</h4>
-                <div class="flex items-center gap-1.5 mb-1 flex-wrap">
-                    <p class="font-display text-base font-bold text-navy">৳${formatPrice(p.price)}</p>
-                    ${hasDiscount ? `<p class="text-[9px] text-gray-400 line-through">৳${formatPrice(p.oldPrice)}</p>` : ''}
+                <div class="mb-1.5">
+                    <p class="text-[15px] font-bold text-navy leading-tight">৳${formatPrice(p.price)}</p>
+                    ${hasDiscount ? `<p class="text-[10px] text-gray-400 line-through mt-0.5">৳${formatPrice(p.oldPrice)}</p>` : ''}
                 </div>
             </a>
             ${actionHtml}
@@ -191,3 +188,5 @@ async function loadProducts() {
 // ============ INIT ============
 updateCartBadges();
 loadProducts();
+
+console.log('✅ wishlist.js v2 loaded (price font fixed)');
