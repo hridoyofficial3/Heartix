@@ -5,7 +5,7 @@ import { db } from './firebase.js';
 import { escapeHtml, formatPrice as fmt, showToast as toast } from './common.js';
 import { logActivity } from './staff-activity.js';
 import {
-    collection, getDocs, doc, getDoc, setDoc, deleteDoc, query, orderBy
+    collection, getDocs, doc, getDoc, setDoc, deleteDoc, query, where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const CLOUDINARY_CLOUD_NAME = "ju2w6e9r";
@@ -77,8 +77,6 @@ function renderLandingList() {
         return;
     }
 
-    const baseUrl = window.location.origin + window.location.pathname.replace(/\/admin\.html.*$/, '') + '/landing.html?slug=';
-
     let html = '';
     allLandings.forEach(l => {
         const isActive = l.active !== false;
@@ -101,7 +99,7 @@ function renderLandingList() {
                             <p class="font-bold text-navy text-sm truncate">${escapeHtml(l.title || 'Untitled')}</p>
                             ${badge}
                         </div>
-                        <p class="text-[11px] text-gray-500 truncate font-mono">/landing.html?slug=${escapeHtml(l.slug || '')}</p>
+                        <p class="text-[11px] text-gray-500 truncate font-mono">slug: ${escapeHtml(l.slug || '')}</p>
                         <div class="flex items-center gap-3 mt-1 text-[10px] text-gray-400">
                             <span><i class="fas fa-box mr-1"></i>${productCount} product</span>
                             ${hasCountdown ? `<span class="text-red-500"><i class="fas fa-clock mr-1"></i>Countdown</span>` : ''}
@@ -132,15 +130,16 @@ function renderLandingList() {
 
 // ============ COPY LINK ============
 window.copyLandingLink = function(slug) {
-    const url = window.location.origin + window.location.pathname.replace(/\/admin\.html.*$/, '') + '/landing.html?slug=' + slug;
+    const base = window.location.origin + window.location.pathname.replace(/\/admin\.html.*$/, '') + '/landing.html?slug=';
+    const url = base + slug;
     if (navigator.clipboard) {
         navigator.clipboard.writeText(url).then(() => {
             toast('Link copy হয়েছে ✅');
         }).catch(() => {
-            toast('Copy করা যায়নি', 'error');
+            prompt('Copy this link:', url);
         });
     } else {
-        toast('Link: ' + url, 'info');
+        prompt('Copy this link:', url);
     }
 };
 
@@ -157,27 +156,39 @@ window.openNewLanding = function() {
     pendingBanner = null;
     existingBanner = null;
 
-    document.getElementById('landing-modal-title').textContent = 'New Landing Page';
-    document.getElementById('landing-edit-id').value = '';
-    document.getElementById('land-title').value = '';
-    document.getElementById('land-slug').value = '';
-    document.getElementById('land-badge').value = '';
-    document.getElementById('land-subtitle').value = '';
-    document.getElementById('land-description').value = '';
-    document.getElementById('land-theme').value = 'navy';
-    document.getElementById('land-countdown').value = '';
-    document.getElementById('land-active').checked = true;
-    document.getElementById('land-banner-file').value = '';
-    document.getElementById('land-banner-name').textContent = '';
-    document.getElementById('land-banner-preview').classList.add('hidden');
-    document.getElementById('land-slug').disabled = false;
+    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+    const setChk = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
+    const hide = (id) => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); };
+
+    const titleEl = document.getElementById('landing-modal-title');
+    if (titleEl) titleEl.textContent = 'New Landing Page';
+
+    setText('landing-edit-id', '');
+    setText('land-title', '');
+    setText('land-slug', '');
+    setText('land-badge', '');
+    setText('land-subtitle', '');
+    setText('land-description', '');
+    setText('land-theme', 'navy');
+    setText('land-countdown', '');
+    setChk('land-active', true);
+
+    const slugEl = document.getElementById('land-slug');
+    if (slugEl) { slugEl.disabled = false; delete slugEl.dataset.touched; }
+
+    const fileEl = document.getElementById('land-banner-file');
+    if (fileEl) fileEl.value = '';
+    const nameEl = document.getElementById('land-banner-name');
+    if (nameEl) nameEl.textContent = '';
+    hide('land-banner-preview');
 
     renderSelectedProducts();
-    document.getElementById('landing-modal').classList.remove('hidden');
+    const modal = document.getElementById('landing-modal');
+    if (modal) modal.classList.remove('hidden');
 };
 
 // ============ EDIT ============
-window.editLanding = async function(id) {
+window.editLanding = function(id) {
     const l = allLandings.find(x => x.id === id);
     if (!l) return;
 
@@ -186,46 +197,60 @@ window.editLanding = async function(id) {
     pendingBanner = null;
     existingBanner = l.banner || null;
 
-    document.getElementById('landing-modal-title').textContent = 'Edit Landing Page';
-    document.getElementById('landing-edit-id').value = id;
-    document.getElementById('land-title').value = l.title || '';
-    document.getElementById('land-slug').value = l.slug || '';
-    document.getElementById('land-slug').disabled = true; // don't change slug on edit
-    document.getElementById('land-badge').value = l.badge || '';
-    document.getElementById('land-subtitle').value = l.subtitle || '';
-    document.getElementById('land-description').value = l.description || '';
-    document.getElementById('land-theme').value = l.theme || 'navy';
-    document.getElementById('land-active').checked = l.active !== false;
-    document.getElementById('land-banner-file').value = '';
-    document.getElementById('land-banner-name').textContent = '';
+    const setText = (elId, val) => { const el = document.getElementById(elId); if (el) el.value = val; };
+    const setChk = (elId, val) => { const el = document.getElementById(elId); if (el) el.checked = val; };
+    const show = (elId) => { const el = document.getElementById(elId); if (el) el.classList.remove('hidden'); };
+    const hide = (elId) => { const el = document.getElementById(elId); if (el) el.classList.add('hidden'); };
 
-    // Countdown date
+    const titleEl = document.getElementById('landing-modal-title');
+    if (titleEl) titleEl.textContent = 'Edit Landing Page';
+
+    setText('landing-edit-id', id);
+    setText('land-title', l.title || '');
+    setText('land-slug', l.slug || '');
+    const slugEl = document.getElementById('land-slug');
+    if (slugEl) slugEl.disabled = true;
+
+    setText('land-badge', l.badge || '');
+    setText('land-subtitle', l.subtitle || '');
+    setText('land-description', l.description || '');
+    setText('land-theme', l.theme || 'navy');
+    setChk('land-active', l.active !== false);
+
+    const fileEl = document.getElementById('land-banner-file');
+    if (fileEl) fileEl.value = '';
+    const nameEl = document.getElementById('land-banner-name');
+    if (nameEl) nameEl.textContent = '';
+
     if (l.countdownEnd) {
         const d = new Date(l.countdownEnd);
         if (!isNaN(d.getTime())) {
             const iso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-            document.getElementById('land-countdown').value = iso;
+            setText('land-countdown', iso);
         } else {
-            document.getElementById('land-countdown').value = '';
+            setText('land-countdown', '');
         }
     } else {
-        document.getElementById('land-countdown').value = '';
+        setText('land-countdown', '');
     }
 
     if (l.banner) {
-        document.getElementById('land-banner-preview-img').src = l.banner;
-        document.getElementById('land-banner-preview').classList.remove('hidden');
+        const imgEl = document.getElementById('land-banner-preview-img');
+        if (imgEl) imgEl.src = l.banner;
+        show('land-banner-preview');
     } else {
-        document.getElementById('land-banner-preview').classList.add('hidden');
+        hide('land-banner-preview');
     }
 
     renderSelectedProducts();
-    document.getElementById('landing-modal').classList.remove('hidden');
+    const modal = document.getElementById('landing-modal');
+    if (modal) modal.classList.remove('hidden');
 };
 
 // ============ CLOSE MODAL ============
 window.closeLandingModal = function() {
-    document.getElementById('landing-modal').classList.add('hidden');
+    const modal = document.getElementById('landing-modal');
+    if (modal) modal.classList.add('hidden');
     editingId = null;
     selectedProductIds = [];
     pendingBanner = null;
@@ -245,9 +270,12 @@ document.addEventListener('change', function(e) {
         const r = new FileReader();
         r.onload = evt => {
             pendingBanner = { file: f, dataUrl: evt.target.result };
-            document.getElementById('land-banner-preview-img').src = evt.target.result;
-            document.getElementById('land-banner-preview').classList.remove('hidden');
-            document.getElementById('land-banner-name').textContent = '✔ ' + f.name;
+            const imgEl = document.getElementById('land-banner-preview-img');
+            if (imgEl) imgEl.src = evt.target.result;
+            const prevEl = document.getElementById('land-banner-preview');
+            if (prevEl) prevEl.classList.remove('hidden');
+            const nameEl = document.getElementById('land-banner-name');
+            if (nameEl) nameEl.textContent = '✔ ' + f.name;
         };
         r.readAsDataURL(f);
     }
@@ -256,9 +284,12 @@ document.addEventListener('change', function(e) {
 window.clearLandingBanner = function() {
     pendingBanner = null;
     existingBanner = null;
-    document.getElementById('land-banner-file').value = '';
-    document.getElementById('land-banner-name').textContent = '';
-    document.getElementById('land-banner-preview').classList.add('hidden');
+    const f = document.getElementById('land-banner-file');
+    if (f) f.value = '';
+    const n = document.getElementById('land-banner-name');
+    if (n) n.textContent = '';
+    const p = document.getElementById('land-banner-preview');
+    if (p) p.classList.add('hidden');
 };
 
 // ============ PRODUCTS ============
@@ -301,11 +332,13 @@ window.openProductPickerLanding = function() {
     const search = document.getElementById('land-picker-search');
     if (search) search.value = '';
     renderPickerList();
-    document.getElementById('land-picker-modal').classList.remove('hidden');
+    const modal = document.getElementById('land-picker-modal');
+    if (modal) modal.classList.remove('hidden');
 };
 
 window.closeProductPickerLanding = function() {
-    document.getElementById('land-picker-modal').classList.add('hidden');
+    const modal = document.getElementById('land-picker-modal');
+    if (modal) modal.classList.add('hidden');
 };
 
 window.renderPickerList = function() {
@@ -390,7 +423,6 @@ window.saveLanding = async function() {
     if (!/^[a-z0-9-]+$/.test(slugRaw)) return toast('Slug শুধু ইংরেজি ছোট হাতের অক্ষর, সংখ্যা ও ড্যাশ', 'error');
     if (selectedProductIds.length === 0) return toast('কমপক্ষে একটা product select করুন', 'error');
 
-    // Check duplicate slug (only on new)
     if (!editingId && allLandings.some(l => l.slug === slugRaw)) {
         return toast('এই slug আগে থেকেই আছে', 'error');
     }
@@ -425,19 +457,23 @@ window.saveLanding = async function() {
         if (editingId) {
             await setDoc(doc(db, 'landing_pages', editingId), data, { merge: true });
             toast('Landing page update হয়েছে ✅');
-            logActivity('settings_update', {
-                description: `Landing page update: ${title} (/lp/${slugRaw})`,
-                meta: { id: editingId, slug: slugRaw }
-            });
+            try {
+                logActivity('settings_update', {
+                    description: `Landing page update: ${title}`,
+                    meta: { id: editingId, slug: slugRaw }
+                });
+            } catch (e) {}
         } else {
             data.createdAt = new Date().toISOString();
             const newRef = doc(collection(db, 'landing_pages'));
             await setDoc(newRef, data);
             toast('Landing page তৈরি হয়েছে ✅');
-            logActivity('settings_update', {
-                description: `নতুন Landing page: ${title} (/lp/${slugRaw})`,
-                meta: { id: newRef.id, slug: slugRaw }
-            });
+            try {
+                logActivity('settings_update', {
+                    description: `নতুন Landing page: ${title}`,
+                    meta: { id: newRef.id, slug: slugRaw }
+                });
+            } catch (e) {}
         }
 
         closeLandingModal();
@@ -460,10 +496,12 @@ window.deleteLanding = async function(id) {
     try {
         await deleteDoc(doc(db, 'landing_pages', id));
         toast('Landing page delete হয়েছে', 'warn');
-        logActivity('settings_update', {
-            description: `Landing page delete: ${l.title} (${l.slug})`,
-            meta: { id, slug: l.slug }
-        });
+        try {
+            logActivity('settings_update', {
+                description: `Landing page delete: ${l.title}`,
+                meta: { id, slug: l.slug }
+            });
+        } catch (e) {}
         await loadAll();
     } catch (e) {
         toast('Delete করা যায়নি', 'error');
