@@ -1,9 +1,9 @@
 // ============================================================
-// HEARTIX PWA — Service Worker v2
+// HEARTIX PWA — Service Worker v3
 // ============================================================
 
-const CACHE_NAME = 'heartix-v2';
-const STATIC_CACHE = 'heartix-static-v2';
+const CACHE_NAME = 'heartix-v3';
+const STATIC_CACHE = 'heartix-static-v3';
 
 const STATIC_ASSETS = [
     '/css/common.css',
@@ -98,4 +98,4 @@ self.addEventListener('message', (event) => {
     }
 });
 
-console.log('✅ Heartix Service Worker v2 loaded');
+console.log('✅ Heartix Service Worker v3 loaded');
