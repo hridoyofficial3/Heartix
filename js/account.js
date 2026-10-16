@@ -1,5 +1,6 @@
 // ============================================================
 // HEARTIX ACCOUNT — Auth + Profile (view/edit) + Address
+// v2 — Phone login via phone_lookup collection
 // ============================================================
 import { db, auth } from './firebase.js';
 import {
@@ -9,7 +10,7 @@ import {
 import { DISTRICTS } from './districts.js';
 
 import {
-    collection, getDocs, doc, getDoc, setDoc, query, where, limit
+    collection, getDocs, doc, getDoc, setDoc, deleteDoc, query, where, limit
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
     createUserWithEmailAndPassword,
@@ -97,6 +98,50 @@ function setFieldError(id, hasError) {
     }
 }
 
+// ============ PHONE LOOKUP HELPERS (new) ============
+// phone_lookup/{phone} = { uid, email, updatedAt }
+// Firestore rule: public read, owner write — see guide
+
+async function findEmailByPhone(phone) {
+    try {
+        const snap = await getDoc(doc(db, "phone_lookup", phone));
+        if (snap.exists()) {
+            const d = snap.data();
+            return d.email || null;
+        }
+    } catch (e) {
+        console.warn('phone_lookup read failed:', e);
+    }
+    return null;
+}
+
+async function registerPhoneLookup(phone, uid, email) {
+    try {
+        await setDoc(doc(db, "phone_lookup", phone), {
+            uid,
+            email,
+            updatedAt: new Date().toISOString()
+        });
+        return true;
+    } catch (e) {
+        console.warn('phone_lookup write failed:', e);
+        return false;
+    }
+}
+
+async function removePhoneLookup(phone, uid) {
+    try {
+        const snap = await getDoc(doc(db, "phone_lookup", phone));
+        if (snap.exists() && snap.data().uid === uid) {
+            await deleteDoc(doc(db, "phone_lookup", phone));
+        }
+        return true;
+    } catch (e) {
+        console.warn('phone_lookup delete failed:', e);
+        return false;
+    }
+}
+
 // Populate district dropdown
 function populateDistrictDropdown() {
     const sel = document.getElementById('profile-district');
@@ -155,20 +200,15 @@ window.loginUser = async function() {
     try {
         let email = identifier;
 
+        // Phone → email lookup via phone_lookup collection
         if (validatePhone(identifier)) {
-            const q = query(collection(db, "customers"), where("phone", "==", identifier), limit(1));
-            const snap = await getDocs(q);
-            if (snap.empty) {
+            const foundEmail = await findEmailByPhone(identifier);
+            if (!foundEmail) {
                 btn.disabled = false;
                 btn.innerHTML = 'Login';
                 return showToast('এই ফোন নাম্বারে কোনো account নেই', 'error');
             }
-            email = snap.docs[0].data().email;
-            if (!email) {
-                btn.disabled = false;
-                btn.innerHTML = 'Login';
-                return showToast('এই account-এ email নেই, email দিয়ে login করুন', 'error');
-            }
+            email = foundEmail;
         }
 
         await signInWithEmailAndPassword(auth, email, password);
@@ -245,11 +285,23 @@ window.registerUser = async function() {
 
     const btn = document.getElementById('register-btn');
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creating...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Checking...';
 
     try {
+        // Pre-check: phone already used?
+        const existingEmail = await findEmailByPhone(phone);
+        if (existingEmail) {
+            btn.disabled = false;
+            btn.innerHTML = 'Create Account';
+            return showToast('এই ফোন নাম্বার দিয়ে আগেই account আছে', 'error');
+        }
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creating...';
+
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         try { await updateProfile(cred.user, { displayName: name }); } catch (e) {}
+
+        // Save customer doc
         try {
             await setDoc(doc(db, "customers", cred.user.uid), {
                 uid: cred.user.uid,
@@ -260,6 +312,9 @@ window.registerUser = async function() {
                 updatedAt: new Date().toISOString()
             }, { merge: true });
         } catch (e) { console.warn('Customer save failed:', e); }
+
+        // Save phone_lookup (for phone-based login)
+        await registerPhoneLookup(phone, cred.user.uid, email);
 
         showToast('Account তৈরি হয়েছে ✅', 'success');
         ['reg-name','reg-phone','reg-email','reg-password','reg-confirm'].forEach(id => {
@@ -287,10 +342,9 @@ window.forgotPassword = async function() {
     let email = identifier;
     try {
         if (validatePhone(identifier)) {
-            const q = query(collection(db, "customers"), where("phone", "==", identifier), limit(1));
-            const snap = await getDocs(q);
-            if (snap.empty) return showToast('এই ফোনে কোনো account নেই', 'error');
-            email = snap.docs[0].data().email;
+            const foundEmail = await findEmailByPhone(identifier);
+            if (!foundEmail) return showToast('এই ফোনে কোনো account নেই', 'error');
+            email = foundEmail;
         }
         await sendPasswordResetEmail(auth, email);
         showToast('Reset link ' + email + '-এ পাঠানো হয়েছে ✅', 'success');
@@ -313,7 +367,6 @@ async function loadProfile() {
     if (!currentUser) return;
     const fallbackName = currentUser.displayName || (currentUser.email || '').split('@')[0] || 'User';
 
-    // Set header
     document.getElementById('user-display-name').textContent = fallbackName;
     document.getElementById('user-display-email').textContent = currentUser.email || '-';
     document.getElementById('user-avatar-letter').textContent = (fallbackName[0] || 'U').toUpperCase();
@@ -382,7 +435,6 @@ window.openAddressEdit = function() {
     const edit = document.getElementById('account-info-edit');
     if (!view || !edit) return;
 
-    // Populate form
     document.getElementById('profile-name').value = currentProfile.name || '';
     document.getElementById('profile-phone').value = currentProfile.phone || '';
     document.getElementById('profile-address').value = currentProfile.address || '';
@@ -413,10 +465,19 @@ window.saveProfile = async function() {
     const district = document.getElementById('profile-district').value || '';
     const thana = (document.getElementById('profile-thana').value || '').trim();
 
-    // Validation
     if (!name || name.length < 2) return showToast('সঠিক নাম দিন', 'error');
     if (!validatePhone(phone)) return showToast('সঠিক ফোন নাম্বার দিন (01XXXXXXXXX)', 'error');
     if (!address || address.length < 5) return showToast('সম্পূর্ণ ঠিকানা দিন', 'error');
+
+    const phoneChanged = phone !== (currentProfile.phone || '');
+
+    // If phone changed, verify it's not taken by someone else
+    if (phoneChanged) {
+        const existingEmail = await findEmailByPhone(phone);
+        if (existingEmail && existingEmail !== currentUser.email) {
+            return showToast('এই ফোন নাম্বার অন্য account ব্যবহার করছে', 'error');
+        }
+    }
 
     const btn = document.getElementById('save-profile-btn');
     btn.disabled = true;
@@ -430,14 +491,20 @@ window.saveProfile = async function() {
             updatedAt: new Date().toISOString()
         }, { merge: true });
 
+        // Handle phone_lookup migration if phone changed
+        if (phoneChanged) {
+            if (currentProfile.phone) {
+                await removePhoneLookup(currentProfile.phone, currentUser.uid);
+            }
+            await registerPhoneLookup(phone, currentUser.uid, currentUser.email);
+        }
+
         try { await updateProfile(currentUser, { displayName: name }); } catch (e) {}
 
-        // Update local state + header
         currentProfile = { ...currentProfile, name, phone, address, district, thana };
         document.getElementById('user-display-name').textContent = name;
         document.getElementById('user-avatar-letter').textContent = (name[0] || 'U').toUpperCase();
 
-        // Back to view mode
         renderAccountInfoView();
         window.cancelAddressEdit();
 
@@ -458,10 +525,24 @@ window.loadMyOrders = async function() {
     list.innerHTML = '<p class="text-xs text-gray-400 text-center py-4"><i class="fas fa-spinner fa-spin mr-1"></i> Loading...</p>';
 
     try {
-        const allSnap = await getDocs(collection(db, "orders"));
+        // Optimized: query by customer.email instead of loading all
+        const q = query(
+            collection(db, "orders"),
+            where("customer.email", "==", currentUser.email)
+        );
+        let snap;
+        try {
+            snap = await getDocs(q);
+        } catch (e) {
+            // Fallback for missing index — load all and filter client-side
+            console.warn('Indexed query failed, using fallback:', e.message);
+            snap = await getDocs(collection(db, "orders"));
+        }
+
         let orders = [];
-        allSnap.forEach(d => {
+        snap.forEach(d => {
             const data = d.data();
+            // Filter client-side to be safe (covers fallback case)
             if (data.customer && data.customer.email === currentUser.email) {
                 orders.push({ id: d.id, ...data });
             }
@@ -556,3 +637,5 @@ updateCartBadges();
 updateWishlistBadges();
 prefillRemembered();
 populateDistrictDropdown();
+
+console.log('✅ account.js v2 loaded (phone_lookup enabled)');
