@@ -114,7 +114,6 @@
                         <span class="text-[11px] text-gray-400">(<span id="product-review-count">0</span>)</span>
                     </div>
 
-                    <!-- ⚡ PRICE — Inter Bold, stacked (no Playfair, no Save badge) -->
                     <div class="mb-3">
                         <p id="product-price" class="text-2xl font-bold text-navy leading-tight"></p>
                         <p id="product-old-price" class="text-sm text-gray-400 line-through mt-1"></p>
@@ -136,7 +135,6 @@
                         </div>
                     </div>
 
-                    <!-- MAIN CTA ROW -->
                     <div class="grid grid-cols-2 gap-2 mb-2">
                         <button id="main-cart-btn" onclick="toggleCart()" class="action-btn gold-gradient text-navy font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs">
                             <i class="fas fa-shopping-bag text-[11px]"></i> ADD TO CART
@@ -146,7 +144,6 @@
                         </button>
                     </div>
 
-                    <!-- COMPACT ACTIONS ROW -->
                     <div class="grid grid-cols-3 gap-2">
                         <a id="whatsapp-btn" href="#" target="_blank" rel="noopener" class="compact-action-btn bg-[#25D366] active:bg-[#1DA851] text-white shadow-md shadow-[#25D366]/25" onclick="handleWhatsApp(event)">
                             <i class="fab fa-whatsapp"></i>
@@ -209,13 +206,13 @@
                     </div>
                 </div>
 
-                <div id="reviews-list" class="space-y-2 mb-3"></div>
+                <div id="reviews-list" class="space-y-3 mb-3"></div>
 
                 <details class="mt-2">
                     <summary class="text-xs font-bold navy-text cursor-pointer py-1.5 flex items-center gap-1">
                         <i class="fas fa-plus-circle gold-text"></i> Write a Review
                     </summary>
-                    <div class="space-y-2 mt-2">
+                    <div class="space-y-2 mt-3">
                         <input type="text" id="review-name" placeholder="Your Name *" maxlength="40" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#D4A84B] text-xs">
                         <select id="review-rating" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#D4A84B] text-xs bg-white">
                             <option value="">Select Rating</option>
@@ -226,6 +223,26 @@
                             <option value="1">★☆☆☆☆ Very Bad</option>
                         </select>
                         <textarea id="review-text" rows="2" maxlength="300" placeholder="Write your review..." class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#D4A84B] text-xs resize-none"></textarea>
+
+                        <!-- ⚡ NEW: Photo Upload -->
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Photo (Optional)</label>
+                            <div id="review-image-preview" class="hidden mb-2 relative inline-block">
+                                <img id="review-image-preview-img" class="w-20 h-20 object-cover rounded-lg border-2 border-gold">
+                                <button type="button" onclick="clearReviewImage()" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] shadow-lg">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="border-2 border-dashed border-gray-200 rounded-lg p-3 text-center">
+                                <label for="review-image-file" class="cursor-pointer block">
+                                    <i class="fas fa-camera text-xl text-gray-300 mb-1"></i>
+                                    <p class="text-[10px] text-gray-500 font-semibold">Add Photo</p>
+                                </label>
+                                <input type="file" id="review-image-file" accept="image/*" class="hidden">
+                                <p id="review-file-name" class="text-[10px] text-green-600 mt-1 font-semibold"></p>
+                            </div>
+                        </div>
+
                         <button onclick="submitReview()" id="review-btn" class="navy-gradient text-white w-full py-2 rounded-lg font-semibold text-xs">
                             <i class="fas fa-paper-plane mr-1"></i> Submit
                         </button>
