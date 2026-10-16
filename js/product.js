@@ -1,5 +1,6 @@
 // ============================================================
 // HEARTIX PRODUCT DETAIL PAGE
+// v2 — Price font fixed (Inter Bold, stacked, no Save badge)
 // ============================================================
 import { db } from './firebase.js';
 import {
@@ -233,7 +234,6 @@ function updateContactLinks() {
     const waBtn = document.getElementById('whatsapp-btn');
     const callBtn = document.getElementById('call-btn');
 
-    // WhatsApp — hide if disabled or no number
     if (waBtn) {
         if (settings.waEnabled && settings.whatsapp) {
             waBtn.href = `https://wa.me/${settings.whatsapp}?text=${msg}`;
@@ -243,7 +243,6 @@ function updateContactLinks() {
         }
     }
 
-    // Call
     if (callBtn) {
         if (settings.contactPhone) {
             callBtn.href = `tel:${settings.contactPhone}`;
@@ -295,15 +294,11 @@ function renderProduct() {
     document.getElementById('product-stars').innerHTML = renderStarsHtml(rating);
     document.getElementById('product-review-count').textContent = allReviews.length;
 
+    // ⚡ PRICE — Inter Bold, stacked (no Playfair, no Save badge)
     document.getElementById('product-price').textContent = '৳' + formatPrice(p.price);
-    if (hasDiscount) {
-        document.getElementById('product-old-price').textContent = '৳' + formatPrice(p.oldPrice);
-        document.getElementById('product-save-badge').textContent = 'Save ৳' + formatPrice(p.oldPrice - p.price);
-        document.getElementById('product-save-badge').classList.remove('hidden');
-    } else {
-        document.getElementById('product-old-price').textContent = '';
-        document.getElementById('product-save-badge').textContent = '';
-        document.getElementById('product-save-badge').classList.add('hidden');
+    const oldPriceEl = document.getElementById('product-old-price');
+    if (oldPriceEl) {
+        oldPriceEl.textContent = hasDiscount ? '৳' + formatPrice(p.oldPrice) : '';
     }
 
     if (p.stock !== undefined) {
@@ -405,7 +400,7 @@ window.submitReview = async function() {
     }
 }
 
-// ============ RELATED ============
+// ============ RELATED (⚡ price font fixed) ============
 function renderRelated() {
     const container = document.getElementById('related-products');
     let related = allProducts.filter(p => p.id !== productId);
@@ -425,9 +420,9 @@ function renderRelated() {
         html += `<a href="product.html?id=${p.id}" class="flex-shrink-0 bg-gray-50 rounded-xl p-2 action-btn" style="width: 130px;">
             <img src="${p.image || 'https://via.placeholder.com/120x120?text=?'}" class="prod-img w-full h-24 rounded-lg mb-1.5" loading="lazy" onerror="this.src='https://via.placeholder.com/120x120?text=?'">
             <h4 class="text-[11px] font-semibold navy-text leading-tight mb-1 line-clamp-2" style="min-height: 28px;">${escapeHtml(p.name)}</h4>
-            <div class="flex items-center gap-1 flex-wrap">
-                <p class="text-xs font-bold gold-text">৳${formatPrice(p.price)}</p>
-                ${hasDiscount ? `<p class="text-[9px] text-gray-400 line-through">৳${formatPrice(p.oldPrice)}</p>` : ''}
+            <div class="mt-1">
+                <p class="text-[13px] font-bold text-navy leading-tight">৳${formatPrice(p.price)}</p>
+                ${hasDiscount ? `<p class="text-[10px] text-gray-400 line-through mt-0.5">৳${formatPrice(p.oldPrice)}</p>` : ''}
             </div>
         </a>`;
     });
@@ -466,7 +461,6 @@ async function loadProduct() {
         currentProduct = { id: prodSnap.id, ...prodSnap.data() };
         addToRecentlyViewed(productId);
 
-        // ========== SETTINGS (WhatsApp from NEW integrations field) ==========
         if (setSnap && setSnap.exists()) {
             const s = setSnap.data();
             const int = s.integrations || {};
@@ -508,3 +502,5 @@ async function loadProduct() {
 }
 
 loadProduct();
+
+console.log('✅ product.js v2 loaded (price font fixed)');
