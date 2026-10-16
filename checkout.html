@@ -166,7 +166,14 @@
                 <button id="place-order-btn" onclick="placeOrder()" class="w-full navy-gradient text-white py-4 rounded-xl mt-5 font-bold text-sm">
                     <i class="fas fa-check-circle mr-1"></i> PLACE ORDER
                 </button>
-                <p class="text-[10px] text-gray-400 text-center mt-2">
+
+                <!-- ============ ORDER VIA WHATSAPP (NEW) ============ -->
+                <button id="order-wa-btn" onclick="orderViaWhatsApp()" class="hidden w-full bg-[#25D366] active:bg-[#1DA851] text-white py-3.5 rounded-xl mt-2 font-bold text-sm shadow-lg shadow-[#25D366]/25 flex items-center justify-center gap-2">
+                    <i class="fab fa-whatsapp text-base"></i>
+                    <span>Order via WhatsApp</span>
+                </button>
+
+                <p class="text-[10px] text-gray-400 text-center mt-3">
                     <i class="fas fa-lock mr-1"></i> নিরাপদ ও এনক্রিপ্টেড
                 </p>
             </div>
@@ -219,7 +226,7 @@
     </div>
 
     <!-- ============================================
-         WARNING MODAL (<10 min) — full screen, no bypass
+         WARNING MODAL (<10 min)
     ============================================ -->
     <div id="warning-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[90] flex items-center justify-center p-4" style="padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));">
         <div class="bg-white rounded-3xl w-full max-w-sm animate-slide-up flex flex-col" style="max-height: calc(100vh - 2rem);">
@@ -264,7 +271,7 @@
     </div>
 
     <!-- ============================================
-         HISTORY MODAL (all previous orders)
+         HISTORY MODAL
     ============================================ -->
     <div id="history-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[95] flex items-end md:items-center justify-center p-0 md:p-4">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-lg animate-slide-up flex flex-col" style="max-height: 92vh;">
@@ -284,5 +291,6 @@
     </div>
 
     <script type="module" src="js/checkout.js"></script>
+    <script type="module" src="js/checkout-whatsapp.js"></script>
 </body>
 </html>
