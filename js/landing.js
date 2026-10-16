@@ -1,6 +1,6 @@
 // ============================================================
-// HEARTIX LANDING PAGE — Customer View v4
-// Order → Firestore (same as checkout)
+// HEARTIX LANDING PAGE — Customer View v5
+// Professional WhatsApp message
 // ============================================================
 import { db, auth } from './firebase.js';
 import {
@@ -220,7 +220,7 @@ window.toggleWishlistLanding = function(id, e) {
     renderProducts();
 };
 
-// ============ SAVE FOR NEXT TIME ============
+// ============ SAVE/LOAD LAST ORDER ============
 function saveLastOrderInfo(name, phone, address) {
     try {
         localStorage.setItem('heartix_last_order', JSON.stringify({ name, phone, address }));
@@ -238,7 +238,7 @@ function loadLastOrderInfo() {
     } catch (e) {}
 }
 
-// ============ SUBMIT ORDER (to Firestore) ============
+// ============ SUBMIT ORDER ============
 window.submitOrder = async function() {
     if (isSubmitting) return;
 
@@ -281,14 +281,10 @@ window.submitOrder = async function() {
         const orderRef = doc(collection(db, 'orders'));
         const orderNumber = generateOrderNumber();
 
-        let finalTotal = Number(p.price) || 0;
-        let finalSubtotal = finalTotal;
-        let finalDelivery = 0;
-
-        // Delivery charge from settings
+        let finalSubtotal = Number(p.price) || 0;
         const isFree = settings.freeDeliveryAbove > 0 && finalSubtotal >= settings.freeDeliveryAbove;
-        finalDelivery = isFree ? 0 : (Number(settings.deliveryCharge) || 0);
-        finalTotal = finalSubtotal + finalDelivery;
+        const finalDelivery = isFree ? 0 : (Number(settings.deliveryCharge) || 0);
+        const finalTotal = finalSubtotal + finalDelivery;
 
         const items = [{
             id: p.id,
@@ -304,12 +300,8 @@ window.submitOrder = async function() {
         const orderData = {
             orderNumber,
             customer: {
-                name,
-                phone,
-                email,
-                address,
-                district: '',
-                thana: '',
+                name, phone, email, address,
+                district: '', thana: '',
                 ipAddress: '',
                 isRepeat: false,
                 orderCount: 1,
@@ -329,14 +321,15 @@ window.submitOrder = async function() {
             status: 'pending',
             stockDeducted: false,
             hasPreorder,
-            adminNote: note ? `[Landing: ${landingData.title || ''}] ${note}` : `[Landing: ${landingData.title || ''}]`,
+            adminNote: note
+                ? `[Landing: ${landingData.title || ''}] ${note}`
+                : `[Landing: ${landingData.title || ''}]`,
             source: 'landing',
             landingSlug: slug,
             landingTitle: landingData.title || '',
             createdAt: serverTimestamp()
         };
 
-        // Transaction to update stock (if not pre-order)
         await runTransaction(db, async (transaction) => {
             if (!hasPreorder) {
                 const pRef = doc(db, 'products', p.id);
@@ -353,13 +346,8 @@ window.submitOrder = async function() {
             transaction.set(orderRef, orderData);
         });
 
-        // Save for next time
         saveLastOrderInfo(name, phone, address);
-
-        // Success
         showToast('✅ আপনার অর্ডার কনফার্ম হয়েছে!', 'success');
-
-        // Show success screen
         showSuccessScreen(orderNumber, finalTotal);
 
     } catch (e) {
@@ -373,12 +361,8 @@ window.submitOrder = async function() {
 
 function showSuccessScreen(orderNumber, total) {
     const formSection = document.getElementById('order-form-section');
-    const productsSection = document.querySelector('.p-4:has(#products-grid)');
-    const heroSection = document.getElementById('hero-section');
-    const countdownSection = document.getElementById('countdown-section');
-    const descSection = document.getElementById('description-section');
+    if (!formSection) return;
 
-    // Hide products, form
     formSection.innerHTML = `
         <div class="bg-white rounded-3xl premium-shadow-lg overflow-hidden">
             <div class="navy-gradient p-8 text-center relative overflow-hidden">
@@ -424,7 +408,6 @@ function showSuccessScreen(orderNumber, total) {
         </div>
     `;
 
-    // Scroll to success
     setTimeout(() => {
         window.scrollTo({ top: formSection.offsetTop - 70, behavior: 'smooth' });
     }, 200);
@@ -458,21 +441,47 @@ function loadLoggedInUser() {
 
 function prefillFromProfile() {
     if (!loggedInProfile) return;
-    let filled = false;
     if (loggedInProfile.name && !document.getElementById('order-name').value) {
         document.getElementById('order-name').value = loggedInProfile.name;
-        filled = true;
     }
     if (loggedInProfile.phone && !document.getElementById('order-phone').value) {
         document.getElementById('order-phone').value = loggedInProfile.phone;
-        filled = true;
     }
     if (loggedInProfile.address && !document.getElementById('order-address').value) {
         const addr = [loggedInProfile.address, loggedInProfile.thana, loggedInProfile.district].filter(Boolean).join(', ');
         document.getElementById('order-address').value = addr;
-        filled = true;
     }
-    return filled;
+}
+
+// ============ FLOATING CONTACT (Professional Message) ============
+function setupFloatingContact() {
+    const wrap = document.getElementById('floating-contact');
+    const callBtn = document.getElementById('float-call');
+    const waBtn = document.getElementById('float-wa');
+    if (!wrap) return;
+
+    let show = false;
+
+    const waNum = getWhatsAppNumber();
+    if (waBtn && waNum) {
+        // Professional WhatsApp message
+        const offerTitle = landingData.title || 'Special Offer';
+        const msg = `🛍️ আসসালামু আলাইকুম,\n\nআমি একটি অর্ডার করতে চাই।\n\n📌 Page: ${offerTitle}\n🔗 Link: ${window.location.href}\n\nঅনুগ্রহ করে আমাকে সাহায্য করুন।`;
+        waBtn.href = `https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`;
+        show = true;
+    } else if (waBtn) {
+        waBtn.style.display = 'none';
+    }
+
+    const cp = getContactPhone();
+    if (callBtn && cp) {
+        callBtn.href = `tel:${cp}`;
+        show = true;
+    } else if (callBtn) {
+        callBtn.style.display = 'none';
+    }
+
+    if (show) wrap.classList.remove('hidden');
 }
 
 // ============ LOAD ============
@@ -507,7 +516,7 @@ async function loadLanding() {
 
         landingData = snap;
 
-        const [prodSnap, setSnap, _user] = await Promise.all([
+        const [prodSnap, setSnap] = await Promise.all([
             getDocs(collection(db, 'products')).catch(() => null),
             getDoc(doc(db, 'settings', 'main')).catch(() => null),
             loadLoggedInUser()
@@ -549,10 +558,7 @@ async function loadLanding() {
             document.getElementById('description-text').textContent = landingData.description;
         }
 
-        // Floating contact buttons
         setupFloatingContact();
-
-        // Prefill from profile first, then last order
         prefillFromProfile();
         loadLastOrderInfo();
 
@@ -566,34 +572,6 @@ async function loadLanding() {
     }
 }
 
-function setupFloatingContact() {
-    const wrap = document.getElementById('floating-contact');
-    const callBtn = document.getElementById('float-call');
-    const waBtn = document.getElementById('float-wa');
-    if (!wrap) return;
-
-    let show = false;
-
-    const waNum = getWhatsAppNumber();
-    if (waBtn && waNum) {
-        const msg = encodeURIComponent(`আমি "${landingData.title || 'Offer'}" page থেকে আসছি। সাহায্য দরকার।`);
-        waBtn.href = `https://wa.me/${waNum}?text=${msg}`;
-        show = true;
-    } else if (waBtn) {
-        waBtn.style.display = 'none';
-    }
-
-    const cp = getContactPhone();
-    if (callBtn && cp) {
-        callBtn.href = `tel:${cp}`;
-        show = true;
-    } else if (callBtn) {
-        callBtn.style.display = 'none';
-    }
-
-    if (show) wrap.classList.remove('hidden');
-}
-
 loadLanding();
 
-console.log('✅ landing.js v4 loaded (Firestore orders)');
+console.log('✅ landing.js v5 loaded (professional WhatsApp message)');
