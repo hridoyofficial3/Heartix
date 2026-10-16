@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Heartix — Premium Smart Appliances in Bangladesh">
     <meta name="theme-color" content="#0A1628">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="logo.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Heartix">
+    <meta name="mobile-web-app-capable" content="yes">
+
     <title>Heartix — Premium Smart Appliances</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,7 +25,6 @@
         }}}
     </script>
 
-    <!-- Immediate cart count (no flash) -->
     <script>
         (function() {
             try {
@@ -36,7 +44,6 @@
 
     <div id="overlay" onclick="closeSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden"></div>
 
-    <!-- SIDEBAR -->
     <div id="sidebar" class="fixed top-0 left-0 h-full w-[85vw] max-w-[340px] bg-white z-50 shadow-2xl overflow-y-auto hide-scrollbar" style="transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);">
 
         <div class="navy-gradient px-5 py-5 text-white relative overflow-hidden">
@@ -175,7 +182,6 @@
         </div>
     </div>
 
-    <!-- HEADER -->
     <header class="glass sticky top-0 z-30 px-3 py-0 flex justify-between items-center border-b border-gray-100">
         <div class="flex items-center gap-1 flex-1 min-w-0">
             <button onclick="openSidebar()" class="w-8 h-8 flex items-center justify-center flex-shrink-0 -ml-1">
@@ -195,7 +201,6 @@
         </div>
     </header>
 
-    <!-- SEARCH BAR -->
     <div id="search-bar-wrapper" class="px-5">
         <div class="relative pt-3 pb-1">
             <input type="text" id="search-input" oninput="searchProducts()" onfocus="showSuggestions()" placeholder="Search products..." class="w-full bg-white rounded-2xl py-3.5 pl-12 pr-12 outline-none premium-shadow text-sm" autocomplete="off">
@@ -207,7 +212,6 @@
         <div id="search-suggestions"></div>
     </div>
 
-    <!-- HERO SLIDER -->
     <div class="px-5 pt-3">
         <div class="slider-viewport">
             <div id="slider-skeleton" class="absolute inset-0 z-20">
@@ -218,7 +222,6 @@
         <div id="slider-dots" class="flex justify-center gap-1.5 mt-3"></div>
     </div>
 
-    <!-- CATEGORIES -->
     <div class="mt-7">
         <h3 class="section-title px-5">Featured Categories</h3>
         <div id="category-scroll-container" class="flex overflow-x-auto hide-scrollbar gap-1.5 pb-2 px-5">
@@ -241,13 +244,11 @@
         </div>
     </div>
 
-    <!-- RECENTLY VIEWED -->
     <div id="recently-viewed-section" class="mt-8 px-5 hidden">
         <h3 class="section-title">Recently Viewed</h3>
         <div id="recently-viewed-list" class="flex gap-3 overflow-x-auto hide-scrollbar pb-2" style="scroll-snap-type: x mandatory;"></div>
     </div>
 
-    <!-- PRODUCTS -->
     <div class="mt-8 px-5">
         <h3 id="section-title" class="section-title">Top Selling Products</h3>
         <div id="product-list" class="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -289,7 +290,6 @@
 
     <div id="dynamic-content"></div>
 
-    <!-- FOOTER -->
     <footer class="navy-gradient px-5 py-8 mt-6">
         <div class="flex items-center gap-3 mb-4">
             <div class="bg-white rounded-xl p-2"><img src="logo.png" alt="Heartix" class="h-12 object-contain"></div>
@@ -325,7 +325,6 @@
         <div class="border-t border-white/10 pt-4 text-center"><p class="text-white/50 text-[10px]">© 2025 Heartix. All rights reserved.</p></div>
     </footer>
 
-    <!-- FLOATING CART -->
     <a href="cart.html" id="floating-cart" class="hide fixed right-3 bottom-24 z-30">
         <div class="floating-cart-card pl-1.5 pr-2.5 py-1.5 flex items-center gap-2">
             <div class="floating-cart-icon gold-gradient w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative"><i class="fas fa-shopping-bag text-navy text-[13px]"></i></div>
@@ -338,7 +337,6 @@
         </div>
     </a>
 
-    <!-- BOTTOM NAV -->
     <nav class="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-[#0F1729]/95 backdrop-blur-xl border-t border-white/5" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
         <div class="flex justify-around items-center pt-1.5 pb-1.5">
             <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]">
@@ -372,7 +370,6 @@
         </div>
     </nav>
 
-    <!-- IMMEDIATE CART/WISHLIST BADGE -->
     <script>
         (function() {
             const count = window.__cartCount || 0;
@@ -396,5 +393,20 @@
     </script>
 
     <script type="module" src="js/index.js"></script>
+
+    <script>
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((reg) => {
+                        console.log('✅ PWA Service Worker registered:', reg.scope);
+                    })
+                    .catch((err) => {
+                        console.warn('Service Worker registration failed:', err);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
