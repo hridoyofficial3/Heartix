@@ -1,5 +1,6 @@
 // ============================================================
 // HEARTIX ADMIN — Integrations (GA + FB + EmailJS + WhatsApp)
+// v2 — Auto-sync settings.whatsapp from integrations.whatsapp
 // ============================================================
 import { db } from './firebase.js';
 import { showToast as toast } from './common.js';
@@ -145,6 +146,8 @@ window.saveIntegrations = async function() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
 
     try {
+        // Save integrations + auto-sync legacy settings.whatsapp field
+        // (used by contact.html, index footer, track-order help button)
         await setDoc(doc(db, "settings", "main"), {
             integrations: {
                 googleAnalytics: { enabled: gaEnabled, measurementId: gaId },
@@ -158,8 +161,11 @@ window.saveIntegrations = async function() {
                     adminEmail: emAdminEmail
                 },
                 whatsapp: { enabled: waEnabled, number: waNumber }
-            }
+            },
+            // Auto-sync legacy field for backward compatibility
+            whatsapp: waEnabled ? waNumber : ''
         }, { merge: true });
+
         toast('Integrations saved! Page reload হচ্ছে...', 'success');
         setTimeout(() => location.reload(), 1500);
     } catch (e) {
@@ -174,4 +180,4 @@ setTimeout(() => {
     if (settingsTab && !settingsTab.classList.contains('hidden')) loadIntegrationsUI();
 }, 2000);
 
-console.log('✅ admin-integrations.js loaded (4 integrations)');
+console.log('✅ admin-integrations.js v2 loaded (auto-sync WhatsApp)');
