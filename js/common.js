@@ -3,6 +3,13 @@
 // ============================================================
 import { initIntegrations } from './integrations.js';
 
+// Safe dynamic import for theme - won't break if theme.js fails
+if (typeof window !== 'undefined') {
+    import('./theme.js').catch(function(e) {
+        console.warn('Theme load skipped:', e);
+    });
+}
+
 // ============ TOAST ============
 export function showToast(msg, type = 'success') {
     const c = document.getElementById('toast-container');
