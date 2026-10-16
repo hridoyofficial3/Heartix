@@ -1,33 +1,40 @@
 // ============================================================
-// HEARTIX LANDING PAGE — Customer View v3
+// HEARTIX LANDING PAGE — Customer View v4
+// Order → Firestore (same as checkout)
 // ============================================================
-import { db } from './firebase.js';
+import { db, auth } from './firebase.js';
 import {
     escapeHtml, formatPrice, showToast,
     getWishlist, saveWishlist, isInWishlist,
-    updateCartBadges, updateWishlistBadges
+    updateCartBadges, updateWishlistBadges,
+    validatePhone, generateOrderNumber
 } from './common.js';
 
 import {
-    collection, getDocs, doc, getDoc, query, where
+    collection, getDocs, doc, getDoc, query, where,
+    runTransaction, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 let landingData = null;
 let products = [];
 let settings = {};
 let countdownTimer = null;
 let selectedProductId = null;
+let isSubmitting = false;
+let loggedInUser = null;
+let loggedInProfile = null;
 
 const params = new URLSearchParams(window.location.search);
 const slug = (params.get('slug') || '').trim().toLowerCase();
 
-// ============ WHATSAPP NUMBER (fixed) ============
+// ============ WHATSAPP ============
 function getWhatsAppNumber() {
-    // Priority 1: integrations.whatsapp.number
     if (settings.integrations?.whatsapp?.number) {
         return String(settings.integrations.whatsapp.number).replace(/\D/g, '');
     }
-    // Priority 2: legacy settings.whatsapp
     if (settings.whatsapp) {
         return String(settings.whatsapp).replace(/\D/g, '');
     }
@@ -51,12 +58,11 @@ function formatCountdown(ms) {
 function updateCountdown() {
     if (!landingData || !landingData.countdownEnd) return;
     const el = document.getElementById('countdown');
+    const sec = document.getElementById('countdown-section');
     if (!el) return;
 
     const end = new Date(landingData.countdownEnd).getTime();
     if (isNaN(end) || end <= Date.now()) {
-        // Hide section if expired
-        const sec = document.getElementById('countdown-section');
         if (sec) sec.classList.add('hidden');
         if (countdownTimer) clearInterval(countdownTimer);
         return;
@@ -94,7 +100,7 @@ function renderHero() {
                 ${landingData.badge ? `<span class="landing-badge">${escapeHtml(landingData.badge)}</span>` : ''}
                 <h1 class="landing-title">${escapeHtml(landingData.title || 'Special Offer')}</h1>
                 ${landingData.subtitle ? `<p class="landing-subtitle">${escapeHtml(landingData.subtitle)}</p>` : ''}
-                <button onclick="scrollToOrderForm()" class="landing-cta-btn pulse">
+                <button onclick="scrollToOrderForm()" class="landing-cta-btn">
                     <i class="fas fa-shopping-bag"></i> অর্ডার করুন
                 </button>
             </div>
@@ -155,7 +161,6 @@ function renderProducts() {
     grid.innerHTML = html;
 }
 
-// ============ FORM PRODUCT SELECTOR ============
 function renderFormProductSelector() {
     const sel = document.getElementById('form-product-selector');
     if (!sel) return;
@@ -186,13 +191,11 @@ function renderFormProductSelector() {
     sel.innerHTML = html;
 }
 
-// ============ SELECT PRODUCT ============
 window.selectProduct = function(pid) {
     if (selectedProductId === pid) {
         selectedProductId = null;
     } else {
         selectedProductId = pid;
-        // Auto scroll to form on first selection
         setTimeout(() => scrollToOrderForm(), 100);
     }
     renderProducts();
@@ -217,13 +220,33 @@ window.toggleWishlistLanding = function(id, e) {
     renderProducts();
 };
 
-// ============ SUBMIT ORDER ============
-window.submitOrder = function() {
+// ============ SAVE FOR NEXT TIME ============
+function saveLastOrderInfo(name, phone, address) {
+    try {
+        localStorage.setItem('heartix_last_order', JSON.stringify({ name, phone, address }));
+    } catch (e) {}
+}
+
+function loadLastOrderInfo() {
+    try {
+        const saved = JSON.parse(localStorage.getItem('heartix_last_order') || 'null');
+        if (saved) {
+            if (saved.name) document.getElementById('order-name').value = saved.name;
+            if (saved.phone) document.getElementById('order-phone').value = saved.phone;
+            if (saved.address) document.getElementById('order-address').value = saved.address;
+        }
+    } catch (e) {}
+}
+
+// ============ SUBMIT ORDER (to Firestore) ============
+window.submitOrder = async function() {
+    if (isSubmitting) return;
+
     const name = (document.getElementById('order-name').value || '').trim();
     const phone = (document.getElementById('order-phone').value || '').trim();
     const address = (document.getElementById('order-address').value || '').trim();
+    const note = (document.getElementById('order-note').value || '').trim();
 
-    // Validation
     if (!selectedProductId) {
         showToast('প্রোডাক্ট select করুন', 'error');
         scrollToOrderForm();
@@ -234,7 +257,7 @@ window.submitOrder = function() {
         document.getElementById('order-name').focus();
         return;
     }
-    if (!/^01[3-9]\d{8}$/.test(phone)) {
+    if (!validatePhone(phone)) {
         showToast('সঠিক মোবাইল নাম্বার দিন (01XXXXXXXXX)', 'error');
         document.getElementById('order-phone').focus();
         return;
@@ -245,45 +268,212 @@ window.submitOrder = function() {
         return;
     }
 
-    const waNumber = getWhatsAppNumber();
-    if (!waNumber) {
-        showToast('WhatsApp নাম্বার সেট করা নেই। ফোনে order করুন।', 'error');
-        return;
-    }
+    const btn = document.getElementById('submit-order-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> অর্ডার হচ্ছে...';
+    isSubmitting = true;
 
-    // Save for next time
     try {
-        localStorage.setItem('heartix_last_order', JSON.stringify({ name, phone, address }));
-    } catch (e) {}
+        const p = products.find(x => x.id === selectedProductId);
+        if (!p) throw new Error('প্রোডাক্ট পাওয়া যায়নি');
 
-    const p = products.find(x => x.id === selectedProductId);
-    if (!p) return;
+        const email = loggedInUser?.email || '';
+        const orderRef = doc(collection(db, 'orders'));
+        const orderNumber = generateOrderNumber();
 
-    // Build message
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        let finalTotal = Number(p.price) || 0;
+        let finalSubtotal = finalTotal;
+        let finalDelivery = 0;
 
-    let msg = `🛍️ *Heartix — নতুন অর্ডার*\n`;
-    msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-    msg += `📦 *প্রোডাক্ট*\n`;
-    msg += `${p.name}\n`;
-    msg += `💰 দাম: ৳${formatPrice(p.price)}\n`;
-    msg += `📊 Quantity: 1\n\n`;
-    msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-    msg += `👤 *গ্রাহকের তথ্য*\n`;
-    msg += `নাম: ${name}\n`;
-    msg += `📱 মোবাইল: ${phone}\n`;
-    msg += `🏠 ঠিকানা: ${address}\n\n`;
-    msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-    if (landingData.title) msg += `🎯 Offer: ${landingData.title}\n`;
-    msg += `🕒 সময়: ${dateStr} ${timeStr}\n\n`;
-    msg += `অনুগ্রহ করে আমার অর্ডারটি কনফার্ম করুন। ধন্যবাদ! 🙏`;
+        // Delivery charge from settings
+        const isFree = settings.freeDeliveryAbove > 0 && finalSubtotal >= settings.freeDeliveryAbove;
+        finalDelivery = isFree ? 0 : (Number(settings.deliveryCharge) || 0);
+        finalTotal = finalSubtotal + finalDelivery;
 
-    const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
-    showToast('WhatsApp-এ পাঠানো হচ্ছে...', 'success');
+        const items = [{
+            id: p.id,
+            name: p.name,
+            price: Number(p.price) || 0,
+            quantity: 1,
+            image: p.image || '',
+            isPreorder: Number(p.stock) <= 0
+        }];
+
+        const hasPreorder = items.some(it => it.isPreorder);
+
+        const orderData = {
+            orderNumber,
+            customer: {
+                name,
+                phone,
+                email,
+                address,
+                district: '',
+                thana: '',
+                ipAddress: '',
+                isRepeat: false,
+                orderCount: 1,
+                previousOrderNumbers: [],
+                flagged: false,
+                flagReason: ''
+            },
+            items,
+            subtotal: finalSubtotal,
+            discount: 0,
+            couponCode: '',
+            deliveryCharge: finalDelivery,
+            total: finalTotal,
+            paymentMethod: 'full-cod',
+            advancePaid: 0,
+            dueAmount: finalTotal,
+            status: 'pending',
+            stockDeducted: false,
+            hasPreorder,
+            adminNote: note ? `[Landing: ${landingData.title || ''}] ${note}` : `[Landing: ${landingData.title || ''}]`,
+            source: 'landing',
+            landingSlug: slug,
+            landingTitle: landingData.title || '',
+            createdAt: serverTimestamp()
+        };
+
+        // Transaction to update stock (if not pre-order)
+        await runTransaction(db, async (transaction) => {
+            if (!hasPreorder) {
+                const pRef = doc(db, 'products', p.id);
+                const pSnap = await transaction.get(pRef);
+                if (pSnap.exists()) {
+                    const data = pSnap.data();
+                    const currentStock = Number(data.stock) || 0;
+                    if (currentStock > 0) {
+                        transaction.update(pRef, { stock: Math.max(0, currentStock - 1) });
+                        orderData.stockDeducted = true;
+                    }
+                }
+            }
+            transaction.set(orderRef, orderData);
+        });
+
+        // Save for next time
+        saveLastOrderInfo(name, phone, address);
+
+        // Success
+        showToast('✅ আপনার অর্ডার কনফার্ম হয়েছে!', 'success');
+
+        // Show success screen
+        showSuccessScreen(orderNumber, finalTotal);
+
+    } catch (e) {
+        console.error('Order error:', e);
+        showToast(e.message || 'অর্ডার পাঠানো যায়নি', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check-circle text-xl"></i><span>অর্ডার কনফার্ম করুন</span>';
+        isSubmitting = false;
+    }
 };
+
+function showSuccessScreen(orderNumber, total) {
+    const formSection = document.getElementById('order-form-section');
+    const productsSection = document.querySelector('.p-4:has(#products-grid)');
+    const heroSection = document.getElementById('hero-section');
+    const countdownSection = document.getElementById('countdown-section');
+    const descSection = document.getElementById('description-section');
+
+    // Hide products, form
+    formSection.innerHTML = `
+        <div class="bg-white rounded-3xl premium-shadow-lg overflow-hidden">
+            <div class="navy-gradient p-8 text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -mr-20 -mt-20"></div>
+                <div class="absolute bottom-0 left-0 w-32 h-32 bg-gold/10 rounded-full -ml-16 -mb-16"></div>
+                <div class="relative">
+                    <div class="w-20 h-20 gold-gradient rounded-full mx-auto mb-4 flex items-center justify-center shadow-xl">
+                        <i class="fas fa-check text-navy text-3xl"></i>
+                    </div>
+                    <h2 class="font-display text-3xl text-white font-bold mb-2">অর্ডার সফল!</h2>
+                    <p class="text-gold text-sm">আমরা আপনার অর্ডার পেয়েছি</p>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="bg-cream rounded-2xl p-5 text-center">
+                    <p class="text-[11px] text-gray-500 uppercase tracking-wider font-bold mb-1">আপনার Order Number</p>
+                    <p class="font-display text-2xl font-bold text-navy tracking-wider">${escapeHtml(orderNumber)}</p>
+                    <button onclick="copyOrderNum('${escapeHtml(orderNumber)}')" class="mt-2 text-xs gold-text font-bold">
+                        <i class="fas fa-copy mr-1"></i> কপি করুন
+                    </button>
+                </div>
+
+                <div class="bg-green-50 border border-green-200 rounded-2xl p-4">
+                    <p class="text-xs text-green-800 leading-relaxed flex items-start gap-2">
+                        <i class="fas fa-info-circle text-green-600 mt-0.5"></i>
+                        <span><strong>পরবর্তী ধাপ:</strong> আমরা শীঘ্রই কল করে আপনার অর্ডার কনফার্ম করব।</span>
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <a href="track-order.html?order=${encodeURIComponent(orderNumber)}" class="bg-white border-2 border-navy text-navy py-3 rounded-xl text-xs font-bold text-center">
+                        <i class="fas fa-truck mr-1"></i> Track Order
+                    </a>
+                    <a href="index.html" class="navy-gradient text-white py-3 rounded-xl text-xs font-bold text-center">
+                        <i class="fas fa-home mr-1"></i> হোম
+                    </a>
+                </div>
+
+                <p class="text-[10px] text-gray-400 text-center">
+                    <i class="fas fa-shield-alt mr-1"></i> এই নাম্বারটি সংরক্ষণ করুন
+                </p>
+            </div>
+        </div>
+    `;
+
+    // Scroll to success
+    setTimeout(() => {
+        window.scrollTo({ top: formSection.offsetTop - 70, behavior: 'smooth' });
+    }, 200);
+}
+
+window.copyOrderNum = function(num) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(num).then(() => showToast('কপি হয়েছে ✅')).catch(() => {});
+    }
+};
+
+// ============ LOAD USER ============
+function loadLoggedInUser() {
+    return new Promise((resolve) => {
+        const unsub = onAuthStateChanged(auth, async (user) => {
+            try { unsub(); } catch (e) {}
+            if (user) {
+                loggedInUser = user;
+                try {
+                    const snap = await getDoc(doc(db, 'customers', user.uid));
+                    if (snap.exists()) loggedInProfile = snap.data();
+                    else loggedInProfile = { email: user.email, name: user.displayName || '' };
+                } catch (e) {
+                    loggedInProfile = { email: user.email, name: user.displayName || '' };
+                }
+            }
+            resolve();
+        });
+    });
+}
+
+function prefillFromProfile() {
+    if (!loggedInProfile) return;
+    let filled = false;
+    if (loggedInProfile.name && !document.getElementById('order-name').value) {
+        document.getElementById('order-name').value = loggedInProfile.name;
+        filled = true;
+    }
+    if (loggedInProfile.phone && !document.getElementById('order-phone').value) {
+        document.getElementById('order-phone').value = loggedInProfile.phone;
+        filled = true;
+    }
+    if (loggedInProfile.address && !document.getElementById('order-address').value) {
+        const addr = [loggedInProfile.address, loggedInProfile.thana, loggedInProfile.district].filter(Boolean).join(', ');
+        document.getElementById('order-address').value = addr;
+        filled = true;
+    }
+    return filled;
+}
 
 // ============ LOAD ============
 async function loadLanding() {
@@ -317,9 +507,10 @@ async function loadLanding() {
 
         landingData = snap;
 
-        const [prodSnap, setSnap] = await Promise.all([
+        const [prodSnap, setSnap, _user] = await Promise.all([
             getDocs(collection(db, 'products')).catch(() => null),
-            getDoc(doc(db, 'settings', 'main')).catch(() => null)
+            getDoc(doc(db, 'settings', 'main')).catch(() => null),
+            loadLoggedInUser()
         ]);
 
         const allProducts = {};
@@ -341,7 +532,7 @@ async function loadLanding() {
         renderProducts();
         renderFormProductSelector();
 
-        // Countdown - only show if valid future date
+        // Countdown
         if (landingData.countdownEnd) {
             const end = new Date(landingData.countdownEnd).getTime();
             if (!isNaN(end) && end > Date.now()) {
@@ -358,24 +549,12 @@ async function loadLanding() {
             document.getElementById('description-text').textContent = landingData.description;
         }
 
-        // Call button
-        const callBtn = document.getElementById('call-order-btn');
-        const cp = getContactPhone();
-        if (callBtn && cp) {
-            callBtn.href = `tel:${cp}`;
-        } else if (callBtn) {
-            callBtn.style.display = 'none';
-        }
+        // Floating contact buttons
+        setupFloatingContact();
 
-        // Auto-fill last order
-        try {
-            const saved = JSON.parse(localStorage.getItem('heartix_last_order') || 'null');
-            if (saved) {
-                if (saved.name) document.getElementById('order-name').value = saved.name;
-                if (saved.phone) document.getElementById('order-phone').value = saved.phone;
-                if (saved.address) document.getElementById('order-address').value = saved.address;
-            }
-        } catch (e) {}
+        // Prefill from profile first, then last order
+        prefillFromProfile();
+        loadLastOrderInfo();
 
         updateCartBadges();
         updateWishlistBadges();
@@ -387,6 +566,34 @@ async function loadLanding() {
     }
 }
 
+function setupFloatingContact() {
+    const wrap = document.getElementById('floating-contact');
+    const callBtn = document.getElementById('float-call');
+    const waBtn = document.getElementById('float-wa');
+    if (!wrap) return;
+
+    let show = false;
+
+    const waNum = getWhatsAppNumber();
+    if (waBtn && waNum) {
+        const msg = encodeURIComponent(`আমি "${landingData.title || 'Offer'}" page থেকে আসছি। সাহায্য দরকার।`);
+        waBtn.href = `https://wa.me/${waNum}?text=${msg}`;
+        show = true;
+    } else if (waBtn) {
+        waBtn.style.display = 'none';
+    }
+
+    const cp = getContactPhone();
+    if (callBtn && cp) {
+        callBtn.href = `tel:${cp}`;
+        show = true;
+    } else if (callBtn) {
+        callBtn.style.display = 'none';
+    }
+
+    if (show) wrap.classList.remove('hidden');
+}
+
 loadLanding();
 
-console.log('✅ landing.js v3 loaded');
+console.log('✅ landing.js v4 loaded (Firestore orders)');
