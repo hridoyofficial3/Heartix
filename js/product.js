@@ -1,578 +1,269 @@
-// ============================================================
-// HEARTIX PRODUCT DETAIL PAGE
-// v4 - Pre-order support
-// ============================================================
-import { db } from './firebase.js';
-import {
-    escapeHtml, formatPrice, showToast,
-    getCart, saveCart, getQtyInCart,
-    getWishlist, saveWishlist, isInWishlist,
-    addToRecentlyViewed, updateCartBadges, updateWishlistBadges
-} from './common.js';
-
-import {
-    collection, getDocs, doc, getDoc, addDoc, query, where, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const CLOUDINARY_CLOUD_NAME = "ju2w6e9r";
-const CLOUDINARY_UPLOAD_PRESET = "heartix_unsigned";
-
-async function uploadToCloudinary(file) {
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
-    const result = await res.json();
-    if (!result.secure_url) throw new Error(result.error?.message || 'Upload failed');
-    return result.secure_url;
-}
-
-let currentProduct = null;
-let productId = null;
-let quantity = 1;
-let currentImageIndex = 0;
-let allImages = [];
-let settings = { whatsapp: '', contactPhone: '', waEnabled: false };
-let allProducts = [];
-let allReviews = [];
-let pendingReviewImage = null;
-
-const urlParams = new URLSearchParams(window.location.search);
-productId = urlParams.get('id');
-
-(function() {
-    try {
-        const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
-        const cCount = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
-        const el = document.getElementById('cart-count-header');
-        if (el) el.textContent = cCount;
-
-        const wl = JSON.parse(localStorage.getItem('heartix_wishlist') || '[]');
-        if (Array.isArray(wl) && wl.length > 0) {
-            const wh = document.getElementById('wishlist-count-header');
-            if (wh) { wh.textContent = wl.length; wh.classList.remove('hidden'); }
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Product - Heartix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: {
+            colors: { navy: { DEFAULT: '#0A1628' }, gold: { DEFAULT: '#D4A84B' }, cream: '#FBF8F3' },
+            fontFamily: { 'display': ['Playfair Display', 'serif'] }
+        }}}
+    </script>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/product.css">
+    <style>
+        .compact-action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 6px;
+            border-radius: 11px;
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.15s ease;
+            text-align: center;
         }
-    } catch (e) {}
-})();
+        .compact-action-btn:active { transform: scale(0.97); }
+        .compact-action-btn i { font-size: 14px; }
+    </style>
+</head>
+<body class="pb-6">
 
-function updateCartUI() {
-    const cart = getCart();
-    const items = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
-    const el = document.getElementById('cart-count-header');
-    if (el) el.innerText = items;
-}
+    <div id="toast-container"></div>
 
-function updateWishlistUI() {
-    const w = getWishlist();
-    const h = document.getElementById('wishlist-count-header');
-    if (w.length > 0) {
-        if (h) { h.textContent = w.length; h.classList.remove('hidden'); }
-    } else {
-        if (h) h.classList.add('hidden');
-    }
-    const btn = document.getElementById('wishlist-toggle');
-    if (btn && currentProduct) {
-        if (isInWishlist(currentProduct.id)) btn.classList.add('active');
-        else btn.classList.remove('active');
-    }
-}
+    <header class="glass sticky top-0 z-30 px-3 py-0 flex justify-between items-center border-b border-gray-100">
+        <div class="flex items-center gap-1 flex-1 min-w-0">
+            <button onclick="goBack()" class="w-8 h-8 flex items-center justify-center flex-shrink-0 -ml-1">
+                <i class="fas fa-arrow-left text-navy text-base"></i>
+            </button>
+            <img src="logo.png" alt="Heartix" class="h-14 object-contain" style="mix-blend-mode: multiply;">
+        </div>
+        <div class="flex items-center gap-1 flex-shrink-0">
+            <a href="wishlist.html" class="relative w-9 h-9 flex items-center justify-center">
+                <i class="fas fa-heart text-navy text-lg"></i>
+                <span id="wishlist-count-header" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+            </a>
+            <a href="cart.html" class="relative w-9 h-9 flex items-center justify-center">
+                <i class="fas fa-shopping-bag text-navy text-lg"></i>
+                <span id="cart-count-header" class="absolute -top-1 -right-1 gold-gradient text-navy text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+            </a>
+        </div>
+    </header>
 
-window.goBack = function() {
-    if (window.history.length > 1) window.history.back();
-    else window.location.href = 'index.html';
-}
-
-window.addToCart = function() {
-    if (!currentProduct) return;
-    const stock = currentProduct.stock !== undefined ? Number(currentProduct.stock) : 999;
-    const isPreorder = stock <= 0;
-    let cart = getCart();
-    const idx = cart.findIndex(i => i.id === productId);
-    const currentQty = idx > -1 ? cart[idx].quantity : 0;
-    const newQty = currentQty + quantity;
-    // If not pre-order, check stock
-    if (!isPreorder && stock !== 999 && newQty > stock) {
-        showToast(`স্টকে মাত্র ${stock} টি`, 'error');
-        return;
-    }
-    if (idx > -1) {
-        cart[idx].quantity = newQty;
-        if (isPreorder) cart[idx].isPreorder = true;
-    } else {
-        cart.push({
-            id: productId,
-            name: currentProduct.name,
-            price: currentProduct.price,
-            image: currentProduct.image,
-            quantity,
-            isPreorder
-        });
-    }
-    saveCart(cart);
-    updateCartUI();
-    showToast(isPreorder ? 'Pre-order কার্টে যোগ হয়েছে' : (currentProduct.name || '').substring(0, 25) + ' কার্টে যোগ', 'success');
-    updateCartButton();
-}
-
-window.removeFromCart = function() {
-    let cart = getCart();
-    const idx = cart.findIndex(i => i.id === productId);
-    if (idx > -1) {
-        cart.splice(idx, 1);
-        saveCart(cart);
-        updateCartUI();
-        showToast('কার্ট থেকে সরানো', 'warn');
-        updateCartButton();
-    }
-}
-
-window.toggleCart = function() {
-    const inCart = getQtyInCart(productId) > 0;
-    if (inCart) removeFromCart();
-    else addToCart();
-}
-
-window.buyNow = function() {
-    if (!currentProduct) return;
-    if (getQtyInCart(productId) === 0) addToCart();
-    setTimeout(() => { window.location.href = 'checkout.html'; }, 250);
-}
-
-window.toggleWishlist = function(e) {
-    if (e) { e.preventDefault(); e.stopPropagation(); }
-    if (!currentProduct) return;
-    let w = getWishlist();
-    const idx = w.indexOf(currentProduct.id);
-    if (idx > -1) {
-        w.splice(idx, 1);
-        showToast('Wishlist থেকে সরানো হয়েছে', 'warn');
-    } else {
-        w.push(currentProduct.id);
-        showToast('Wishlist-এ যোগ হয়েছে', 'success');
-    }
-    saveWishlist(w);
-    updateWishlistUI();
-}
-
-function updateCartButton() {
-    const btn = document.getElementById('main-cart-btn');
-    if (!btn) return;
-    const qty = getQtyInCart(productId);
-    const stock = currentProduct && currentProduct.stock !== undefined ? Number(currentProduct.stock) : 999;
-    const isPreorder = stock <= 0;
-
-    if (qty > 0) {
-        btn.className = 'action-btn bg-orange-500 text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs';
-        btn.innerHTML = '<i class="fas fa-check text-[11px]"></i> IN CART (' + qty + ')';
-    } else if (isPreorder) {
-        btn.className = 'action-btn bg-purple-600 text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs';
-        btn.innerHTML = '<i class="fas fa-clock text-[11px]"></i> PRE-ORDER NOW';
-    } else {
-        btn.className = 'action-btn gold-gradient text-navy font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs';
-        btn.innerHTML = '<i class="fas fa-shopping-bag text-[11px]"></i> ADD TO CART';
-    }
-}
-
-window.changeQty = function(delta) {
-    const stock = currentProduct && currentProduct.stock !== undefined ? currentProduct.stock : 999;
-    const isPreorder = stock <= 0;
-    const newQty = quantity + delta;
-    if (newQty < 1) return;
-    if (!isPreorder && stock !== 999 && newQty > stock) {
-        showToast(`স্টকে মাত্র ${stock} টি`, 'error');
-        return;
-    }
-    quantity = newQty;
-    const el = document.getElementById('qty-display');
-    if (el) el.innerText = quantity;
-}
-
-window.shareProduct = function(e) {
-    if (e) e.preventDefault();
-    if (!currentProduct) return;
-    const shareData = {
-        title: currentProduct.name,
-        text: `Heartix-এ দেখুন: ${currentProduct.name} — ৳${formatPrice(currentProduct.price)}`,
-        url: window.location.href
-    };
-    if (navigator.share) {
-        navigator.share(shareData).catch(() => {});
-    } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            showToast('Link কপি হয়েছে', 'success');
-        }).catch(() => showToast('কপি করা যায়নি', 'error'));
-    } else {
-        showToast('শেয়ার করা যাচ্ছে না', 'warn');
-    }
-}
-
-window.setMainImage = function(idx) {
-    if (idx < 0 || idx >= allImages.length) return;
-    currentImageIndex = idx;
-    const mainImg = document.getElementById('main-image');
-    if (mainImg) mainImg.src = allImages[idx];
-    document.querySelectorAll('.thumb-item').forEach((el, i) => {
-        if (i === idx) el.classList.add('active');
-        else el.classList.remove('active');
-    });
-}
-window.nextImage = function() {
-    if (allImages.length <= 1) return;
-    currentImageIndex = (currentImageIndex + 1) % allImages.length;
-    setMainImage(currentImageIndex);
-}
-window.prevImage = function() {
-    if (allImages.length <= 1) return;
-    currentImageIndex = (currentImageIndex - 1 + allImages.length) % allImages.length;
-    setMainImage(currentImageIndex);
-}
-
-function renderStarsHtml(rating) {
-    let html = '';
-    const full = Math.floor(rating);
-    const hasHalf = (rating - full) >= 0.5 && (rating - full) < 1;
-    for (let i = 1; i <= 5; i++) {
-        if (i <= full) html += '<i class="fas fa-star gold-text text-[10px]"></i>';
-        else if (i === full + 1 && hasHalf) html += '<i class="fas fa-star-half-alt gold-text text-[10px]"></i>';
-        else html += '<i class="far fa-star text-gray-300 text-[10px]"></i>';
-    }
-    return html;
-}
-
-function handleWhatsApp(e) {
-    if (!settings.whatsapp) { e.preventDefault(); showToast('WhatsApp নম্বর সেট হয়নি', 'warn'); }
-}
-function handleCall(e) {
-    if (!settings.contactPhone) { e.preventDefault(); showToast('ফোন নম্বর সেট হয়নি', 'warn'); }
-}
-window.handleWhatsApp = handleWhatsApp;
-window.handleCall = handleCall;
-
-function updateContactLinks() {
-    if (!currentProduct) return;
-    const msg = encodeURIComponent(`Hi, I want to order: ${currentProduct.name} (৳${currentProduct.price})`);
-    const waBtn = document.getElementById('whatsapp-btn');
-    const callBtn = document.getElementById('call-btn');
-
-    if (waBtn) {
-        if (settings.waEnabled && settings.whatsapp) {
-            waBtn.href = `https://wa.me/${settings.whatsapp}?text=${msg}`;
-            waBtn.style.display = '';
-        } else {
-            waBtn.style.display = 'none';
-        }
-    }
-
-    if (callBtn) {
-        if (settings.contactPhone) {
-            callBtn.href = `tel:${settings.contactPhone}`;
-            callBtn.style.display = '';
-        } else {
-            callBtn.style.display = 'none';
-        }
-    }
-}
-
-function renderProduct() {
-    const p = currentProduct;
-
-    document.getElementById('breadcrumb-category').innerText = p.category || 'Products';
-    document.getElementById('breadcrumb-product').innerText = p.name;
-
-    const hasDiscount = p.oldPrice && p.oldPrice > p.price;
-    const discountPct = hasDiscount ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 0;
-    const isOut = p.stock !== undefined && Number(p.stock) <= 0;
-
-    let thumbsHtml = '';
-    allImages.forEach((url, i) => {
-        thumbsHtml += `<div onclick="setMainImage(${i})" class="thumb-item ${i === 0 ? 'active' : ''} w-12 h-12 rounded-lg bg-white overflow-hidden mb-1.5">
-            <img src="${url}" class="w-full h-full object-contain p-0.5" onerror="this.src='https://via.placeholder.com/60x60?text=?'">
-        </div>`;
-    });
-    document.getElementById('thumbs-container').innerHTML = thumbsHtml;
-
-    document.getElementById('main-image').src = allImages[0];
-    document.getElementById('main-image').alt = p.name;
-
-    document.getElementById('discount-badge').innerHTML = hasDiscount
-        ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">Save ${discountPct}%</span>`
-        : '';
-
-    document.getElementById('nav-arrows').innerHTML = allImages.length > 1 ? `
-        <button onclick="prevImage()" class="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/95 rounded-full shadow flex items-center justify-center text-navy z-10">
-            <i class="fas fa-chevron-left text-[10px]"></i>
-        </button>
-        <button onclick="nextImage()" class="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/95 rounded-full shadow flex items-center justify-center text-navy z-10">
-            <i class="fas fa-chevron-right text-[10px]"></i>
-        </button>` : '';
-
-    document.getElementById('product-name').textContent = p.name;
-
-    const rating = allReviews.length > 0 ? allReviews.reduce((s, r) => s + (Number(r.rating) || 0), 0) / allReviews.length : 0;
-    document.getElementById('product-stars').innerHTML = renderStarsHtml(rating);
-    document.getElementById('product-review-count').textContent = allReviews.length;
-
-    document.getElementById('product-price').textContent = '৳' + formatPrice(p.price);
-    const oldPriceEl = document.getElementById('product-old-price');
-    if (oldPriceEl) {
-        oldPriceEl.textContent = hasDiscount ? '৳' + formatPrice(p.oldPrice) : '';
-    }
-
-    // Stock info — Pre-order support
-    if (p.stock !== undefined) {
-        const stockEl = document.getElementById('stock-info');
-        if (isOut) {
-            stockEl.innerHTML = '<span class="text-purple-600 font-semibold"><i class="fas fa-clock mr-0.5"></i> Pre-order available</span>';
-        } else {
-            stockEl.innerHTML = `<span class="text-green-600 font-semibold"><i class="fas fa-check-circle mr-0.5"></i> স্টকে আছে (${p.stock})</span>`;
-        }
-    }
-
-    if (p.brand) {
-        document.getElementById('brand-info').innerHTML = `<span class="text-gray-500">ব্র্যান্ড: <span class="font-semibold navy-text">${escapeHtml(p.brand)}</span></span>`;
-    }
-
-    // Show pre-order notice if out of stock
-    if (isOut) {
-        const notice = document.getElementById('preorder-notice');
-        if (notice) notice.classList.remove('hidden');
-    }
-
-    updateCartButton();
-    updateWishlistUI();
-
-    if (p.description) {
-        document.getElementById('description-block').classList.remove('hidden');
-        document.getElementById('description-text').textContent = p.description;
-    }
-
-    updateContactLinks();
-}
-
-function renderReviews() {
-    const total = allReviews.length;
-    const avg = total > 0 ? allReviews.reduce((s, r) => s + (Number(r.rating) || 0), 0) / total : 0;
-
-    document.getElementById('avg-rating').innerText = avg.toFixed(1);
-    document.getElementById('review-count').innerText = total + ' reviews';
-    document.getElementById('avg-stars').innerHTML = renderStarsHtml(avg);
-
-    for (let i = 1; i <= 5; i++) {
-        const count = allReviews.filter(r => Number(r.rating) === i).length;
-        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-        document.getElementById('bar' + i).style.width = pct + '%';
-        document.getElementById('pct' + i).innerText = pct + '%';
-    }
-
-    const list = document.getElementById('reviews-list');
-    if (allReviews.length === 0) {
-        list.innerHTML = '<p class="text-center text-gray-400 text-[11px] py-2">এখনো রিভিউ নেই।</p>';
-        return;
-    }
-
-    let html = '';
-    allReviews.slice(0, 5).forEach(r => {
-        const rating = Number(r.rating) || 0;
-        const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-        const imageHtml = r.image ? `
-            <div class="mt-1.5">
-                <img src="${r.image}" alt="review photo" class="w-20 h-20 object-cover rounded-lg border border-gray-200 cursor-pointer" onclick="window.open('${r.image}', '_blank')" onerror="this.style.display='none'">
+    <div id="loading-skeleton" class="p-3 max-w-2xl mx-auto">
+        <div class="bg-white rounded-2xl p-3 premium-shadow">
+            <div class="w-full h-64 shimmer rounded-xl mb-2"></div>
+            <div class="flex gap-2 mb-3">
+                <div class="w-12 h-12 shimmer rounded-lg"></div>
+                <div class="w-12 h-12 shimmer rounded-lg"></div>
+                <div class="w-12 h-12 shimmer rounded-lg"></div>
             </div>
-        ` : '';
-        html += `<div class="border-b border-gray-100 pb-3 last:border-0">
-            <div class="flex justify-between items-center mb-0.5">
-                <p class="font-semibold navy-text text-xs">${escapeHtml(r.name)}</p>
-                <span class="text-yellow-500 text-[11px]">${stars}</span>
+            <div class="h-5 w-3/4 shimmer rounded mb-2"></div>
+            <div class="h-7 w-1/3 shimmer rounded mb-3"></div>
+            <div class="h-11 w-full shimmer rounded-xl"></div>
+        </div>
+    </div>
+
+    <div id="error-state" class="hidden p-4 max-w-2xl mx-auto">
+        <div class="bg-white rounded-2xl p-8 text-center premium-shadow">
+            <i class="fas fa-box-open text-5xl text-gray-300 mb-4"></i>
+            <p class="text-gray-600 font-semibold mb-2" id="error-msg">প্রোডাক্ট খুঁজে পাওয়া যায়নি</p>
+            <p class="text-xs text-gray-400 mb-5" id="error-sub">সঠিক লিংক ব্যবহার করুন</p>
+            <a href="index.html" class="inline-block navy-gradient text-white px-6 py-3 rounded-xl text-sm font-semibold">
+                <i class="fas fa-shopping-bag mr-1"></i> শপিং করুন
+            </a>
+        </div>
+    </div>
+
+    <div id="main-content" class="max-w-2xl mx-auto hidden">
+
+        <div class="px-3 py-1.5 text-[11px] text-gray-500 flex items-center gap-1 flex-wrap">
+            <a href="index.html" class="hover:text-navy">Home</a>
+            <i class="fas fa-chevron-right text-[7px] text-gray-400"></i>
+            <a href="#" id="breadcrumb-category" class="hover:text-navy">Products</a>
+            <i class="fas fa-chevron-right text-[7px] text-gray-400"></i>
+            <span id="breadcrumb-product" class="text-navy font-semibold truncate">Loading...</span>
+        </div>
+
+        <div class="px-3">
+            <div class="bg-white rounded-2xl premium-shadow p-3">
+
+                <div class="flex gap-2">
+                    <div class="flex flex-col gap-1.5 hide-scrollbar overflow-y-auto flex-shrink-0" style="max-height: 260px;">
+                        <div id="thumbs-container"></div>
+                    </div>
+                    <div class="flex-1 relative bg-gray-50 rounded-xl overflow-hidden" style="height: 260px;">
+                        <img id="main-image" src="" alt="" class="prod-img w-full h-full p-2" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">
+                        <button onclick="toggleWishlist(event)" id="wishlist-toggle" class="wishlist-btn-lg" aria-label="Wishlist">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <div id="discount-badge"></div>
+                        <div id="nav-arrows"></div>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <div class="flex items-start gap-2 mb-1">
+                        <h1 id="product-name" class="text-base font-semibold navy-text leading-snug flex-1 min-w-0"></h1>
+                        <button onclick="shareProduct(event)" class="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-100 active:bg-gray-200 flex items-center justify-center text-gray-600" aria-label="Share">
+                            <i class="fas fa-share-alt text-[13px]"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="flex gap-0.5" id="product-stars"></div>
+                        <span class="text-[11px] text-gray-400">(<span id="product-review-count">0</span>)</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <p id="product-price" class="text-2xl font-bold text-navy leading-tight"></p>
+                        <p id="product-old-price" class="text-sm text-gray-400 line-through mt-1"></p>
+                    </div>
+
+                    <div class="flex items-center gap-3 text-xs mb-3 flex-wrap">
+                        <span id="stock-info"></span>
+                        <span id="brand-info"></span>
+                    </div>
+
+                    <div id="preorder-notice" class="hidden mb-3 bg-purple-50 border border-purple-200 rounded-xl p-3">
+                        <p class="text-[11px] text-purple-800 leading-relaxed flex items-start gap-2">
+                            <i class="fas fa-clock text-purple-600 mt-0.5 flex-shrink-0"></i>
+                            <span><strong>Pre-order:</strong> এই প্রোডাক্টটি এখন স্টকে নেই। আপনি order দিতে পারবেন — স্টকে আসলে আমরা ডেলিভারি দেব।</span>
+                        </p>
+                    </div>
+
+                    <div id="qty-row" class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-gray-600">Qty:</span>
+                            <div class="qty-control">
+                                <button onclick="changeQty(-1)">−</button>
+                                <span id="qty-display" class="qty-num">1</span>
+                                <button onclick="changeQty(1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <button id="main-cart-btn" onclick="toggleCart()" class="action-btn gold-gradient text-navy font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs">
+                            <i class="fas fa-shopping-bag text-[11px]"></i> ADD TO CART
+                        </button>
+                        <button onclick="buyNow()" class="action-btn navy-gradient text-white font-bold py-2.5 rounded-xl text-xs">
+                            <i class="fas fa-bolt text-[11px] mr-1"></i> BUY NOW
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <a id="whatsapp-btn" href="#" target="_blank" rel="noopener" class="compact-action-btn bg-[#25D366] active:bg-[#1DA851] text-white shadow-md shadow-[#25D366]/25" onclick="handleWhatsApp(event)">
+                            <i class="fab fa-whatsapp"></i>
+                            <span>WhatsApp</span>
+                        </a>
+                        <a id="call-btn" href="#" class="compact-action-btn bg-navy active:opacity-90 text-white" onclick="handleCall(event)">
+                            <i class="fas fa-phone"></i>
+                            <span>Call</span>
+                        </a>
+                    </div>
+                </div>
             </div>
-            <p class="text-[11px] text-gray-600 leading-relaxed">${escapeHtml(r.text)}</p>
-            ${imageHtml}
-        </div>`;
-    });
-    list.innerHTML = html;
-}
 
-document.getElementById('review-image-file')?.addEventListener('change', function(e) {
-    const f = e.target.files[0];
-    if (!f) return;
-    if (f.size > 5 * 1024 * 1024) {
-        showToast('ছবি ৫ MB-র বেশি বড়', 'error');
-        e.target.value = '';
-        return;
-    }
-    const r = new FileReader();
-    r.onload = evt => {
-        pendingReviewImage = { file: f, dataUrl: evt.target.result };
-        document.getElementById('review-image-preview-img').src = evt.target.result;
-        document.getElementById('review-image-preview').classList.remove('hidden');
-        document.getElementById('review-file-name').textContent = '✔ ' + f.name;
-    };
-    r.readAsDataURL(f);
-});
-
-window.clearReviewImage = function() {
-    pendingReviewImage = null;
-    const fileInput = document.getElementById('review-image-file');
-    if (fileInput) fileInput.value = '';
-    document.getElementById('review-image-preview').classList.add('hidden');
-    document.getElementById('review-file-name').textContent = '';
-};
-
-window.submitReview = async function() {
-    const name = (document.getElementById('review-name').value || '').trim();
-    const rating = parseInt(document.getElementById('review-rating').value);
-    const text = (document.getElementById('review-text').value || '').trim();
-    if (!name || name.length < 2) return showToast('নাম লিখুন (কমপক্ষে ২ অক্ষর)', 'error');
-    if (!rating) return showToast('রেটিং দিন', 'error');
-    if (!text || text.length < 3) return showToast('রিভিউ লিখুন (কমপক্ষে ৩ অক্ষর)', 'error');
-    if (text.length > 300) return showToast('রিভিউ অনেক বড়', 'error');
-
-    const btn = document.getElementById('review-btn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Submitting...';
-
-    try {
-        let imageUrl = '';
-        if (pendingReviewImage) {
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Uploading photo...';
-            try {
-                imageUrl = await uploadToCloudinary(pendingReviewImage.file);
-            } catch (err) {
-                console.warn('Image upload failed:', err);
-                showToast('ছবি আপলোড হয়নি, রিভিউ ছবি ছাড়াই পাঠানো হচ্ছে', 'warn');
-                imageUrl = '';
-            }
-        }
-
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
-
-        await addDoc(collection(db, "reviews"), {
-            productId,
-            name,
-            rating,
-            text,
-            image: imageUrl,
-            createdAt: serverTimestamp()
-        });
-
-        showToast('রিভিউ সাবমিট হয়েছে', 'success');
-
-        document.getElementById('review-name').value = '';
-        document.getElementById('review-rating').value = '';
-        document.getElementById('review-text').value = '';
-        window.clearReviewImage();
-
-        allReviews.unshift({ name, rating, text, image: imageUrl });
-        renderReviews();
-        document.getElementById('product-review-count').textContent = allReviews.length;
-
-    } catch (e) {
-        showToast('সাবমিট করা যায়নি', 'error');
-        console.error('Review error:', e);
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> Submit';
-    }
-}
-
-function renderRelated() {
-    const container = document.getElementById('related-products');
-    let related = allProducts.filter(p => p.id !== productId);
-    if (related.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-400 text-xs py-4 w-full">কোনো প্রোডাক্ট নেই</p>';
-        return;
-    }
-    const getCats = (p) => Array.isArray(p.categories) && p.categories.length > 0 ? p.categories : (p.category ? [p.category] : []);
-    const myCats = getCats(currentProduct);
-    const sameCat = related.filter(p => getCats(p).some(c => myCats.includes(c)));
-    const others = related.filter(p => !getCats(p).some(c => myCats.includes(c)));
-    const prioritized = [...sameCat, ...others].slice(0, 6);
-
-    let html = '';
-    prioritized.forEach(p => {
-        const hasDiscount = p.oldPrice && p.oldPrice > p.price;
-        html += `<a href="product.html?id=${p.id}" class="flex-shrink-0 bg-gray-50 rounded-xl p-2 action-btn" style="width: 130px;">
-            <img src="${p.image || 'https://via.placeholder.com/120x120?text=?'}" class="prod-img w-full h-24 rounded-lg mb-1.5" loading="lazy" onerror="this.src='https://via.placeholder.com/120x120?text=?'">
-            <h4 class="text-[11px] font-semibold navy-text leading-tight mb-1 line-clamp-2" style="min-height: 28px;">${escapeHtml(p.name)}</h4>
-            <div class="mt-1">
-                <p class="text-[13px] font-bold text-navy leading-tight">৳${formatPrice(p.price)}</p>
-                ${hasDiscount ? `<p class="text-[10px] text-gray-400 line-through mt-0.5">৳${formatPrice(p.oldPrice)}</p>` : ''}
+            <div id="description-block" class="bg-white rounded-2xl premium-shadow mt-2.5 p-3.5 hidden">
+                <h3 class="text-sm font-bold navy-text mb-2 pb-1.5 border-b border-gray-100">Product Details</h3>
+                <p id="description-text" class="text-xs text-gray-600 leading-relaxed whitespace-pre-line"></p>
             </div>
-        </a>`;
-    });
-    container.innerHTML = html;
-}
 
-async function loadProduct() {
-    if (!productId) {
-        document.getElementById('loading-skeleton').classList.add('hidden');
-        document.getElementById('error-state').classList.remove('hidden');
-        document.getElementById('error-msg').textContent = 'প্রোডাক্ট আইডি নেই';
-        return;
-    }
-    if (!db) {
-        document.getElementById('loading-skeleton').classList.add('hidden');
-        document.getElementById('error-state').classList.remove('hidden');
-        document.getElementById('error-msg').textContent = 'লোড করা যায়নি';
-        return;
-    }
-    try {
-        const [prodSnap, setSnap, revSnap, allProdSnap] = await Promise.all([
-            getDoc(doc(db, "products", productId)).catch(() => null),
-            getDoc(doc(db, "settings", "main")).catch(() => null),
-            getDocs(query(collection(db, "reviews"), where("productId", "==", productId))).catch(() => null),
-            getDocs(collection(db, "products")).catch(() => null)
-        ]);
+            <div class="bg-white rounded-2xl premium-shadow mt-2.5 p-3.5">
+                <h3 class="text-sm font-bold navy-text mb-3 pb-1.5 border-b border-gray-100 flex items-center gap-1.5">
+                    <i class="fas fa-star gold-text text-xs"></i> Reviews
+                </h3>
 
-        document.getElementById('loading-skeleton').classList.add('hidden');
+                <div class="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100">
+                    <div class="text-center flex-shrink-0">
+                        <p class="text-2xl font-bold navy-text leading-none" id="avg-rating">0.0</p>
+                        <div class="flex gap-0.5 justify-center mt-1" id="avg-stars"></div>
+                        <p class="text-[9px] text-gray-500 mt-0.5" id="review-count">0 reviews</p>
+                    </div>
+                    <div class="flex-1 space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-gray-600 w-5">5★</span>
+                            <div class="flex-1 bg-gray-100 rounded-full h-1"><div id="bar5" class="bg-yellow-400 h-1 rounded-full" style="width:0%"></div></div>
+                            <span class="text-[9px] text-gray-400 w-7 text-right" id="pct5">0%</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-gray-600 w-5">4★</span>
+                            <div class="flex-1 bg-gray-100 rounded-full h-1"><div id="bar4" class="bg-yellow-400 h-1 rounded-full" style="width:0%"></div></div>
+                            <span class="text-[9px] text-gray-400 w-7 text-right" id="pct4">0%</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-gray-600 w-5">3★</span>
+                            <div class="flex-1 bg-gray-100 rounded-full h-1"><div id="bar3" class="bg-yellow-400 h-1 rounded-full" style="width:0%"></div></div>
+                            <span class="text-[9px] text-gray-400 w-7 text-right" id="pct3">0%</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-gray-600 w-5">2★</span>
+                            <div class="flex-1 bg-gray-100 rounded-full h-1"><div id="bar2" class="bg-yellow-400 h-1 rounded-full" style="width:0%"></div></div>
+                            <span class="text-[9px] text-gray-400 w-7 text-right" id="pct2">0%</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-gray-600 w-5">1★</span>
+                            <div class="flex-1 bg-gray-100 rounded-full h-1"><div id="bar1" class="bg-yellow-400 h-1 rounded-full" style="width:0%"></div></div>
+                            <span class="text-[9px] text-gray-400 w-7 text-right" id="pct1">0%</span>
+                        </div>
+                    </div>
+                </div>
 
-        if (!prodSnap || !prodSnap.exists()) {
-            document.getElementById('error-state').classList.remove('hidden');
-            return;
-        }
+                <div id="reviews-list" class="space-y-3 mb-3"></div>
 
-        currentProduct = { id: prodSnap.id, ...prodSnap.data() };
-        addToRecentlyViewed(productId);
+                <details class="mt-2">
+                    <summary class="text-xs font-bold navy-text cursor-pointer py-1.5 flex items-center gap-1">
+                        <i class="fas fa-plus-circle gold-text"></i> Write a Review
+                    </summary>
+                    <div class="space-y-2 mt-3">
+                        <input type="text" id="review-name" placeholder="Your Name *" maxlength="40" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#D4A84B] text-xs">
+                        <select id="review-rating" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#D4A84B] text-xs bg-white">
+                            <option value="">Select Rating</option>
+                            <option value="5">★★★★★ Excellent</option>
+                            <option value="4">★★★★☆ Good</option>
+                            <option value="3">★★★☆☆ Average</option>
+                            <option value="2">★★☆☆☆ Poor</option>
+                            <option value="1">★☆☆☆☆ Very Bad</option>
+                        </select>
+                        <textarea id="review-text" rows="2" maxlength="300" placeholder="Write your review..." class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#D4A84B] text-xs resize-none"></textarea>
 
-        if (setSnap && setSnap.exists()) {
-            const s = setSnap.data();
-            const int = s.integrations || {};
-            const wa = int.whatsapp || {};
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Photo (Optional)</label>
+                            <div id="review-image-preview" class="hidden mb-2 relative inline-block">
+                                <img id="review-image-preview-img" class="w-20 h-20 object-cover rounded-lg border-2 border-gold">
+                                <button type="button" onclick="clearReviewImage()" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] shadow-lg">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="border-2 border-dashed border-gray-200 rounded-lg p-3 text-center">
+                                <label for="review-image-file" class="cursor-pointer block">
+                                    <i class="fas fa-camera text-xl text-gray-300 mb-1"></i>
+                                    <p class="text-[10px] text-gray-500 font-semibold">Add Photo</p>
+                                </label>
+                                <input type="file" id="review-image-file" accept="image/*" class="hidden">
+                                <p id="review-file-name" class="text-[10px] text-green-600 mt-1 font-semibold"></p>
+                            </div>
+                        </div>
 
-            if (wa.enabled && wa.number) {
-                settings.whatsapp = String(wa.number).replace(/\D/g, '');
-                settings.waEnabled = true;
-            } else {
-                settings.whatsapp = '';
-                settings.waEnabled = false;
-            }
+                        <button onclick="submitReview()" id="review-btn" class="navy-gradient text-white w-full py-2 rounded-lg font-semibold text-xs">
+                            <i class="fas fa-paper-plane mr-1"></i> Submit
+                        </button>
+                    </div>
+                </details>
+            </div>
 
-            settings.contactPhone = s.contactPhone || '';
-        }
+            <div class="bg-white rounded-2xl premium-shadow mt-2.5 p-3.5">
+                <h3 class="text-sm font-bold navy-text mb-2.5 pb-1.5 border-b border-gray-100">Related Products</h3>
+                <div id="related-products" class="flex gap-2 overflow-x-auto hide-scrollbar pb-1"></div>
+            </div>
+        </div>
+    </div>
 
-        allReviews = [];
-        if (revSnap) revSnap.forEach(d => allReviews.push(d.data()));
-
-        allProducts = [];
-        if (allProdSnap) allProdSnap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
-
-        allImages = (currentProduct.images && currentProduct.images.length) ? currentProduct.images.filter(u => typeof u === 'string' && u.length > 0).slice() : [];
-        if (allImages.length === 0 && currentProduct.image && typeof currentProduct.image === 'string') allImages = [currentProduct.image];
-        if (allImages.length === 0) allImages = ['https://via.placeholder.com/400x400?text=No+Image'];
-        currentImageIndex = 0;
-
-        document.getElementById('main-content').classList.remove('hidden');
-        renderProduct();
-        renderReviews();
-        renderRelated();
-        updateCartUI();
-        updateWishlistUI();
-    } catch (e) {
-        console.error('Load error:', e);
-        document.getElementById('loading-skeleton').classList.add('hidden');
-        document.getElementById('error-state').classList.remove('hidden');
-    }
-}
-
-loadProduct();
-
-console.log('✅ product.js v4 loaded (pre-order)');
+    <script type="module" src="js/product.js"></script>
+</body>
+</html>
