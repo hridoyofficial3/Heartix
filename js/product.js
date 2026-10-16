@@ -1,6 +1,6 @@
 // ============================================================
 // HEARTIX PRODUCT DETAIL PAGE
-// v2 — Price font fixed (Inter Bold, stacked, no Save badge)
+// v3 — Reviews with Images
 // ============================================================
 import { db } from './firebase.js';
 import {
@@ -14,6 +14,20 @@ import {
     collection, getDocs, doc, getDoc, addDoc, query, where, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+// ============ CLOUDINARY ============
+const CLOUDINARY_CLOUD_NAME = "ju2w6e9r";
+const CLOUDINARY_UPLOAD_PRESET = "heartix_unsigned";
+
+async function uploadToCloudinary(file) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
+    const result = await res.json();
+    if (!result.secure_url) throw new Error(result.error?.message || 'Upload failed');
+    return result.secure_url;
+}
+
 // ============ STATE ============
 let currentProduct = null;
 let productId = null;
@@ -23,6 +37,7 @@ let allImages = [];
 let settings = { whatsapp: '', contactPhone: '', waEnabled: false };
 let allProducts = [];
 let allReviews = [];
+let pendingReviewImage = null;
 
 // ============ GET PRODUCT ID FROM URL ============
 const urlParams = new URLSearchParams(window.location.search);
@@ -264,7 +279,6 @@ function renderProduct() {
     const discountPct = hasDiscount ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 0;
     const isOut = p.stock !== undefined && p.stock <= 0;
 
-    // Thumbnails
     let thumbsHtml = '';
     allImages.forEach((url, i) => {
         thumbsHtml += `<div onclick="setMainImage(${i})" class="thumb-item ${i === 0 ? 'active' : ''} w-12 h-12 rounded-lg bg-white overflow-hidden mb-1.5">
@@ -294,7 +308,6 @@ function renderProduct() {
     document.getElementById('product-stars').innerHTML = renderStarsHtml(rating);
     document.getElementById('product-review-count').textContent = allReviews.length;
 
-    // ⚡ PRICE — Inter Bold, stacked (no Playfair, no Save badge)
     document.getElementById('product-price').textContent = '৳' + formatPrice(p.price);
     const oldPriceEl = document.getElementById('product-old-price');
     if (oldPriceEl) {
@@ -332,7 +345,7 @@ function renderProduct() {
     updateContactLinks();
 }
 
-// ============ REVIEWS ============
+// ============ REVIEWS WITH IMAGES ============
 function renderReviews() {
     const total = allReviews.length;
     const avg = total > 0 ? allReviews.reduce((s, r) => s + (Number(r.rating) || 0), 0) / total : 0;
@@ -353,20 +366,54 @@ function renderReviews() {
         list.innerHTML = '<p class="text-center text-gray-400 text-[11px] py-2">এখনো রিভিউ নেই।</p>';
         return;
     }
+
     let html = '';
     allReviews.slice(0, 5).forEach(r => {
         const rating = Number(r.rating) || 0;
         const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-        html += `<div class="border-b border-gray-100 pb-2 last:border-0">
+        const imageHtml = r.image ? `
+            <div class="mt-1.5">
+                <img src="${r.image}" alt="review photo" class="w-20 h-20 object-cover rounded-lg border border-gray-200 cursor-pointer" onclick="window.open('${r.image}', '_blank')" onerror="this.style.display='none'">
+            </div>
+        ` : '';
+        html += `<div class="border-b border-gray-100 pb-3 last:border-0">
             <div class="flex justify-between items-center mb-0.5">
                 <p class="font-semibold navy-text text-xs">${escapeHtml(r.name)}</p>
                 <span class="text-yellow-500 text-[11px]">${stars}</span>
             </div>
             <p class="text-[11px] text-gray-600 leading-relaxed">${escapeHtml(r.text)}</p>
+            ${imageHtml}
         </div>`;
     });
     list.innerHTML = html;
 }
+
+// ============ REVIEW IMAGE UPLOAD ============
+document.getElementById('review-image-file')?.addEventListener('change', function(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    if (f.size > 5 * 1024 * 1024) {
+        showToast('ছবি ৫ MB-র বেশি বড়', 'error');
+        e.target.value = '';
+        return;
+    }
+    const r = new FileReader();
+    r.onload = evt => {
+        pendingReviewImage = { file: f, dataUrl: evt.target.result };
+        document.getElementById('review-image-preview-img').src = evt.target.result;
+        document.getElementById('review-image-preview').classList.remove('hidden');
+        document.getElementById('review-file-name').textContent = '✔ ' + f.name;
+    };
+    r.readAsDataURL(f);
+});
+
+window.clearReviewImage = function() {
+    pendingReviewImage = null;
+    const fileInput = document.getElementById('review-image-file');
+    if (fileInput) fileInput.value = '';
+    document.getElementById('review-image-preview').classList.add('hidden');
+    document.getElementById('review-file-name').textContent = '';
+};
 
 window.submitReview = async function() {
     const name = (document.getElementById('review-name').value || '').trim();
@@ -382,15 +429,44 @@ window.submitReview = async function() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Submitting...';
 
     try {
+        let imageUrl = '';
+
+        // Upload image if provided
+        if (pendingReviewImage) {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Uploading photo...';
+            try {
+                imageUrl = await uploadToCloudinary(pendingReviewImage.file);
+            } catch (err) {
+                console.warn('Image upload failed:', err);
+                showToast('ছবি আপলোড হয়নি, রিভিউ ছবি ছাড়াই পাঠানো হচ্ছে', 'warn');
+                imageUrl = '';
+            }
+        }
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
+
         await addDoc(collection(db, "reviews"), {
-            productId, name, rating, text, createdAt: serverTimestamp()
+            productId,
+            name,
+            rating,
+            text,
+            image: imageUrl,
+            createdAt: serverTimestamp()
         });
+
         showToast('রিভিউ সাবমিট হয়েছে', 'success');
+
+        // Reset form
         document.getElementById('review-name').value = '';
         document.getElementById('review-rating').value = '';
         document.getElementById('review-text').value = '';
-        allReviews.unshift({ name, rating, text });
+        window.clearReviewImage();
+
+        // Optimistically add to list
+        allReviews.unshift({ name, rating, text, image: imageUrl });
         renderReviews();
+        document.getElementById('product-review-count').textContent = allReviews.length;
+
     } catch (e) {
         showToast('সাবমিট করা যায়নি', 'error');
         console.error('Review error:', e);
@@ -400,7 +476,7 @@ window.submitReview = async function() {
     }
 }
 
-// ============ RELATED (⚡ price font fixed) ============
+// ============ RELATED ============
 function renderRelated() {
     const container = document.getElementById('related-products');
     let related = allProducts.filter(p => p.id !== productId);
@@ -503,4 +579,4 @@ async function loadProduct() {
 
 loadProduct();
 
-console.log('✅ product.js v2 loaded (price font fixed)');
+console.log('✅ product.js v3 loaded (reviews with images)');
