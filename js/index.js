@@ -1,6 +1,6 @@
 // ============================================================
-// HEARTIX INDEX (Home) — Featured + Pinned + SortOrder + Low Stock
-// v3 — Price font fix (Inter Bold, stacked old price, no Save badge)
+// HEARTIX INDEX (Home)
+// v4 - Pre-order badge support
 // ============================================================
 import { db } from './firebase.js';
 import {
@@ -15,7 +15,6 @@ import {
     collection, getDocs, doc, getDoc, query, orderBy, limit
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ============ STATE ============
 let allProducts = [];
 let allReviews = [];
 let allSettings = {};
@@ -35,14 +34,12 @@ let isDataLoaded = false;
 let displayedCount = 0;
 const PAGE_SIZE = 12;
 
-// ============ MULTI-CATEGORY HELPER ============
 function getCategories(p) {
     if (Array.isArray(p.categories) && p.categories.length > 0) return p.categories;
     if (p.category) return [p.category];
     return [];
 }
 
-// ============ SORT HELPER ============
 function sortProducts(list) {
     return list.sort((a, b) => {
         const aPinned = a.pinned === true ? 1 : 0;
@@ -59,7 +56,6 @@ function sortProducts(list) {
     });
 }
 
-// ============ SIDEBAR ============
 window.openSidebar = function() {
     document.getElementById('sidebar').style.transform = 'translateX(0)';
     document.getElementById('overlay').classList.remove('hidden');
@@ -71,7 +67,6 @@ window.closeSidebar = function() {
     document.body.style.overflow = '';
 }
 
-// ============ SEARCH ============
 let searchTimer = null;
 
 window.toggleSearch = function() {
@@ -149,7 +144,6 @@ document.addEventListener('click', function(e) {
     if (box && input && !box.contains(e.target) && e.target !== input) hideSuggestions();
 });
 
-// ============ FILTER ============
 window.filterByCategory = function(cat) {
     currentFilter = cat;
     displayedCount = 0;
@@ -163,24 +157,27 @@ window.filterByCategory = function(cat) {
     renderProducts();
 }
 
-// ============ CART ACTIONS ============
 window.addToCart = function(id) {
     const p = allProducts.find(x => x.id === id);
     if (!p) return;
     const stock = p.stock !== undefined ? Number(p.stock) : 999;
-    if (stock <= 0) { showToast('প্রোডাক্টটি স্টকে নেই', 'error'); return; }
+    const isPreorder = stock <= 0;
     let cart = getCart();
     const idx = cart.findIndex(i => i.id === id);
     const currentQty = idx > -1 ? (Number(cart[idx].quantity) || 0) : 0;
-    if (stock !== 999 && currentQty + 1 > stock) {
+    if (!isPreorder && stock !== 999 && currentQty + 1 > stock) {
         showToast(`স্টকে মাত্র ${stock} টি আছে`, 'error');
         return;
     }
-    if (idx > -1) cart[idx].quantity = currentQty + 1;
-    else cart.push({ id, name: p.name, price: Number(p.price) || 0, image: p.image, quantity: 1 });
+    if (idx > -1) {
+        cart[idx].quantity = currentQty + 1;
+        if (isPreorder) cart[idx].isPreorder = true;
+    } else {
+        cart.push({ id, name: p.name, price: Number(p.price) || 0, image: p.image, quantity: 1, isPreorder });
+    }
     saveCart(cart);
     updateCartBadges();
-    showToast((p.name || '').substring(0, 30) + ' added to Cart', 'success');
+    showToast(isPreorder ? 'Pre-order কার্টে যোগ হয়েছে' : (p.name || '').substring(0, 30) + ' added to Cart', 'success');
     renderProducts();
     renderRecentlyViewed();
     renderDynamicContent();
@@ -200,7 +197,6 @@ window.removeFromCart = function(id) {
     }
 }
 
-// ============ WISHLIST ============
 window.toggleWishlist = function(id, e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     let w = getWishlist();
@@ -220,7 +216,6 @@ window.toggleWishlist = function(id, e) {
     renderDynamicContent();
 }
 
-// ============ HERO SLIDER ============
 let slideIndex = 0, totalSlides = 0, heroTimer = null;
 
 function getDefaultHeroBanners() {
@@ -313,7 +308,6 @@ function updateSlide() {
     });
 }
 
-// ============ CATEGORIES ============
 function renderCategories() {
     const list = document.getElementById('category-scroll-container');
     const sidebarList = document.getElementById('sidebar-categories');
@@ -370,7 +364,6 @@ function startAutoScroll() {
     }, 2000);
 }
 
-// ============ PRODUCT CARD ============
 function getRating(pid) {
     const r = allReviews.filter(x => x.productId === pid);
     if (r.length === 0) return { avg: 0, count: 0 };
@@ -387,9 +380,13 @@ function renderProductCard(p) {
     const inWishlist = isInWishlist(p.id);
 
     let actionHtml = '';
-    if (isOut) actionHtml = `<button disabled class="w-full mt-2 add-cart-btn opacity-50">Out of Stock</button>`;
-    else if (qty === 0) actionHtml = `<button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')" class="w-full mt-2 add-cart-btn"><i class="fas fa-shopping-bag"></i> Add To Cart</button>`;
-    else actionHtml = `<div class="mt-2 qty-control w-full"><button onclick="event.preventDefault(); event.stopPropagation(); removeFromCart('${p.id}')">−</button><span class="qty-num flex-1">${qty}</span><button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')">+</button></div>`;
+    if (isOut) {
+        actionHtml = `<button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')" class="w-full mt-2 add-cart-btn bg-purple-50 border-purple-500 text-purple-700"><i class="fas fa-clock"></i> Pre-order</button>`;
+    } else if (qty === 0) {
+        actionHtml = `<button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')" class="w-full mt-2 add-cart-btn"><i class="fas fa-shopping-bag"></i> Add To Cart</button>`;
+    } else {
+        actionHtml = `<div class="mt-2 qty-control w-full"><button onclick="event.preventDefault(); event.stopPropagation(); removeFromCart('${p.id}')">−</button><span class="qty-num flex-1">${qty}</span><button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')">+</button></div>`;
+    }
 
     const isPinned = p.pinned === true;
     const isLowStock = !isOut && p.stock !== undefined && Number(p.stock) < 5;
@@ -402,6 +399,7 @@ function renderProductCard(p) {
             <div class="relative mb-2">
                 <img src="${p.image || 'https://via.placeholder.com/200x200?text=No+Image'}" alt="${escapeHtml(p.name)}" loading="lazy" class="product-img w-full h-28 rounded-lg" onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
                 ${hasDiscount ? `<span class="absolute top-1.5 left-1.5 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">-${discountPct}%</span>` : ''}
+                ${isOut ? `<span class="absolute top-1.5 right-1.5 bg-purple-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full"><i class="fas fa-clock mr-0.5"></i>Pre-order</span>` : ''}
                 ${isPinned ? `<span class="absolute bottom-1.5 left-1.5 bg-purple-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full"><i class="fas fa-thumbtack mr-0.5"></i>Top</span>` : ''}
                 ${isLowStock ? `<span class="absolute top-9 left-1.5 bg-orange-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full animate-pulse"><i class="fas fa-fire mr-0.5"></i>Only ${p.stock} left</span>` : ''}
             </div>
@@ -465,7 +463,6 @@ window.loadMoreProducts = function() {
     renderProducts();
 }
 
-// ============ RECENTLY VIEWED ============
 function renderRecentlyViewed() {
     const section = document.getElementById('recently-viewed-section');
     const list = document.getElementById('recently-viewed-list');
@@ -487,7 +484,6 @@ function renderRecentlyViewed() {
     list.innerHTML = html;
 }
 
-// ============ DYNAMIC SECTIONS ============
 function renderDynamicContent() {
     const container = document.getElementById('dynamic-content');
     if (!container) return;
@@ -551,7 +547,6 @@ function renderDynamicContent() {
     container.innerHTML = html;
 }
 
-// ============ APPLY SETTINGS ============
 function applySettings() {
     const s = allSettings;
     try {
@@ -564,7 +559,6 @@ function applySettings() {
     } catch (e) {}
 }
 
-// ============ LOAD ============
 async function loadAll() {
     if (!db) {
         isDataLoaded = true;
@@ -627,7 +621,6 @@ async function loadAll() {
     }
 }
 
-// ============ INITIAL BADGES ============
 (function() {
     try {
         const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
@@ -651,4 +644,4 @@ updateCartBadges();
 updateWishlistBadges();
 loadAll();
 
-console.log('✅ index.js v3 loaded (price font fixed)');
+console.log('✅ index.js v4 loaded (pre-order badge)');
