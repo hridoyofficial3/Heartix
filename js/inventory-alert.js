@@ -1,41 +1,14 @@
 // ============================================================
-// HEARTIX ADMIN — Inventory Alert (self-injecting)
-// Adds "Send Low Stock Alert Email" button to dashboard
+// HEARTIX ADMIN — Inventory Alert + Backup (static buttons)
 // ============================================================
 import { db } from './firebase.js';
 import { showToast as toast } from './common.js';
 import { notifyLowStockAlert } from './email-notify.js';
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const LOW_STOCK_THRESHOLD = 5;
 
-// ============ INJECT BUTTON ============
-function injectAlertButton() {
-    if (document.getElementById('send-alert-btn')) return true;
-
-    // Find the recent-orders card in dashboard
-    const recentOrders = document.getElementById('recent-orders');
-    if (!recentOrders) return false;
-
-    const card = recentOrders.closest('.bg-white');
-    if (!card) return false;
-
-    const parent = card.parentElement;
-    if (!parent) return false;
-
-    // Build button
-    const btn = document.createElement('button');
-    btn.id = 'send-alert-btn';
-    btn.type = 'button';
-    btn.className = 'w-full bg-amber-50 border-2 border-amber-200 text-amber-800 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:bg-amber-100 hover:border-amber-300 transition-all mb-4';
-    btn.innerHTML = '<i class="fas fa-bell"></i> Send Low Stock Alert Email';
-    btn.onclick = handleSendAlert;
-
-    parent.insertBefore(btn, card);
-    return true;
-}
-
-// ============ HANDLE CLICK ============
+// ============ SEND LOW STOCK ALERT ============
 async function handleSendAlert() {
     const btn = document.getElementById('send-alert-btn');
     if (!btn) return;
@@ -44,7 +17,6 @@ async function handleSendAlert() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Loading products...';
 
     try {
-        // Fetch products
         const snap = await getDocs(collection(db, "products"));
         const lowStock = [];
         snap.forEach(d => {
@@ -53,7 +25,6 @@ async function handleSendAlert() {
             if (stock < LOW_STOCK_THRESHOLD) lowStock.push(p);
         });
 
-        // No products?
         if (lowStock.length === 0) {
             toast('কোনো low stock product নেই ✅', 'success');
             btn.disabled = false;
@@ -63,31 +34,24 @@ async function handleSendAlert() {
 
         btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-1"></i> Sending ${lowStock.length} alert...`;
 
-        // Sort: out of stock first, then by stock ascending
-        lowStock.sort((a, b) => {
-            const sa = Number(a.stock) || 0;
-            const sb = Number(b.stock) || 0;
-            return sa - sb;
-        });
+        lowStock.sort((a, b) => (Number(a.stock) || 0) - (Number(b.stock) || 0));
 
-        // Send email
         const result = await notifyLowStockAlert(lowStock);
 
         if (result.ok) {
             toast(`✅ ${lowStock.length}টি product-এর alert email পাঠানো হয়েছে`);
-            // Log activity (non-blocking)
             try {
                 const mod = await import('./staff-activity.js');
                 if (mod && mod.logActivity) {
                     mod.logActivity('settings_update', {
                         description: `Low stock alert email sent (${lowStock.length} items)`,
-                        meta: { count: lowStock.length, products: lowStock.slice(0, 10).map(p => p.name) }
+                        meta: { count: lowStock.length }
                     });
                 }
-            } catch (e) { /* silent */ }
+            } catch (e) {}
         } else {
             let msg = 'Email পাঠানো যায়নি';
-            if (result.reason === 'not_configured') msg = 'Email Notifications enable করা নেই (Settings → Integrations)';
+            if (result.reason === 'not_configured') msg = 'Email Notifications enable করা নেই';
             else if (result.reason === 'no_admin_email') msg = 'Admin Email সেট করা নেই';
             else if (result.reason === 'no_template') msg = 'Email template সেট করা নেই';
             toast(msg, 'error');
@@ -101,21 +65,123 @@ async function handleSendAlert() {
     btn.innerHTML = '<i class="fas fa-bell"></i> Send Low Stock Alert Email';
 }
 
-// ============ INIT (retry-based injection) ============
-let attempts = 0;
-const MAX_ATTEMPTS = 30; // ~15 seconds max
+// ============ BACKUP ============
+async function handleBackup() {
+    const btn = document.getElementById('backup-btn');
+    if (!btn) return;
 
-function tryInject() {
-    if (injectAlertButton()) return;
-    attempts++;
-    if (attempts < MAX_ATTEMPTS) {
-        setTimeout(tryInject, 500);
+    if (!confirm('সম্পূর্ণ ডাটা backup download করবেন?\n\n(Products, Orders, Coupons, Settings, Staff, Reviews)\n\nফাইল সাইজ কয়েক MB হতে পারে।')) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Collecting data...';
+
+    try {
+        const collections = ['products', 'orders', 'coupons', 'reviews', 'messages', 'customers'];
+        const backup = {
+            meta: {
+                app: 'Heartix',
+                version: '1.0',
+                exportedAt: new Date().toISOString(),
+                exportedAtLocal: new Date().toLocaleString('en-GB')
+            },
+            data: {}
+        };
+
+        for (let i = 0; i < collections.length; i++) {
+            const name = collections[i];
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-1"></i> ${name} (${i + 1}/${collections.length})...`;
+            try {
+                const snap = await getDocs(collection(db, name));
+                backup.data[name] = [];
+                snap.forEach(d => backup.data[name].push({ _id: d.id, ...d.data() }));
+            } catch (e) {
+                backup.data[name] = { error: e.message || 'failed' };
+            }
+        }
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> settings...';
+        try {
+            const settingsSnap = await getDoc(doc(db, "settings", "main"));
+            backup.data.settings = settingsSnap.exists() ? { main: settingsSnap.data() } : {};
+        } catch (e) {
+            backup.data.settings = { error: e.message || 'failed' };
+        }
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> staff...';
+        try {
+            const snap = await getDocs(collection(db, 'staff'));
+            backup.data.staff = [];
+            snap.forEach(d => backup.data.staff.push({ _id: d.id, ...d.data() }));
+        } catch (e) {
+            backup.data.staff = { error: e.message || 'failed' };
+        }
+
+        const json = JSON.stringify(backup, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+
+        const date = new Date().toISOString().slice(0, 10);
+        const time = new Date().toTimeString().slice(0, 5).replace(':', '-');
+        a.href = url;
+        a.download = `heartix-backup-${date}-${time}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        const counts = {
+            products: Array.isArray(backup.data.products) ? backup.data.products.length : 0,
+            orders: Array.isArray(backup.data.orders) ? backup.data.orders.length : 0,
+            coupons: Array.isArray(backup.data.coupons) ? backup.data.coupons.length : 0,
+            reviews: Array.isArray(backup.data.reviews) ? backup.data.reviews.length : 0,
+            messages: Array.isArray(backup.data.messages) ? backup.data.messages.length : 0,
+            customers: Array.isArray(backup.data.customers) ? backup.data.customers.length : 0,
+            staff: Array.isArray(backup.data.staff) ? backup.data.staff.length : 0
+        };
+
+        toast(`✅ Backup downloaded — ${counts.products}P, ${counts.orders}O, ${counts.customers}C`);
+
+        try {
+            const mod = await import('./staff-activity.js');
+            if (mod && mod.logActivity) {
+                mod.logActivity('settings_update', {
+                    description: `Full backup downloaded (${counts.products} products, ${counts.orders} orders)`,
+                    meta: counts
+                });
+            }
+        } catch (e) {}
+    } catch (e) {
+        console.error('Backup failed:', e);
+        toast('Backup ব্যর্থ: ' + (e.message || 'unknown'), 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-download"></i> Download Full Backup (JSON)';
     }
 }
 
+// ============ ATTACH HANDLERS ============
+function attachHandlers() {
+    const alertBtn = document.getElementById('send-alert-btn');
+    const backupBtn = document.getElementById('backup-btn');
+
+    if (alertBtn && !alertBtn._bound) {
+        alertBtn.onclick = handleSendAlert;
+        alertBtn._bound = true;
+    }
+    if (backupBtn && !backupBtn._bound) {
+        backupBtn.onclick = handleBackup;
+        backupBtn._bound = true;
+    }
+}
+
+// ============ INIT (retry-based) ============
+let attempts = 0;
 function init() {
-    // Wait a bit for admin.js to render dashboard
-    setTimeout(tryInject, 800);
+    function tryAttach() {
+        attachHandlers();
+        attempts++;
+        if (attempts < 30) setTimeout(tryAttach, 500);
+    }
+    setTimeout(tryAttach, 500);
 }
 
 if (document.readyState === 'loading') {
@@ -124,4 +190,4 @@ if (document.readyState === 'loading') {
     init();
 }
 
-console.log('✅ inventory-alert.js loaded');
+console.log('✅ inventory-alert.js loaded (static buttons)');
