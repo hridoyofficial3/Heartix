@@ -1,5 +1,6 @@
 // ============================================================
 // HEARTIX EMAIL NOTIFICATIONS — EmailJS Integration
+// v2 — Added notifyLowStockAlert
 // ============================================================
 import { db } from './firebase.js';
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -35,7 +36,7 @@ async function loadEmailJSSDK() {
     });
 }
 
-// ============ ENSURE READY (config + SDK) ============
+// ============ ENSURE READY ============
 async function ensureReady() {
     const config = await loadConfig();
     if (!config || !config.enabled) return null;
@@ -126,9 +127,60 @@ export async function notifyStatusChange(orderData) {
     });
 }
 
+// ============ NEW: LOW STOCK ALERT ============
+/**
+ * Send low stock alert to admin.
+ * @param {Array} products — [{ name, stock, price, id }]
+ * @returns {Promise<{ok: boolean, reason?: string, count?: number}>}
+ */
+export async function notifyLowStockAlert(products) {
+    try {
+        if (!Array.isArray(products) || products.length === 0) {
+            return { ok: false, reason: 'no_products' };
+        }
+
+        const config = await ensureReady();
+        if (!config) {
+            return { ok: false, reason: 'not_configured' };
+        }
+        if (!config.adminEmail) {
+            return { ok: false, reason: 'no_admin_email' };
+        }
+        if (!config.customerTemplateId) {
+            return { ok: false, reason: 'no_template' };
+        }
+
+        // Build product list text
+        const shown = products.slice(0, 25);
+        const list = shown.map(p => {
+            const stock = Number(p.stock) || 0;
+            const tag = stock <= 0 ? '❌ OUT' : `⚠️ ${stock} left`;
+            return `• ${p.name || 'Unknown'} — ${tag} (৳${p.price || 0})`;
+        }).join('\n');
+
+        const more = products.length > 25 ? `\n\n...এবং আরো ${products.length - 25} টি প্রোডাক্ট` : '';
+
+        await window.emailjs.send(config.serviceId, config.customerTemplateId, {
+            to_email: config.adminEmail,
+            custom_subject: `⚠️ Low Stock Alert — ${products.length} item(s)`,
+            status_message: `⚠️ ${products.length}টি product-এর stock কম!`,
+            status_description: `নিচের product-গুলো শীঘ্রই restock করুন:\n\n${list}${more}`,
+            customer_name: 'Heartix Admin',
+            order_number: 'INVENTORY-ALERT',
+            total: products.length
+        });
+
+        console.log('✅ Low stock alert sent:', products.length, 'items');
+        return { ok: true, count: products.length };
+    } catch (e) {
+        console.warn('Low stock alert failed:', e);
+        return { ok: false, reason: e.message || 'send_failed' };
+    }
+}
+
 // ============ PUBLIC: Reset cache ============
 export function resetEmailConfigCache() {
     emailJSConfig = null;
 }
 
-console.log('✅ email-notify.js loaded');
+console.log('✅ email-notify.js v2 loaded (with low stock alert)');
