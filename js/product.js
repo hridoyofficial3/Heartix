@@ -1,6 +1,6 @@
 // ============================================================
 // HEARTIX PRODUCT DETAIL PAGE
-// v3 — Reviews with Images
+// v4 - Pre-order support
 // ============================================================
 import { db } from './firebase.js';
 import {
@@ -14,7 +14,6 @@ import {
     collection, getDocs, doc, getDoc, addDoc, query, where, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ============ CLOUDINARY ============
 const CLOUDINARY_CLOUD_NAME = "ju2w6e9r";
 const CLOUDINARY_UPLOAD_PRESET = "heartix_unsigned";
 
@@ -28,7 +27,6 @@ async function uploadToCloudinary(file) {
     return result.secure_url;
 }
 
-// ============ STATE ============
 let currentProduct = null;
 let productId = null;
 let quantity = 1;
@@ -39,11 +37,9 @@ let allProducts = [];
 let allReviews = [];
 let pendingReviewImage = null;
 
-// ============ GET PRODUCT ID FROM URL ============
 const urlParams = new URLSearchParams(window.location.search);
 productId = urlParams.get('id');
 
-// ============ INITIAL BADGES ============
 (function() {
     try {
         const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
@@ -59,7 +55,6 @@ productId = urlParams.get('id');
     } catch (e) {}
 })();
 
-// ============ HELPERS ============
 function updateCartUI() {
     const cart = getCart();
     const items = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
@@ -87,27 +82,35 @@ window.goBack = function() {
     else window.location.href = 'index.html';
 }
 
-// ============ CART ACTIONS ============
 window.addToCart = function() {
     if (!currentProduct) return;
-    if (currentProduct.stock !== undefined && currentProduct.stock <= 0) {
-        showToast('স্টকে নেই', 'error');
-        return;
-    }
-    const stock = currentProduct.stock !== undefined ? currentProduct.stock : 999;
+    const stock = currentProduct.stock !== undefined ? Number(currentProduct.stock) : 999;
+    const isPreorder = stock <= 0;
     let cart = getCart();
     const idx = cart.findIndex(i => i.id === productId);
     const currentQty = idx > -1 ? cart[idx].quantity : 0;
     const newQty = currentQty + quantity;
-    if (stock !== 999 && newQty > stock) {
+    // If not pre-order, check stock
+    if (!isPreorder && stock !== 999 && newQty > stock) {
         showToast(`স্টকে মাত্র ${stock} টি`, 'error');
         return;
     }
-    if (idx > -1) cart[idx].quantity = newQty;
-    else cart.push({ id: productId, name: currentProduct.name, price: currentProduct.price, image: currentProduct.image, quantity });
+    if (idx > -1) {
+        cart[idx].quantity = newQty;
+        if (isPreorder) cart[idx].isPreorder = true;
+    } else {
+        cart.push({
+            id: productId,
+            name: currentProduct.name,
+            price: currentProduct.price,
+            image: currentProduct.image,
+            quantity,
+            isPreorder
+        });
+    }
     saveCart(cart);
     updateCartUI();
-    showToast((currentProduct.name || '').substring(0, 25) + ' কার্টে যোগ', 'success');
+    showToast(isPreorder ? 'Pre-order কার্টে যোগ হয়েছে' : (currentProduct.name || '').substring(0, 25) + ' কার্টে যোগ', 'success');
     updateCartButton();
 }
 
@@ -135,7 +138,6 @@ window.buyNow = function() {
     setTimeout(() => { window.location.href = 'checkout.html'; }, 250);
 }
 
-// ============ WISHLIST ============
 window.toggleWishlist = function(e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     if (!currentProduct) return;
@@ -156,9 +158,15 @@ function updateCartButton() {
     const btn = document.getElementById('main-cart-btn');
     if (!btn) return;
     const qty = getQtyInCart(productId);
+    const stock = currentProduct && currentProduct.stock !== undefined ? Number(currentProduct.stock) : 999;
+    const isPreorder = stock <= 0;
+
     if (qty > 0) {
         btn.className = 'action-btn bg-orange-500 text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs';
         btn.innerHTML = '<i class="fas fa-check text-[11px]"></i> IN CART (' + qty + ')';
+    } else if (isPreorder) {
+        btn.className = 'action-btn bg-purple-600 text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs';
+        btn.innerHTML = '<i class="fas fa-clock text-[11px]"></i> PRE-ORDER NOW';
     } else {
         btn.className = 'action-btn gold-gradient text-navy font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs';
         btn.innerHTML = '<i class="fas fa-shopping-bag text-[11px]"></i> ADD TO CART';
@@ -167,9 +175,10 @@ function updateCartButton() {
 
 window.changeQty = function(delta) {
     const stock = currentProduct && currentProduct.stock !== undefined ? currentProduct.stock : 999;
+    const isPreorder = stock <= 0;
     const newQty = quantity + delta;
     if (newQty < 1) return;
-    if (stock !== 999 && newQty > stock) {
+    if (!isPreorder && stock !== 999 && newQty > stock) {
         showToast(`স্টকে মাত্র ${stock} টি`, 'error');
         return;
     }
@@ -178,7 +187,6 @@ window.changeQty = function(delta) {
     if (el) el.innerText = quantity;
 }
 
-// ============ SHARE ============
 window.shareProduct = function(e) {
     if (e) e.preventDefault();
     if (!currentProduct) return;
@@ -198,7 +206,6 @@ window.shareProduct = function(e) {
     }
 }
 
-// ============ IMAGE GALLERY ============
 window.setMainImage = function(idx) {
     if (idx < 0 || idx >= allImages.length) return;
     currentImageIndex = idx;
@@ -220,7 +227,6 @@ window.prevImage = function() {
     setMainImage(currentImageIndex);
 }
 
-// ============ STARS ============
 function renderStarsHtml(rating) {
     let html = '';
     const full = Math.floor(rating);
@@ -233,7 +239,6 @@ function renderStarsHtml(rating) {
     return html;
 }
 
-// ============ CONTACT LINKS ============
 function handleWhatsApp(e) {
     if (!settings.whatsapp) { e.preventDefault(); showToast('WhatsApp নম্বর সেট হয়নি', 'warn'); }
 }
@@ -268,7 +273,6 @@ function updateContactLinks() {
     }
 }
 
-// ============ RENDER PRODUCT ============
 function renderProduct() {
     const p = currentProduct;
 
@@ -277,7 +281,7 @@ function renderProduct() {
 
     const hasDiscount = p.oldPrice && p.oldPrice > p.price;
     const discountPct = hasDiscount ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 0;
-    const isOut = p.stock !== undefined && p.stock <= 0;
+    const isOut = p.stock !== undefined && Number(p.stock) <= 0;
 
     let thumbsHtml = '';
     allImages.forEach((url, i) => {
@@ -314,24 +318,24 @@ function renderProduct() {
         oldPriceEl.textContent = hasDiscount ? '৳' + formatPrice(p.oldPrice) : '';
     }
 
+    // Stock info — Pre-order support
     if (p.stock !== undefined) {
         const stockEl = document.getElementById('stock-info');
-        stockEl.innerHTML = isOut
-            ? '<span class="text-red-500 font-semibold"><i class="fas fa-times-circle mr-0.5"></i> স্টকে নেই</span>'
-            : `<span class="text-green-600 font-semibold"><i class="fas fa-check-circle mr-0.5"></i> স্টকে আছে (${p.stock})</span>`;
+        if (isOut) {
+            stockEl.innerHTML = '<span class="text-purple-600 font-semibold"><i class="fas fa-clock mr-0.5"></i> Pre-order available</span>';
+        } else {
+            stockEl.innerHTML = `<span class="text-green-600 font-semibold"><i class="fas fa-check-circle mr-0.5"></i> স্টকে আছে (${p.stock})</span>`;
+        }
     }
 
     if (p.brand) {
         document.getElementById('brand-info').innerHTML = `<span class="text-gray-500">ব্র্যান্ড: <span class="font-semibold navy-text">${escapeHtml(p.brand)}</span></span>`;
     }
 
+    // Show pre-order notice if out of stock
     if (isOut) {
-        const qtyRow = document.getElementById('qty-row');
-        if (qtyRow) qtyRow.style.display = 'none';
-        const btn = document.getElementById('main-cart-btn');
-        btn.disabled = true;
-        btn.className = 'action-btn bg-gray-300 text-gray-500 font-bold py-2.5 rounded-xl text-xs col-span-2 cursor-not-allowed';
-        btn.innerHTML = '<i class="fas fa-times-circle mr-1"></i> Out of Stock';
+        const notice = document.getElementById('preorder-notice');
+        if (notice) notice.classList.remove('hidden');
     }
 
     updateCartButton();
@@ -345,7 +349,6 @@ function renderProduct() {
     updateContactLinks();
 }
 
-// ============ REVIEWS WITH IMAGES ============
 function renderReviews() {
     const total = allReviews.length;
     const avg = total > 0 ? allReviews.reduce((s, r) => s + (Number(r.rating) || 0), 0) / total : 0;
@@ -388,7 +391,6 @@ function renderReviews() {
     list.innerHTML = html;
 }
 
-// ============ REVIEW IMAGE UPLOAD ============
 document.getElementById('review-image-file')?.addEventListener('change', function(e) {
     const f = e.target.files[0];
     if (!f) return;
@@ -430,8 +432,6 @@ window.submitReview = async function() {
 
     try {
         let imageUrl = '';
-
-        // Upload image if provided
         if (pendingReviewImage) {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Uploading photo...';
             try {
@@ -456,13 +456,11 @@ window.submitReview = async function() {
 
         showToast('রিভিউ সাবমিট হয়েছে', 'success');
 
-        // Reset form
         document.getElementById('review-name').value = '';
         document.getElementById('review-rating').value = '';
         document.getElementById('review-text').value = '';
         window.clearReviewImage();
 
-        // Optimistically add to list
         allReviews.unshift({ name, rating, text, image: imageUrl });
         renderReviews();
         document.getElementById('product-review-count').textContent = allReviews.length;
@@ -476,7 +474,6 @@ window.submitReview = async function() {
     }
 }
 
-// ============ RELATED ============
 function renderRelated() {
     const container = document.getElementById('related-products');
     let related = allProducts.filter(p => p.id !== productId);
@@ -505,7 +502,6 @@ function renderRelated() {
     container.innerHTML = html;
 }
 
-// ============ LOAD ============
 async function loadProduct() {
     if (!productId) {
         document.getElementById('loading-skeleton').classList.add('hidden');
@@ -579,4 +575,4 @@ async function loadProduct() {
 
 loadProduct();
 
-console.log('✅ product.js v3 loaded (reviews with images)');
+console.log('✅ product.js v4 loaded (pre-order)');
