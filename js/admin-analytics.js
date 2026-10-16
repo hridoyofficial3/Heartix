@@ -5,6 +5,9 @@ import { db } from './firebase.js';
 import { formatPrice as fmt } from './common.js';
 import { collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+// Auto-load backup module
+import './admin-backup.js';
+
 let allOrders = [];
 let charts = {};
 let chartJSLoaded = false;
@@ -254,10 +257,7 @@ function renderRevenue(d) {
             responsive: true, maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
-                tooltip: {
-                    backgroundColor: '#0A1628', padding: 10,
-                    callbacks: { label: (c) => '৳' + Number(c.raw).toLocaleString('en-IN') }
-                }
+                tooltip: { backgroundColor: '#0A1628', padding: 10, callbacks: { label: (c) => '৳' + Number(c.raw).toLocaleString('en-IN') } }
             },
             scales: {
                 x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#9CA3AF', maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
@@ -354,4 +354,4 @@ setTimeout(wrap, 300);
 setTimeout(wrap, 1200);
 setTimeout(wrap, 2500);
 
-console.log('✅ admin-analytics.js loaded');
+console.log('✅ admin-analytics.js loaded (with backup)');
