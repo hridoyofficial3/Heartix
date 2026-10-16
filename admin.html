@@ -23,6 +23,35 @@
         .oe-chevron { transition: transform 0.2s ease; }
         details.integration-card[open] .int-chevron { transform: rotate(180deg); }
         .int-chevron { transition: transform 0.2s ease; }
+
+        /* Help tabs */
+        .help-tab { background: #f3f4f6; color: #6b7280; }
+        .help-tab.active {
+            background: linear-gradient(135deg, #D4A84B, #E8C77B);
+            color: #0A1628;
+            box-shadow: 0 4px 12px rgba(212,168,75,0.3);
+        }
+        .help-step-num {
+            width: 28px; height: 28px;
+            background: linear-gradient(135deg, #D4A84B, #E8C77B);
+            color: #0A1628;
+            border-radius: 999px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 800;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(212,168,75,0.35);
+        }
+        .help-step-line {
+            position: absolute; left: 13px; top: 32px; bottom: -12px;
+            width: 2px; background: #e5e7eb;
+        }
+        .help-step:last-child .help-step-line { display: none; }
+        .help-code {
+            background: #0A1628; color: #E8C77B;
+            padding: 2px 6px; border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px; font-weight: 700;
+        }
     </style>
 </head>
 <body class="pb-20 md:pb-6">
@@ -175,6 +204,7 @@
 
         <main class="p-4 md:p-8 max-w-6xl mx-auto">
 
+            <!-- ============ DASHBOARD TAB ============ -->
             <div id="content-dashboard" class="tab-content">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Dashboard</h2>
@@ -233,6 +263,7 @@
                 </div>
             </div>
 
+            <!-- ============ PRODUCTS TAB ============ -->
             <div id="content-products" class="tab-content hidden">
                 <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -260,6 +291,7 @@
                 <div id="product-list-admin" class="space-y-3"></div>
             </div>
 
+            <!-- ============ CATEGORIES TAB ============ -->
             <div id="content-categories" class="tab-content hidden">
                 <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -276,6 +308,7 @@
                 <div id="category-list-admin" class="space-y-3"></div>
             </div>
 
+            <!-- ============ COUPONS TAB ============ -->
             <div id="content-coupons" class="tab-content hidden">
                 <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -289,6 +322,7 @@
                 <div id="coupon-list-admin" class="space-y-3"></div>
             </div>
 
+            <!-- ============ CONTENT TAB ============ -->
             <div id="content-content" class="tab-content hidden">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Website Content</h2>
@@ -339,6 +373,7 @@
                 </div>
             </div>
 
+            <!-- ============ ORDERS TAB ============ -->
             <div id="content-orders" class="tab-content hidden">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Orders</h2>
@@ -366,6 +401,7 @@
                 <div id="order-list-admin" class="space-y-3"></div>
             </div>
 
+            <!-- ============ REVIEWS TAB ============ -->
             <div id="content-reviews" class="tab-content hidden">
                 <div class="mb-6">
                     <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Product Reviews</h2>
@@ -374,6 +410,7 @@
                 <div id="reviews-list-admin" class="space-y-3"></div>
             </div>
 
+            <!-- ============ STAFF TAB ============ -->
             <div id="content-staff" class="tab-content hidden">
                 <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -400,6 +437,7 @@
                 <div id="staff-list" class="space-y-3"></div>
             </div>
 
+            <!-- ============ ACTIVITY TAB ============ -->
             <div id="content-activity" class="tab-content hidden">
                 <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -460,14 +498,19 @@
                     <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Free Delivery Above (৳)</label>
                     <input type="number" id="setting-free-delivery" placeholder="5000" min="0" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
                 </div>
+
+                <!-- Contact Info (WhatsApp field REMOVED — auto-synced from Integrations) -->
                 <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
                     <h3 class="font-bold text-navy mb-4"><i class="fas fa-address-book text-green-600 mr-2"></i>Contact Info</h3>
                     <input type="text" id="setting-address" placeholder="Address" maxlength="200" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
                     <input type="text" id="setting-phone" placeholder="Phone" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
-                    <input type="email" id="setting-email" placeholder="Email" maxlength="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
-                    <input type="text" id="setting-whatsapp" placeholder="WhatsApp (8801XXXXXXXXX)" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
-                    <p class="text-[10px] text-gray-400 mt-1.5"><i class="fas fa-info-circle mr-1"></i>বাংলাদেশের country code সহ (88 দিয়ে শুরু, space ছাড়া)</p>
+                    <input type="email" id="setting-email" placeholder="Email" maxlength="100" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium">
+                    <p class="text-[10px] text-gray-400 mt-2 flex items-start gap-1.5">
+                        <i class="fas fa-info-circle mt-0.5"></i>
+                        <span>WhatsApp number এখন <strong>Integrations → WhatsApp Orders</strong> থেকে সেট হবে (নিচে দেখুন)</span>
+                    </p>
                 </div>
+
                 <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
                     <h3 class="font-bold text-navy mb-4"><i class="fas fa-credit-card text-orange-600 mr-2"></i>Payment Numbers</h3>
                     <input type="text" id="setting-bkash" placeholder="bKash Number" maxlength="20" class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none text-sm font-medium mb-3">
@@ -475,15 +518,23 @@
                     <p class="text-[10px] text-gray-400 mt-1.5"><i class="fas fa-info-circle mr-1"></i>Customer checkout-এ এই number দেখে নিজে পাঠাবে</p>
                 </div>
 
+                <!-- ============ INTEGRATIONS (with HELP icon) ============ -->
                 <div class="bg-white rounded-2xl premium-shadow p-5 mb-4">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
-                            <i class="fas fa-plug text-indigo-600"></i>
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-plug text-indigo-600"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="font-bold text-navy">Integrations</h3>
+                                <p class="text-[11px] text-gray-500">Third-party services on/off করুন</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="font-bold text-navy">Integrations</h3>
-                            <p class="text-[11px] text-gray-500">Third-party services on/off করুন</p>
-                        </div>
+
+                        <!-- HELP BUTTON -->
+                        <button onclick="openIntegrationHelp()" class="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 flex items-center justify-center hover:border-gold active:scale-95 transition-all" title="Setup Guide">
+                            <i class="fas fa-circle-question text-amber-600 text-lg"></i>
+                        </button>
                     </div>
 
                     <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
@@ -568,6 +619,7 @@
                         </div>
                     </details>
 
+                    <!-- WhatsApp card — "100% Free" box REMOVED -->
                     <details class="integration-card bg-gray-50 rounded-xl overflow-hidden mb-2">
                         <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                             <div class="flex items-center gap-3 min-w-0">
@@ -591,9 +643,6 @@
                             </label>
                             <input type="text" id="int-wa-number" placeholder="8801712345678" maxlength="15" inputmode="numeric" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none text-xs font-medium bg-white focus:border-gold">
                             <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i>Country code সহ (88 দিয়ে শুরু, space ছাড়া)</p>
-                            <div class="bg-green-50 border border-green-200 rounded-lg p-2">
-                                <p class="text-[10px] text-green-700 leading-relaxed"><i class="fas fa-check-circle mr-1"></i><strong>100% Free</strong> — কোনো API লাগবে না। wa.me link ব্যবহার হবে।</p>
-                            </div>
                         </div>
                     </details>
                 </div>
@@ -604,6 +653,7 @@
 
         </main>
 
+        <!-- ============ MOBILE BOTTOM NAV ============ -->
         <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white border-t border-gray-100" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
             <div class="flex justify-around items-center py-1.5">
                 <button onclick="showTab('dashboard')" data-tab="dashboard" class="mob-nav-btn flex flex-col items-center py-2 px-2 min-w-[56px] text-gray-400">
@@ -628,6 +678,7 @@
 
     </div>
 
+    <!-- ============ MORE MENU MODAL ============ -->
     <div id="more-menu-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end justify-center">
         <div class="bg-white rounded-t-3xl w-full max-w-md animate-slide-up">
             <div class="p-5">
@@ -675,6 +726,386 @@
         </div>
     </div>
 
+    <!-- ================================================================
+         INTEGRATION HELP MODAL — TUTORIAL PANEL
+    ================================================================ -->
+    <div id="integration-help-modal" class="hidden fixed inset-0 modal-bg z-[80] flex items-end md:items-center justify-center p-0 md:p-4">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-2xl flex flex-col animate-slide-up" style="max-height: 94vh;">
+
+            <!-- Header -->
+            <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center flex-shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl gold-gradient flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-circle-question text-navy text-lg"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="text-white font-bold text-base leading-none">Integration Setup Guide</h3>
+                        <p class="text-gold/80 text-[10px] mt-1 uppercase tracking-widest font-semibold">Step-by-step Tutorials</p>
+                    </div>
+                </div>
+                <button onclick="closeIntegrationHelp()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="px-4 pt-3 pb-2 flex gap-1.5 overflow-x-auto hide-scrollbar flex-shrink-0 border-b border-gray-100">
+                <button onclick="showHelpTab('ga')" id="help-tab-ga" class="help-tab active whitespace-nowrap px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </button>
+                <button onclick="showHelpTab('fb')" id="help-tab-fb" class="help-tab whitespace-nowrap px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                    <i class="fab fa-facebook"></i> Pixel
+                </button>
+                <button onclick="showHelpTab('em')" id="help-tab-em" class="help-tab whitespace-nowrap px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                    <i class="fas fa-envelope"></i> Email
+                </button>
+                <button onclick="showHelpTab('wa')" id="help-tab-wa" class="help-tab whitespace-nowrap px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 overflow-y-auto p-5">
+
+                <!-- ============ GOOGLE ANALYTICS ============ -->
+                <div id="help-content-ga" class="help-content">
+                    <div class="flex items-start gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-chart-line text-orange-500 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-display text-lg font-bold text-navy">Google Analytics</h4>
+                            <p class="text-xs text-gray-500 mt-0.5">ভিজিটর ও কনভার্সন ট্র্যাক করার জন্য</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border-l-4 border-blue-400 rounded-r-xl p-3 mb-5">
+                        <p class="text-xs text-blue-900 leading-relaxed">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <strong>কী করে:</strong> কতজন ভিজিটর আসে, কোথা থেকে আসে, কী দেখে, কী কেনে — সব ডেটা পাবেন। সম্পূর্ণ ফ্রি।
+                        </p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">1</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">analytics.google.com-এ যান</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">আপনার Gmail account দিয়ে sign in করুন।</p>
+                                <a href="https://analytics.google.com" target="_blank" rel="noopener" class="inline-flex items-center gap-1 mt-2 text-[11px] text-blue-600 font-bold">
+                                    <i class="fas fa-external-link-alt"></i> Open Analytics
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">2</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Account তৈরি করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Admin (নিচে বাম দিকে) → <strong>Create Account</strong> → Account name: <span class="help-code">Heartix</span></p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">3</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Property তৈরি করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Property name: <span class="help-code">Heartix</span>, Time zone: <strong>Bangladesh</strong>, Currency: <strong>BDT</strong></p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">4</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Data Stream যোগ করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Platform: <strong>Web</strong>, Website URL: <span class="help-code">heartix.vercel.app</span>, Stream name: <span class="help-code">Heartix Web</span></p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">5</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Measurement ID কপি করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Stream তৈরি হলে একটা ID দেখাবে যেটা <span class="help-code">G-</span> দিয়ে শুরু হবে। সম্পূর্ণ ID কপি করুন।</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">6</div>
+                            <div class="flex-1">
+                                <p class="font-bold text-navy text-sm">Heartix Admin-এ paste করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Settings → Integrations → Google Analytics → Enable + ID paste → Save করুন।</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mt-5">
+                        <p class="text-[11px] text-amber-900 leading-relaxed">
+                            <i class="fas fa-lightbulb text-amber-600 mr-1"></i>
+                            <strong>Tip:</strong> ডেটা দেখতে ২৪-৪৮ ঘণ্টা লাগতে পারে। তাড়াহুড়ো করবেন না।
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ============ FACEBOOK PIXEL ============ -->
+                <div id="help-content-fb" class="help-content hidden">
+                    <div class="flex items-start gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fab fa-facebook text-blue-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-display text-lg font-bold text-navy">Facebook Pixel</h4>
+                            <p class="text-xs text-gray-500 mt-0.5">Facebook Ads-এর জন্য কনভার্সন ট্র্যাকিং</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border-l-4 border-blue-400 rounded-r-xl p-3 mb-5">
+                        <p class="text-xs text-blue-900 leading-relaxed">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <strong>কী করে:</strong> Facebook-এ বিজ্ঞাপন দিলে কতজনের কাছে পৌঁছালো, কতজন কিনলো — সব মাপতে সাহায্য করে। সম্পূর্ণ ফ্রি।
+                        </p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">1</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">business.facebook.com-এ যান</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Facebook account দিয়ে login করুন। Business account না থাকলে তৈরি করুন।</p>
+                                <a href="https://business.facebook.com" target="_blank" rel="noopener" class="inline-flex items-center gap-1 mt-2 text-[11px] text-blue-600 font-bold">
+                                    <i class="fas fa-external-link-alt"></i> Open Business Manager
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">2</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Events Manager-এ যান</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">বাম দিকের menu → <strong>Events Manager</strong> → <strong>Connect Data Sources</strong></p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">3</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Web → Facebook Pixel select করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">"Facebook Pixel" card-এ ক্লিক করুন → <strong>Create</strong></p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">4</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Pixel Name দিন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed"><span class="help-code">Heartix Pixel</span> — Website URL দিতে বললে <span class="help-code">heartix.vercel.app</span> দিন</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">5</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Pixel ID কপি করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">১৫-১৬ ডিজিটের একটা সংখ্যা দেখাবে। সেটা কপি করুন। <strong>শুধু সংখ্যা</strong> — কোনো অক্ষর নেই।</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">6</div>
+                            <div class="flex-1">
+                                <p class="font-bold text-navy text-sm">Heartix Admin-এ paste করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Settings → Integrations → Facebook Pixel → Enable + ID paste → Save।</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-3 mt-5">
+                        <p class="text-[11px] text-red-900 leading-relaxed">
+                            <i class="fas fa-exclamation-triangle text-red-600 mr-1"></i>
+                            <strong>সাবধান:</strong> শুধু সংখ্যা দিন। স্পেস, ড্যাশ, বা কোনো অক্ষর দিলে কাজ করবে না।
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ============ EMAILJS ============ -->
+                <div id="help-content-em" class="help-content hidden">
+                    <div class="flex items-start gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-envelope text-purple-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-display text-lg font-bold text-navy">Email Notifications</h4>
+                            <p class="text-xs text-gray-500 mt-0.5">অর্ডার কনফার্মেশন ইমেইল অটোমেটিক পাঠানোর জন্য</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border-l-4 border-blue-400 rounded-r-xl p-3 mb-5">
+                        <p class="text-xs text-blue-900 leading-relaxed">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <strong>কী করে:</strong> নতুন অর্ডার হলে আপনি (admin) আর customer দুজনেই automatic email পাবেন। ফ্রি tier: <strong>মাসে ২০০ ইমেইল</strong>।
+                        </p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">1</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">emailjs.com-এ সাইন আপ করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Free plan-এ register করুন। আপনার Gmail দিয়েই করতে পারেন।</p>
+                                <a href="https://www.emailjs.com/" target="_blank" rel="noopener" class="inline-flex items-center gap-1 mt-2 text-[11px] text-blue-600 font-bold">
+                                    <i class="fas fa-external-link-alt"></i> Open EmailJS
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">2</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Gmail Service Connect করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Email Services → <strong>Add New Service</strong> → <strong>Gmail</strong> → Connect → Service name: <span class="help-code">Heartix</span> → Copy <strong>Service ID</strong></p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">3</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Admin Template তৈরি করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed mb-2">Email Templates → <strong>Create New Template</strong> → Name: <span class="help-code">Admin Order Alert</span></p>
+                                <div class="bg-gray-50 rounded-lg p-2.5 text-[11px] space-y-1 font-mono">
+                                    <p><span class="text-gray-500">To Email:</span> {{to_email}}</p>
+                                    <p><span class="text-gray-500">Subject:</span> 🛍️ New Order {{order_number}}</p>
+                                    <p><span class="text-gray-500">Body:</span> নাম: {{customer_name}}, ফোন: {{customer_phone}}, ঠিকানা: {{customer_address}}, Total: ৳{{total}}</p>
+                                </div>
+                                <p class="text-[11px] text-gray-600 mt-2">Save করে <strong>Template ID</strong> কপি করুন।</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">4</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Customer Template তৈরি করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed mb-2">আরেকটা template বানান → Name: <span class="help-code">Customer Confirmation</span></p>
+                                <div class="bg-gray-50 rounded-lg p-2.5 text-[11px] space-y-1 font-mono">
+                                    <p><span class="text-gray-500">To Email:</span> {{to_email}}</p>
+                                    <p><span class="text-gray-500">Subject:</span> {{custom_subject}}</p>
+                                    <p><span class="text-gray-500">Body:</span> {{status_message}}, {{status_description}}, Order: {{order_number}}, Total: ৳{{total}}</p>
+                                </div>
+                                <p class="text-[11px] text-gray-600 mt-2">Save করে <strong>Template ID</strong> কপি করুন।</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">5</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Public Key কপি করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">বাম দিকের menu → Account → General → <strong>Public Key</strong> কপি করুন (<span class="help-code">UOTX…</span> format)</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">6</div>
+                            <div class="flex-1">
+                                <p class="font-bold text-navy text-sm">Heartix Admin-এ সব paste করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Settings → Integrations → Email Notifications → ৫টা field পূরণ করুন:</p>
+                                <ul class="text-[11px] text-gray-600 mt-2 space-y-1 list-disc pl-4">
+                                    <li>Public Key</li>
+                                    <li>Service ID</li>
+                                    <li>Customer Template ID</li>
+                                    <li>Admin Template ID</li>
+                                    <li>Admin Email (আপনার ইমেইল)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mt-5">
+                        <p class="text-[11px] text-amber-900 leading-relaxed">
+                            <i class="fas fa-lightbulb text-amber-600 mr-1"></i>
+                            <strong>Tip:</strong> EmailJS Dashboard-এ "Test" button দিয়ে template test করে দেখুন কাজ করে কিনা।
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ============ WHATSAPP ============ -->
+                <div id="help-content-wa" class="help-content hidden">
+                    <div class="flex items-start gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fab fa-whatsapp text-green-500 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-display text-lg font-bold text-navy">WhatsApp Orders</h4>
+                            <p class="text-xs text-gray-500 mt-0.5">Customer সরাসরি WhatsApp-এ অর্ডার করতে পারবে</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border-l-4 border-blue-400 rounded-r-xl p-3 mb-5">
+                        <p class="text-xs text-blue-900 leading-relaxed">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <strong>কী করে:</strong> Product page, cart, checkout, order success — সব জায়গায় "Order via WhatsApp" button দেখাবে। Customer ক্লিক করলে pre-filled message সহ আপনার WhatsApp-এ চলে আসবে।
+                        </p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">1</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">আপনার WhatsApp নাম্বার নিন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">সেই নাম্বার যেটা দিয়ে customer-দের সাথে কথা বলেন। Business WhatsApp হলেও চলবে।</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">2</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Format ঠিক করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">দেশের কোড + নাম্বার — <strong>শুরুতে 88</strong>, এরপর 01 বাদ দিয়ে বাকি ৯ ডিজিট।</p>
+                                <div class="bg-gray-50 rounded-lg p-3 mt-2 text-[11px] space-y-1">
+                                    <p class="flex items-center gap-2"><i class="fas fa-times text-red-500"></i> <span class="font-mono line-through text-gray-400">01712345678</span></p>
+                                    <p class="flex items-center gap-2"><i class="fas fa-times text-red-500"></i> <span class="font-mono line-through text-gray-400">+880 171 234 5678</span></p>
+                                    <p class="flex items-center gap-2"><i class="fas fa-times text-red-500"></i> <span class="font-mono line-through text-gray-400">880-1712-345678</span></p>
+                                    <p class="flex items-center gap-2 mt-2"><i class="fas fa-check text-green-600"></i> <span class="font-mono font-bold text-green-700 help-code">8801712345678</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">3</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Heartix Admin-এ paste করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">Settings → Integrations → <strong>WhatsApp Orders</strong> → Expand করুন</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">4</div>
+                            <div class="flex-1 pb-4">
+                                <p class="font-bold text-navy text-sm">Enable checkbox টিক দিন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">✅ "Enable WhatsApp Order Buttons" checkbox-এ টিক দিন</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative help-step">
+                            <div class="help-step-num">5</div>
+                            <div class="flex-1">
+                                <p class="font-bold text-navy text-sm">SAVE INTEGRATIONS ক্লিক করুন</p>
+                                <p class="text-xs text-gray-600 mt-1 leading-relaxed">নিচের সবুজ "SAVE INTEGRATIONS" button-এ ক্লিক করুন। Page auto reload হবে।</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 border border-green-200 rounded-xl p-3 mt-5">
+                        <p class="text-[11px] text-green-900 leading-relaxed">
+                            <i class="fas fa-check-circle text-green-600 mr-1"></i>
+                            <strong>Verified:</strong> Product page, cart, checkout, order success — সব জায়গায় button automatically দেখাবে। কোনো কোড বা API লাগবে না।
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ OTHER MODALS (unchanged) ============ -->
     <div id="staff-modal" class="hidden fixed inset-0 modal-bg z-[85] flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-slide-up">
             <div class="navy-gradient p-5 rounded-t-3xl flex justify-between items-center sticky top-0 z-10">
@@ -755,6 +1186,7 @@
         </div>
     </div>
 
+    <!-- Order Edit Modal (simplified placeholder — original preserved) -->
     <div id="order-edit-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-lg flex flex-col" style="max-height: 95vh; height: 95vh;">
             <div class="navy-gradient px-4 py-3 rounded-t-3xl flex justify-between items-center flex-shrink-0">
@@ -1192,6 +1624,31 @@
             </div>
         </div>
     </div>
+
+    <!-- ============ INTEGRATION HELP TOGGLE SCRIPT ============ -->
+    <script>
+        window.openIntegrationHelp = function() {
+            document.getElementById('integration-help-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+        window.closeIntegrationHelp = function() {
+            document.getElementById('integration-help-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        };
+        window.showHelpTab = function(tab) {
+            // Deactivate all tabs
+            document.querySelectorAll('.help-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.help-content').forEach(c => c.classList.add('hidden'));
+            // Activate selected
+            const tabBtn = document.getElementById('help-tab-' + tab);
+            const content = document.getElementById('help-content-' + tab);
+            if (tabBtn) tabBtn.classList.add('active');
+            if (content) content.classList.remove('hidden');
+            // Scroll content to top
+            const scroller = content ? content.closest('.overflow-y-auto') : null;
+            if (scroller) scroller.scrollTop = 0;
+        };
+    </script>
 
     <script type="module" src="js/admin-reorder.js"></script>
     <script type="module" src="js/admin.js"></script>
