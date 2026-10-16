@@ -5,8 +5,9 @@ import { db } from './firebase.js';
 import { formatPrice as fmt } from './common.js';
 import { collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Auto-load backup module
+// Auto-load modules
 import './admin-backup.js';
+import './admin-preorder-badge.js';
 
 let allOrders = [];
 let charts = {};
@@ -354,4 +355,4 @@ setTimeout(wrap, 300);
 setTimeout(wrap, 1200);
 setTimeout(wrap, 2500);
 
-console.log('✅ admin-analytics.js loaded (with backup)');
+console.log('✅ admin-analytics.js loaded (with backup + preorder badge)');
