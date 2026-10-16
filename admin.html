@@ -129,6 +129,9 @@
                 <button onclick="showTab('dashboard')" data-tab="dashboard" class="nav-item active w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left">
                     <i class="fas fa-chart-pie nav-icon w-5 text-center"></i> Dashboard
                 </button>
+                <button onclick="showTab('analytics')" data-tab="analytics" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left">
+                    <i class="fas fa-chart-line nav-icon w-5 text-center"></i> Analytics
+                </button>
                 <button onclick="showTab('orders')" data-tab="orders" class="nav-item w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left">
                     <i class="fas fa-receipt nav-icon w-5 text-center"></i> Orders
                     <span id="orders-badge" class="ml-auto bg-gold text-navy text-[10px] font-bold rounded-full px-2 py-0.5 hidden">0</span>
@@ -258,6 +261,14 @@
                     </div>
                     <div id="recent-orders"></div>
                 </div>
+            </div>
+
+            <div id="content-analytics" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="font-display text-2xl md:text-3xl font-bold text-navy mb-1">Analytics</h2>
+                    <p class="text-sm text-gray-500">Sales ও business insights</p>
+                </div>
+                <div id="analytics-container"></div>
             </div>
 
             <div id="content-products" class="tab-content hidden">
@@ -666,6 +677,11 @@
                 <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
                 <h3 class="font-bold text-navy text-lg mb-4">More Options</h3>
                 <div class="space-y-2">
+                    <button onclick="showTab('analytics'); closeMoreMenu()" class="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl active:bg-gray-100">
+                        <div class="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center"><i class="fas fa-chart-line text-pink-600"></i></div>
+                        <span class="font-semibold text-navy">Analytics</span>
+                        <i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i>
+                    </button>
                     <button onclick="showTab('categories'); closeMoreMenu()" class="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl active:bg-gray-100">
                         <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><i class="fas fa-th-large text-blue-600"></i></div>
                         <span class="font-semibold text-navy">Categories</span>
@@ -1592,5 +1608,6 @@
     <script type="module" src="js/admin-staff.js"></script>
     <script type="module" src="js/inventory-alert.js"></script>
     <script type="module" src="js/admin-bulk-orders.js"></script>
+    <script type="module" src="js/admin-analytics.js"></script>
 </body>
 </html>
