@@ -1,5 +1,6 @@
 // ============================================================
 // HEARTIX INDEX (Home) — Featured + Pinned + SortOrder + Low Stock
+// v3 — Price font fix (Inter Bold, stacked old price, no Save badge)
 // ============================================================
 import { db } from './firebase.js';
 import {
@@ -11,7 +12,7 @@ import {
 } from './common.js';
 
 import {
-    collection, getDocs, doc, getDoc
+    collection, getDocs, doc, getDoc, query, orderBy, limit
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ============ STATE ============
@@ -80,6 +81,7 @@ window.toggleSearch = function() {
     else {
         document.getElementById('search-input').value = '';
         currentSearch = '';
+        displayedCount = 0;
         hideSuggestions();
         renderProducts();
     }
@@ -89,6 +91,7 @@ window.closeSearch = function() {
     document.getElementById('search-input').value = '';
     document.getElementById('search-input').blur();
     currentSearch = '';
+    displayedCount = 0;
     hideSuggestions();
     renderProducts();
 }
@@ -97,6 +100,7 @@ window.searchProducts = function() {
     if (searchTimer) clearTimeout(searchTimer);
     searchTimer = setTimeout(() => {
         currentSearch = (document.getElementById('search-input').value || '').toLowerCase().trim();
+        displayedCount = 0;
         renderProducts();
         showSuggestions();
     }, 200);
@@ -151,6 +155,7 @@ window.filterByCategory = function(cat) {
     displayedCount = 0;
     const input = document.getElementById('search-input');
     if (input) input.value = '';
+    currentSearch = '';
     document.getElementById('search-bar-wrapper').classList.remove('open');
     hideSuggestions();
     const found = categories.find(c => c.key === cat);
@@ -402,11 +407,10 @@ function renderProductCard(p) {
             </div>
             <h4 class="text-[12px] font-semibold text-navy leading-tight mb-1 line-clamp-2" style="min-height:32px;">${escapeHtml(p.name)}</h4>
             <div class="text-[9px] text-gray-500 mb-1.5">${starsHtml}</div>
-            <div class="flex items-center gap-1.5 mb-1 flex-wrap">
-                <p class="font-display text-base font-bold text-navy">৳${formatPrice(p.price)}</p>
-                ${hasDiscount ? `<p class="text-[9px] text-gray-400 line-through">৳${formatPrice(p.oldPrice)}</p>` : ''}
+            <div class="mb-1.5">
+                <p class="text-[15px] font-bold text-navy leading-tight">৳${formatPrice(p.price)}</p>
+                ${hasDiscount ? `<p class="text-[10px] text-gray-400 line-through mt-0.5">৳${formatPrice(p.oldPrice)}</p>` : ''}
             </div>
-            ${hasDiscount ? `<span class="inline-block bg-green-100 text-green-700 text-[9px] font-bold px-1.5 py-0.5 rounded-full mb-1">Save ৳${formatPrice(p.oldPrice - p.price)}</span>` : ''}
         </a>
         ${actionHtml}
     </div>`;
@@ -476,8 +480,8 @@ function renderRecentlyViewed() {
         html += `<a href="product.html?id=${p.id}" class="bg-white rounded-2xl p-2.5 premium-shadow" style="width: 130px; flex-shrink: 0; scroll-snap-align: start;">
             <img src="${p.image || 'https://via.placeholder.com/120x120?text=?'}" class="product-img w-full h-24 rounded-lg mb-1.5" loading="lazy" onerror="this.src='https://via.placeholder.com/120x120?text=?'">
             <h4 class="text-[11px] font-semibold text-navy leading-tight mb-1 line-clamp-2" style="min-height: 28px;">${escapeHtml(p.name)}</h4>
-            <p class="text-xs font-bold text-navy">৳${formatPrice(p.price)}</p>
-            ${hasDiscount ? `<p class="text-[9px] text-gray-400 line-through">৳${formatPrice(p.oldPrice)}</p>` : ''}
+            <p class="text-[15px] font-bold text-navy leading-tight">৳${formatPrice(p.price)}</p>
+            ${hasDiscount ? `<p class="text-[10px] text-gray-400 line-through mt-0.5">৳${formatPrice(p.oldPrice)}</p>` : ''}
         </a>`;
     });
     list.innerHTML = html;
@@ -555,8 +559,8 @@ function applySettings() {
         if (s.contactEmail) { const el = document.getElementById('footer-email'); if (el) el.textContent = s.contactEmail; }
         if (s.contactAddress) { const el = document.getElementById('footer-address'); if (el) el.textContent = s.contactAddress; }
         if (s.whatsapp) { const waEl = document.getElementById('social-whatsapp'); if (waEl) waEl.href = 'https://wa.me/' + s.whatsapp; }
-        if (s.facebook) { const fbEl = document.getElementById('social-facebook'); if (fbEl) fbEl.href = s.facebook; }
-        if (s.instagram) { const igEl = document.getElementById('social-instagram'); if (igEl) igEl.href = s.instagram; }
+        if (s.facebook) { const el = document.getElementById('social-facebook'); if (el) el.href = s.facebook; }
+        if (s.instagram) { const el = document.getElementById('social-instagram'); if (el) el.href = s.instagram; }
     } catch (e) {}
 }
 
@@ -570,10 +574,23 @@ async function loadAll() {
         return;
     }
     try {
-        const [prodSnap, revSnap, setSnap] = await Promise.all([
-            getDocs(collection(db, "products")).catch(() => null),
-            getDocs(collection(db, "reviews")).catch(() => null),
-            getDoc(doc(db, "settings", "main")).catch(() => null)
+        const productsPromise = getDocs(collection(db, "products")).catch(() => null);
+        const settingsPromise = getDoc(doc(db, "settings", "main")).catch(() => null);
+
+        const reviewsPromise = (async () => {
+            try {
+                const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(500));
+                return await getDocs(q);
+            } catch (e) {
+                try { return await getDocs(collection(db, "reviews")); }
+                catch (e2) { return null; }
+            }
+        })();
+
+        const [prodSnap, setSnap, revSnap] = await Promise.all([
+            productsPromise,
+            settingsPromise,
+            reviewsPromise
         ]);
 
         if (prodSnap) {
@@ -633,3 +650,5 @@ async function loadAll() {
 updateCartBadges();
 updateWishlistBadges();
 loadAll();
+
+console.log('✅ index.js v3 loaded (price font fixed)');
