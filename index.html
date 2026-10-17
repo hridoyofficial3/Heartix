@@ -5,15 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Heartix — Premium Smart Appliances in Bangladesh">
     <meta name="theme-color" content="#0A1628">
-
-    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="logo.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Heartix">
-    <meta name="mobile-web-app-capable" content="yes">
-
     <title>Heartix — Premium Smart Appliances</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,7 +18,6 @@
             fontFamily: { 'display': ['Playfair Display', 'serif'] }
         }}}
     </script>
-
     <script>
         (function() {
             try {
@@ -34,262 +27,110 @@
             } catch(e) { window.__cartCount = 0; }
         })();
     </script>
-
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/index.css">
 </head>
 <body class="pb-16">
 
     <div id="toast-container"></div>
-
     <div id="overlay" onclick="closeSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden"></div>
 
+    <!-- SIDEBAR -->
     <div id="sidebar" class="fixed top-0 left-0 h-full w-[85vw] max-w-[340px] bg-white z-50 shadow-2xl overflow-y-auto hide-scrollbar" style="transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);">
-
         <div class="navy-gradient px-5 py-5 text-white relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
-            <div class="absolute bottom-0 left-0 w-24 h-24 bg-[#D4A84B]/10 rounded-full -ml-12 -mb-12"></div>
-
             <div class="relative">
                 <div class="flex justify-between items-center mb-4">
-                    <div class="bg-white rounded-xl p-1.5 shadow-sm">
-                        <img src="logo.png" alt="Heartix" class="h-7 object-contain">
-                    </div>
-                    <button onclick="closeSidebar()" class="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition">
-                        <i class="fas fa-times text-white text-sm"></i>
-                    </button>
+                    <div class="bg-white rounded-xl p-1.5 shadow-sm"><img src="logo.png" alt="Heartix" class="h-7 object-contain"></div>
+                    <button onclick="closeSidebar()" class="w-9 h-9 flex items-center justify-center rounded-full bg-white/10"><i class="fas fa-times text-white text-sm"></i></button>
                 </div>
-
                 <p class="text-[10px] text-[#D4A84B] tracking-[0.2em] uppercase font-bold mb-1">Welcome to</p>
                 <p class="font-display text-3xl font-bold leading-none mb-1">Heartix</p>
                 <p class="text-[11px] text-white/50">Premium Smart Appliances</p>
             </div>
         </div>
-
         <div class="px-4 pt-4">
-            <a href="account.html" class="flex items-center gap-3 bg-gradient-to-r from-[#FBF8F3] to-[#F5EEDF] border border-[#D4A84B]/20 rounded-2xl p-3 active:scale-[0.98] transition">
-                <div class="w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-user text-[#0A1628] text-base"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-bold text-[#0A1628] text-sm">Hello, Guest!</p>
-                    <p class="text-[11px] text-gray-500">Sign in to your account</p>
-                </div>
-                <i class="fas fa-chevron-right text-[#D4A84B] text-xs"></i>
+            <a href="account.html" class="flex items-center gap-3 bg-gradient-to-r from-[#FBF8F3] to-[#F5EEDF] border border-[#D4A84B]/20 rounded-2xl p-3">
+                <div class="w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center"><i class="fas fa-user text-[#0A1628]"></i></div>
+                <div class="flex-1 min-w-0"><p class="font-bold text-[#0A1628] text-sm">Hello, Guest!</p><p class="text-[11px] text-gray-500">Sign in to your account</p></div>
             </a>
         </div>
-
         <div class="px-4 mt-5">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="w-1 h-3.5 bg-[#D4A84B] rounded-full"></span>
-                <p class="text-[10px] font-bold text-[#0A1628] tracking-[0.15em] uppercase">Browse</p>
-            </div>
-
+            <div class="flex items-center gap-2 mb-2"><span class="w-1 h-3.5 bg-[#D4A84B] rounded-full"></span><p class="text-[10px] font-bold text-[#0A1628] uppercase">Browse</p></div>
             <div class="space-y-0.5">
-                <a href="#" onclick="filterByCategory('all'); closeSidebar(); return false;" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
-                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center text-base flex-shrink-0 transition">🛍️</span>
-                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">All Products</span>
-                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
-                </a>
+                <a href="#" onclick="filterByCategory('all'); closeSidebar(); return false;" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] transition"><span class="w-9 h-9 rounded-lg bg-[#FBF8F3] flex items-center justify-center text-base">🛍️</span><span class="flex-1 text-[13px] font-semibold text-[#0A1628]">All Products</span></a>
                 <div id="sidebar-categories"></div>
             </div>
         </div>
-
         <div class="px-4 mt-5">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="w-1 h-3.5 bg-[#D4A84B] rounded-full"></span>
-                <p class="text-[10px] font-bold text-[#0A1628] tracking-[0.15em] uppercase">Quick Links</p>
-            </div>
-
+            <div class="flex items-center gap-2 mb-2"><span class="w-1 h-3.5 bg-[#D4A84B] rounded-full"></span><p class="text-[10px] font-bold text-[#0A1628] uppercase">Quick Links</p></div>
             <div class="space-y-0.5">
-                <a href="cart.html" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
-                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition relative">
-                        <i class="fas fa-shopping-bag text-[#0A1628] text-sm"></i>
-                        <span id="cart-count-sidebar" class="absolute -top-1 -right-1 bg-[#D4A84B] text-[#0A1628] text-[9px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center">0</span>
-                    </span>
-                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">My Cart</span>
-                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
-                </a>
-                <a href="wishlist.html" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
-                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition relative">
-                        <i class="fas fa-heart text-[#0A1628] text-sm"></i>
-                        <span id="wishlist-count-sidebar" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center hidden">0</span>
-                    </span>
-                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">Wishlist</span>
-                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
-                </a>
-                <a href="track-order.html" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
-                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition">
-                        <i class="fas fa-truck-fast text-[#0A1628] text-sm"></i>
-                    </span>
-                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">Track Order</span>
-                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
-                </a>
-            </div>
-        </div>
-
-        <div class="px-4 mt-5 mb-4">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="w-1 h-3.5 bg-[#D4A84B] rounded-full"></span>
-                <p class="text-[10px] font-bold text-[#0A1628] tracking-[0.15em] uppercase">Support</p>
-            </div>
-
-            <div class="space-y-0.5">
-                <a href="contact.html" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
-                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition">
-                        <i class="fas fa-headset text-[#0A1628] text-sm"></i>
-                    </span>
-                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">Contact Us</span>
-                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
-                </a>
-                <a href="about.html" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
-                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition">
-                        <i class="fas fa-circle-info text-[#0A1628] text-sm"></i>
-                    </span>
-                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">About Heartix</span>
-                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
-                </a>
-                <a href="faq.html" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
-                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition">
-                        <i class="fas fa-circle-question text-[#0A1628] text-sm"></i>
-                    </span>
-                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">FAQ</span>
-                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
-                </a>
-                <a href="return-policy.html" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] active:bg-[#F5EEDF] transition group">
-                    <span class="w-9 h-9 rounded-lg bg-[#FBF8F3] group-hover:bg-[#D4A84B]/15 flex items-center justify-center flex-shrink-0 transition">
-                        <i class="fas fa-arrow-rotate-left text-[#0A1628] text-sm"></i>
-                    </span>
-                    <span class="flex-1 text-[13px] font-semibold text-[#0A1628]">Return Policy</span>
-                    <i class="fas fa-chevron-right text-[9px] text-gray-300 group-hover:text-[#D4A84B] transition"></i>
-                </a>
-            </div>
-        </div>
-
-        <div class="px-4 pb-5">
-            <div class="navy-gradient rounded-2xl p-4 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-20 h-20 bg-[#D4A84B]/20 rounded-full -mr-10 -mt-10"></div>
-                <div class="relative flex items-center gap-3">
-                    <div class="w-10 h-10 gold-gradient rounded-xl flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-crown text-[#0A1628] text-base"></i>
-                    </div>
-                    <div>
-                        <p class="text-white text-xs font-bold leading-none mb-1">Premium Service</p>
-                        <p class="text-white/60 text-[10px] leading-none">100% Authentic Products</p>
-                    </div>
-                </div>
+                <a href="cart.html" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] transition"><span class="w-9 h-9 rounded-lg bg-[#FBF8F3] flex items-center justify-center relative"><i class="fas fa-shopping-bag text-[#0A1628] text-sm"></i><span id="cart-count-sidebar" class="absolute -top-1 -right-1 bg-[#D4A84B] text-[#0A1628] text-[9px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center">0</span></span><span class="flex-1 text-[13px] font-semibold text-[#0A1628]">My Cart</span></a>
+                <a href="wishlist.html" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] transition"><span class="w-9 h-9 rounded-lg bg-[#FBF8F3] flex items-center justify-center"><i class="fas fa-heart text-[#0A1628] text-sm"></i></span><span class="flex-1 text-[13px] font-semibold text-[#0A1628]">Wishlist</span></a>
+                <a href="track-order.html" class="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FBF8F3] transition"><span class="w-9 h-9 rounded-lg bg-[#FBF8F3] flex items-center justify-center"><i class="fas fa-truck-fast text-[#0A1628] text-sm"></i></span><span class="flex-1 text-[13px] font-semibold text-[#0A1628]">Track Order</span></a>
             </div>
         </div>
     </div>
 
+    <!-- HEADER -->
     <header class="glass sticky top-0 z-30 px-3 py-0 flex justify-between items-center border-b border-gray-100">
         <div class="flex items-center gap-1 flex-1 min-w-0">
-            <button onclick="openSidebar()" class="w-8 h-8 flex items-center justify-center flex-shrink-0 -ml-1">
-                <i class="fas fa-bars text-navy text-base"></i>
-            </button>
+            <button onclick="openSidebar()" class="w-8 h-8 flex items-center justify-center flex-shrink-0 -ml-1"><i class="fas fa-bars text-navy text-base"></i></button>
             <img src="logo.png" alt="Heartix" class="h-14 object-contain" style="mix-blend-mode: multiply;">
         </div>
         <div class="flex items-center gap-1 flex-shrink-0">
-            <a href="wishlist.html" class="relative w-9 h-9 flex items-center justify-center">
-                <i class="fas fa-heart text-navy text-lg"></i>
-                <span id="wishlist-count-header" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
-            </a>
-            <a href="cart.html" class="relative w-9 h-9 flex items-center justify-center">
-                <i class="fas fa-shopping-bag text-navy text-lg"></i>
-                <span id="cart-count-header" class="absolute -top-1 -right-1 gold-gradient text-navy text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
-            </a>
+            <a href="wishlist.html" class="relative w-9 h-9 flex items-center justify-center"><i class="fas fa-heart text-navy text-lg"></i><span id="wishlist-count-header" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></a>
+            <a href="cart.html" class="relative w-9 h-9 flex items-center justify-center"><i class="fas fa-shopping-bag text-navy text-lg"></i><span id="cart-count-header" class="absolute -top-1 -right-1 gold-gradient text-navy text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span></a>
         </div>
     </header>
 
+    <!-- SEARCH BAR -->
     <div id="search-bar-wrapper" class="px-5">
         <div class="relative pt-3 pb-1">
             <input type="text" id="search-input" oninput="searchProducts()" onfocus="showSuggestions()" placeholder="Search products..." class="w-full bg-white rounded-2xl py-3.5 pl-12 pr-12 outline-none premium-shadow text-sm" autocomplete="off">
             <i class="fas fa-search absolute left-4 top-7 text-gold"></i>
-            <button onclick="closeSearch()" class="absolute right-4 top-7 text-gray-400 w-6 h-6 flex items-center justify-center">
-                <i class="fas fa-times"></i>
-            </button>
+            <button onclick="closeSearch()" class="absolute right-4 top-7 text-gray-400 w-6 h-6 flex items-center justify-center"><i class="fas fa-times"></i></button>
         </div>
         <div id="search-suggestions"></div>
     </div>
 
+    <!-- HERO SLIDER -->
     <div class="px-5 pt-3">
         <div class="slider-viewport">
-            <div id="slider-skeleton" class="absolute inset-0 z-20">
-                <div class="w-full h-full shimmer rounded-3xl"></div>
-            </div>
+            <div id="slider-skeleton" class="absolute inset-0 z-20"><div class="w-full h-full shimmer rounded-3xl"></div></div>
             <div id="slider-track" class="slider-track opacity-0 transition-opacity duration-300"></div>
         </div>
         <div id="slider-dots" class="flex justify-center gap-1.5 mt-3"></div>
     </div>
 
+    <!-- CATEGORIES -->
     <div class="mt-7">
         <h3 class="section-title px-5">Featured Categories</h3>
         <div id="category-scroll-container" class="flex overflow-x-auto hide-scrollbar gap-1.5 pb-2 px-5">
-            <div class="flex flex-col items-center" style="min-width:78px; flex-shrink:0;">
-                <div class="category-card"><div class="shimmer w-12 h-12 rounded-lg"></div></div>
-                <div class="shimmer h-3 w-12 rounded mt-2"></div>
-            </div>
-            <div class="flex flex-col items-center" style="min-width:78px; flex-shrink:0;">
-                <div class="category-card"><div class="shimmer w-12 h-12 rounded-lg"></div></div>
-                <div class="shimmer h-3 w-12 rounded mt-2"></div>
-            </div>
-            <div class="flex flex-col items-center" style="min-width:78px; flex-shrink:0;">
-                <div class="category-card"><div class="shimmer w-12 h-12 rounded-lg"></div></div>
-                <div class="shimmer h-3 w-12 rounded mt-2"></div>
-            </div>
-            <div class="flex flex-col items-center" style="min-width:78px; flex-shrink:0;">
-                <div class="category-card"><div class="shimmer w-12 h-12 rounded-lg"></div></div>
-                <div class="shimmer h-3 w-12 rounded mt-2"></div>
-            </div>
+            <div class="flex flex-col items-center" style="min-width:78px; flex-shrink:0;"><div class="category-card"><div class="shimmer w-12 h-12 rounded-lg"></div></div><div class="shimmer h-3 w-12 rounded mt-2"></div></div>
+            <div class="flex flex-col items-center" style="min-width:78px; flex-shrink:0;"><div class="category-card"><div class="shimmer w-12 h-12 rounded-lg"></div></div><div class="shimmer h-3 w-12 rounded mt-2"></div></div>
         </div>
     </div>
 
+    <!-- RECENTLY VIEWED -->
     <div id="recently-viewed-section" class="mt-8 px-5 hidden">
         <h3 class="section-title">Recently Viewed</h3>
         <div id="recently-viewed-list" class="flex gap-3 overflow-x-auto hide-scrollbar pb-2" style="scroll-snap-type: x mandatory;"></div>
     </div>
 
+    <!-- PRODUCTS -->
     <div class="mt-8 px-5">
         <h3 id="section-title" class="section-title">Top Selling Products</h3>
         <div id="product-list" class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div class="bg-white rounded-2xl p-2.5 premium-shadow">
-                <div class="w-full h-28 shimmer rounded-lg mb-2"></div>
-                <div class="h-3.5 w-3/4 shimmer rounded mb-2"></div>
-                <div class="h-3.5 w-1/2 shimmer rounded mb-2"></div>
-                <div class="h-8 w-full shimmer rounded-lg"></div>
-            </div>
-            <div class="bg-white rounded-2xl p-2.5 premium-shadow">
-                <div class="w-full h-28 shimmer rounded-lg mb-2"></div>
-                <div class="h-3.5 w-3/4 shimmer rounded mb-2"></div>
-                <div class="h-3.5 w-1/2 shimmer rounded mb-2"></div>
-                <div class="h-8 w-full shimmer rounded-lg"></div>
-            </div>
-            <div class="bg-white rounded-2xl p-2.5 premium-shadow">
-                <div class="w-full h-28 shimmer rounded-lg mb-2"></div>
-                <div class="h-3.5 w-3/4 shimmer rounded mb-2"></div>
-                <div class="h-3.5 w-1/2 shimmer rounded mb-2"></div>
-                <div class="h-8 w-full shimmer rounded-lg"></div>
-            </div>
-            <div class="bg-white rounded-2xl p-2.5 premium-shadow">
-                <div class="w-full h-28 shimmer rounded-lg mb-2"></div>
-                <div class="h-3.5 w-3/4 shimmer rounded mb-2"></div>
-                <div class="h-3.5 w-1/2 shimmer rounded mb-2"></div>
-                <div class="h-8 w-full shimmer rounded-lg"></div>
-            </div>
+            <div class="bg-white rounded-2xl p-2.5 premium-shadow"><div class="w-full h-28 shimmer rounded-lg mb-2"></div><div class="h-3.5 w-3/4 shimmer rounded mb-2"></div><div class="h-8 w-full shimmer rounded-lg"></div></div>
+            <div class="bg-white rounded-2xl p-2.5 premium-shadow"><div class="w-full h-28 shimmer rounded-lg mb-2"></div><div class="h-3.5 w-3/4 shimmer rounded mb-2"></div><div class="h-8 w-full shimmer rounded-lg"></div></div>
         </div>
-        <p id="no-product-msg" class="hidden text-center text-gray-400 py-12">
-            <i class="fas fa-box-open text-4xl mb-3 block"></i>
-            কোনো প্রোডাক্ট পাওয়া যায়নি
-        </p>
-        <div id="load-more-wrap" class="hidden text-center mt-4">
-            <button onclick="loadMoreProducts()" id="load-more-btn" class="bg-white border-2 border-gold text-navy px-6 py-2.5 rounded-xl text-xs font-bold">
-                <i class="fas fa-arrow-down mr-1"></i> Load More
-            </button>
-        </div>
+        <p id="no-product-msg" class="hidden text-center text-gray-400 py-12"><i class="fas fa-box-open text-4xl mb-3 block"></i>কোনো প্রোডাক্ট পাওয়া যায়নি</p>
+        <div id="load-more-wrap" class="hidden text-center mt-4"><button onclick="loadMoreProducts()" id="load-more-btn" class="bg-white border-2 border-gold text-navy px-6 py-2.5 rounded-xl text-xs font-bold"><i class="fas fa-arrow-down mr-1"></i> Load More</button></div>
     </div>
 
     <div id="dynamic-content"></div>
 
+    <!-- FOOTER -->
     <footer class="navy-gradient px-5 py-8 mt-6">
         <div class="flex items-center gap-3 mb-4">
             <div class="bg-white rounded-xl p-2"><img src="logo.png" alt="Heartix" class="h-12 object-contain"></div>
@@ -302,9 +143,9 @@
             <p class="text-white/80 text-xs"><i class="fas fa-map-marker-alt gold-text mr-2 w-4"></i><span id="footer-address">Dhaka, Bangladesh</span></p>
         </div>
         <div class="flex gap-3 mb-6">
-            <a id="social-facebook" href="https://facebook.com/" target="_blank" rel="noopener" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition"><i class="fab fa-facebook-f text-sm"></i></a>
-            <a id="social-whatsapp" href="https://wa.me/" target="_blank" rel="noopener" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition"><i class="fab fa-whatsapp text-sm"></i></a>
-            <a id="social-instagram" href="https://instagram.com/" target="_blank" rel="noopener" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition"><i class="fab fa-instagram text-sm"></i></a>
+            <a id="social-facebook" href="https://facebook.com/" target="_blank" rel="noopener" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white"><i class="fab fa-facebook-f text-sm"></i></a>
+            <a id="social-whatsapp" href="https://wa.me/" target="_blank" rel="noopener" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white"><i class="fab fa-whatsapp text-sm"></i></a>
+            <a id="social-instagram" href="https://instagram.com/" target="_blank" rel="noopener" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white"><i class="fab fa-instagram text-sm"></i></a>
         </div>
         <div class="grid grid-cols-2 gap-4 mb-6">
             <div>
@@ -325,50 +166,51 @@
         <div class="border-t border-white/10 pt-4 text-center"><p class="text-white/50 text-[10px]">© 2025 Heartix. All rights reserved.</p></div>
     </footer>
 
+    <!-- FLOATING CART -->
     <a href="cart.html" id="floating-cart" class="hide fixed right-3 bottom-24 z-30">
         <div class="floating-cart-card pl-1.5 pr-2.5 py-1.5 flex items-center gap-2">
             <div class="floating-cart-icon gold-gradient w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative"><i class="fas fa-shopping-bag text-navy text-[13px]"></i></div>
             <div class="flex flex-col min-w-[50px]" style="position:relative;z-index:2;">
                 <span class="text-[7.5px] font-bold uppercase" style="color:rgba(255,255,255,0.55);">In Cart</span>
-                <span id="floating-cart-total" class="text-white text-[14px] font-extrabold" style="text-shadow:0 1px 4px rgba(0,0,0,0.4);">৳0</span>
+                <span id="floating-cart-total" class="text-white text-[14px] font-extrabold">৳0</span>
                 <span id="floating-cart-count" class="text-[8.5px]" style="color:rgba(212,168,75,0.95);">0 items</span>
             </div>
             <i class="fas fa-chevron-right text-gold/60 text-[8px]"></i>
         </div>
     </a>
 
+    <!-- BOTTOM NAV -->
     <nav class="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-[#0F1729]/95 backdrop-blur-xl border-t border-white/5" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
         <div class="flex justify-around items-center pt-1.5 pb-1.5">
-            <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]">
-                <i class="fas fa-home text-[15px] text-gold"></i>
-                <span class="text-[8px] mt-0.5 text-gold font-semibold">Home</span>
-                <span class="w-0.5 h-0.5 bg-gold rounded-full mt-0.5"></span>
-            </button>
-            <button onclick="openSidebar()" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]">
-                <i class="fas fa-th-large text-[15px] text-white/50"></i>
-                <span class="text-[8px] mt-0.5 text-white/50">Menu</span>
-                <span class="w-0.5 h-0.5 bg-transparent rounded-full mt-0.5"></span>
-            </button>
-            <a href="cart.html" class="relative flex flex-col items-center py-0.5 px-3 min-w-[56px]">
-                <div class="relative">
-                    <i class="fas fa-shopping-bag text-[15px] text-white/50"></i>
-                    <span id="cart-count-bottom" class="absolute -top-1 -right-2 bg-gold text-navy text-[8px] font-bold rounded-full h-3.5 min-w-[14px] px-0.5 flex items-center justify-center">0</span>
-                </div>
-                <span class="text-[8px] mt-0.5 text-white/50">Cart</span>
-                <span class="w-0.5 h-0.5 bg-transparent rounded-full mt-0.5"></span>
-            </a>
-            <button onclick="toggleSearch()" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]">
-                <i class="fas fa-search text-[15px] text-white/50"></i>
-                <span class="text-[8px] mt-0.5 text-white/50">Search</span>
-                <span class="w-0.5 h-0.5 bg-transparent rounded-full mt-0.5"></span>
-            </button>
-            <a href="account.html" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]">
-                <i class="fas fa-user text-[15px] text-white/50"></i>
-                <span class="text-[8px] mt-0.5 text-white/50">Account</span>
-                <span class="w-0.5 h-0.5 bg-transparent rounded-full mt-0.5"></span>
-            </a>
+            <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]"><i class="fas fa-home text-[15px] text-gold"></i><span class="text-[8px] mt-0.5 text-gold font-semibold">Home</span></button>
+            <button onclick="openSidebar()" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]"><i class="fas fa-th-large text-[15px] text-white/50"></i><span class="text-[8px] mt-0.5 text-white/50">Menu</span></button>
+            <a href="cart.html" class="relative flex flex-col items-center py-0.5 px-3 min-w-[56px]"><div class="relative"><i class="fas fa-shopping-bag text-[15px] text-white/50"></i><span id="cart-count-bottom" class="absolute -top-1 -right-2 bg-gold text-navy text-[8px] font-bold rounded-full h-3.5 min-w-[14px] px-0.5 flex items-center justify-center">0</span></div><span class="text-[8px] mt-0.5 text-white/50">Cart</span></a>
+            <button onclick="toggleSearch()" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]"><i class="fas fa-search text-[15px] text-white/50"></i><span class="text-[8px] mt-0.5 text-white/50">Search</span></button>
+            <a href="account.html" class="flex flex-col items-center py-0.5 px-3 min-w-[56px]"><i class="fas fa-user text-[15px] text-white/50"></i><span class="text-[8px] mt-0.5 text-white/50">Account</span></a>
         </div>
     </nav>
+
+    <!-- BUNDLE DETAIL MODAL -->
+    <div id="bundle-detail-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[90] flex items-end md:items-center justify-center p-0 md:p-4">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md flex flex-col animate-slide-up" style="max-height: 90vh;">
+            <div class="relative flex-shrink-0">
+                <img id="bd-image" class="w-full h-48 object-cover rounded-t-3xl bg-gray-100">
+                <button onclick="closeBundleDetail()" class="absolute top-4 right-4 w-9 h-9 bg-black/50 text-white rounded-full flex items-center justify-center backdrop-blur-md"><i class="fas fa-times"></i></button>
+                <span class="absolute top-4 left-4 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg">COMBO DEAL</span>
+            </div>
+            <div class="p-5 overflow-y-auto">
+                <h2 id="bd-title" class="font-display text-2xl font-bold text-navy mb-2">Bundle Title</h2>
+                <div class="flex items-end gap-3 mb-5 pb-5 border-b border-gray-100">
+                    <span id="bd-price" class="text-2xl font-bold text-gold">৳0</span>
+                    <span id="bd-original" class="text-sm text-gray-400 line-through">৳0</span>
+                    <span id="bd-save" class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full mb-1">Save ৳0</span>
+                </div>
+                <h3 class="text-sm font-bold text-navy mb-3"><i class="fas fa-box-open text-gold mr-1"></i> What's Inside:</h3>
+                <div id="bd-items" class="space-y-2 mb-6"></div>
+                <button onclick="addBundleToCartFromModal()" class="w-full navy-gradient text-white py-4 rounded-xl font-bold text-sm shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-transform"><i class="fas fa-shopping-cart"></i> Add Bundle to Cart</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         (function() {
@@ -376,37 +218,13 @@
             const h = document.getElementById('cart-count-header');
             const b = document.getElementById('cart-count-bottom');
             const s = document.getElementById('cart-count-sidebar');
-            if (h) h.textContent = count;
-            if (b) b.textContent = count;
-            if (s) s.textContent = count;
-            try {
-                const wl = JSON.parse(localStorage.getItem('heartix_wishlist') || '[]');
-                const wc = Array.isArray(wl) ? wl.length : 0;
-                if (wc > 0) {
-                    const wh = document.getElementById('wishlist-count-header');
-                    const ws = document.getElementById('wishlist-count-sidebar');
-                    if (wh) { wh.textContent = wc; wh.classList.remove('hidden'); }
-                    if (ws) { ws.textContent = wc; ws.classList.remove('hidden'); }
-                }
-            } catch(e) {}
+            if (h) h.textContent = count; if (b) b.textContent = count; if (s) s.textContent = count;
+            try { const wl = JSON.parse(localStorage.getItem('heartix_wishlist') || '[]'); const wc = Array.isArray(wl) ? wl.length : 0; if (wc > 0) { const wh = document.getElementById('wishlist-count-header'); if (wh) { wh.textContent = wc; wh.classList.remove('hidden'); } } } catch(e) {}
         })();
     </script>
-
     <script type="module" src="js/index.js"></script>
-
     <script>
-        // PWA Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then((reg) => {
-                        console.log('✅ PWA Service Worker registered:', reg.scope);
-                    })
-                    .catch((err) => {
-                        console.warn('Service Worker registration failed:', err);
-                    });
-            });
-        }
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); }); }
     </script>
 </body>
 </html>
