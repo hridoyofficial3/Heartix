@@ -1,10 +1,14 @@
-# Heartix Master Guide v9.0
+📖 guide.md — Full File (v10.0)
 
-Version: 9.0 | Updated: 17 Oct 2025 | Live: heartix.vercel.app
-Status: Phase 0-3 ✅
+নিচের পুরো কোডটা কপি করে আপনার guide.md ফাইলে পেস্ট করুন। কোনো অংশ বাদ যায়নি, সব একসাথে দেওয়া হলো।
+
+```markdown
+# Heartix Master Guide v10.0
+
+Version: 10.0 | Updated: 17 Oct 2025 | Live: heartix.vercel.app
+Status: Phase 0-3 ✅ | Phase 4 (Partial) ✅
 
 ## PROJECT INFO
-
 Heartix — বাংলাদেশের প্রিমিয়াম স্মার্ট অ্যাপ্লায়েন্স ই-কমার্স সাইট।
 
 Tech Stack:
@@ -22,7 +26,6 @@ Colors: Navy #0A1628 | Gold #D4A84B | Cream #FBF8F3 | WhatsApp #25D366 | Purple 
 Admin: admin@heartix.com | Owner UID: IeE3IFsCrmSE5hfzhXWbtes32To2
 
 ## CURRENT STATUS
-
 সম্পূর্ণ (Phase 0-3):
 1. Modular structure
 2. Reorder system (admin-reorder.js)
@@ -46,12 +49,12 @@ Admin: admin@heartix.com | Owner UID: IeE3IFsCrmSE5hfzhXWbtes32To2
 20. Backup & Export (inventory-alert.js)
 21. PWA (manifest.json + sw.js)
 22. Landing Pages (landing.html/js + admin-landing.js)
+23. Product Bundles (admin-bundle.js)
 
 Pending (Phase 4-6):
-Advanced Analytics, Customer Segmentation, Profit Calculator, Push Notifications, Dark Mode, Abandoned Cart, Refer & Earn, Loyalty, Spin Wheel, Bundle, Flash Sale
+Advanced Profit Calculator, Flash Sale, Abandoned Cart, Refer & Earn, Loyalty, Spin Wheel, Push Notifications, Dark Mode.
 
 ## FILE STRUCTURE
-
 Root HTML:
 index.html (index.css, index.js)
 product.html (product.css, product.js)
@@ -62,7 +65,7 @@ wishlist.html (wishlist.css, wishlist.js)
 contact.html (contact.css, contact.js)
 order-success.html (order-success.css, order-success.js)
 track-order.html (track-order.css, track-order.js)
-admin.html (admin.css + 9 JS files)
+admin.html (admin.css + 10 JS files)
 messages.html (messages.css, messages.js)
 moderator.html (moderator.css, moderator.js)
 landing.html (landing.css, landing.js)
@@ -84,42 +87,32 @@ admin-integrations.js — GA/FB/EmailJS/WhatsApp
 admin-back-trap.js — Back trap
 admin-bulk.js — CSV upload
 admin-bulk-orders.js — Bulk order update
-admin-analytics.js — Chart.js analytics
-admin-backup.js — Stub
+admin-analytics.js — Chart.js analytics + Customer Segments
+admin-backup.js — Stub (backup moved)
 admin-preorder-badge.js — Purple badge
 admin-landing.js — Landing CRUD
+admin-bundle.js — Bundle CRUD
 inventory-alert.js — Low stock + backup
 index.js, product.js, cart.js, checkout.js, account.js, wishlist.js, contact.js
 order-success.js, track-order.js, messages.js, moderator.js, landing.js
 
 ## FIREBASE COLLECTIONS
-
 products: {id, name, price, oldPrice, category, categories[], stock, brand, description, image, images[], sortOrder, featured, pinned, createdAt}
-
 orders: {id, orderNumber, customer{name,phone,email,address,district,thana,ipAddress,isRepeat,orderCount,previousOrderNumbers,flagged,flagReason}, items[{id,name,price,quantity,image,isPreorder}], subtotal, discount, couponCode, deliveryCharge, total, paymentMethod, advancePaid, dueAmount, status, stockDeducted, hasPreorder, adminNote, source, landingSlug, landingTitle, createdAt}
-
 customers: {uid, name, phone, email, address, district, thana, photoURL, provider, createdAt, updatedAt}
-
 phone_lookup: {uid, email, updatedAt} — path: phone_lookup/{phone}
-
 landing_pages: {id, title, slug, badge, subtitle, description, theme, banner, countdownEnd, productIds[], active, createdAt, updatedAt}
-
+bundles: {id, title, productIds[], originalPrice, bundlePrice, discountType, discountValue, image, active, createdAt, updatedAt}
 messages: {name, contact, subject, message, read, createdAt}
-
 reviews: {productId, name, rating, text, image, createdAt}
-
 coupons: {code, description, type, value, minOrder, maxUses, usedCount, expiry, active, createdAt, updatedAt}
-
 settings/main: {deliveryCharge, freeDeliveryAbove, contactAddress, contactPhone, contactEmail, whatsapp, bkashNumber, nagadNumber, facebook, instagram, categories[], customSections[], middleBanners[], testimonials[], heroBanners[], integrations{googleAnalytics, facebookPixel, emailjs, whatsapp}}
-
 staff: {uid, name, email, phone, role, active, lastLogin, createdAt, createdBy, updatedAt, updatedBy}
-
 activity_log: {uid, name, email, role, action, description, meta, createdAt}
 
-Indexes: orders(createdAt DESC, orderNumber ASC, customer.phone+createdAt, customer.ipAddress+createdAt, customer.email+createdAt), reviews(createdAt DESC), activity_log(createdAt DESC), landing_pages(slug ASC, createdAt DESC)
+Indexes: orders(createdAt DESC, orderNumber ASC, customer.phone+createdAt, customer.ipAddress+createdAt, customer.email+createdAt), reviews(createdAt DESC), activity_log(createdAt DESC), landing_pages(slug ASC, createdAt DESC), bundles(createdAt DESC)
 
-## FIRESTORE RULES v10
-
+## FIRESTORE RULES v11
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -144,6 +137,10 @@ service cloud.firestore {
       allow create: if true;
       allow update: if isModerator();
       allow delete: if isAdmin();
+    }
+    match /bundles/{doc} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() || isManager();
     }
     match /coupons/{doc} {
       allow read: if true;
@@ -192,37 +189,25 @@ service cloud.firestore {
 }
 
 ## KEY FUNCTIONS
-
 Email: notifyOrderPlaced(data), notifyStatusChange(data), notifyLowStockAlert(products)
-
 WhatsApp: orderViaWhatsApp(), loadWhatsAppConfirm()
-
 Staff: openAddStaffModal(), saveStaff(), openEditStaff(uid), toggleStaffActive(uid), removeStaff(uid), openStaffDetail(uid)
-
 Activity: logActivity(action, {description, meta}), loadActivity(), filterActivity(type, value), refreshActivity()
-
 Auth: loginUser(), registerUser(), googleSignIn(), forgotPassword(), logoutUser()
-
 Cart: addToCart(id), removeFromCart(id), applyCoupon(), removeCoupon(), changeQty(), removeItem(), clearCart(), moveToWishlist(), proceedToCheckout()
-
 Checkout: placeOrder(), showRepeatModal(), showWarningModal(), showHistoryModal()
-
 Admin: showTab(tab), openAddModal(), editProduct(), saveProduct(), deleteProduct(), openOrderEdit(), saveOrderEdit(), confirmDeleteOrder(), executeDelete(), openStatusPicker(), selectStatus(), confirmStatusChange(), filterOrders(), exportOrdersCSV(), recalcOrderEdit(), openCategoryModal(), saveCategory(), openCouponModal(), saveCoupon(), openHeroModal(), openSectionModal(), openBannerModal(), openTestimonialModal(), saveSettings(), saveIntegrations()
-
 Analytics: setAnalyticsPeriod(period)
-
 Landing Admin: openNewLanding(), editLanding(id), saveLanding(), deleteLanding(id), copyLandingLink(slug), openLandingPreview(slug), openProductPickerLanding(), renderPickerList(), togglePickerProduct(id, checked), confirmProductPicker(), removeSelectedProduct(idx)
-
 Landing Customer: selectProduct(pid), submitOrder(), scrollToOrderForm(), toggleWishlistLanding(id, event), copyOrderNum(num)
-
+Bundle Admin: openNewBundle(), editBundle(id), saveBundle(), deleteBundle(id), toggleBundle(id), openBundleProductPicker(), renderBundlePicker(), toggleBundlePicker(id, checked), confirmBundlePicker(), removeSelectedProduct(idx)
+Bundle Customer: openBundleDetail(id), closeBundleDetail(), addBundleToCartFromModal(), addBundleToCart(bundleId)
 Backup: handleBackup(), handleSendAlert()
 
 ## LOCALSTORAGE KEYS
-
 heartix_cart, heartix_wishlist, heartix_recent, heartix_coupon, heartix_remember, heartix_last_order
 
 ## STATUS VALUES
-
 Order: pending, confirmed, shipped, delivered, cancelled
 Payment: full-cod, delivery-advance, full-online
 Coupon: percentage, fixed
@@ -231,7 +216,6 @@ Landing Theme: navy, gold, red, purple
 Activity Actions: login, logout, order_status, order_edit, order_delete, product_add, product_edit, product_delete, message_read, message_delete, staff_add, staff_edit, staff_disable, staff_remove, coupon_add, coupon_edit, coupon_delete, category_add, category_edit, category_delete, settings_update
 
 ## RULES
-
 সবসময়:
 1. escapeHtml() — user input
 2. serverTimestamp() — Firestore
@@ -262,7 +246,6 @@ Activity Actions: login, logout, order_status, order_edit, order_delete, product
 12. Duplicate script tag
 
 ## RECOVERY
-
 White screen → Console import error
 404 on css/js → Path check
 Permission denied → Rules check
@@ -273,30 +256,24 @@ Email না আসা → await + EmailJS history
 WhatsApp button নেই → integrations.whatsapp.enabled
 WhatsApp ভুল নাম্বার → integrations.whatsapp.number
 Landing save fail → landing_pages rules
+Bundle save fail → bundles rules
 Countdown ভুল → Future date check
 Chart দেখাচ্ছে না → Chart.js CDN
 
 ## STATISTICS
-
-Progress: Phase 0-3: 100% ✅ | Phase 4-6: 0% ⏳ | Overall: ~65%
-
-File Counts: HTML: 19 | CSS: 14 | JS: 31 | MD: 2 | JSON: 1
-
+Progress: Phase 0-3: 100% ✅ | Phase 4: 25% ⏳ | Overall: ~70%
+File Counts: HTML: 19 | CSS: 14 | JS: 33 | MD: 2 | JSON: 1
 Cost: ৳0 (all free tier)
 
 ## CHANGELOG
-
+v10.0 (17 Oct 2025): Product Bundles, Customer Segmentation, Landing Pages bug fixes, Bundles Image Upload, Premium Bundle UI, Firestore Rules v11
 v9.0 (17 Oct 2025): Phone Login, WhatsApp Checkout, Integration Help Panel, Contact WhatsApp Sync, Messages Bottom Nav, Admin Parallel Loading, Homepage Optimization, Price Font Inter Bold, Inventory Alert Email, Bulk Order Update, Reviews with Images, Pre-order System, Analytics Dashboard, Backup & Export JSON, PWA Setup, Landing Pages, Firestore Rules v10
-
 v8.0 (16 Oct 2025): WhatsApp manual wa.me link, checkout-whatsapp.js new, SMS/bKash/Nagad gateways removed
-
 v7.0 (16 Oct 2025): EmailJS integration, Admin + Customer templates
-
 v5.0 (15 Oct 2025): Staff + Activity System, Moderator panel
 
 ## NEXT SESSION
-
-Priority: Phase 4 → Advanced Analytics, Customer Segmentation, Profit Calculator
+Priority: Phase 4 → Profit Calculator, Flash Sale, Abandoned Cart, Refer & Earn, Loyalty, Spin Wheel.
 
 Golden Rules for AI:
 1. এই guide.md আগে পড়ুন
@@ -308,7 +285,7 @@ Golden Rules for AI:
 7. Email = settings.main.integrations.emailjs
 8. WhatsApp = settings.main.integrations.whatsapp
 9. Landing = landing_pages collection
-10. ৪+১ integration final
+10. Bundle = bundles collection
 
 Contact:
 Firebase: heartix
@@ -316,4 +293,5 @@ Cloudinary: ju2w6e9r
 Support: twhob71122@gmail.com
 Owner UID: IeE3IFsCrmSE5hfzhXWbtes32To2
 
-Last Updated: 17 Oct 2025 | Version: 9.0
+Last Updated: 17 Oct 2025 | Version: 10.0
+```
