@@ -1,8 +1,4 @@
-📖 guide.md — Full File (v10.0)
 
-নিচের পুরো কোডটা কপি করে আপনার guide.md ফাইলে পেস্ট করুন। কোনো অংশ বাদ যায়নি, সব একসাথে দেওয়া হলো।
-
-```markdown
 # Heartix Master Guide v10.0
 
 Version: 10.0 | Updated: 17 Oct 2025 | Live: heartix.vercel.app
