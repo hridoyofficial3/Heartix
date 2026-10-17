@@ -1,5 +1,5 @@
 // ============================================================
-// HEARTIX CHECKOUT — Pre-order support
+// HEARTIX CHECKOUT — Bundle support
 // ============================================================
 import { db, auth } from './firebase.js';
 import {
@@ -13,9 +13,7 @@ import {
     collection, doc, getDoc, getDocs, query, where,
     runTransaction, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 let settings = { deliveryCharge: 100, freeDeliveryAbove: 0, bkashNumber: '', nagadNumber: '', whatsapp: '' };
 let isLoading = true;
@@ -37,12 +35,9 @@ function initDistricts() {
     if (!sel) return;
     const currentVal = sel.value;
     sel.innerHTML = '<option value="">Select District</option>';
-    const sorted = [...new Set(DISTRICTS)].sort();
-    sorted.forEach(d => {
+    [...new Set(DISTRICTS)].sort().forEach(d => {
         const opt = document.createElement('option');
-        opt.value = d;
-        opt.textContent = d;
-        sel.appendChild(opt);
+        opt.value = d; opt.textContent = d; sel.appendChild(opt);
     });
     if (currentVal) sel.value = currentVal;
 }
@@ -57,10 +52,7 @@ async function fetchIP() {
         const res = await fetch('https://api.ipify.org?format=json', { cache: 'no-store' });
         const data = await res.json();
         return (data && data.ip) ? String(data.ip) : '';
-    } catch (e) {
-        console.warn('IP fetch failed:', e);
-        return '';
-    }
+    } catch (e) { return ''; }
 }
 
 async function lookupOrdersByPhone(phone) {
@@ -75,10 +67,7 @@ async function lookupOrdersByPhone(phone) {
             return tb - ta;
         });
         return orders;
-    } catch (e) {
-        console.warn('Phone lookup failed:', e);
-        return [];
-    }
+    } catch (e) { return []; }
 }
 
 async function checkSameIPRecent(ip, phone) {
@@ -93,15 +82,10 @@ async function checkSameIPRecent(ip, phone) {
             const data = d.data();
             const cPhone = data.customer?.phone || '';
             const ts = data.createdAt?.toMillis ? data.createdAt.toMillis() : 0;
-            if (cPhone !== phone && ts && (now - ts) < windowMs) {
-                found = true;
-            }
+            if (cPhone !== phone && ts && (now - ts) < windowMs) found = true;
         });
         return found;
-    } catch (e) {
-        console.warn('IP check failed:', e);
-        return false;
-    }
+    } catch (e) { return false; }
 }
 
 async function loadFreshCartData() {
@@ -110,33 +94,27 @@ async function loadFreshCartData() {
     const fresh = {};
     const issues = [];
     for (const item of cart) {
+        if (item.isBundle) {
+            fresh[item.id] = {
+                id: item.id, name: item.name, price: Number(item.price) || 0, image: item.image || '',
+                quantity: item.quantity, isPreorder: false, isBundle: true, stock: 999
+            };
+            continue;
+        }
         try {
             const snap = await getDoc(doc(db, "products", item.id));
-            if (!snap.exists()) {
-                issues.push({ type: 'missing', name: item.name });
-                continue;
-            }
+            if (!snap.exists()) { issues.push({ type: 'missing', name: item.name }); continue; }
             const data = snap.data();
             const stock = Number(data.stock) || 0;
             const isPreorder = item.isPreorder || stock <= 0;
-
-            // Pre-order item — skip stock check
             if (!isPreorder && stock < item.quantity) {
-                issues.push({ type: 'stock', name: data.name || item.name, stock });
-                continue;
+                issues.push({ type: 'stock', name: data.name || item.name, stock }); continue;
             }
             fresh[item.id] = {
-                id: item.id,
-                name: data.name || item.name,
-                price: Number(data.price) || 0,
-                image: data.image || item.image || '',
-                quantity: item.quantity,
-                isPreorder: isPreorder,
-                stock: stock
+                id: item.id, name: data.name || item.name, price: Number(data.price) || 0,
+                image: data.image || item.image || '', quantity: item.quantity, isPreorder, stock
             };
-        } catch (e) {
-            issues.push({ type: 'error', name: item.name });
-        }
+        } catch (e) { issues.push({ type: 'error', name: item.name }); }
     }
     cachedFreshPrices = fresh;
     return { ok: issues.length === 0, issues };
@@ -153,17 +131,12 @@ async function validateCoupon(coupon, subtotal) {
         if (c.maxUses > 0 && (c.usedCount || 0) >= c.maxUses) return { valid: false, discount: 0, reason: 'exhausted' };
         if (c.minOrder > 0 && subtotal < c.minOrder) return { valid: false, discount: 0, reason: 'min_order' };
         let discount = 0;
-        if (c.type === 'percentage') {
-            discount = Math.round((subtotal * Number(c.value || 0)) / 100);
-        } else {
-            discount = Number(c.value || 0);
-        }
+        if (c.type === 'percentage') discount = Math.round((subtotal * Number(c.value || 0)) / 100);
+        else discount = Number(c.value || 0);
         discount = Math.min(discount, subtotal);
         discount = Math.max(discount, 0);
         return { valid: true, discount, type: c.type, value: c.value, code: snap.id };
-    } catch (e) {
-        return { valid: false, discount: 0, reason: 'error' };
-    }
+    } catch (e) { return { valid: false, discount: 0, reason: 'error' }; }
 }
 
 async function loadLoggedInUser() {
@@ -174,14 +147,8 @@ async function loadLoggedInUser() {
                 loggedInUser = user;
                 try {
                     const snap = await getDoc(doc(db, "customers", user.uid));
-                    if (snap.exists()) {
-                        loggedInProfile = snap.data();
-                    } else {
-                        loggedInProfile = { email: user.email, name: user.displayName || '' };
-                    }
-                } catch (e) {
-                    loggedInProfile = { email: user.email, name: user.displayName || '' };
-                }
+                    loggedInProfile = snap.exists() ? snap.data() : { email: user.email, name: user.displayName || '' };
+                } catch (e) { loggedInProfile = { email: user.email, name: user.displayName || '' }; }
             }
             resolve();
         });
@@ -194,16 +161,11 @@ function prefillFromLoggedInProfile() {
     let filled = false;
     if (p.name) { document.getElementById('customer-name').value = p.name; filled = true; }
     if (p.phone) { document.getElementById('customer-phone').value = p.phone; filled = true; }
-    if (p.email || loggedInUser.email) {
-        document.getElementById('customer-email').value = p.email || loggedInUser.email;
-        filled = true;
-    }
+    if (p.email || loggedInUser.email) { document.getElementById('customer-email').value = p.email || loggedInUser.email; filled = true; }
     if (p.address) { document.getElementById('customer-address').value = p.address; filled = true; }
     if (p.district) { document.getElementById('customer-district').value = p.district; filled = true; }
     if (p.thana) { document.getElementById('customer-thana').value = p.thana; filled = true; }
-    if (filled) {
-        showToast('আপনার saved তথ্য অটো-ফিল করা হয়েছে ✅', 'success');
-    }
+    if (filled) showToast('saved তথ্য অটো-ফিল ✅', 'success');
     if (p.phone) lastCheckedPhone = p.phone;
     return filled;
 }
@@ -221,9 +183,8 @@ async function loadSettings() {
             settings.nagadNumber = s.nagadNumber || '';
             settings.whatsapp = s.whatsapp || '';
         }
-    } catch (e) { console.warn('Settings:', e); }
-    isLoading = false;
-    afterLoad();
+    } catch (e) {}
+    isLoading = false; afterLoad();
 }
 
 async function afterLoad() {
@@ -237,16 +198,12 @@ async function afterLoad() {
     }
     document.getElementById('empty-cart').classList.add('hidden');
     document.getElementById('checkout-form').classList.remove('hidden');
-    initDistricts();
-    attachPaymentListeners();
-    attachPhoneListener();
+    initDistricts(); attachPaymentListeners(); attachPhoneListener();
     await loadLoggedInUser();
     const result = await loadFreshCartData();
     renderOrderReview();
     await updateSummary();
-    if (loggedInUser) {
-        prefillFromLoggedInProfile();
-    }
+    if (loggedInUser) prefillFromLoggedInProfile();
     updatePaymentInfo('full-cod');
     if (!result.ok) {
         const missing = result.issues.filter(i => i.type === 'missing').length;
@@ -266,15 +223,11 @@ function attachPhoneListener() {
     phoneInput.addEventListener('input', (e) => {
         const raw = e.target.value.replace(/\D/g, '');
         if (raw !== e.target.value) e.target.value = raw;
-        const phone = raw;
         if (phoneLookupTimer) clearTimeout(phoneLookupTimer);
-        if (phone.length !== 11) return;
-        if (phone === lastCheckedPhone) return;
-        if (loggedInProfile && loggedInProfile.phone === phone) return;
-        phoneLookupTimer = setTimeout(() => {
-            lastCheckedPhone = phone;
-            handlePhoneLookup(phone);
-        }, 600);
+        if (raw.length !== 11) return;
+        if (raw === lastCheckedPhone) return;
+        if (loggedInProfile && loggedInProfile.phone === raw) return;
+        phoneLookupTimer = setTimeout(() => { lastCheckedPhone = raw; handlePhoneLookup(raw); }, 600);
     });
 }
 
@@ -283,15 +236,11 @@ async function handlePhoneLookup(phone) {
     const orders = await lookupOrdersByPhone(phone);
     previousOrders = orders;
     if (orders.length === 0) return;
-    const latest = orders[0];
-    autoFillSourceOrder = latest;
+    const latest = orders[0]; autoFillSourceOrder = latest;
     const ts = latest.createdAt?.toMillis ? latest.createdAt.toMillis() : 0;
     const minutesAgo = ts ? Math.floor((Date.now() - ts) / 60000) : null;
-    if (minutesAgo !== null && minutesAgo < RECENT_ORDER_WINDOW_MIN) {
-        showWarningModal(latest, minutesAgo);
-    } else {
-        showRepeatModal(latest, orders.length);
-    }
+    if (minutesAgo !== null && minutesAgo < RECENT_ORDER_WINDOW_MIN) showWarningModal(latest, minutesAgo);
+    else showRepeatModal(latest, orders.length);
 }
 
 function activateBackTrap() {
@@ -301,43 +250,24 @@ function activateBackTrap() {
     window.addEventListener('popstate', handlePopState);
     document.body.style.overflow = 'hidden';
 }
-
 function releaseBackTrap() {
     if (!backTrapActive) return;
     backTrapActive = false;
     window.removeEventListener('popstate', handlePopState);
     document.body.style.overflow = '';
 }
-
 function handlePopState() {
     const warnOpen = !document.getElementById('warning-modal').classList.contains('hidden');
     const repOpen = !document.getElementById('repeat-modal').classList.contains('hidden');
     const histOpen = !document.getElementById('history-modal').classList.contains('hidden');
     if (warnOpen || repOpen || histOpen) {
         try { history.pushState({ trap: true }, '', location.href); } catch (e) {}
-    } else {
-        releaseBackTrap();
-    }
+    } else { releaseBackTrap(); }
 }
 
-const STATUS_COLORS = {
-    'pending': 'bg-yellow-100 text-yellow-700',
-    'confirmed': 'bg-blue-100 text-blue-700',
-    'shipped': 'bg-purple-100 text-purple-700',
-    'delivered': 'bg-green-100 text-green-700',
-    'cancelled': 'bg-red-100 text-red-700'
-};
-
-function getStatusClass(status) {
-    return STATUS_COLORS[status] || 'bg-gray-100 text-gray-600';
-}
-
-function formatOrderDate(ts) {
-    if (!ts || !ts.toDate) return '';
-    try {
-        return ts.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    } catch (e) { return ''; }
-}
+const STATUS_COLORS = { 'pending': 'bg-yellow-100 text-yellow-700', 'confirmed': 'bg-blue-100 text-blue-700', 'shipped': 'bg-purple-100 text-purple-700', 'delivered': 'bg-green-100 text-green-700', 'cancelled': 'bg-red-100 text-red-700' };
+function getStatusClass(status) { return STATUS_COLORS[status] || 'bg-gray-100 text-gray-600'; }
+function formatOrderDate(ts) { if (!ts || !ts.toDate) return ''; try { return ts.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); } catch (e) { return ''; } }
 
 window.showRepeatModal = function(order, count) {
     document.getElementById('rep-order-num').textContent = order.orderNumber || order.id.slice(0, 10);
@@ -349,18 +279,8 @@ window.showRepeatModal = function(order, count) {
     document.getElementById('repeat-modal').classList.remove('hidden');
     activateBackTrap();
 }
-
-window.closeRepeatModal = function() {
-    document.getElementById('repeat-modal').classList.add('hidden');
-    releaseBackTrap();
-}
-
-window.continueFromRepeat = function() {
-    autoFillFromOrder(autoFillSourceOrder);
-    document.getElementById('repeat-modal').classList.add('hidden');
-    releaseBackTrap();
-    showToast('তথ্য অটো-ফিল করা হয়েছে ✅', 'success');
-}
+window.closeRepeatModal = function() { document.getElementById('repeat-modal').classList.add('hidden'); releaseBackTrap(); }
+window.continueFromRepeat = function() { autoFillFromOrder(autoFillSourceOrder); closeRepeatModal(); showToast('তথ্য অটো-ফিল ✅', 'success'); }
 
 window.showWarningModal = function(order, minutesAgo) {
     document.getElementById('warn-minutes').textContent = minutesAgo;
@@ -374,30 +294,17 @@ window.showWarningModal = function(order, minutesAgo) {
     document.getElementById('warning-modal').classList.remove('hidden');
     activateBackTrap();
 }
-
 window.cancelFromWarning = function() {
-    document.getElementById('warning-modal').classList.add('hidden');
-    releaseBackTrap();
-    document.getElementById('customer-phone').value = '';
-    document.getElementById('customer-name').value = '';
-    document.getElementById('customer-address').value = '';
-    document.getElementById('customer-district').value = '';
+    document.getElementById('warning-modal').classList.add('hidden'); releaseBackTrap();
+    document.getElementById('customer-phone').value = ''; document.getElementById('customer-name').value = '';
+    document.getElementById('customer-address').value = ''; document.getElementById('customer-district').value = '';
     document.getElementById('customer-thana').value = '';
-    lastCheckedPhone = '';
-    autoFillSourceOrder = null;
-    showToast('ফোন নাম্বার আবার লিখুন বা আগের Order Track করুন', 'info');
-    setTimeout(() => {
-        const p = document.getElementById('customer-phone');
-        if (p) p.focus();
-    }, 250);
+    lastCheckedPhone = ''; autoFillSourceOrder = null;
+    showToast('ফোন নাম্বার আবার লিখুন', 'info');
+    setTimeout(() => { const p = document.getElementById('customer-phone'); if (p) p.focus(); }, 250);
 }
-
-window.continueFromWarning = function() {
-    autoFillFromOrder(autoFillSourceOrder);
-    document.getElementById('warning-modal').classList.add('hidden');
-    releaseBackTrap();
-    showToast('নতুন অর্ডারের জন্য প্রস্তুত ✅', 'success');
-}
+window.continueFromWarning = function() { autoFillFromOrder(autoFillSourceOrder); closeWarningModal(); showToast('প্রস্তুত ✅', 'success'); }
+window.closeWarningModal = function() { document.getElementById('warning-modal').classList.add('hidden'); releaseBackTrap(); }
 
 window.showHistoryModal = function() {
     const list = document.getElementById('history-list');
@@ -405,35 +312,30 @@ window.showHistoryModal = function() {
     if (previousOrders.length === 0) {
         list.innerHTML = '<p class="text-center text-gray-400 text-xs py-6">কোনো অর্ডার নেই</p>';
     } else {
-        let html = '';
-        previousOrders.forEach(o => {
+        list.innerHTML = previousOrders.map(o => {
             const date = formatOrderDate(o.createdAt);
-            const statusClass = getStatusClass(o.status);
-            const items = (o.items || []).length;
-            html += `<a href="track-order.html?order=${encodeURIComponent(o.orderNumber || '')}" class="block bg-gray-50 rounded-xl p-3 active:bg-gray-100">
+            return `<a href="track-order.html?order=${encodeURIComponent(o.orderNumber || '')}" class="block bg-gray-50 rounded-xl p-3 active:bg-gray-100">
                 <div class="flex justify-between items-start gap-2 mb-1">
                     <div class="min-w-0 flex-1">
                         <p class="font-bold text-navy text-xs">${escapeHtml(o.orderNumber || o.id.slice(0, 10))}</p>
-                        <p class="text-[10px] text-gray-500 mt-0.5">${date} • ${items} item(s)</p>
+                        <p class="text-[10px] text-gray-500 mt-0.5">${date} • ${(o.items || []).length} item(s)</p>
                     </div>
-                    <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase flex-shrink-0 ${statusClass}">${o.status || 'pending'}</span>
+                    <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase flex-shrink-0 ${getStatusClass(o.status)}">${o.status || 'pending'}</span>
                 </div>
                 <div class="flex justify-between items-baseline">
                     <span class="text-[10px] text-gray-500">Total</span>
                     <span class="font-bold text-navy text-sm">৳${formatPrice(o.total)}</span>
                 </div>
             </a>`;
-        });
-        list.innerHTML = html;
+        }).join('');
     }
     document.getElementById('history-modal').classList.remove('hidden');
 }
-
 window.closeHistoryModal = function() {
     document.getElementById('history-modal').classList.add('hidden');
-    const warnOpen = !document.getElementById('warning-modal').classList.contains('hidden');
-    const repOpen = !document.getElementById('repeat-modal').classList.contains('hidden');
-    if (!warnOpen && !repOpen) releaseBackTrap();
+    const w = !document.getElementById('warning-modal').classList.contains('hidden');
+    const r = !document.getElementById('repeat-modal').classList.contains('hidden');
+    if (!w && !r) releaseBackTrap();
 }
 
 function autoFillFromOrder(order) {
@@ -458,14 +360,19 @@ function renderOrderReview() {
         const image = fresh ? fresh.image : item.image;
         const name = fresh ? fresh.name : item.name;
         const isPreorder = fresh ? fresh.isPreorder : (item.isPreorder || false);
-        const preorderBadge = isPreorder ? `<span class="inline-flex items-center gap-1 text-[9px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-bold mt-1"><i class="fas fa-clock text-[7px]"></i> Pre-order</span>` : '';
+        const isBundle = fresh ? fresh.isBundle : false;
+
+        let badge = '';
+        if (isPreorder) badge = `<span class="inline-flex items-center gap-1 text-[9px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-bold mt-1"><i class="fas fa-clock text-[7px]"></i> Pre-order</span>`;
+        else if (isBundle) badge = `<span class="inline-flex items-center gap-1 text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-bold mt-1"><i class="fas fa-gift text-[7px]"></i> Bundle</span>`;
+
         html += `
             <div class="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0">
                 <img src="${image || 'https://via.placeholder.com/60x60?text=?'}" class="w-14 h-14 object-contain rounded-lg bg-gray-50 flex-shrink-0" onerror="this.src='https://via.placeholder.com/60x60?text=?'">
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium navy-text line-clamp-2">${escapeHtml(name)}</p>
                     <p class="text-xs text-gray-500 mt-0.5">৳ ${formatPrice(price)} × ${qty}</p>
-                    ${preorderBadge}
+                    ${badge}
                 </div>
                 <p class="font-bold navy-text text-sm flex-shrink-0">৳ ${formatPrice(price * qty)}</p>
             </div>`;
@@ -478,22 +385,15 @@ async function updateSummary() {
     let subtotal = 0;
     cart.forEach(item => {
         const fresh = cachedFreshPrices[item.id];
-        const price = fresh ? fresh.price : (Number(item.price) || 0);
-        subtotal += price * (Number(item.quantity) || 0);
+        subtotal += (fresh ? fresh.price : (Number(item.price) || 0)) * (Number(item.quantity) || 0);
     });
     let discount = 0;
     if (appliedCoupon && appliedCoupon.code) {
         const validation = await validateCoupon(appliedCoupon, subtotal);
-        if (validation.valid) {
-            discount = validation.discount;
-        } else {
+        if (validation.valid) discount = validation.discount;
+        else {
             if (validation.reason !== 'no_coupon') {
-                let msg = 'Coupon আর কাজ করছে না';
-                if (validation.reason === 'expired') msg = 'Coupon expired';
-                else if (validation.reason === 'inactive') msg = 'Coupon inactive';
-                else if (validation.reason === 'exhausted') msg = 'Coupon সীমা শেষ';
-                else if (validation.reason === 'min_order') msg = 'Minimum order পূরণ হয়নি';
-                showToast(msg, 'warn');
+                showToast('Coupon আর কাজ করছে না', 'warn');
                 appliedCoupon = null;
                 try { localStorage.removeItem('heartix_coupon'); } catch(e) {}
             }
@@ -509,14 +409,11 @@ async function updateSummary() {
         discountRow.classList.remove('hidden');
         document.getElementById('checkout-discount').innerText = '-৳ ' + formatPrice(discount);
         document.getElementById('checkout-coupon-badge').textContent = appliedCoupon.code;
-    } else {
-        discountRow.classList.add('hidden');
-    }
+    } else { discountRow.classList.add('hidden'); }
     document.getElementById('checkout-delivery').innerText = dc === 0 ? 'ফ্রি' : '৳ ' + formatPrice(dc);
     document.getElementById('checkout-total').innerText = '৳ ' + formatPrice(total);
     const fn = document.getElementById('checkout-free-note');
-    if (isFree) fn.classList.remove('hidden');
-    else fn.classList.add('hidden');
+    if (isFree) fn.classList.remove('hidden'); else fn.classList.add('hidden');
 }
 
 function attachPaymentListeners() {
@@ -539,8 +436,7 @@ async function updatePaymentInfo(method) {
     let subtotal = 0;
     cart.forEach(item => {
         const fresh = cachedFreshPrices[item.id];
-        const price = fresh ? fresh.price : (Number(item.price) || 0);
-        subtotal += price * (Number(item.quantity) || 0);
+        subtotal += (fresh ? fresh.price : (Number(item.price) || 0)) * (Number(item.quantity) || 0);
     });
     let discount = 0;
     if (appliedCoupon && appliedCoupon.code) {
@@ -553,25 +449,19 @@ async function updatePaymentInfo(method) {
     const total = afterDiscount + dc;
     if (method === 'full-cod') { box.classList.add('hidden'); return; }
     box.classList.remove('hidden');
-    let html = '';
-    if (method === 'delivery-advance') {
-        html += `<p class="text-navy mb-2">ডেলিভারি চার্জ <strong class="gold-text">৳ ${formatPrice(dc)}</strong> পাঠাতে হবে:</p>`;
-    } else {
-        html += `<p class="text-navy mb-2">সম্পূর্ণ <strong class="gold-text">৳ ${formatPrice(total)}</strong> পাঠাতে হবে:</p>`;
-    }
+    let html = method === 'delivery-advance'
+        ? `<p class="text-navy mb-2">ডেলিভারি চার্জ <strong class="gold-text">৳ ${formatPrice(dc)}</strong> পাঠাতে হবে:</p>`
+        : `<p class="text-navy mb-2">সম্পূর্ণ <strong class="gold-text">৳ ${formatPrice(total)}</strong> পাঠাতে হবে:</p>`;
     if (settings.bkashNumber) html += `<p class="text-sm mb-1 flex items-center gap-2"><i class="fas fa-mobile-alt text-pink-500"></i><strong>bKash:</strong> <span class="font-mono">${escapeHtml(settings.bkashNumber)}</span></p>`;
     if (settings.nagadNumber) html += `<p class="text-sm mb-1 flex items-center gap-2"><i class="fas fa-mobile-alt text-orange-500"></i><strong>Nagad:</strong> <span class="font-mono">${escapeHtml(settings.nagadNumber)}</span></p>`;
-    if (!settings.bkashNumber && !settings.nagadNumber) {
-        html += `<p class="text-red-500 text-sm"><i class="fas fa-exclamation-triangle mr-1"></i> অ্যাডমিন পেমেন্ট নম্বর সেট করেননি।</p>`;
-    }
+    if (!settings.bkashNumber && !settings.nagadNumber) html += `<p class="text-red-500 text-sm"><i class="fas fa-exclamation-triangle mr-1"></i> পেমেন্ট নম্বর সেট হয়নি।</p>`;
     content.innerHTML = html;
 }
 
 function setFieldError(id, hasError) {
     const el = document.getElementById(id);
     if (!el) return;
-    if (hasError) el.classList.add('field-error');
-    else el.classList.remove('field-error');
+    if (hasError) el.classList.add('field-error'); else el.classList.remove('field-error');
 }
 
 function validateForm() {
@@ -580,14 +470,10 @@ function validateForm() {
     const email = (document.getElementById('customer-email').value || '').trim();
     const address = (document.getElementById('customer-address').value || '').trim();
     let ok = true;
-    if (!name || name.length < 2) { setFieldError('customer-name', true); if (ok) showToast('সঠিক নাম দিন', 'error'); ok = false; }
-    else setFieldError('customer-name', false);
-    if (!validatePhone(phone)) { setFieldError('customer-phone', true); if (ok) showToast('সঠিক ফোন নাম্বার (01XXXXXXXXX)', 'error'); ok = false; }
-    else setFieldError('customer-phone', false);
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setFieldError('customer-email', true); if (ok) showToast('সঠিক ইমেইল দিন', 'error'); ok = false; }
-    else setFieldError('customer-email', false);
-    if (!address || address.length < 5) { setFieldError('customer-address', true); if (ok) showToast('সম্পূর্ণ ঠিকানা দিন', 'error'); ok = false; }
-    else setFieldError('customer-address', false);
+    if (!name || name.length < 2) { setFieldError('customer-name', true); if (ok) showToast('নাম দিন', 'error'); ok = false; } else setFieldError('customer-name', false);
+    if (!validatePhone(phone)) { setFieldError('customer-phone', true); if (ok) showToast('ফোন নাম্বার দিন', 'error'); ok = false; } else setFieldError('customer-phone', false);
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setFieldError('customer-email', true); if (ok) showToast('সঠিক ইমেইল দিন', 'error'); ok = false; } else setFieldError('customer-email', false);
+    if (!address || address.length < 5) { setFieldError('customer-address', true); if (ok) showToast('ঠিকানা দিন', 'error'); ok = false; } else setFieldError('customer-address', false);
     return ok;
 }
 
@@ -614,9 +500,7 @@ window.placeOrder = async function() {
         if (!db) throw new Error("Database connection failed");
         if (!currentIP) currentIP = await fetchIP();
         const ipFlagged = await checkSameIPRecent(currentIP, phone);
-        if (previousOrders.length === 0) {
-            previousOrders = await lookupOrdersByPhone(phone);
-        }
+        if (previousOrders.length === 0) previousOrders = await lookupOrdersByPhone(phone);
         const isRepeat = previousOrders.length > 0;
         const orderCount = previousOrders.length + 1;
         const previousOrderNumbers = previousOrders.slice(0, 5).map(o => o.orderNumber || '').filter(Boolean);
@@ -630,17 +514,20 @@ window.placeOrder = async function() {
         const orderRef = doc(collection(db, "orders"));
         const orderNumber = generateOrderNumber();
 
-        let finalSubtotal = 0;
-        let finalTotal = 0;
-        let finalDelivery = 0;
-        let finalAdvance = 0;
-        let finalDiscount = 0;
-        let finalItems = [];
-        let hasPreorderItem = false;
+        let finalSubtotal = 0, finalTotal = 0, finalDelivery = 0, finalAdvance = 0, finalDiscount = 0;
+        let finalItems = [], hasPreorderItem = false;
 
         await runTransaction(db, async (transaction) => {
             const readData = [];
             for (const item of cart) {
+                if (item.isBundle) {
+                    readData.push({
+                        ref: null, freshPrice: Number(item.price) || 0, freshName: item.name,
+                        freshImage: item.image || '', stock: 999, qty: Number(item.quantity) || 1,
+                        isPreorder: false, isBundle: true
+                    });
+                    continue;
+                }
                 const pRef = doc(db, "products", item.id);
                 const pSnap = await transaction.get(pRef);
                 if (!pSnap.exists()) throw new Error(`প্রোডাক্টটি আর নেই: ${item.name}`);
@@ -648,24 +535,12 @@ window.placeOrder = async function() {
                 const currentStock = Number(data.stock) || 0;
                 const qty = Number(item.quantity) || 1;
                 const isPreorder = item.isPreorder || currentStock <= 0;
-
                 if (isPreorder) hasPreorderItem = true;
-                if (!isPreorder && currentStock < qty) {
-                    throw new Error(`"${data.name || item.name}" - স্টকে মাত্র ${currentStock} টি আছে`);
-                }
-                readData.push({
-                    ref: pRef,
-                    freshPrice: Number(data.price) || 0,
-                    freshName: data.name || item.name,
-                    freshImage: data.image || item.image || '',
-                    stock: currentStock,
-                    qty,
-                    isPreorder
-                });
+                if (!isPreorder && currentStock < qty) throw new Error(`"${data.name || item.name}" - স্টকে মাত্র ${currentStock} টি`);
+                readData.push({ ref: pRef, freshPrice: Number(data.price) || 0, freshName: data.name || item.name, freshImage: data.image || item.image || '', stock: currentStock, qty, isPreorder });
             }
 
-            let couponSnapData = null;
-            let couponRef = null;
+            let couponSnapData = null, couponRef = null;
             if (couponData) {
                 couponRef = doc(db, "coupons", couponData.code);
                 const cSnap = await transaction.get(couponRef);
@@ -677,10 +552,7 @@ window.placeOrder = async function() {
             let couponValid = false;
             if (couponSnapData) {
                 const c = couponSnapData;
-                couponValid = c.active !== false
-                    && (!c.expiry || new Date(c.expiry) >= new Date())
-                    && (!c.maxUses || (c.usedCount || 0) < c.maxUses)
-                    && (!c.minOrder || finalSubtotal >= c.minOrder);
+                couponValid = c.active !== false && (!c.expiry || new Date(c.expiry) >= new Date()) && (!c.maxUses || (c.usedCount || 0) < c.maxUses) && (!c.minOrder || finalSubtotal >= c.minOrder);
                 if (couponValid) {
                     if (c.type === 'percentage') finalDiscount = Math.round((finalSubtotal * Number(c.value || 0)) / 100);
                     else finalDiscount = Number(c.value || 0);
@@ -696,67 +568,35 @@ window.placeOrder = async function() {
             else if (paymentMethod === 'delivery-advance') finalAdvance = finalDelivery;
 
             finalItems = readData.map(r => ({
-                id: r.ref.id,
-                name: r.freshName,
-                price: r.freshPrice,
-                quantity: r.qty,
-                image: r.freshImage,
-                isPreorder: r.isPreorder
+                id: r.ref ? r.ref.id : 'bundle_' + Date.now(), name: r.freshName,
+                price: r.freshPrice, quantity: r.qty, image: r.freshImage, isPreorder: r.isPreorder, isBundle: r.isBundle || false
             }));
 
-            // Deduct stock only for non-preorder items
             for (const r of readData) {
-                if (!r.isPreorder) {
+                if (!r.isPreorder && !r.isBundle && r.ref) {
                     transaction.update(r.ref, { stock: r.stock - r.qty });
                 }
             }
             if (couponValid && couponRef && couponSnapData) {
-                const newCount = (couponSnapData.usedCount || 0) + 1;
-                transaction.update(couponRef, { usedCount: newCount });
+                transaction.update(couponRef, { usedCount: (couponSnapData.usedCount || 0) + 1 });
             }
 
             transaction.set(orderRef, {
                 orderNumber,
-                customer: {
-                    name, phone, email, address, district, thana,
-                    ipAddress: currentIP || '',
-                    isRepeat,
-                    orderCount,
-                    previousOrderNumbers,
-                    flagged: ipFlagged,
-                    flagReason: ipFlagged ? 'same_ip_recent' : ''
-                },
-                items: finalItems,
-                subtotal: finalSubtotal,
-                discount: finalDiscount,
-                couponCode: couponValid ? couponData.code : '',
-                deliveryCharge: finalDelivery,
-                total: finalTotal,
-                paymentMethod,
-                advancePaid: finalAdvance,
-                dueAmount: finalTotal - finalAdvance,
-                status: 'pending',
-                stockDeducted: !hasPreorderItem,
-                hasPreorder: hasPreorderItem,
-                createdAt: serverTimestamp()
+                customer: { name, phone, email, address, district, thana, ipAddress: currentIP || '', isRepeat, orderCount, previousOrderNumbers, flagged: ipFlagged, flagReason: ipFlagged ? 'same_ip_recent' : '' },
+                items: finalItems, subtotal: finalSubtotal, discount: finalDiscount, couponCode: couponValid ? couponData.code : '',
+                deliveryCharge: finalDelivery, total: finalTotal, paymentMethod, advancePaid: finalAdvance, dueAmount: finalTotal - finalAdvance,
+                status: 'pending', stockDeducted: !hasPreorderItem, hasPreorder: hasPreorderItem, createdAt: serverTimestamp()
             });
         });
 
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending notifications...';
         try {
-            const emailPromise = notifyOrderPlaced({
-                orderNumber,
-                customerName: name,
-                customerPhone: phone,
-                customerEmail: email || '',
-                customerAddress: [address, thana, district].filter(Boolean).join(', '),
-                total: finalTotal
-            });
-            const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
-            await Promise.race([emailPromise, timeoutPromise]);
-        } catch (e) {
-            console.warn('Email notification failed:', e);
-        }
+            await Promise.race([
+                notifyOrderPlaced({ orderNumber, customerName: name, customerPhone: phone, customerEmail: email || '', customerAddress: [address, thana, district].filter(Boolean).join(', '), total: finalTotal }),
+                new Promise(resolve => setTimeout(resolve, 5000))
+            ]);
+        } catch (e) {}
 
         saveCart([]);
         try { localStorage.removeItem('heartix_coupon'); } catch(e) {}
