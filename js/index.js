@@ -1,6 +1,5 @@
 // ============================================================
-// HEARTIX INDEX (Home)
-// v4 - Pre-order badge support
+// HEARTIX INDEX (Home) + Bundles
 // ============================================================
 import { db } from './firebase.js';
 import {
@@ -17,15 +16,11 @@ import {
 
 let allProducts = [];
 let allReviews = [];
+let allBundles = [];
 let allSettings = {};
 let currentFilter = 'all';
 let currentSearch = '';
-let categories = [
-    { key: 'TV', label: 'Televisions', icon: '📺' },
-    { key: 'Fridge', label: 'Refrigerators', icon: '❄️' },
-    { key: 'Fan', label: 'Fans', icon: '🌀' },
-    { key: 'Gadget', label: 'Smart Gadgets', icon: '🔌' }
-];
+let categories = [];
 let customSections = [];
 let middleBanners = [];
 let testimonials = [];
@@ -68,52 +63,38 @@ window.closeSidebar = function() {
 }
 
 let searchTimer = null;
-
 window.toggleSearch = function() {
     const w = document.getElementById('search-bar-wrapper');
     w.classList.toggle('open');
     if (w.classList.contains('open')) setTimeout(() => document.getElementById('search-input').focus(), 350);
     else {
         document.getElementById('search-input').value = '';
-        currentSearch = '';
-        displayedCount = 0;
-        hideSuggestions();
-        renderProducts();
+        currentSearch = ''; displayedCount = 0; hideSuggestions(); renderProducts();
     }
 }
 window.closeSearch = function() {
     document.getElementById('search-bar-wrapper').classList.remove('open');
     document.getElementById('search-input').value = '';
     document.getElementById('search-input').blur();
-    currentSearch = '';
-    displayedCount = 0;
-    hideSuggestions();
-    renderProducts();
+    currentSearch = ''; displayedCount = 0; hideSuggestions(); renderProducts();
 }
-
 window.searchProducts = function() {
     if (searchTimer) clearTimeout(searchTimer);
     searchTimer = setTimeout(() => {
         currentSearch = (document.getElementById('search-input').value || '').toLowerCase().trim();
-        displayedCount = 0;
-        renderProducts();
-        showSuggestions();
+        displayedCount = 0; renderProducts(); showSuggestions();
     }, 200);
 }
-
 window.showSuggestions = function() {
     const q = (document.getElementById('search-input').value || '').toLowerCase().trim();
     const box = document.getElementById('search-suggestions');
     if (!q || q.length < 1) { hideSuggestions(); return; }
-
     const matches = allProducts.filter(p =>
         (p.name || '').toLowerCase().includes(q) ||
         (p.brand || '').toLowerCase().includes(q) ||
         getCategories(p).some(c => c.toLowerCase().includes(q))
     ).slice(0, 6);
-
     if (matches.length === 0) { hideSuggestions(); return; }
-
     let html = '';
     matches.forEach(p => {
         html += `<div class="suggestion-item" onclick="selectSuggestion('${p.id}')">
@@ -128,16 +109,11 @@ window.showSuggestions = function() {
     box.innerHTML = html;
     box.classList.add('show');
 }
-
 window.hideSuggestions = function() {
     const box = document.getElementById('search-suggestions');
     if (box) box.classList.remove('show');
 }
-
-window.selectSuggestion = function(id) {
-    window.location.href = 'product.html?id=' + encodeURIComponent(id);
-}
-
+window.selectSuggestion = function(id) { window.location.href = 'product.html?id=' + encodeURIComponent(id); }
 document.addEventListener('click', function(e) {
     const box = document.getElementById('search-suggestions');
     const input = document.getElementById('search-input');
@@ -145,11 +121,9 @@ document.addEventListener('click', function(e) {
 });
 
 window.filterByCategory = function(cat) {
-    currentFilter = cat;
-    displayedCount = 0;
+    currentFilter = cat; displayedCount = 0;
     const input = document.getElementById('search-input');
-    if (input) input.value = '';
-    currentSearch = '';
+    if (input) input.value = ''; currentSearch = '';
     document.getElementById('search-bar-wrapper').classList.remove('open');
     hideSuggestions();
     const found = categories.find(c => c.key === cat);
@@ -165,22 +139,16 @@ window.addToCart = function(id) {
     let cart = getCart();
     const idx = cart.findIndex(i => i.id === id);
     const currentQty = idx > -1 ? (Number(cart[idx].quantity) || 0) : 0;
-    if (!isPreorder && stock !== 999 && currentQty + 1 > stock) {
-        showToast(`স্টকে মাত্র ${stock} টি আছে`, 'error');
-        return;
-    }
+    if (!isPreorder && stock !== 999 && currentQty + 1 > stock) { showToast(`স্টকে মাত্র ${stock} টি`, 'error'); return; }
     if (idx > -1) {
         cart[idx].quantity = currentQty + 1;
         if (isPreorder) cart[idx].isPreorder = true;
     } else {
         cart.push({ id, name: p.name, price: Number(p.price) || 0, image: p.image, quantity: 1, isPreorder });
     }
-    saveCart(cart);
-    updateCartBadges();
-    showToast(isPreorder ? 'Pre-order কার্টে যোগ হয়েছে' : (p.name || '').substring(0, 30) + ' added to Cart', 'success');
-    renderProducts();
-    renderRecentlyViewed();
-    renderDynamicContent();
+    saveCart(cart); updateCartBadges();
+    showToast(isPreorder ? 'Pre-order কার্টে যোগ' : (p.name || '').substring(0, 30) + ' added', 'success');
+    renderProducts(); renderRecentlyViewed(); renderDynamicContent();
 }
 
 window.removeFromCart = function(id) {
@@ -189,11 +157,7 @@ window.removeFromCart = function(id) {
     if (idx > -1) {
         if (cart[idx].quantity > 1) cart[idx].quantity--;
         else cart.splice(idx, 1);
-        saveCart(cart);
-        updateCartBadges();
-        renderProducts();
-        renderRecentlyViewed();
-        renderDynamicContent();
+        saveCart(cart); updateCartBadges(); renderProducts(); renderRecentlyViewed(); renderDynamicContent();
     }
 }
 
@@ -202,22 +166,41 @@ window.toggleWishlist = function(id, e) {
     let w = getWishlist();
     const idx = w.indexOf(id);
     const p = allProducts.find(x => x.id === id);
-    if (idx > -1) {
-        w.splice(idx, 1);
-        showToast('Wishlist থেকে সরানো হয়েছে', 'warn');
-    } else {
-        w.push(id);
-        showToast((p?.name || 'Product').substring(0, 25) + ' wishlist-এ যোগ', 'success');
+    if (idx > -1) { w.splice(idx, 1); showToast('Wishlist থেকে সরানো', 'warn'); }
+    else { w.push(id); showToast('Wishlist-এ যোগ', 'success'); }
+    saveWishlist(w); updateWishlistBadges(); renderProducts(); renderRecentlyViewed(); renderDynamicContent();
+}
+
+window.addBundleToCart = function(bundleId) {
+    const b = allBundles.find(x => x.id === bundleId);
+    if (!b) return;
+
+    let cart = getCart();
+    const bundleItemId = 'bundle_' + b.id;
+
+    if (cart.some(i => i.id === bundleItemId)) {
+        return showToast('Bundle আগেই কার্টে আছে', 'warn');
     }
-    saveWishlist(w);
-    updateWishlistBadges();
-    renderProducts();
-    renderRecentlyViewed();
+
+    // Add bundle as single special item
+    cart.push({
+        id: bundleItemId,
+        name: b.title,
+        price: Number(b.bundlePrice) || 0,
+        image: b.image || '',
+        quantity: 1,
+        isBundle: true,
+        bundleItems: b.productIds,
+        originalPrice: b.originalPrice
+    });
+
+    saveCart(cart); updateCartBadges();
+    showToast('✅ Bundle কার্টে যোগ হয়েছে', 'success');
     renderDynamicContent();
 }
 
+// ============ HERO ============
 let slideIndex = 0, totalSlides = 0, heroTimer = null;
-
 function getDefaultHeroBanners() {
     return [
         { badge: '✨ Premium', title: 'Smart Living<br>Starts Here', subtitle: 'Premium appliances for modern homes', bg: 'navy' },
@@ -225,19 +208,16 @@ function getDefaultHeroBanners() {
         { badge: '🚚 Free Delivery', title: 'On Orders<br>Above ৳ 5,000', subtitle: 'Fast delivery all over Bangladesh', bg: 'teal' }
     ];
 }
-
 function getHeroBgStyle(b) {
     if (b.image) return `background-image: url('${b.image}'); background-size: cover; background-position: center;`;
     if (b.bg === 'gold') return 'background: linear-gradient(135deg, #B8860B, #D4A84B, #E8C77B);';
     if (b.bg === 'teal') return 'background: linear-gradient(135deg, #0F4C5C, #1A6B7C, #2C8B9E);';
     return 'background: linear-gradient(135deg, #0A1628, #152238);';
 }
-
 function safeHeroTitle(t) {
     if (!t) return '';
     return escapeHtml(t).replace(/&lt;br\s*\/?&gt;/gi, '<br>');
 }
-
 function renderHeroBanners() {
     const track = document.getElementById('slider-track');
     const skeleton = document.getElementById('slider-skeleton');
@@ -246,7 +226,6 @@ function renderHeroBanners() {
 
     const banners = (Array.isArray(heroBanners) && heroBanners.length > 0) ? heroBanners : getDefaultHeroBanners();
     totalSlides = banners.length;
-
     let html = '';
     banners.forEach(b => {
         const bgStyle = getHeroBgStyle(b);
@@ -272,51 +251,31 @@ function renderHeroBanners() {
 
     slideIndex = 0; updateSlide();
 
-    if (skeleton) {
-        skeleton.style.transition = 'opacity 0.3s';
-        skeleton.style.opacity = '0';
-        setTimeout(() => { skeleton.style.display = 'none'; }, 300);
-    }
+    if (skeleton) { skeleton.style.transition = 'opacity 0.3s'; skeleton.style.opacity = '0'; setTimeout(() => { skeleton.style.display = 'none'; }, 300); }
     track.classList.remove('opacity-0');
-
     if (heroTimer) clearInterval(heroTimer);
     if (totalSlides > 1) {
-        heroTimer = setInterval(() => {
-            slideIndex = (slideIndex + 1) % totalSlides;
-            updateSlide();
-        }, 4000);
+        heroTimer = setInterval(() => { slideIndex = (slideIndex + 1) % totalSlides; updateSlide(); }, 4000);
     }
 }
-
 window.goSlide = function(i) {
     slideIndex = i; updateSlide();
-    if (heroTimer) {
-        clearInterval(heroTimer);
-        if (totalSlides > 1) heroTimer = setInterval(() => {
-            slideIndex = (slideIndex + 1) % totalSlides;
-            updateSlide();
-        }, 4000);
-    }
+    if (heroTimer) { clearInterval(heroTimer); if (totalSlides > 1) heroTimer = setInterval(() => { slideIndex = (slideIndex + 1) % totalSlides; updateSlide(); }, 4000); }
 }
-
 function updateSlide() {
     const track = document.getElementById('slider-track');
     if (track) track.style.transform = `translateX(-${slideIndex * 100}%)`;
     const dots = document.querySelectorAll('.slider-dot');
-    dots.forEach((d, i) => {
-        d.className = i === slideIndex ? 'slider-dot active h-1.5 rounded-full' : 'slider-dot inactive h-1.5 rounded-full';
-    });
+    dots.forEach((d, i) => { d.className = i === slideIndex ? 'slider-dot active h-1.5 rounded-full' : 'slider-dot inactive h-1.5 rounded-full'; });
 }
 
+// ============ CATEGORIES ============
 function renderCategories() {
     const list = document.getElementById('category-scroll-container');
     const sidebarList = document.getElementById('sidebar-categories');
     if (!list) return;
     if (!isDataLoaded) return;
-    if (categories.length === 0) {
-        list.innerHTML = '<p class="text-center text-gray-400 text-xs py-4 w-full">No categories</p>';
-        return;
-    }
+    if (categories.length === 0) { list.innerHTML = '<p class="text-center text-gray-400 text-xs py-4 w-full">No categories</p>'; return; }
     let html = '', sideHtml = '';
     categories.forEach(c => {
         const isImg = c.icon && (c.icon.startsWith('http') || c.icon.startsWith('data:'));
@@ -364,6 +323,7 @@ function startAutoScroll() {
     }, 2000);
 }
 
+// ============ PRODUCT CARD ============
 function getRating(pid) {
     const r = allReviews.filter(x => x.productId === pid);
     if (r.length === 0) return { avg: 0, count: 0 };
@@ -399,7 +359,6 @@ function renderProductCard(p) {
             <div class="relative mb-2">
                 <img src="${p.image || 'https://via.placeholder.com/200x200?text=No+Image'}" alt="${escapeHtml(p.name)}" loading="lazy" class="product-img w-full h-28 rounded-lg" onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
                 ${hasDiscount ? `<span class="absolute top-1.5 left-1.5 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">-${discountPct}%</span>` : ''}
-                ${isOut ? `<span class="absolute top-1.5 right-1.5 bg-purple-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full"><i class="fas fa-clock mr-0.5"></i>Pre-order</span>` : ''}
                 ${isPinned ? `<span class="absolute bottom-1.5 left-1.5 bg-purple-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full"><i class="fas fa-thumbtack mr-0.5"></i>Top</span>` : ''}
                 ${isLowStock ? `<span class="absolute top-9 left-1.5 bg-orange-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full animate-pulse"><i class="fas fa-fire mr-0.5"></i>Only ${p.stock} left</span>` : ''}
             </div>
@@ -416,9 +375,7 @@ function renderProductCard(p) {
 
 function getFilteredProducts() {
     let filtered = allProducts.slice();
-    if (currentFilter !== 'all') {
-        filtered = filtered.filter(p => getCategories(p).includes(currentFilter));
-    }
+    if (currentFilter !== 'all') filtered = filtered.filter(p => getCategories(p).includes(currentFilter));
     if (currentSearch) {
         filtered = filtered.filter(p => {
             const name = (p.name || '').toLowerCase();
@@ -436,7 +393,6 @@ window.renderProducts = function() {
     const noMsg = document.getElementById('no-product-msg');
     const loadMoreWrap = document.getElementById('load-more-wrap');
     if (!listDiv) return;
-
     if (!isDataLoaded) return;
     const filtered = getFilteredProducts();
 
@@ -447,22 +403,18 @@ window.renderProducts = function() {
         return;
     }
     if (noMsg) noMsg.classList.add('hidden');
-
     if (displayedCount === 0) displayedCount = PAGE_SIZE;
     const visible = filtered.slice(0, displayedCount);
     listDiv.innerHTML = visible.map(p => renderProductCard(p)).join('');
-
     if (loadMoreWrap) {
         if (displayedCount < filtered.length) loadMoreWrap.classList.remove('hidden');
         else loadMoreWrap.classList.add('hidden');
     }
 }
 
-window.loadMoreProducts = function() {
-    displayedCount += PAGE_SIZE;
-    renderProducts();
-}
+window.loadMoreProducts = function() { displayedCount += PAGE_SIZE; renderProducts(); }
 
+// ============ RECENTLY VIEWED ============
 function renderRecentlyViewed() {
     const section = document.getElementById('recently-viewed-section');
     const list = document.getElementById('recently-viewed-list');
@@ -484,11 +436,47 @@ function renderRecentlyViewed() {
     list.innerHTML = html;
 }
 
+// ============ DYNAMIC CONTENT + BUNDLES ============
 function renderDynamicContent() {
     const container = document.getElementById('dynamic-content');
     if (!container) return;
     let html = '';
 
+    // 1. Bundles Section
+    if (allBundles.length > 0) {
+        html += `<div class="mt-8 px-5">
+            <div class="flex justify-between items-baseline mb-4">
+                <h3 class="font-display text-xl text-navy font-bold flex items-center gap-2">
+                    <i class="fas fa-gift gold-text text-base"></i> Special Bundles
+                </h3>
+            </div>
+            <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+                ${allBundles.map(b => `
+                    <div class="bg-white rounded-2xl p-3 min-w-[240px] max-w-[260px] premium-shadow flex flex-col border border-amber-200/50" style="scroll-snap-align: start;">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="w-12 h-12 bg-gray-50 rounded-lg flex-shrink-0 relative">
+                                <img src="${b.image || 'https://via.placeholder.com/50x50?text=Bundle'}" class="w-full h-full object-contain p-1" onerror="this.src='https://via.placeholder.com/50x50?text=Bundle'">
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">DEAL</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-navy text-xs truncate">${escapeHtml(b.title)}</h4>
+                                <p class="text-[10px] text-gray-500">${b.productIds.length} items</p>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline gap-2 mb-3 mt-auto">
+                            <span class="text-lg font-bold text-gold">৳${formatPrice(b.bundlePrice)}</span>
+                            <span class="text-xs text-gray-400 line-through">৳${formatPrice(b.originalPrice)}</span>
+                        </div>
+                        <button onclick="addBundleToCart('${b.id}')" class="w-full navy-gradient text-white py-2 rounded-lg font-bold text-xs flex items-center justify-center gap-1">
+                            <i class="fas fa-cart-plus"></i> Add Bundle
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
+    }
+
+    // 2. Featured Products
     const featuredProducts = allProducts.filter(p => p.featured === true);
     if (featuredProducts.length > 0) {
         html += `<div class="mt-8 px-5">
@@ -503,6 +491,7 @@ function renderDynamicContent() {
         </div>`;
     }
 
+    // 3. Custom Sections
     let bannerIdx = 0;
     (customSections || []).forEach((section) => {
         if (!section || !section.categoryKey) return;
@@ -527,6 +516,7 @@ function renderDynamicContent() {
         }
     });
 
+    // 4. Testimonials
     if (testimonials && testimonials.length > 0) {
         html += `<div class="mt-10 px-5">
             <h3 class="section-title">What Our Customers Say</h3>
@@ -547,6 +537,7 @@ function renderDynamicContent() {
     container.innerHTML = html;
 }
 
+// ============ APPLY SETTINGS ============
 function applySettings() {
     const s = allSettings;
     try {
@@ -559,17 +550,16 @@ function applySettings() {
     } catch (e) {}
 }
 
+// ============ LOAD ============
 async function loadAll() {
     if (!db) {
         isDataLoaded = true;
-        renderHeroBanners();
-        renderCategories();
-        renderProducts();
-        return;
+        renderHeroBanners(); renderCategories(); renderProducts(); return;
     }
     try {
         const productsPromise = getDocs(collection(db, "products")).catch(() => null);
         const settingsPromise = getDoc(doc(db, "settings", "main")).catch(() => null);
+        const bundlesPromise = getDocs(collection(db, "bundles")).catch(() => null);
 
         const reviewsPromise = (async () => {
             try {
@@ -581,10 +571,8 @@ async function loadAll() {
             }
         })();
 
-        const [prodSnap, setSnap, revSnap] = await Promise.all([
-            productsPromise,
-            settingsPromise,
-            reviewsPromise
+        const [prodSnap, setSnap, revSnap, bundleSnap] = await Promise.all([
+            productsPromise, settingsPromise, reviewsPromise, bundlesPromise
         ]);
 
         if (prodSnap) {
@@ -594,6 +582,13 @@ async function loadAll() {
         if (revSnap) {
             allReviews = [];
             revSnap.forEach(d => allReviews.push({ id: d.id, ...d.data() }));
+        }
+        if (bundleSnap) {
+            allBundles = [];
+            bundleSnap.forEach(d => {
+                const data = d.data();
+                if (data.active !== false) allBundles.push({ id: d.id, ...data });
+            });
         }
         if (setSnap && setSnap.exists()) {
             allSettings = setSnap.data();
@@ -605,19 +600,13 @@ async function loadAll() {
             applySettings();
         }
         isDataLoaded = true;
-        renderHeroBanners();
-        renderCategories();
-        renderProducts();
-        renderRecentlyViewed();
-        renderDynamicContent();
-        updateCartBadges();
-        updateWishlistBadges();
+        renderHeroBanners(); renderCategories(); renderProducts();
+        renderRecentlyViewed(); renderDynamicContent();
+        updateCartBadges(); updateWishlistBadges();
     } catch (e) {
         console.error('Load error:', e);
         isDataLoaded = true;
-        renderHeroBanners();
-        renderCategories();
-        renderProducts();
+        renderHeroBanners(); renderCategories(); renderProducts();
     }
 }
 
@@ -626,22 +615,17 @@ async function loadAll() {
         const cart = JSON.parse(localStorage.getItem('heartix_cart') || '[]');
         const count = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
         ['cart-count-header', 'cart-count-bottom', 'cart-count-sidebar'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = count;
+            const el = document.getElementById(id); if (el) el.textContent = count;
         });
         const wl = JSON.parse(localStorage.getItem('heartix_wishlist') || '[]');
         const wc = Array.isArray(wl) ? wl.length : 0;
         if (wc > 0) {
             ['wishlist-count-header', 'wishlist-count-sidebar'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) { el.textContent = wc; el.classList.remove('hidden'); }
+                const el = document.getElementById(id); if (el) { el.textContent = wc; el.classList.remove('hidden'); }
             });
         }
     } catch (e) {}
 })();
 
-updateCartBadges();
-updateWishlistBadges();
-loadAll();
-
-console.log('✅ index.js v4 loaded (pre-order badge)');
+updateCartBadges(); updateWishlistBadges(); loadAll();
+console.log('✅ index.js v5 loaded (bundles)');
